@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { Send, Loader2, Sparkles, Bot, User } from 'lucide-react';
 import { generateCodeFromPrompt } from '../services/geminiService';
 import { AppMode, CommandBlock } from '../types';
 
@@ -14,11 +15,10 @@ interface Message {
 }
 
 const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', text: "Hi! I'm KidCode Bot 🤖. Ask me to draw something, make a game, or light up LEDs!" }
+    { role: 'assistant', text: "Hello! I'm your AI Copilot. Describe what you want to build, and I'll write the blocks for you." }
   ]);
   
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -27,7 +27,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isOpen]);
+  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,82 +50,83 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
   };
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end`}>
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-80 md:w-96 mb-4 overflow-hidden flex flex-col h-[400px] animate-in slide-in-from-bottom-5 fade-in duration-300">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-violet-500 to-fuchsia-500 p-4 flex justify-between items-center text-white">
-            <div className="flex items-center gap-2">
-              <Sparkles size={18} className="animate-pulse" />
-              <span className="font-bold">AI Assistant</span>
+    <div className="flex flex-col h-full bg-slate-50">
+      {/* Header */}
+      <div className="p-4 bg-white border-b border-slate-100 flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white shadow-md">
+          <Sparkles size={16} />
+        </div>
+        <div>
+          <h3 className="font-bold text-slate-800 leading-tight">AI Agent</h3>
+          <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Copilot Active</p>
+        </div>
+      </div>
+
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar" ref={scrollRef}>
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+            {/* Avatar */}
+            <div className={`
+              w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1
+              ${msg.role === 'user' ? 'bg-slate-200 text-slate-600' : 'bg-violet-100 text-violet-600'}
+            `}>
+              {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
             </div>
-            <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-1 rounded">
-              <X size={18} />
-            </button>
+
+            {/* Bubble */}
+            <div className={`
+              max-w-[85%] text-sm leading-relaxed p-3 rounded-2xl shadow-sm border
+              ${msg.role === 'user' 
+                ? 'bg-slate-800 text-white border-slate-700 rounded-tr-none' 
+                : 'bg-white text-slate-700 border-slate-200 rounded-tl-none'}
+            `}>
+              {msg.text}
+            </div>
           </div>
+        ))}
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50" ref={scrollRef}>
-            {messages.map((msg, idx) => (
-              <div 
-                key={idx} 
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div 
-                  className={`
-                    max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm
-                    ${msg.role === 'user' 
-                      ? 'bg-violet-500 text-white rounded-br-none' 
-                      : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none'}
-                  `}
-                >
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-bl-none shadow-sm flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-violet-500" />
-                  <span className="text-xs text-slate-400">Thinking...</span>
-                </div>
-              </div>
-            )}
+        {isLoading && (
+          <div className="flex gap-3">
+             <div className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0 mt-1">
+                <Bot size={14} />
+             </div>
+             <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
+                <Loader2 size={14} className="animate-spin text-violet-500" />
+                <span className="text-xs text-slate-400 font-medium">Generating blocks...</span>
+             </div>
           </div>
+        )}
+      </div>
 
-          {/* Input */}
-          <form onSubmit={handleSubmit} className="p-3 bg-white border-t border-slate-100 flex gap-2">
-            <input 
-              type="text" 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type here..." 
-              className="flex-1 bg-slate-100 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-violet-200 transition-all"
-            />
-            <button 
-              type="submit" 
-              disabled={isLoading || !input.trim()}
-              className="bg-violet-500 hover:bg-violet-600 disabled:bg-slate-300 text-white p-2 rounded-xl transition-colors"
-            >
-              <Send size={18} />
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Toggle Button */}
-      {!isOpen && (
-        <button 
-        onClick={() => setIsOpen(true)}
-        className="group flex items-center gap-3 bg-violet-600 hover:bg-violet-700 text-white pl-5 pr-2 py-2 rounded-full shadow-lg shadow-violet-200 transition-all hover:scale-105 active:scale-95"
-      >
-        <span className="font-bold">Ask AI Mentor</span>
-        <div className="bg-white/20 p-2 rounded-full">
-           <Wand2 size={24} />
-        </div>
-      </button>
-      )}
+      {/* Input Area */}
+      <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+        <form onSubmit={handleSubmit} className="relative">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+            placeholder="Ask to create a game, app, or circuit..."
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-10 py-3 text-sm focus:ring-2 focus:ring-violet-200 focus:border-violet-300 outline-none resize-none custom-scrollbar"
+            rows={2} 
+          />
+          <button 
+            type="submit" 
+            disabled={isLoading || !input.trim()}
+            className="absolute right-2 bottom-2 p-1.5 bg-violet-500 hover:bg-violet-600 disabled:bg-slate-300 text-white rounded-lg transition-all"
+          >
+            <Send size={16} />
+          </button>
+        </form>
+        <p className="text-[10px] text-slate-400 mt-2 text-center">
+          AI can make mistakes. Review generated code.
+        </p>
+      </div>
     </div>
   );
 };

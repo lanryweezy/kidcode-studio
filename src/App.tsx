@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { AppMode, AppState, CommandBlock, CommandType, HardwareState, SpriteState, BlockDefinition, CircuitComponent, ComponentType, Mission, GameEntity, AppElement, UserProfile } from './types';
 import { AVAILABLE_BLOCKS, INITIAL_HARDWARE_STATE, INITIAL_SPRITE_STATE, INITIAL_APP_STATE, MODE_CONFIG, UI_PALETTE, CIRCUIT_PALETTE, LEVEL_PALETTE, CHARACTER_PALETTE, VEHICLE_PALETTE } from './constants';
@@ -63,9 +64,9 @@ const App: React.FC = () => {
     setUserProfile(getUserProfile());
   }, []);
 
-  const updateSpriteState = useCallback((newState: Partial<SpriteState>) => {
+  const updateSpriteState = (newState: Partial<SpriteState>) => {
     setSpriteState(prev => ({ ...prev, ...newState }));
-  }, []);
+  };
   
   // Input State (Keyboard + Virtual Joystick)
   const activeInputs = useRef<Set<string>>(new Set());
@@ -74,13 +75,11 @@ const App: React.FC = () => {
   const hardwareStateRef = useRef(hardwareState);
   const spriteStateRef = useRef(spriteState);
   const appStateRef = useRef(appState);
-  const commandsRef = useRef(commands);
 
   // Sync Refs with State
-  useEffect(() => { if(!isPlaying) hardwareStateRef.current = hardwareState; }, [hardwareState, isPlaying]);
-  useEffect(() => { if(!isPlaying) spriteStateRef.current = spriteState; }, [spriteState, isPlaying]);
-  useEffect(() => { if(!isPlaying) appStateRef.current = appState; }, [appState, isPlaying]);
-  useEffect(() => { commandsRef.current = commands; }, [commands]);
+  useEffect(() => { hardwareStateRef.current = hardwareState; }, [hardwareState]);
+  useEffect(() => { spriteStateRef.current = spriteState; }, [spriteState]);
+  useEffect(() => { appStateRef.current = appState; }, [appState]);
 
   const [circuitComponents, setCircuitComponents] = useState<CircuitComponent[]>([]);
   const [pcbColor, setPcbColor] = useState<string>('#059669'); 
@@ -220,36 +219,6 @@ const App: React.FC = () => {
       setSaveStatus('unsaved');
   };
 
-  const handleUpdateBlock = useCallback((id: string, params: any) => {
-      setCommands(prev => prev.map(c => c.id === id ? { ...c, params: { ...c.params, ...params } } : c));
-  }, []);
-
-  const handleDeleteBlock = useCallback((id: string) => {
-      const currentCmds = commandsRef.current;
-      const newCmds = currentCmds.filter(c => c.id !== id);
-      setHistory(h => [...h.slice(-20), currentCmds]);
-      setRedoStack([]);
-      setCommands(newCmds);
-      setSaveStatus('unsaved');
-      playSoundEffect('click');
-  }, []);
-
-  const handleDuplicateBlock = useCallback((id: string) => {
-      const currentCmds = commandsRef.current;
-      const original = currentCmds.find(c => c.id === id);
-      if (original) {
-          const index = currentCmds.indexOf(original);
-          const copy = { ...original, id: crypto.randomUUID() };
-          const newCmds = [...currentCmds];
-          newCmds.splice(index + 1, 0, copy);
-          setHistory(h => [...h.slice(-20), currentCmds]);
-          setRedoStack([]);
-          setCommands(newCmds);
-          setSaveStatus('unsaved');
-          playSoundEffect('click');
-      }
-  }, []);
-
   // --- INPUT HANDLING (KEYBOARD) ---
   useEffect(() => {
       const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -309,20 +278,19 @@ const App: React.FC = () => {
 
     const speedMultiplier = 1 / speedRef.current; 
 
-    // Helper for UI Element Creation - Modifies Ref directly for speed
+    // Helper for UI Element Creation
     const addAppElement = (type: AppElement['type'], defaultContent: string, extraParams: Partial<AppElement> = {}) => {
-        const currentScr = renderingScreen.current;
-        const newEl: AppElement = { 
-            id: crypto.randomUUID(), 
-            blockId: cmd.id,
-            type, 
-            content: cmd.params.text || defaultContent, 
-            ...extraParams
-        };
-        const prev = appStateRef.current;
-        const newState = { ...prev, screens: { ...prev.screens, [currentScr]: [...(prev.screens[currentScr] || []), newEl] } };
-        appStateRef.current = newState;
-        setAppState(newState); // Force UI update
+        setAppState(prev => {
+            const currentScr = renderingScreen.current;
+            const newEl: AppElement = { 
+                id: crypto.randomUUID(), 
+                blockId: cmd.id,
+                type, 
+                content: cmd.params.text || defaultContent, 
+                ...extraParams
+            };
+            return { ...prev, screens: { ...prev.screens, [currentScr]: [...(prev.screens[currentScr] || []), newEl] } };
+        });
     };
 
     try {
@@ -339,98 +307,222 @@ const App: React.FC = () => {
             // --- APP BUILDER COMMANDS ---
             case CommandType.CREATE_SCREEN:
                 renderingScreen.current = cmd.params.text || 'main';
-                appStateRef.current.screens[renderingScreen.current] = [];
+                setAppState(prev => ({ ...prev, screens: { ...prev.screens, [renderingScreen.current]: [] } }));
                 break;
             case CommandType.SET_TITLE:
-                appStateRef.current.title = cmd.params.text || 'My App';
-                setAppState({...appStateRef.current});
+                setAppState(prev => ({ ...prev, title: cmd.params.text || 'My App' }));
                 break;
             case CommandType.SET_BACKGROUND:
-                appStateRef.current.backgroundColor = cmd.params.color || '#ffffff';
-                setAppState({...appStateRef.current});
+                setAppState(prev => ({ ...prev, backgroundColor: cmd.params.color || '#ffffff' }));
                 break;
-            case CommandType.ADD_BUTTON: addAppElement('button', cmd.params.text || 'Button', { actionMessage: cmd.params.message, targetScreen: cmd.params.screenName }); break;
-            case CommandType.ADD_INPUT: addAppElement('input', '', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_TEXT_BLOCK: addAppElement('text', cmd.params.text || '', { color: cmd.params.color, textSize: cmd.params.textSize }); break;
-            case CommandType.ADD_IMAGE: addAppElement('image', cmd.params.text || ''); break;
-            case CommandType.ADD_SWITCH: addAppElement('switch', cmd.params.text || 'Toggle', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_SLIDER: addAppElement('slider', cmd.params.text || 'Value', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_CHECKBOX: addAppElement('checkbox', cmd.params.text || 'Check', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_PROGRESS: addAppElement('progress', 'Loading', { value: cmd.params.value, max: 100 }); break;
-            case CommandType.ADD_LIST_VIEW: addAppElement('list', '', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_DRAWING_CANVAS: addAppElement('drawing_canvas', '', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_MAP: addAppElement('map', cmd.params.text || 'New York'); break;
-            case CommandType.ADD_VIDEO: addAppElement('video', cmd.params.text || ''); break;
-            case CommandType.ADD_CAMERA: addAppElement('camera', ''); break;
-            case CommandType.ADD_CHART: addAppElement('chart', cmd.params.text || 'Data', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_DATE_PICKER: addAppElement('date', '', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_COLOR_PICKER: addAppElement('color_picker', '', { variableName: cmd.params.varName }); break;
-            case CommandType.ADD_DIVIDER: addAppElement('divider', ''); break;
-            case CommandType.ADD_SPACER: addAppElement('spacer', '', { max: cmd.params.value }); break;
+            case CommandType.ADD_BUTTON:
+                addAppElement('button', cmd.params.text || 'Button', { actionMessage: cmd.params.message, targetScreen: cmd.params.screenName });
+                break;
+            case CommandType.ADD_INPUT:
+                addAppElement('input', '', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_TEXT_BLOCK:
+                addAppElement('text', cmd.params.text || '', { color: cmd.params.color, textSize: cmd.params.textSize });
+                break;
+            case CommandType.ADD_IMAGE:
+                addAppElement('image', cmd.params.text || '');
+                break;
+            case CommandType.ADD_SWITCH:
+                addAppElement('switch', cmd.params.text || 'Toggle', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_SLIDER:
+                addAppElement('slider', cmd.params.text || 'Value', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_CHECKBOX:
+                addAppElement('checkbox', cmd.params.text || 'Check', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_PROGRESS:
+                addAppElement('progress', 'Loading', { value: cmd.params.value, max: 100 });
+                break;
+            case CommandType.ADD_LIST_VIEW:
+                addAppElement('list', '', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_DRAWING_CANVAS:
+                addAppElement('drawing_canvas', '', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_MAP:
+                addAppElement('map', cmd.params.text || 'New York');
+                break;
+            case CommandType.ADD_VIDEO:
+                addAppElement('video', cmd.params.text || '');
+                break;
+            case CommandType.ADD_CAMERA:
+                addAppElement('camera', '');
+                break;
+            case CommandType.ADD_CHART:
+                addAppElement('chart', cmd.params.text || 'Data', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_DATE_PICKER:
+                addAppElement('date', '', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_COLOR_PICKER:
+                addAppElement('color_picker', '', { variableName: cmd.params.varName });
+                break;
+            case CommandType.ADD_DIVIDER:
+                addAppElement('divider', '');
+                break;
+            case CommandType.ADD_SPACER:
+                addAppElement('spacer', '', { max: cmd.params.value });
+                break;
 
-            case CommandType.SHOW_ALERT: alert(cmd.params.text); break;
-            case CommandType.SPEAK: if ('speechSynthesis' in window) { window.speechSynthesis.speak(new SpeechSynthesisUtterance(cmd.params.text)); } break;
-            case CommandType.VIBRATE_DEVICE: if (navigator.vibrate) navigator.vibrate((cmd.params.value || 0.5) * 1000); break;
-            case CommandType.OPEN_URL: window.open(cmd.params.text, '_blank'); break;
+            case CommandType.SHOW_ALERT:
+                alert(cmd.params.text);
+                break;
+            case CommandType.SHOW_TOAST:
+                // Simple toast implementation via log for now
+                console.log("TOAST:", cmd.params.text);
+                break;
+            case CommandType.SPEAK:
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(cmd.params.text);
+                    window.speechSynthesis.speak(utterance);
+                }
+                break;
+            case CommandType.VIBRATE_DEVICE:
+                if (navigator.vibrate) navigator.vibrate((cmd.params.value || 0.5) * 1000);
+                break;
+            case CommandType.OPEN_URL:
+                window.open(cmd.params.text, '_blank');
+                break;
             case CommandType.CLEAR_UI:
-                appStateRef.current.screens = { 'main': [] };
-                appStateRef.current.activeScreen = 'main';
-                setAppState({...appStateRef.current});
+                setAppState(prev => ({ ...prev, screens: { 'main': [] }, activeScreen: 'main' }));
                 break;
 
             // --- VARIABLES ---
             case CommandType.SET_VAR:
-                if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = cmd.params.value;
-                if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = cmd.params.value;
+                if (mode === AppMode.APP) setAppState(prev => ({ ...prev, variables: { ...prev.variables, [cmd.params.varName!]: cmd.params.value } }));
+                if (mode === AppMode.GAME) setSpriteState(prev => ({ ...prev, variables: { ...prev.variables, [cmd.params.varName!]: cmd.params.value } }));
                 break;
             case CommandType.CHANGE_VAR:
-                 if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = (appStateRef.current.variables[cmd.params.varName!] || 0) + (cmd.params.value || 0);
-                 if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = (spriteStateRef.current.variables[cmd.params.varName!] || 0) + (cmd.params.value || 0);
+                 // Simplified: needs to read current value and add
+                 // Assuming logic handles reading via state ref in runCode if needed, but for simple exec:
+                 if (mode === AppMode.APP) setAppState(prev => ({ ...prev, variables: { ...prev.variables, [cmd.params.varName!]: (prev.variables[cmd.params.varName!] || 0) + (cmd.params.value || 0) } }));
+                 if (mode === AppMode.GAME) setSpriteState(prev => ({ ...prev, variables: { ...prev.variables, [cmd.params.varName!]: (prev.variables[cmd.params.varName!] || 0) + (cmd.params.value || 0) } }));
                  break;
 
-            // --- GAME COMMANDS (Ref Mutation) ---
-            case CommandType.MOVE_X: spriteStateRef.current.x += (cmd.params.value || 0); playSoundEffect('move'); break;
-            case CommandType.MOVE_Y: spriteStateRef.current.y -= (cmd.params.value || 0); break;
-            case CommandType.GO_TO_XY: spriteStateRef.current.x = cmd.params.x || 0; spriteStateRef.current.y = cmd.params.y || 0; break;
-            case CommandType.POINT_DIR: spriteStateRef.current.rotation = cmd.params.value || 0; break;
-            case CommandType.JUMP: if (!spriteStateRef.current.isJumping) { spriteStateRef.current.vy = -(cmd.params.value || 10); spriteStateRef.current.isJumping = true; playSoundEffect('move'); } break;
-            case CommandType.SET_GRAVITY: spriteStateRef.current.gravity = cmd.params.condition === 'true'; break;
-            case CommandType.BOUNCE_ON_EDGE: bounceEnabled.current = true; break;
-            case CommandType.SAY: spriteStateRef.current.speech = cmd.params.text || null; if (cmd.params.text) setTimeout(() => spriteStateRef.current.speech = null, 2000); break;
-            case CommandType.SET_SCENE: spriteStateRef.current.scene = cmd.params.text; break;
-            case CommandType.SET_WEATHER: spriteStateRef.current.weather = cmd.params.text as any; break;
-            case CommandType.SET_EMOJI: spriteStateRef.current.emoji = cmd.params.text || '🤖'; spriteStateRef.current.texture = null; break;
+            // --- GAME COMMANDS ---
+            case CommandType.MOVE_X:
+                setSpriteState(prev => ({ ...prev, x: prev.x + (cmd.params.value || 0) }));
+                playSoundEffect('move');
+                break;
+            case CommandType.MOVE_Y:
+                setSpriteState(prev => ({ ...prev, y: prev.y - (cmd.params.value || 0) })); // Y is up
+                break;
+            case CommandType.GO_TO_XY:
+                setSpriteState(prev => ({ ...prev, x: cmd.params.x || 0, y: cmd.params.y || 0 }));
+                break;
+            case CommandType.POINT_DIR:
+                setSpriteState(prev => ({ ...prev, rotation: cmd.params.value || 0 }));
+                break;
+            case CommandType.JUMP:
+                if (!spriteStateRef.current.isJumping) {
+                    setSpriteState(prev => ({ ...prev, vy: -(cmd.params.value || 10), isJumping: true }));
+                    playSoundEffect('move');
+                }
+                break;
+            case CommandType.SET_GRAVITY:
+                setSpriteState(prev => ({ ...prev, gravity: cmd.params.condition === 'true' }));
+                break;
+            case CommandType.BOUNCE_ON_EDGE:
+                // Handled in loop generally, but can set flag
+                bounceEnabled.current = true;
+                break;
+            case CommandType.SAY:
+                setSpriteState(prev => ({ ...prev, speech: cmd.params.text || null }));
+                if (cmd.params.text) setTimeout(() => setSpriteState(prev => ({ ...prev, speech: null })), 2000);
+                break;
+            case CommandType.SET_SCENE:
+                setSpriteState(prev => ({ ...prev, scene: cmd.params.text }));
+                break;
+            case CommandType.SET_WEATHER:
+                setSpriteState(prev => ({ ...prev, weather: cmd.params.text as any }));
+                break;
+            case CommandType.SET_EMOJI:
+                setSpriteState(prev => ({ ...prev, emoji: cmd.params.text || '🤖', texture: null, frames: [] }));
+                break;
             case CommandType.SHOOT:
-                const projectile: GameEntity = { id: crypto.randomUUID(), x: spriteStateRef.current.x, y: spriteStateRef.current.y, vx: Math.cos((spriteStateRef.current.rotation - 90) * Math.PI / 180) * 10, vy: Math.sin((spriteStateRef.current.rotation - 90) * Math.PI / 180) * 10, type: 'projectile', emoji: cmd.params.text || '⚡', lifeTime: 100 };
-                spriteStateRef.current.projectiles.push(projectile);
+                const projectile: GameEntity = {
+                    id: crypto.randomUUID(),
+                    x: spriteStateRef.current.x,
+                    y: spriteStateRef.current.y,
+                    vx: Math.cos((spriteStateRef.current.rotation - 90) * Math.PI / 180) * 10,
+                    vy: Math.sin((spriteStateRef.current.rotation - 90) * Math.PI / 180) * 10,
+                    type: 'projectile',
+                    emoji: cmd.params.text || '⚡',
+                    lifeTime: 100
+                };
+                setSpriteState(prev => ({ ...prev, projectiles: [...prev.projectiles, projectile] }));
                 playSoundEffect('laser');
                 break;
             case CommandType.SPAWN_ENEMY:
-                spriteStateRef.current.enemies.push({ id: crypto.randomUUID(), x: Math.random() * 300 + 50, y: Math.random() * 300 + 50, type: 'enemy', emoji: cmd.params.text || '👾', width: 30, height: 30 });
+                const enemy: GameEntity = {
+                    id: crypto.randomUUID(),
+                    x: Math.random() * 300 + 50,
+                    y: Math.random() * 300 + 50,
+                    type: 'enemy',
+                    emoji: cmd.params.text || '👾',
+                    width: 30, height: 30
+                };
+                setSpriteState(prev => ({ ...prev, enemies: [...prev.enemies, enemy] }));
                 break;
             case CommandType.SPAWN_ITEM:
-                spriteStateRef.current.items.push({ id: crypto.randomUUID(), x: Math.random() * 300 + 50, y: Math.random() * 300 + 50, type: 'item', emoji: cmd.params.text || '💎', width: 20, height: 20 });
-                break;
-            case CommandType.SPAWN_PARTICLES:
-                // Decouple particle spawning from React State. Set a trigger on Ref.
-                spriteStateRef.current.effectTrigger = { type: 'explosion', x: spriteStateRef.current.x, y: spriteStateRef.current.y, color: '#f59e0b' };
-                playSoundEffect('explosion');
+                const item: GameEntity = {
+                    id: crypto.randomUUID(),
+                    x: Math.random() * 300 + 50,
+                    y: Math.random() * 300 + 50,
+                    type: 'item',
+                    emoji: cmd.params.text || '💎',
+                    width: 20, height: 20
+                };
+                setSpriteState(prev => ({ ...prev, items: [...prev.items, item] }));
                 break;
              case CommandType.CHANGE_SCORE:
-                spriteStateRef.current.score += (cmd.params.value || 0);
+                setSpriteState(prev => ({ ...prev, score: prev.score + (cmd.params.value || 0) }));
                 break;
 
             // --- HARDWARE COMMANDS ---
-            case CommandType.LED_ON: hardwareStateRef.current.pins[cmd.params.pin!] = true; setHardwareState({...hardwareStateRef.current}); playSoundEffect('click'); break;
-            case CommandType.LED_OFF: hardwareStateRef.current.pins[cmd.params.pin!] = false; setHardwareState({...hardwareStateRef.current}); playSoundEffect('click'); break;
-            case CommandType.SET_RGB: hardwareStateRef.current.rgbColor = cmd.params.color || '#ff0000'; setHardwareState({...hardwareStateRef.current}); break;
-            case CommandType.SET_FAN: hardwareStateRef.current.fanSpeed = cmd.params.speed || 0; setHardwareState({...hardwareStateRef.current}); break;
-            case CommandType.SET_SERVO: hardwareStateRef.current.servoAngle = cmd.params.angle || 0; setHardwareState({...hardwareStateRef.current}); break;
-            case CommandType.PLAY_TONE: playTone(cmd.params.duration || 0.5); await wait((cmd.params.duration || 0.5) * 1000); break;
-            case CommandType.PLAY_SOUND: playSpeakerSound(cmd.params.text || 'beep'); break;
-            case CommandType.SET_LCD: hardwareStateRef.current.lcdLines[cmd.params.row || 0] = cmd.params.text || ""; setHardwareState({...hardwareStateRef.current}); break;
-            case CommandType.CLEAR_LCD: hardwareStateRef.current.lcdLines = ["", ""]; setHardwareState({...hardwareStateRef.current}); break;
-            case CommandType.SET_SEGMENT: hardwareStateRef.current.sevenSegmentValue = cmd.params.value || 0; setHardwareState({...hardwareStateRef.current}); break;
+            case CommandType.LED_ON:
+                setHardwareState(prev => { const n = [...prev.pins]; n[cmd.params.pin!] = true; return { ...prev, pins: n }; });
+                playSoundEffect('click');
+                break;
+            case CommandType.LED_OFF:
+                setHardwareState(prev => { const n = [...prev.pins]; n[cmd.params.pin!] = false; return { ...prev, pins: n }; });
+                playSoundEffect('click');
+                break;
+            case CommandType.SET_RGB:
+                setHardwareState(prev => ({ ...prev, rgbColor: cmd.params.color || '#ff0000' }));
+                break;
+            case CommandType.SET_FAN:
+                setHardwareState(prev => ({ ...prev, fanSpeed: cmd.params.speed || 0 }));
+                break;
+            case CommandType.SET_SERVO:
+                setHardwareState(prev => ({ ...prev, servoAngle: cmd.params.angle || 0 }));
+                break;
+            case CommandType.PLAY_TONE:
+                playTone(cmd.params.duration || 0.5);
+                await wait((cmd.params.duration || 0.5) * 1000);
+                break;
+            case CommandType.PLAY_SOUND:
+                playSpeakerSound(cmd.params.text || 'beep');
+                break;
+            case CommandType.SET_LCD:
+                setHardwareState(prev => {
+                    const n = [...prev.lcdLines];
+                    n[cmd.params.row || 0] = cmd.params.text || "";
+                    return { ...prev, lcdLines: n };
+                });
+                break;
+            case CommandType.CLEAR_LCD:
+                setHardwareState(prev => ({ ...prev, lcdLines: ["", ""] }));
+                break;
+            case CommandType.SET_SEGMENT:
+                setHardwareState(prev => ({ ...prev, sevenSegmentValue: cmd.params.value || 0 }));
+                break;
 
         }
     } catch (e) {
@@ -446,128 +538,111 @@ const App: React.FC = () => {
 
     // --- RESET ---
     setHardwareState(INITIAL_HARDWARE_STATE);
-    setSpriteState({ ...INITIAL_SPRITE_STATE, tilemap: spriteState.tilemap }); 
+    setSpriteState({ ...INITIAL_SPRITE_STATE, tilemap: spriteState.tilemap }); // Keep map
     setAppState(INITIAL_APP_STATE);
-    
-    // Sync Refs
-    hardwareStateRef.current = { ...INITIAL_HARDWARE_STATE };
-    spriteStateRef.current = { ...INITIAL_SPRITE_STATE, tilemap: spriteState.tilemap };
-    appStateRef.current = { ...INITIAL_APP_STATE };
-    
     renderingScreen.current = 'main';
 
     const loopStack: { index: number, count: number }[] = [];
-    let pc = 0; 
     
-    // UI Sync Loop (Low Frequency)
-    const syncInterval = setInterval(() => {
-        if (!stopExecution.current) {
-            setSpriteState({ ...spriteStateRef.current }); 
-        }
-    }, 200);
+    // --- MAIN LOOP ---
+    // If GAME mode and FOREVER block exists, we wrap in requestAnimationFrame logic implicitly or use a loop
+    // But for this interpreter, we iterate blocks.
+    // If FOREVER is found, we might loop the whole command set or that block.
+    // Simplification: We execute list once unless REPEAT/FOREVER blocks control flow.
 
-    // TIME-SLICED EXECUTION LOOP
+    let pc = 0; // Program Counter
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    const TIME_SLICE_MS = 12; // Run blocks for up to 12ms per frame before yielding
 
     while (pc < commands.length && !stopExecution.current) {
-        const frameStart = performance.now();
+        const cmd = commands[pc];
         
-        // Execute as many commands as possible within time budget
-        while (performance.now() - frameStart < TIME_SLICE_MS && pc < commands.length && !stopExecution.current) {
-            const cmd = commands[pc];
+        // Control Flow Handling
+        if (cmd.type === CommandType.REPEAT) {
+            loopStack.push({ index: pc, count: cmd.params.value || 1 });
+            pc++;
+        } 
+        else if (cmd.type === CommandType.FOREVER) {
+            loopStack.push({ index: pc, count: Infinity });
+            pc++;
+        }
+        else if (cmd.type === CommandType.END_REPEAT || cmd.type === CommandType.END_FOREVER) {
+            const loop = loopStack[loopStack.length - 1];
+            if (loop) {
+                loop.count--;
+                if (loop.count > 0) {
+                    pc = loop.index + 1; // Jump back
+                    await wait(0); // Yield to prevent freeze
+                } else {
+                    loopStack.pop();
+                    pc++;
+                }
+            } else {
+                pc++;
+            }
+        }
+        else if (cmd.type === CommandType.IF) {
+            // Evaluate Condition
+            let condition = false;
+            if (cmd.params.condition === 'IS_PRESSED') condition = hardwareStateRef.current.pins[cmd.params.pin || 4];
+            else if (cmd.params.condition === 'IS_DARK') condition = !hardwareStateRef.current.pins[5]; // Simplified
+            else if (cmd.params.condition === 'true') condition = true;
+            else if (cmd.params.condition === 'IS_TOUCHING_EDGE') {
+                 const s = spriteStateRef.current;
+                 condition = s.x <= 0 || s.x >= 360 || s.y <= 0 || s.y >= 360;
+            }
+            // ... more conditions
             
-            // --- LOGIC CONTROL FLOW (Synchronous) ---
-            if (cmd.type === CommandType.REPEAT) {
-                loopStack.push({ index: pc, count: cmd.params.value || 1 });
-                pc++;
-            } 
-            else if (cmd.type === CommandType.FOREVER) {
-                loopStack.push({ index: pc, count: Infinity });
-                pc++;
-            }
-            else if (cmd.type === CommandType.END_REPEAT || cmd.type === CommandType.END_FOREVER) {
-                const loop = loopStack[loopStack.length - 1];
-                if (loop) {
-                    loop.count--;
-                    if (loop.count > 0) {
-                        pc = loop.index + 1; 
-                        // Yield after loop iteration to prevent freeze in tight infinite loops
-                        if (cmd.type === CommandType.END_FOREVER) break; 
-                    } else {
-                        loopStack.pop();
-                        pc++;
-                    }
-                } else {
-                    pc++;
-                }
-            }
-            else if (cmd.type === CommandType.IF) {
-                let condition = false;
-                if (cmd.params.condition === 'IS_PRESSED') condition = hardwareStateRef.current.pins[cmd.params.pin || 4];
-                else if (cmd.params.condition === 'IS_DARK') condition = !hardwareStateRef.current.pins[5]; 
-                else if (cmd.params.condition === 'true') condition = true;
-                else if (cmd.params.condition === 'IS_TOUCHING_EDGE') {
-                     const s = spriteStateRef.current;
-                     condition = s.x <= 0 || s.x >= 360 || s.y <= 0 || s.y >= 360;
-                }
-                
-                if (!condition) {
-                    let depth = 0;
-                    let found = false;
-                    for (let i = pc + 1; i < commands.length; i++) {
-                        if (commands[i].type === CommandType.IF) depth++;
-                        if (commands[i].type === CommandType.END_IF) {
-                            if (depth === 0) { pc = i; found = true; break; }
-                            depth--;
-                        }
-                        if (commands[i].type === CommandType.ELSE && depth === 0) {
-                            pc = i; found = true; break;
-                        }
-                    }
-                    if (!found) pc++;
-                } else {
-                    pc++;
-                }
-            }
-            else if (cmd.type === CommandType.ELSE) {
+            if (!condition) {
+                // Skip to ELSE or END_IF
                 let depth = 0;
+                let found = false;
                 for (let i = pc + 1; i < commands.length; i++) {
                     if (commands[i].type === CommandType.IF) depth++;
                     if (commands[i].type === CommandType.END_IF) {
-                        if (depth === 0) { pc = i; break; }
+                        if (depth === 0) { pc = i; found = true; break; }
                         depth--;
                     }
+                    if (commands[i].type === CommandType.ELSE && depth === 0) {
+                        pc = i; found = true; break; // Jump to Else
+                    }
                 }
-            }
-            else {
-                // Execute standard command
-                await executeSingleCommand(cmd, wait);
+                if (!found) pc++;
+            } else {
                 pc++;
             }
-            
-            // --- MISSION CHECK ---
-            if (activeMission && !activeMission.completed) {
-                const updatedSteps = activeMission.steps.map(s => {
-                    if (!s.isCompleted && s.criteria?.requiredBlock === cmd.type) return { ...s, isCompleted: true };
-                    return s;
-                });
-                if (JSON.stringify(updatedSteps) !== JSON.stringify(activeMission.steps)) {
-                     setActiveMission({ ...activeMission, steps: updatedSteps });
+        }
+        else if (cmd.type === CommandType.ELSE) {
+            // If we hit ELSE, it means we executed the IF block, so skip to END_IF
+            let depth = 0;
+            for (let i = pc + 1; i < commands.length; i++) {
+                if (commands[i].type === CommandType.IF) depth++;
+                if (commands[i].type === CommandType.END_IF) {
+                    if (depth === 0) { pc = i; break; }
+                    depth--;
                 }
             }
         }
+        else {
+            // Normal Command
+            await executeSingleCommand(cmd, wait);
+            pc++;
+        }
         
-        // Yield to browser to render frame
-        await wait(0); 
+        // Check Missions
+        if (activeMission && !activeMission.completed) {
+            const updatedSteps = activeMission.steps.map(s => {
+                if (!s.isCompleted && s.criteria?.requiredBlock === cmd.type) return { ...s, isCompleted: true };
+                return s;
+            });
+            if (JSON.stringify(updatedSteps) !== JSON.stringify(activeMission.steps)) {
+                 setActiveMission({ ...activeMission, steps: updatedSteps });
+            }
+        }
     }
 
-    clearInterval(syncInterval);
     setIsPlaying(false);
     setActiveBlockId(null);
     setHighlightedPin(null);
-    setSpriteState({ ...spriteStateRef.current });
-    setHardwareState({ ...hardwareStateRef.current });
   };
 
   const stopCode = () => {
@@ -582,27 +657,6 @@ const App: React.FC = () => {
         resumeRef.current();
     }
   };
-
-  // --- STABLE HANDLERS FOR STAGE ---
-  const handleNavigate = useCallback((scr: string) => { 
-      renderingScreen.current = scr; 
-      setAppState(prev => ({...prev, activeScreen: scr})); 
-  }, []);
-
-  const handleInput = useCallback((key: string, pressed: boolean) => {
-      if (pressed) activeInputs.current.add(key);
-      else activeInputs.current.delete(key);
-  }, []);
-
-  const handleAppendCode = useCallback((newCmds: any) => {
-      setCommands(prev => {
-          const updated = [...prev, ...newCmds];
-          setHistory(h => [...h.slice(-20), prev]);
-          setRedoStack([]);
-          return updated;
-      });
-      setSaveStatus('unsaved');
-  }, []);
 
   // --- HOME SCREEN ---
   if (showHome) {
@@ -745,7 +799,7 @@ const App: React.FC = () => {
             {/* Left Panel (Library/AI) */}
             <div className="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-75 relative z-20" style={{ width: leftPanelWidth }}>
                 {activeTab === 'ai' ? (
-                    <AIChat currentMode={mode} onAppendCode={handleAppendCode} />
+                    <AIChat currentMode={mode} onAppendCode={(newCmds) => pushToHistory([...commands, ...newCmds as CommandBlock[]])} />
                 ) : (
                     <div className="flex-1 flex flex-col">
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800">

@@ -2,77 +2,50 @@
 import { GoogleGenAI } from "@google/genai";
 import { AppMode, CommandBlock, CommandType } from "../types";
 
-// Note: In a real app, this should be in an environment variable. 
-// However, per instructions, we access process.env.API_KEY directly in the component if needed, 
-// but here we initialize the client.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const SYSTEM_PROMPT = `
 You are "KidCode Bot", a friendly, enthusiastic coding tutor for children (ages 8-12).
 Your goal is to help them write code for the "KidCode Studio" app.
 
 The app has three modes: APP MAKER, GAME MAKER, and CIRCUIT LAB.
-Below are the available commands for each mode and their parameter structure.
+The user has access to a MASSIVE library of hundreds of blocks and components.
 
-COMMON COMMANDS:
-- WAIT: { value: number (seconds) }
-- REPEAT: { value: number (times to repeat) }
-- END_REPEAT: {} (Marks the end of a loop)
+COMMON LOGIC:
+- REPEAT (Loop), FOREVER, IF/ELSE, WAIT.
+- VARIABLES: SET_VAR, CHANGE_VAR.
+- MATH: CALC_ADD, CALC_SUB, CALC_RANDOM (Set result to variable).
 
-APP MAKER COMMANDS (Build a UI):
-- SET_TITLE: { text: string }
-- SET_BACKGROUND: { color: string (hex code) }
-- ADD_BUTTON: { text: string (label), message: string (alert message when clicked) }
-- ADD_TEXT_BLOCK: { text: string }
-- ADD_INPUT: { text: string (placeholder text) }
-- ADD_IMAGE: { text: string (image URL) }
-- CLEAR_UI: {} (Removes all elements from the screen)
-- CHANGE_SCORE: { value: number } (Add points to app score)
+APP MAKER (UI):
+- Screens: CREATE_SCREEN, NAVIGATE.
+- Widgets: ADD_BUTTON, ADD_INPUT, ADD_TEXT_BLOCK, ADD_IMAGE, ADD_SWITCH, ADD_SLIDER, ADD_MAP, ADD_VIDEO, ADD_DATE_PICKER.
+- Actions: SHOW_ALERT, SPEAK, VIBRATE_DEVICE, OPEN_URL.
 
-GAME MAKER COMMANDS (Move a sprite):
-- MOVE_X: { value: number (pixels, can be negative) }
-- MOVE_Y: { value: number (pixels, can be negative) }
-- SAY: { text: string }
-- SET_EMOJI: { text: string (emoji character) }
-- SET_SCENE: { text: 'grid' | 'space' | 'forest' | 'underwater' | 'desert' }
-- CHANGE_SCORE: { value: number } (Add points to game score)
-- SET_SCORE: { value: number } (Reset or set score)
+GAME MAKER (Sprites):
+- Movement: MOVE_X, MOVE_Y, GO_TO_XY, GLIDE_TO_XY, POINT_DIR.
+- Physics: JUMP, SET_GRAVITY, SET_VELOCITY_X/Y, BOUNCE_ON_EDGE.
+- Looks: SAY, THINK, SET_EMOJI, SET_SIZE, CHANGE_EFFECT, SHOW/HIDE.
+- World: SET_SCENE, SET_WEATHER, SET_CAMERA, SHAKE_CAMERA.
+- Actions: SHOOT, SPAWN_ENEMY, SPAWN_ITEM, CREATE_CLONE.
+- Sound: PLAY_SOUND, PLAY_TONE.
 
-CIRCUIT LAB COMMANDS (Hardware Sim):
-- LED_ON: { pin: number (0-3) }
-- LED_OFF: { pin: number (0-3) }
-- PLAY_TONE: { duration: number (seconds) }
-- PLAY_SOUND: { text: 'siren' | 'laser' | 'coin' | 'powerup' } - Plays a sound effect on the Speaker.
-- SET_FAN: { speed: number (0-100) }
-- SET_LCD: { text: string (max 16 chars) } - Writes text to the LCD Screen.
-- SET_SERVO: { angle: number (0-180) } - Rotates the Servo Motor.
-- SET_RGB: { color: string (hex) } - Sets RGB LED color.
-- SET_SEGMENT: { value: number (0-9) } - Sets Seven Segment Display.
-- SET_VIBRATION: { value: number (seconds) } - Vibrates the motor.
-
-LOGIC / SENSORS:
-- IF: { condition: string, value?: number, pin?: number }
-  * Conditions:
-    - 'IS_PRESSED' (Button)
-    - 'IS_SWITCH_ON' (Toggle Switch)
-    - 'IS_DARK' (Light Sensor)
-    - 'IS_TEMP_HIGH' (Temp Sensor, use 'value')
-    - 'IS_TOUCHING_EDGE' (Game Sprite touching wall)
-    - 'IS_MOTION' (Motion Sensor Detected)
-    - 'DIST_LESS_THAN' (Ultrasonic Distance < value cm)
-    - 'PIN_HIGH' (Generic Pin check)
-- END_IF: {}
-- ELSE: {}
-- WAIT_FOR_PRESS: {} (Pause until button is pressed)
-
-IMPORTANT - LOOPS & LOGIC:
-If the user wants to repeat actions, use the REPEAT block to start a loop, followed by the commands to repeat, and finish with END_REPEAT.
-For conditions, use the generic IF block with the correct 'condition' parameter, followed by commands, and finish with END_IF.
+CIRCUIT LAB (Electronics):
+- Outputs: LED_ON, LED_OFF, SET_RGB, SET_SERVO, SET_FAN, SET_RELAY, SET_LASER.
+- Displays: SET_LCD, SET_OLED_TEXT, SET_SEGMENT, CLEAR_LCD.
+- Inputs: READ_DIGITAL, READ_ANALOG, WAIT_FOR_PRESS.
+- Comms: LOG_DATA, SEND_HTTP.
 
 OUTPUT FORMAT:
 If the user asks to write code, generate a JSON array of command objects. 
-Each object must have a 'type' matching the CommandType strings above, and a 'params' object.
-Do NOT include the 'id' field, the app will generate it.
+Each object must have a 'type' matching the CommandType enums, and a 'params' object.
+Do NOT include the 'id' field.
+
+Example JSON:
+[
+  { "type": "SET_SCENE", "params": { "text": "space" } },
+  { "type": "SET_GRAVITY", "params": { "condition": "true" } },
+  { "type": "REPEAT", "params": { "value": 10 } },
+  { "type": "MOVE_X", "params": { "value": 10 } },
+  { "type": "END_REPEAT", "params": {} }
+]
 
 If the user asks for help or an explanation, answer in plain, encouraging text. Keep it short and simple.
 If generating code, put the JSON array inside a markdown code block labeled 'json'.
@@ -83,6 +56,15 @@ export const generateCodeFromPrompt = async (
   currentMode: AppMode
 ): Promise<{ text: string; commands?: Omit<CommandBlock, 'id'>[] }> => {
   try {
+    // Lazily initialize to avoid crash if process is missing on load in some browser envs
+    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
+    
+    if (!apiKey) {
+        console.warn("API Key missing");
+        return { text: "I can't access my brain right now (API Key missing)." };
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     const model = 'gemini-2.5-flash';
     const finalPrompt = `
     Current Mode: ${currentMode}
@@ -97,7 +79,7 @@ export const generateCodeFromPrompt = async (
       contents: finalPrompt,
       config: {
         systemInstruction: SYSTEM_PROMPT,
-        temperature: 0.4, // Lower temperature for more deterministic code generation
+        temperature: 0.4, 
       }
     });
 

@@ -7,6 +7,7 @@ export interface SavedProject {
   name: string;
   mode: AppMode;
   lastEdited: number; // Timestamp
+  thumbnail?: string; // Base64 data URL
   data: {
     commands: CommandBlock[];
     hardwareState: HardwareState;
@@ -78,4 +79,40 @@ export const createNewProject = (mode: AppMode): SavedProject => {
       pcbColor: '#059669'
     }
   };
+};
+
+// --- EXPORT / IMPORT FEATURES ---
+
+export const exportProjectToFile = (project: SavedProject) => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(project, null, 2));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", `${project.name.replace(/\s+/g, '_')}_kidcode.json`);
+  document.body.appendChild(downloadAnchorNode);
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+};
+
+export const importProjectFromFile = (file: File): Promise<SavedProject> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        // Basic validation
+        if (!json.id || !json.mode || !json.data) {
+          throw new Error("Invalid project file");
+        }
+        // Force a new ID to avoid collisions with existing projects
+        json.id = crypto.randomUUID();
+        json.name = `${json.name} (Imported)`;
+        json.lastEdited = Date.now();
+        resolve(json);
+      } catch (e) {
+        reject(e);
+      }
+    };
+    reader.onerror = (e) => reject(e);
+    reader.readAsText(file);
+  });
 };

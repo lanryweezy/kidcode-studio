@@ -1,0 +1,7 @@
+{
+  "name": "KidCode Studio",
+  "description": "A playful, visual programming environment for kids to create art, games, and simulate hardware electronics using AI assistance.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -15,6 +15,7 @@ export const INITIAL_HARDWARE_STATE = {
   potentiometerValue: 0,
   speakerVolume: 50,
   rgbColor: '#ff0000',
+  rgbLedColor: '#FF0000', // For RGB LED
   sevenSegmentValue: null,
   distance: 100, 
   motionDetected: false,

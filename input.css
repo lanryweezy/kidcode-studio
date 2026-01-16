@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Fredoka', sans-serif;
+}
+
+.font-digital {
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.font-hand {
+  font-family: 'Patrick Hand', cursive;
+}
+
+/* Custom Keyframes for "Way Animated" Feel */
+@keyframes popIn {
+  0% { transform: scale(0) translateY(20px); opacity: 0; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1) translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes wirePulse {
+  0% { stroke-opacity: 0.6; stroke-width: 3; stroke: #fbbf24; filter: drop-shadow(0 0 2px rgba(251,191,36,0.5)); }
+  50% { stroke-opacity: 1; stroke-width: 5; stroke: #fcd34d; filter: drop-shadow(0 0 8px rgba(251,191,36,0.9)); }
+  100% { stroke-opacity: 0.6; stroke-width: 3; stroke: #fbbf24; filter: drop-shadow(0 0 2px rgba(251,191,36,0.5)); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.wire-active {
+  animation: wirePulse 0.5s infinite;
+}
+
+.block-pop {
+  opacity: 0;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9; 
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; 
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

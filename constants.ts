@@ -1,7 +1,7 @@
 
 import { AppMode, CommandType, BlockDefinition, ComponentType, Mission, CircuitComponent } from './types';
 import { 
-  Gamepad2, Cpu, ArrowUp, Type, Eye, Lightbulb, Music, Repeat, XCircle, Layout, MousePointer2, PaintBucket, MessageSquare, Hand, Moon, GitBranch, Battery, Fan, Terminal, Thermometer, Disc, Zap, Volume2, Image, Eraser, TextCursorInput, Move, ToggleLeft, Gauge, Tv, Split, Image as ImageIcon, Trophy, Target, Palette, Hash, Radar, Activity, Waves, Flame, CloudRain, Droplets, Mic, Lock, Keyboard, Gamepad, Power, Variable, Fingerprint, Box, Sun, Wind, CloudFog, Wifi, Bluetooth, Radio, Network, Smartphone, Speaker, Headphones, Watch, Camera, Printer, HardDrive, Shield, Key, Crosshair, RotateCcw, Settings, Signal, SlidersHorizontal, ToggleRight, CheckSquare, BarChart3, Megaphone, StickyNote, Ghost, Apple, Rocket, ArrowBigUp, Minus, MapPin, Grid, Scan, Heart, Layers, CloudSnow, List, Copy, Video, Trash, PanelTop, BrickWall, Coins, Triangle, Flag, Calendar, Clock, Globe, Link, Share2, AlertTriangle, Play, Pause, Square, Circle, Anchor, ArrowRight, ArrowLeft, RotateCw, RefreshCw, ZoomIn, ZoomOut, EyeOff, Tag, Calculator, Percent, Binary, Sigma, Ruler, Compass, Timer, Hourglass, SmartphoneCharging, FileText, FolderOpen, Save, Download, Upload, Cloud, Server, Database, Truck, Bike, Car, Boxes, Mountain, DoorOpen, Key as KeyIcon, ArrowUpCircle, Sparkles, StopCircle, User, Pencil, Grip, View, Mouse
+  Gamepad2, Cpu, ArrowUp, Type, Eye, Lightbulb, Music, Repeat, XCircle, Layout, MousePointer2, PaintBucket, MessageSquare, Hand, Moon, GitBranch, Battery, Fan, Terminal, Thermometer, Disc, Zap, Volume2, Image, Eraser, TextCursorInput, Move, ToggleLeft, Gauge, Tv, Split, Image as ImageIcon, Trophy, Target, Palette, Hash, Radar, Activity, Waves, Flame, CloudRain, Droplets, Mic, Lock, Keyboard, Gamepad, Power, Variable, Fingerprint, Box, Sun, Wind, CloudFog, Wifi, Bluetooth, Radio, Network, Smartphone, Speaker, Headphones, Watch, Camera, Printer, HardDrive, Shield, Key, Crosshair, RotateCcw, Settings, Signal, SlidersHorizontal, ToggleRight, CheckSquare, BarChart3, Megaphone, StickyNote, Ghost, Apple, Rocket, ArrowBigUp, Minus, MapPin, Grid, Scan, Heart, Layers, CloudSnow, List, Copy, Video, Trash, PanelTop, BrickWall, Coins, Triangle, Flag, Calendar, Clock, Globe, Link, Share2, AlertTriangle, Play, Pause, Square, Circle, Anchor, ArrowRight, ArrowLeft, RotateCw, RefreshCw, ZoomIn, ZoomOut, EyeOff, Tag, Calculator, Percent, Binary, Sigma, Ruler, Compass, Timer, Hourglass, SmartphoneCharging, FileText, FolderOpen, Save, Download, Upload, Cloud, Server, Database, Truck, Bike, Car, Boxes, Mountain, DoorOpen, Key as KeyIcon, ArrowUpCircle, Sparkles, StopCircle, User, Pencil, Grip, View, Mouse, Magnet
 } from 'lucide-react';
 
 export const INITIAL_HARDWARE_STATE = {
@@ -26,6 +26,34 @@ export const INITIAL_HARDWARE_STATE = {
   tilt: false,
   magneticField: 0,
   detectedColor: '#ffffff',
+  
+  // Enhanced States for New Components
+  humidity: 50, // For DHT sensors
+  gasLevel: 0, // For gas sensors
+  flameDetected: false, // For flame sensors
+  rainLevel: 0, // For rain sensors
+  soilMoisture: 50, // For soil sensors
+  heartbeatRate: 0, // For heartbeat sensors
+  compassHeading: 0, // For compass
+  gyroData: { x: 0, y: 0, z: 0 }, // For gyro/accel
+  gpsLocation: { lat: 0, lng: 0 }, // For GPS
+  fingerprintMatch: false, // For fingerprint sensor
+  rfidTag: null, // For RFID reader
+  stepperPosition: 0, // For stepper motor
+  pumpFlowRate: 0, // For water pump
+  solenoidActive: false, // For solenoid
+  relayState: false, // For relay
+  laserActive: false, // For laser
+  bulbOn: false, // For light bulb
+  continuousServoSpeed: 0, // For continuous servo
+  rgbStripColors: ['#ff0000', '#00ff00', '#0000ff'], // For RGB strip
+  sdCardData: [], // For SD card
+  rtcTime: new Date(), // For RTC
+  logicGateOutput: false, // For logic gates
+  timerOutput: false, // For 555 timer
+  
+  variables: {}, // Variables for hardware state
+  
   sensorHistory: []
 };
 
@@ -353,23 +381,60 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     // --- OUTPUT ---
     { type: CommandType.LED_ON, label: 'LED On', icon: Lightbulb, defaultParams: { pin: 0 }, color: 'bg-blue-500', category: 'Output', description: 'Turn light on.' },
     { type: CommandType.LED_OFF, label: 'LED Off', icon: Lightbulb, defaultParams: { pin: 0 }, color: 'bg-blue-500', category: 'Output', description: 'Turn light off.' },
+    { type: CommandType.LED_TOGGLE, label: 'LED Toggle', icon: Lightbulb, defaultParams: { pin: 0 }, color: 'bg-blue-400', category: 'Output', description: 'Flip LED state.' },
     { type: CommandType.SET_RGB, label: 'Set RGB Color', icon: Palette, defaultParams: { color: '#ff0000' }, color: 'bg-fuchsia-500', category: 'Output', description: 'Change RGB LED color.' },
+    { type: CommandType.SET_RGB_BRIGHTNESS, label: 'RGB Brightness', icon: Palette, defaultParams: { value: 100 }, color: 'bg-fuchsia-600', category: 'Output', description: 'Set RGB brightness.' },
     { type: CommandType.SET_FAN, label: 'Set Fan Speed', icon: Fan, defaultParams: { speed: 50 }, color: 'bg-cyan-500', category: 'Output', description: 'Spin the motor.' },
     { type: CommandType.SET_SERVO, label: 'Servo Angle', icon: Move, defaultParams: { angle: 90 }, color: 'bg-orange-500', category: 'Output', description: 'Rotate servo arm.' },
+    { type: CommandType.SET_MOTOR_SPEED, label: 'Motor Speed', icon: Settings, defaultParams: { speed: 50 }, color: 'bg-yellow-600', category: 'Output', description: 'Set DC motor speed.' },
+    { type: CommandType.SET_MOTOR_DIR, label: 'Motor Direction', icon: ArrowUp, defaultParams: { direction: 'cw' }, color: 'bg-yellow-700', category: 'Output', description: 'Set motor direction.' },
+    { type: CommandType.SET_STEPPER, label: 'Stepper Steps', icon: Settings, defaultParams: { steps: 100 }, color: 'bg-emerald-600', category: 'Output', description: 'Set stepper position.' },
+    { type: CommandType.SET_RELAY, label: 'Relay Switch', icon: Zap, defaultParams: { state: true }, color: 'bg-violet-600', category: 'Output', description: 'Control relay.' },
+    { type: CommandType.SET_SOLENOID, label: 'Solenoid', icon: Zap, defaultParams: { state: true }, color: 'bg-rose-600', category: 'Output', description: 'Control solenoid.' },
+    { type: CommandType.SET_LASER, label: 'Laser', icon: Zap, defaultParams: { state: true }, color: 'bg-red-600', category: 'Output', description: 'Control laser.' },
+    { type: CommandType.SET_VIBRATION, label: 'Vibrate', icon: Waves, defaultParams: { duration: 0.5 }, color: 'bg-indigo-500', category: 'Output', description: 'Vibrate motor.' },
+    { type: CommandType.SET_MOTOR_DIR, label: 'Motor Direction', icon: ArrowUp, defaultParams: { direction: 'cw' }, color: 'bg-yellow-700', category: 'Output', description: 'Set motor direction.' },
+    { type: CommandType.SET_STEPPER, label: 'Stepper Steps', icon: Settings, defaultParams: { steps: 100 }, color: 'bg-emerald-600', category: 'Output', description: 'Set stepper position.' },
+    { type: CommandType.SET_RGB_BRIGHTNESS, label: 'RGB Brightness', icon: Palette, defaultParams: { value: 100 }, color: 'bg-fuchsia-600', category: 'Output', description: 'Set RGB brightness.' },
+    { type: CommandType.SET_OLED_TEXT, label: 'OLED Text', icon: Type, defaultParams: { text: 'Hello', row: 0, col: 0 }, color: 'bg-cyan-700', category: 'Display', description: 'Write to OLED.' },
+    { type: CommandType.DRAW_OLED_SHAPE, label: 'Draw Shape', icon: PaintBucket, defaultParams: { shape: 'rect', x: 10, y: 10, width: 20, height: 20 }, color: 'bg-cyan-600', category: 'Display', description: 'Draw on OLED.' },
+    { type: CommandType.SET_MATRIX_ROW, label: 'Matrix Row', icon: Grid, defaultParams: { row: 0, pattern: '10101010' }, color: 'bg-red-500', category: 'Display', description: 'Set matrix row.' },
+    { type: CommandType.CLEAR_MATRIX, label: 'Clear Matrix', icon: Eraser, defaultParams: {}, color: 'bg-red-700', category: 'Display', description: 'Clear matrix.' },
     { type: CommandType.PLAY_TONE, label: 'Play Tone', icon: Music, defaultParams: { duration: 0.5 }, color: 'bg-pink-500', category: 'Sound', description: 'Beep the buzzer.' },
+    { type: CommandType.PLAY_NOTE, label: 'Play Note', icon: Music, defaultParams: { note: 'C4', duration: 0.5 }, color: 'bg-pink-600', category: 'Sound', description: 'Play musical note.' },
     { type: CommandType.PLAY_SOUND, label: 'Play Effect', icon: Volume2, defaultParams: { text: 'siren' }, color: 'bg-pink-600', category: 'Sound', description: 'Play sound effect.' },
+    { type: CommandType.STOP_SOUND, label: 'Stop Sound', icon: Volume2, defaultParams: {}, color: 'bg-pink-700', category: 'Sound', description: 'Stop sounds.' },
     { type: CommandType.SET_LCD, label: 'LCD Print', icon: Type, defaultParams: { text: 'Hello', row: 0, col: 0 }, color: 'bg-lime-600', category: 'Display', description: 'Show text on screen.' },
     { type: CommandType.CLEAR_LCD, label: 'Clear LCD', icon: Eraser, defaultParams: {}, color: 'bg-lime-700', category: 'Display', description: 'Wipe screen.' },
+    { type: CommandType.SCROLL_LCD, label: 'Scroll LCD', icon: ArrowUp, defaultParams: { text: 'Scrolling text' }, color: 'bg-lime-500', category: 'Display', description: 'Scroll text on LCD.' },
     { type: CommandType.SET_SEGMENT, label: 'Show Number', icon: Binary, defaultParams: { value: 0 }, color: 'bg-red-600', category: 'Display', description: 'Display digit.' },
 
     // --- INPUT ---
     { type: CommandType.READ_DIGITAL, label: 'Read Digital', icon: ToggleLeft, defaultParams: { pin: 4, varName: 'btnState' }, color: 'bg-indigo-500', category: 'Input', description: 'Read Button/Switch.' },
     { type: CommandType.READ_ANALOG, label: 'Read Analog', icon: Gauge, defaultParams: { pin: 97, varName: 'val' }, color: 'bg-indigo-500', category: 'Input', description: 'Read Sensor value.' },
+    { type: CommandType.READ_TEMPERATURE, label: 'Read Temp', icon: Thermometer, defaultParams: { varName: 'temp' }, color: 'bg-red-500', category: 'Input', description: 'Read temperature.' },
+    { type: CommandType.READ_HUMIDITY, label: 'Read Humidity', icon: Droplets, defaultParams: { varName: 'humidity' }, color: 'bg-blue-500', category: 'Input', description: 'Read humidity.' },
+    { type: CommandType.READ_DISTANCE, label: 'Read Distance', icon: Wifi, defaultParams: { varName: 'distance' }, color: 'bg-blue-400', category: 'Input', description: 'Read ultrasonic sensor.' },
+    { type: CommandType.READ_GAS_LEVEL, label: 'Read Gas', icon: Wind, defaultParams: { varName: 'gas' }, color: 'bg-indigo-500', category: 'Input', description: 'Read gas sensor.' },
+    { type: CommandType.READ_FLAME, label: 'Read Flame', icon: Flame, defaultParams: { varName: 'flame' }, color: 'bg-red-600', category: 'Input', description: 'Read flame sensor.' },
+    { type: CommandType.READ_RAIN, label: 'Read Rain', icon: CloudRain, defaultParams: { varName: 'rain' }, color: 'bg-blue-400', category: 'Input', description: 'Read rain sensor.' },
+    { type: CommandType.READ_SOIL, label: 'Read Soil', icon: Droplets, defaultParams: { varName: 'soil' }, color: 'bg-amber-800', category: 'Input', description: 'Read soil moisture.' },
+    { type: CommandType.READ_HEARTBEAT, label: 'Read Pulse', icon: Heart, defaultParams: { varName: 'pulse' }, color: 'bg-red-500', category: 'Input', description: 'Read heartbeat sensor.' },
+    { type: CommandType.READ_COMPASS, label: 'Read Compass', icon: Target, defaultParams: { varName: 'heading' }, color: 'bg-sky-500', category: 'Input', description: 'Read compass heading.' },
+    { type: CommandType.READ_GYRO, label: 'Read Gyro', icon: Activity, defaultParams: { varName: 'gyro' }, color: 'bg-teal-500', category: 'Input', description: 'Read gyro data.' },
+    { type: CommandType.READ_GPS, label: 'Read GPS', icon: MapPin, defaultParams: { varName: 'location' }, color: 'bg-emerald-600', category: 'Input', description: 'Read GPS coordinates.' },
+    { type: CommandType.READ_COLOR, label: 'Read Color', icon: Palette, defaultParams: { varName: 'color' }, color: 'bg-pink-500', category: 'Input', description: 'Read color sensor.' },
+    { type: CommandType.READ_PRESSURE, label: 'Read Pressure', icon: Gauge, defaultParams: { varName: 'pressure' }, color: 'bg-cyan-500', category: 'Input', description: 'Read pressure sensor.' },
+    { type: CommandType.READ_FLEX, label: 'Read Flex', icon: Move, defaultParams: { varName: 'flex' }, color: 'bg-purple-500', category: 'Input', description: 'Read flex sensor.' },
+    { type: CommandType.READ_MAGNETIC, label: 'Read Mag Field', icon: Magnet, defaultParams: { varName: 'magnetic' }, color: 'bg-blue-600', category: 'Input', description: 'Read hall sensor.' },
     
     // --- DATA ---
     { type: CommandType.LOG_DATA, label: 'Log Data', icon: Terminal, defaultParams: { text: 'Value' }, color: 'bg-slate-600', category: 'Data', description: 'Print to console.' },
     { type: CommandType.SET_VAR, label: 'Set Var', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value.' },
     { type: CommandType.CALC_ADD, label: 'Calculate', icon: Calculator, defaultParams: { varName: 'res', value: 1, value2: 1 }, color: 'bg-orange-700', category: 'Math', description: 'Do math.' },
+    { type: CommandType.RESET_BOARD, label: 'Reset Board', icon: RotateCcw, defaultParams: {}, color: 'bg-slate-600', category: 'System', description: 'Reset hardware state.' },
+    { type: CommandType.CONNECT_WIFI, label: 'Connect WiFi', icon: Wifi, defaultParams: { ssid: 'network', password: 'password' }, color: 'bg-blue-500', category: 'System', description: 'Connect to WiFi.' },
+    { type: CommandType.SEND_HTTP, label: 'HTTP Request', icon: Cloud, defaultParams: { url: 'http://api.example.com', method: 'GET' }, color: 'bg-blue-400', category: 'System', description: 'Send HTTP request.' },
   ]
 };
 
@@ -378,41 +443,92 @@ export const CIRCUIT_PALETTE = [
   { type: 'LED_RED', label: 'Red LED', icon: Lightbulb, color: 'text-red-500', category: 'Outputs', defaultPin: 0, description: 'Lights up red.' },
   { type: 'LED_BLUE', label: 'Blue LED', icon: Lightbulb, color: 'text-blue-500', category: 'Outputs', defaultPin: 1, description: 'Lights up blue.' },
   { type: 'LED_GREEN', label: 'Green LED', icon: Lightbulb, color: 'text-green-500', category: 'Outputs', defaultPin: 2, description: 'Lights up green.' },
+  { type: 'LED_WHITE', label: 'White LED', icon: Lightbulb, color: 'text-gray-200', category: 'Outputs', defaultPin: 3, description: 'Lights up white.' },
+  { type: 'LED_YELLOW', label: 'Yellow LED', icon: Lightbulb, color: 'text-yellow-400', category: 'Outputs', defaultPin: 4, description: 'Lights up yellow.' },
+  { type: 'LED_ORANGE', label: 'Orange LED', icon: Lightbulb, color: 'text-orange-500', category: 'Outputs', defaultPin: 5, description: 'Lights up orange.' },
   { type: 'RGB_LED', label: 'RGB LED', icon: Palette, color: 'text-purple-500', category: 'Outputs', defaultPin: 10, description: 'Changes colors.' },
+  { type: 'RGB_STRIP', label: 'RGB Strip', icon: Palette, color: 'text-pink-500', category: 'Outputs', defaultPin: 11, description: 'Addressable LED strip.' },
   { type: 'FAN', label: 'Fan Motor', icon: Fan, color: 'text-cyan-500', category: 'Outputs', defaultPin: 9, description: 'Spins when ON.' },
   { type: 'SERVO', label: 'Servo', icon: Move, color: 'text-orange-500', category: 'Outputs', defaultPin: 11, description: 'Rotates to 180°.' },
+  { type: 'SERVO_CONTINUOUS', label: 'Continuous Servo', icon: RotateCw, color: 'text-amber-600', category: 'Outputs', defaultPin: 12, description: '360° rotation servo.' },
   { type: 'SPEAKER', label: 'Speaker', icon: Volume2, color: 'text-slate-600', category: 'Outputs', defaultPin: 8, description: 'Plays tones.' },
   { type: 'MOTOR_DC', label: 'DC Motor', icon: Settings, color: 'text-yellow-600', category: 'Outputs', defaultPin: 6, description: 'Basic motor.' },
   { type: 'BUZZER', label: 'Piezo Buzzer', icon: Volume2, color: 'text-stone-700', category: 'Outputs', defaultPin: 8, description: 'Basic beeps.' },
   { type: 'VIBRATION', label: 'Vibration Motor', icon: Waves, color: 'text-indigo-500', category: 'Outputs', defaultPin: 7, description: 'Shakes the device.' },
+  { type: 'LASER', label: 'Laser', icon: Zap, color: 'text-red-600', category: 'Outputs', defaultPin: 13, description: 'Laser beam.' },
+  { type: 'BULB', label: 'Light Bulb', icon: Lightbulb, color: 'text-yellow-300', category: 'Outputs', defaultPin: 14, description: 'Incandescent bulb.' },
+  { type: 'RELAY', label: 'Relay', icon: Zap, color: 'text-violet-600', category: 'Outputs', defaultPin: 15, description: 'Electronic switch.' },
+  { type: 'SOLENOID', label: 'Solenoid', icon: Zap, color: 'text-rose-600', category: 'Outputs', defaultPin: 16, description: 'Linear actuator.' },
+  { type: 'STEPPER', label: 'Stepper Motor', icon: Settings, color: 'text-emerald-600', category: 'Outputs', defaultPin: 17, description: 'Precise position motor.' },
+  { type: 'PUMP', label: 'Water Pump', icon: Waves, color: 'text-blue-500', category: 'Outputs', defaultPin: 18, description: 'Liquid pump.' },
   
   // --- INPUTS ---
   { type: 'BUTTON', label: 'Push Button', icon: MousePointer2, color: 'text-red-600', category: 'Inputs', defaultPin: 4, description: 'Push to activate.' },
+  { type: 'BUTTON_TACTILE', label: 'Tactile Button', icon: MousePointer2, color: 'text-red-700', category: 'Inputs', defaultPin: 19, description: 'Small push button.' },
   { type: 'SWITCH_SLIDE', label: 'Slide Switch', icon: ToggleLeft, color: 'text-slate-500', category: 'Inputs', defaultPin: 7, description: 'On/Off toggle.' },
+  { type: 'SWITCH_TOGGLE', label: 'Toggle Switch', icon: ToggleRight, color: 'text-slate-600', category: 'Inputs', defaultPin: 20, description: 'Maintained on/off.' },
+  { type: 'SWITCH_DIP', label: 'DIP Switch', icon: ToggleLeft, color: 'text-slate-700', category: 'Inputs', defaultPin: 21, description: 'Multiple switches.' },
+  { type: 'SWITCH_ROTARY', label: 'Rotary Switch', icon: RotateCcw, color: 'text-slate-800', category: 'Inputs', defaultPin: 22, description: 'Multi-position switch.' },
   { type: 'POTENTIOMETER', label: 'Rotary Knob', icon: RotateCcw, color: 'text-orange-600', category: 'Inputs', defaultPin: 97, description: 'Adjustable dial.' },
+  { type: 'SLIDE_POT', label: 'Slide Pot', icon: Move, color: 'text-amber-600', category: 'Inputs', defaultPin: 23, description: 'Linear adjustable.' },
   { type: 'JOYSTICK', label: 'Joystick', icon: Gamepad, color: 'text-slate-700', category: 'Inputs', defaultPin: 13, description: 'X/Y control.' },
   { type: 'KEYPAD', label: 'Keypad 4x4', icon: Grid, color: 'text-slate-800', category: 'Inputs', defaultPin: 12, description: 'Number pad.' },
+  { type: 'KEYPAD_MATRIX', label: 'Matrix Keypad', icon: Grid, color: 'text-slate-900', category: 'Inputs', defaultPin: 24, description: 'Custom matrix.' },
   { type: 'ENCODER', label: 'Rotary Encoder', icon: RotateCw, color: 'text-slate-600', category: 'Inputs', defaultPin: 5, description: 'Infinite dial.' },
 
   // --- SENSORS ---
   { type: 'LIGHT_SENSOR', label: 'Light Sensor', icon: Sun, color: 'text-yellow-500', category: 'Sensors', defaultPin: 5, description: 'Detects brightness.' },
   { type: 'TEMP_SENSOR', label: 'Temp Sensor', icon: Thermometer, color: 'text-red-500', category: 'Sensors', defaultPin: 99, description: 'Reads temperature.' },
+  { type: 'DHT11', label: 'DHT11', icon: Thermometer, color: 'text-rose-500', category: 'Sensors', defaultPin: 25, description: 'Temp/Humidity sensor.' },
+  { type: 'DHT22', label: 'DHT22', icon: Thermometer, color: 'text-rose-600', category: 'Sensors', defaultPin: 26, description: 'Accurate temp/humid.' },
+  { type: 'THERMISTOR', label: 'Thermistor', icon: Thermometer, color: 'text-orange-600', category: 'Sensors', defaultPin: 27, description: 'Temperature sensor.' },
   { type: 'ULTRASONIC', label: 'Distance Sensor', icon: Wifi, color: 'text-blue-500', category: 'Sensors', defaultPin: 92, description: 'Measures distance.' },
   { type: 'MOTION', label: 'Motion PIR', icon: Activity, color: 'text-emerald-500', category: 'Sensors', defaultPin: 3, description: 'Detects movement.' },
   { type: 'SOUND_SENSOR', label: 'Mic Sensor', icon: Mic, color: 'text-slate-700', category: 'Sensors', defaultPin: 94, description: 'Detects noise.' },
+  { type: 'GAS_SENSOR', label: 'Gas Sensor', icon: Wind, color: 'text-indigo-500', category: 'Sensors', defaultPin: 28, description: 'Detects gas levels.' },
+  { type: 'FLAME_SENSOR', label: 'Flame Sensor', icon: Flame, color: 'text-red-600', category: 'Sensors', defaultPin: 29, description: 'Detects fire/flame.' },
+  { type: 'RAIN_SENSOR', label: 'Rain Sensor', icon: CloudRain, color: 'text-blue-400', category: 'Sensors', defaultPin: 30, description: 'Detects water/rain.' },
+  { type: 'SOIL_SENSOR', label: 'Soil Sensor', icon: Droplets, color: 'text-amber-800', category: 'Sensors', defaultPin: 31, description: 'Moisture detector.' },
+  { type: 'PRESSURE_SENSOR', label: 'Pressure Sensor', icon: Gauge, color: 'text-cyan-500', category: 'Sensors', defaultPin: 32, description: 'Pressure measurement.' },
+  { type: 'FLEX_SENSOR', label: 'Flex Sensor', icon: Move, color: 'text-purple-500', category: 'Sensors', defaultPin: 33, description: 'Bend detection.' },
   { type: 'TILT_SENSOR', label: 'Tilt Switch', icon: RefreshCw, color: 'text-purple-500', category: 'Sensors', defaultPin: 93, description: 'Detects orientation.' },
+  { type: 'HALL_SENSOR', label: 'Hall Sensor', icon: Magnet, color: 'text-blue-600', category: 'Sensors', defaultPin: 34, description: 'Magnetic field sensor.' },
+  { type: 'COMPASS', label: 'Digital Compass', icon: Target, color: 'text-sky-500', category: 'Sensors', defaultPin: 35, description: 'Direction sensor.' },
+  { type: 'GYRO', label: 'Gyro/Accel', icon: Activity, color: 'text-teal-500', category: 'Sensors', defaultPin: 36, description: 'Motion/angle sensor.' },
+  { type: 'GPS', label: 'GPS Module', icon: MapPin, color: 'text-emerald-600', category: 'Sensors', defaultPin: 37, description: 'Location sensor.' },
+  { type: 'HEARTBEAT', label: 'Heartbeat', icon: Heart, color: 'text-red-500', category: 'Sensors', defaultPin: 38, description: 'Pulse sensor.' },
+  { type: 'COLOR_SENSOR', label: 'Color Sensor', icon: Palette, color: 'text-pink-500', category: 'Sensors', defaultPin: 39, description: 'Color recognition.' },
+  
+  // --- COMPONENTS ---
+  { type: 'RESISTOR', label: 'Resistor', icon: Ruler, color: 'text-amber-800', category: 'Components', defaultPin: 40, description: 'Electrical resistor.' },
+  { type: 'RFID', label: 'RFID Reader', icon: Fingerprint, color: 'text-violet-500', category: 'Components', defaultPin: 41, description: 'RFID card reader.' },
+  { type: 'FINGERPRINT', label: 'Fingerprint', icon: Fingerprint, color: 'text-indigo-600', category: 'Components', defaultPin: 42, description: 'Biometric scanner.' },
   
   // --- DISPLAYS ---
   { type: 'LCD', label: 'LCD Screen', icon: Type, color: 'text-green-700', category: 'Displays', defaultPin: 95, description: 'Displays text.' },
+  { type: 'OLED', label: 'OLED Screen', icon: Tv, color: 'text-cyan-400', category: 'Displays', defaultPin: 11, description: 'Graphics display.' },
   { type: 'SEVEN_SEGMENT', label: '7-Segment', icon: Binary, color: 'text-red-600', category: 'Displays', defaultPin: 96, description: 'Shows numbers.' },
   { type: 'MATRIX', label: 'LED Matrix', icon: Grid, color: 'text-red-500', category: 'Displays', defaultPin: 10, description: 'Dot display.' },
-  { type: 'OLED', label: 'OLED Screen', icon: Tv, color: 'text-cyan-400', category: 'Displays', defaultPin: 11, description: 'Graphics display.' },
   
-  // --- POWER / OTHER ---
-  { type: 'BATTERY_9V', label: '9V Battery', icon: Battery, color: 'text-orange-500', category: 'Power', defaultPin: 90, description: 'Power source.' },
-  { type: 'SOLAR', label: 'Solar Panel', icon: Sun, color: 'text-blue-600', category: 'Power', defaultPin: 91, description: 'Sun power.' },
-  { type: 'BREADBOARD', label: 'Breadboard', icon: Layout, color: 'text-slate-400', category: 'Misc', defaultPin: 98, description: 'Prototyping base.' },
+  // --- COMMUNICATION ---
   { type: 'WIFI', label: 'WiFi Module', icon: Wifi, color: 'text-blue-400', category: 'Comms', defaultPin: 2, description: 'Connect internet.' },
+  { type: 'BLUETOOTH', label: 'Bluetooth', icon: Bluetooth, color: 'text-blue-500', category: 'Comms', defaultPin: 43, description: 'Wireless comms.' },
+  { type: 'RADIO', label: 'Radio Module', icon: Radio, color: 'text-purple-500', category: 'Comms', defaultPin: 44, description: 'RF communication.' },
+  
+  // --- STORAGE & PERIPHERALS ---
+  { type: 'SD_CARD', label: 'SD Card', icon: Save, color: 'text-slate-500', category: 'Storage', defaultPin: 45, description: 'Memory card.' },
+  { type: 'RTC', label: 'RTC', icon: Clock, color: 'text-slate-600', category: 'Components', defaultPin: 46, description: 'Real-time clock.' },
+  
+  // --- POWER ---
+  { type: 'BATTERY_9V', label: '9V Battery', icon: Battery, color: 'text-orange-500', category: 'Power', defaultPin: 90, description: 'Power source.' },
+  { type: 'BATTERY_AA', label: 'AA Battery', icon: Battery, color: 'text-orange-600', category: 'Power', defaultPin: 91, description: 'Standard battery.' },
+  { type: 'SOLAR', label: 'Solar Panel', icon: Sun, color: 'text-blue-600', category: 'Power', defaultPin: 91, description: 'Sun power.' },
+  
+  // --- MISC ---
+  { type: 'BREADBOARD', label: 'Breadboard', icon: Layout, color: 'text-slate-400', category: 'Misc', defaultPin: 98, description: 'Prototyping base.' },
+  { type: 'LOGIC_AND', label: 'AND Gate', icon: Zap, color: 'text-amber-500', category: 'Logic', defaultPin: 47, description: 'Logical AND gate.' },
+  { type: 'LOGIC_OR', label: 'OR Gate', icon: Zap, color: 'text-emerald-500', category: 'Logic', defaultPin: 48, description: 'Logical OR gate.' },
+  { type: '555_TIMER', label: '555 Timer', icon: Timer, color: 'text-cyan-600', category: 'Logic', defaultPin: 49, description: 'Timer IC.' },
 ];
 
 export const AVAILABLE_MISSIONS: Mission[] = [

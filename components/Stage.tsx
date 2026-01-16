@@ -593,6 +593,152 @@ const HardwareStage = React.memo(({ hardwareState, hardwareStateRef, circuitComp
                                 <text x="10" y="12" fontSize="4" fill="#22d3ee" textAnchor="middle" fontFamily="monospace">OLED</text>
                             </>
                         )}
+                        {comp.type === 'FAN' && (
+                            <g className="fan-blades" transform="translate(10, 10)">
+                                <path d="M0 -8 L3 -3 L8 0 L3 3 L0 8 L-3 3 L-8 0 L-3 -3 Z" fill="#22d3ee" />
+                            </g>
+                        )}
+                        {comp.type === 'SERVO' && (
+                            <rect className="servo-arm" x="2" y="8" width="16" height="4" fill="#fbbf24" rx="2" />
+                        )}
+                        {comp.type === 'SERVO_CONTINUOUS' && (
+                            <rect className="servo-arm" x="2" y="8" width="16" height="4" fill="#fbbf24" rx="2" />
+                        )}
+                        {comp.type === 'STEPPER' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#8b5cf6" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">STP</text>
+                            </>
+                        )}
+                        {comp.type === 'PUMP' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#0ea5e9" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">PMP</text>
+                            </>
+                        )}
+                        {comp.type === 'RELAY' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#8b5cf6" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">RLY</text>
+                            </>
+                        )}
+                        {comp.type === 'SOLENOID' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#f43f5e" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">SOL</text>
+                            </>
+                        )}
+                        {comp.type === 'LASER' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#dc2626" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">LAS</text>
+                            </>
+                        )}
+                        {comp.type === 'BULB' && (
+                            <circle cx="10" cy="10" r="8" fill="#fde047" stroke="#f59e0b" strokeWidth="2" />
+                        )}
+                        {comp.type === 'RGB_STRIP' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#ec4899" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">RGB</text>
+                            </>
+                        )}
+                        {comp.type === 'DHT11' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#f43f5e" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">DHT</text>
+                            </>
+                        )}
+                        {comp.type === 'DHT22' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#f43f5e" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">DHT</text>
+                            </>
+                        )}
+                        {comp.type === 'GAS_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#6366f1" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">GAS</text>
+                            </>
+                        )}
+                        {comp.type === 'FLAME_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#dc2626" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">FLM</text>
+                            </>
+                        )}
+                        {comp.type === 'RAIN_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#0ea5e9" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">RAI</text>
+                            </>
+                        )}
+                        {comp.type === 'SOIL_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#ca8a04" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">SOI</text>
+                            </>
+                        )}
+                        {comp.type === 'PRESSURE_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#0891b2" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">PRS</text>
+                            </>
+                        )}
+                        {comp.type === 'FLEX_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#a855f7" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">FLX</text>
+                            </>
+                        )}
+                        {comp.type === 'HALL_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#3b82f6" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">MAG</text>
+                            </>
+                        )}
+                        {comp.type === 'COMPASS' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#0284c7" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">CMP</text>
+                            </>
+                        )}
+                        {comp.type === 'GYRO' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#0d9488" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">GYR</text>
+                            </>
+                        )}
+                        {comp.type === 'GPS' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#059669" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">GPS</text>
+                            </>
+                        )}
+                        {comp.type === 'HEARTBEAT' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#dc2626" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">HRB</text>
+                            </>
+                        )}
+                        {comp.type === 'COLOR_SENSOR' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#ec4899" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">COL</text>
+                            </>
+                        )}
+                        {comp.type === 'RFID' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#8b5cf6" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">RFID</text>
+                            </>
+                        )}
+                        {comp.type === 'FINGERPRINT' && (
+                            <>
+                                <rect x="2" y="2" width="16" height="16" fill="#6366f1" rx="2" />
+                                <text x="10" y="12" fontSize="4" fill="#fff" textAnchor="middle" fontFamily="monospace">FP</text>
+                            </>
+                        )}
                         
                         <text x="10" y="30" textAnchor="middle" fontSize="6" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>P{comp.pin}</text>
                     </g>

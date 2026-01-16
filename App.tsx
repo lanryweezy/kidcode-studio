@@ -523,8 +523,216 @@ const App: React.FC = () => {
             // Re-implement key commands ensuring Ref mutation
             case CommandType.LED_ON: hardwareStateRef.current.pins[cmd.params.pin!] = true; playSoundEffect('click'); break;
             case CommandType.LED_OFF: hardwareStateRef.current.pins[cmd.params.pin!] = false; playSoundEffect('click'); break;
+            case CommandType.LED_TOGGLE: 
+                const currentPin = hardwareStateRef.current.pins[cmd.params.pin!];
+                hardwareStateRef.current.pins[cmd.params.pin!] = !currentPin; 
+                playSoundEffect('click'); 
+                break;
+            case CommandType.SET_RGB: 
+                hardwareStateRef.current.rgbColor = cmd.params.color || '#ff0000'; 
+                break;
+            case CommandType.SET_RGB_BRIGHTNESS: 
+                // Handle RGB brightness if needed
+                break;
+            case CommandType.SET_FAN: 
+                hardwareStateRef.current.fanSpeed = cmd.params.speed || 0; 
+                break;
+            case CommandType.SET_SERVO: 
+                hardwareStateRef.current.servoAngle = cmd.params.angle || 90; 
+                break;
+            case CommandType.SET_MOTOR_SPEED: 
+                // Set motor speed
+                break;
+            case CommandType.SET_MOTOR_DIR: 
+                // Set motor direction
+                break;
+            case CommandType.SET_STEPPER: 
+                hardwareStateRef.current.stepperPosition = cmd.params.steps || 0; 
+                break;
+            case CommandType.SET_RELAY: 
+                hardwareStateRef.current.relayState = cmd.params.state === true; 
+                break;
+            case CommandType.SET_SOLENOID: 
+                hardwareStateRef.current.solenoidActive = cmd.params.state === true; 
+                break;
+            case CommandType.SET_LASER: 
+                hardwareStateRef.current.laserActive = cmd.params.state === true; 
+                break;
+            case CommandType.SET_VIBRATION: 
+                hardwareStateRef.current.vibrationActive = true; 
+                // Auto-reset after duration
+                setTimeout(() => { 
+                    hardwareStateRef.current.vibrationActive = false; 
+                    setHardwareState({...hardwareStateRef.current}); 
+                }, (cmd.params.duration || 0.5) * 1000);
+                break;
+            case CommandType.SET_OLED_TEXT: 
+                // Handle OLED display
+                break;
+            case CommandType.DRAW_OLED_SHAPE: 
+                // Handle OLED drawing
+                break;
+            case CommandType.SET_MATRIX_ROW: 
+                // Handle matrix display
+                break;
+            case CommandType.CLEAR_MATRIX: 
+                // Clear matrix display
+                break;
             case CommandType.PLAY_SOUND: playSpeakerSound(cmd.params.text || 'beep'); break;
+            case CommandType.PLAY_NOTE: 
+                // Play musical note
+                playTone(cmd.params.duration || 0.5); 
+                await wait((cmd.params.duration || 0.5) * 1000); 
+                break;
             case CommandType.PLAY_TONE: playTone(cmd.params.duration || 0.5); await wait((cmd.params.duration || 0.5) * 1000); break;
+            case CommandType.SET_LCD: 
+                hardwareStateRef.current.lcdLines[0] = cmd.params.text || 'Hello'; 
+                break;
+            case CommandType.CLEAR_LCD: 
+                hardwareStateRef.current.lcdLines = ['', '']; 
+                break;
+            case CommandType.SCROLL_LCD: 
+                // Handle scrolling LCD text
+                break;
+            case CommandType.SET_SEGMENT: 
+                hardwareStateRef.current.sevenSegmentValue = cmd.params.value || 0; 
+                break;
+            case CommandType.READ_DIGITAL: 
+                // Update variable with digital pin state
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
+                }
+                break;
+            case CommandType.READ_ANALOG: 
+                // Update variable with analog value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
+                }
+                break;
+            case CommandType.READ_TEMPERATURE: 
+                // Update variable with temperature value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.temperature;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.temperature;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.temperature;
+                }
+                break;
+            case CommandType.READ_HUMIDITY: 
+                // Update variable with humidity value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.humidity;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.humidity;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.humidity;
+                }
+                break;
+            case CommandType.READ_DISTANCE: 
+                // Update variable with distance value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.distance;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.distance;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.distance;
+                }
+                break;
+            case CommandType.READ_GAS_LEVEL: 
+                // Update variable with gas level value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gasLevel;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gasLevel;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gasLevel;
+                }
+                break;
+            case CommandType.READ_FLAME: 
+                // Update variable with flame detection value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flameDetected;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flameDetected;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flameDetected;
+                }
+                break;
+            case CommandType.READ_RAIN: 
+                // Update variable with rain level value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.rainLevel;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.rainLevel;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.rainLevel;
+                }
+                break;
+            case CommandType.READ_SOIL: 
+                // Update variable with soil moisture value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.soilMoisture;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.soilMoisture;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.soilMoisture;
+                }
+                break;
+            case CommandType.READ_HEARTBEAT: 
+                // Update variable with heartbeat rate value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.heartbeatRate;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.heartbeatRate;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.heartbeatRate;
+                }
+                break;
+            case CommandType.READ_COMPASS: 
+                // Update variable with compass heading value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.compassHeading;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.compassHeading;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.compassHeading;
+                }
+                break;
+            case CommandType.READ_GYRO: 
+                // Update variable with gyro data value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gyroData;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gyroData;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gyroData;
+                }
+                break;
+            case CommandType.READ_GPS: 
+                // Update variable with GPS location value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gpsLocation;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gpsLocation;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gpsLocation;
+                }
+                break;
+            case CommandType.READ_COLOR: 
+                // Update variable with detected color value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.detectedColor;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.detectedColor;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.detectedColor;
+                }
+                break;
+            case CommandType.READ_PRESSURE: 
+                // Update variable with pressure value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pressure;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pressure;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pressure;
+                }
+                break;
+            case CommandType.READ_FLEX: 
+                // Update variable with flex value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flex;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flex;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flex;
+                }
+                break;
+            case CommandType.READ_MAGNETIC: 
+                // Update variable with magnetic field value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.magneticField;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.magneticField;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.magneticField;
+                }
+                break;
             
             // --- GAME COMMANDS ---
             case CommandType.JUMP:

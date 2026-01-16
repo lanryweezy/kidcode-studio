@@ -20,7 +20,7 @@ import { getProjects, saveProject, createNewProject, SavedProject, exportProject
 import { generateCode } from '../services/codeGenerator';
 import { generateSprite } from '../services/geminiService';
 import { getUserProfile, addXp, DEFAULT_USER, upgradeUserPlan } from '../services/userService';
-import { Play, Trash, Plus, ChevronDown, ChevronRight, Undo2, Redo2, FileCode, Camera, Trophy, Search, Sliders, Code2, Paintbrush, Zap, Upload, Box, TableProperties, Terminal, Car, User, Music, X, ZoomIn, ZoomOut, RotateCcw, Cloud, Check, Bug, Pause, StepForward, Disc, Home, Save, Ghost, Palette, Cpu, Sparkles, Crown, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Play, Trash, Plus, ChevronDown, ChevronRight, Undo2, Redo2, FileCode, Camera, Trophy, Search, Sliders, Code2, Paintbrush, Zap, Upload, Box, TableProperties, Terminal, Car, User, Music, X, ZoomIn, ZoomOut, RotateCcw, Cloud, Check, Bug, Pause, StepForward, Disc, Home, Save, Ghost, Palette, Cpu, Sparkles, Crown, Loader2, Image as ImageIcon, Layout, Square, ToggleLeft, SlidersHorizontal, PanelTop, Trash2 } from 'lucide-react';
 
 const MIN_LEFT_WIDTH = 220;
 const MAX_LEFT_WIDTH = 400;
@@ -566,8 +566,249 @@ export const App: React.FC = () => {
             // Re-implement key commands ensuring Ref mutation
             case CommandType.LED_ON: hardwareStateRef.current.pins[cmd.params.pin!] = true; playSoundEffect('click'); break;
             case CommandType.LED_OFF: hardwareStateRef.current.pins[cmd.params.pin!] = false; playSoundEffect('click'); break;
+            case CommandType.LED_TOGGLE: 
+                const currentPin = hardwareStateRef.current.pins[cmd.params.pin!];
+                hardwareStateRef.current.pins[cmd.params.pin!] = !currentPin; 
+                playSoundEffect('click'); 
+                break;
+            case CommandType.SET_RGB: 
+                hardwareStateRef.current.rgbColor = cmd.params.color || '#ff0000'; 
+                break;
+            case CommandType.SET_RGB_BRIGHTNESS: 
+                // Handle RGB brightness if needed
+                break;
+            case CommandType.SET_FAN: 
+                hardwareStateRef.current.fanSpeed = cmd.params.speed || 0; 
+                break;
+            case CommandType.SET_SERVO: 
+                hardwareStateRef.current.servoAngle = cmd.params.angle || 90; 
+                break;
+            case CommandType.SET_MOTOR_SPEED: 
+                // Set motor speed
+                break;
+            case CommandType.SET_MOTOR_DIR: 
+                // Set motor direction
+                break;
+            case CommandType.SET_STEPPER: 
+                hardwareStateRef.current.stepperPosition = cmd.params.steps || 0; 
+                break;
+            case CommandType.SET_RELAY: 
+                hardwareStateRef.current.relayState = cmd.params.state === true; 
+                break;
+            case CommandType.SET_SOLENOID: 
+                hardwareStateRef.current.solenoidActive = cmd.params.state === true; 
+                break;
+            case CommandType.SET_LASER: 
+                hardwareStateRef.current.laserActive = cmd.params.state === true; 
+                break;
+            case CommandType.SET_VIBRATION: 
+                hardwareStateRef.current.vibrationActive = true; 
+                // Auto-reset after duration
+                setTimeout(() => { 
+                    hardwareStateRef.current.vibrationActive = false; 
+                    setHardwareState({...hardwareStateRef.current}); 
+                }, (cmd.params.duration || 0.5) * 1000);
+                break;
+            case CommandType.SET_OLED_TEXT: 
+                // Handle OLED display
+                break;
+            case CommandType.DRAW_OLED_SHAPE: 
+                // Handle OLED drawing
+                break;
+            case CommandType.SET_MATRIX_ROW: 
+                // Handle matrix display
+                break;
+            case CommandType.CLEAR_MATRIX: 
+                // Clear matrix display
+                break;
             case CommandType.PLAY_SOUND: playSpeakerSound(cmd.params.text || 'beep'); break;
+            case CommandType.PLAY_NOTE: 
+                // Play musical note
+                playTone(cmd.params.duration || 0.5); 
+                await wait((cmd.params.duration || 0.5) * 1000); 
+                break;
             case CommandType.PLAY_TONE: playTone(cmd.params.duration || 0.5); await wait((cmd.params.duration || 0.5) * 1000); break;
+            case CommandType.SET_LCD: 
+                hardwareStateRef.current.lcdLines[0] = cmd.params.text || 'Hello'; 
+                break;
+            case CommandType.CLEAR_LCD: 
+                hardwareStateRef.current.lcdLines = ['', '']; 
+                break;
+            case CommandType.SCROLL_LCD: 
+                // Handle scrolling LCD text
+                break;
+            case CommandType.SET_SEGMENT: 
+                hardwareStateRef.current.sevenSegmentValue = cmd.params.value || 0; 
+                break;
+            case CommandType.READ_DIGITAL: 
+                // Update variable with digital pin state
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
+                }
+                break;
+            case CommandType.READ_ANALOG: 
+                // Update variable with analog value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
+                }
+                break;
+            case CommandType.READ_TEMPERATURE: 
+                // Update variable with temperature value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.temperature;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.temperature;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.temperature;
+                }
+                break;
+            case CommandType.READ_HUMIDITY: 
+                // Update variable with humidity value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.humidity;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.humidity;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.humidity;
+                }
+                break;
+            case CommandType.READ_DISTANCE: 
+                // Update variable with distance value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.distance;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.distance;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.distance;
+                }
+                break;
+            case CommandType.READ_GAS_LEVEL: 
+                // Update variable with gas level value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gasLevel;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gasLevel;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gasLevel;
+                }
+                break;
+            case CommandType.READ_FLAME: 
+                // Update variable with flame detection value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flameDetected;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flameDetected;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flameDetected;
+                }
+                break;
+            case CommandType.READ_RAIN: 
+                // Update variable with rain level value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.rainLevel;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.rainLevel;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.rainLevel;
+                }
+                break;
+            case CommandType.READ_SOIL: 
+                // Update variable with soil moisture value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.soilMoisture;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.soilMoisture;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.soilMoisture;
+                }
+                break;
+            case CommandType.READ_HEARTBEAT: 
+                // Update variable with heartbeat rate value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.heartbeatRate;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.heartbeatRate;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.heartbeatRate;
+                }
+                break;
+            case CommandType.READ_COMPASS: 
+                // Update variable with compass heading value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.compassHeading;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.compassHeading;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.compassHeading;
+                }
+                break;
+            case CommandType.READ_GYRO: 
+                // Update variable with gyro data value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gyroData;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gyroData;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gyroData;
+                }
+                break;
+            case CommandType.READ_GPS: 
+                // Update variable with GPS location value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gpsLocation;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gpsLocation;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.gpsLocation;
+                }
+                break;
+            case CommandType.READ_COLOR: 
+                // Update variable with detected color value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.detectedColor;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.detectedColor;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.detectedColor;
+                }
+                break;
+            case CommandType.READ_PRESSURE: 
+                // Update variable with pressure value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pressure;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pressure;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pressure;
+                }
+                break;
+            case CommandType.READ_FLEX: 
+                // Update variable with flex value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flex;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flex;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.flex;
+                }
+                break;
+            case CommandType.READ_MAGNETIC: 
+                // Update variable with magnetic field value
+                if (cmd.params.varName) {
+                    if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.magneticField;
+                    if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.magneticField;
+                    if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.magneticField;
+                }
+                break;
+            
+            case CommandType.CONNECT_WIFI:
+                // Connect to WiFi network
+                const ssid = cmd.params.ssid || 'default_network';
+                const password = cmd.params.password || '';
+                
+                // Update hardware state to indicate WiFi is connected
+                hardwareStateRef.current.wifiConnected = password.length > 0;
+                
+                // Update variables with connection status
+                if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName || 'wifi_status'] = password.length > 0 ? 'connected' : 'connecting';
+                if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName || 'wifi_status'] = password.length > 0 ? 'connected' : 'connecting';
+                if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName || 'wifi_status'] = password.length > 0 ? 'connected' : 'connecting';
+                
+                // Add to console log
+                setConsoleLogs(prev => [...prev, `WiFi connected to: ${ssid}`].slice(-50));
+                if (!showConsole) setShowConsole(true);
+                break;
+            
+            case CommandType.SEND_HTTP:
+                // Send HTTP request
+                const url = cmd.params.url || 'http://localhost';
+                const method = cmd.params.method || 'GET';
+                
+                // Simulate HTTP request
+                setConsoleLogs(prev => [...prev, `HTTP ${method}: ${url}`].slice(-50));
+                if (!showConsole) setShowConsole(true);
+                
+                // Update variables with response status
+                if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName || 'http_response'] = 'sent';
+                if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName || 'http_response'] = 'sent';
+                if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName || 'http_response'] = 'sent';
+                break;
             
             // --- GAME COMMANDS ---
             case CommandType.JUMP:
@@ -1001,6 +1242,101 @@ export const App: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-75 relative z-20" style={{ width: leftPanelWidth }}>
                 {activeTab === 'ai' ? (
                     <AIChat currentMode={mode} onAppendCode={handleAppendCode} />
+                ) : activeTab === 'design' && mode === AppMode.APP ? (
+                    // --- APP DESIGN PANEL ---
+                    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
+                        <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                            <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                <Layout className="text-blue-500" /> App Designer
+                            </h3>
+                            <p className="text-xs text-slate-400">Design your app interface!</p>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }}>
+                            
+                            {/* Preview Box */}
+                            <div className="aspect-video bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 mb-6 flex items-center justify-center relative overflow-hidden shadow-inner group">
+                                <div className="absolute inset-0 bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==')] opacity-10"></div>
+                                <div className="text-center p-4">
+                                    <div className="text-4xl mb-2">📱</div>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm">App Preview</p>
+                                    <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">Screen: {appState.activeScreen || 'main'}</p>
+                                </div>
+                                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-[10px] bg-black/50 text-white px-2 py-1 rounded-full">Preview</span>
+                                </div>
+                            </div>
+
+                            {/* Main Actions */}
+                            <div className="space-y-3 mb-6">
+                                <button
+                                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={18} /> Add New Screen
+                                </button>
+                                <button
+                                    className="w-full py-3 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Palette size={18} /> Theme Editor
+                                </button>
+                            </div>
+
+                            {/* App Elements */}
+                            <div className="space-y-4 mb-6 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                                <h4 className="font-bold text-slate-700 dark:text-slate-200 text-sm uppercase tracking-wide">UI Components</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button className="flex flex-col items-center justify-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                                        <Square className="text-slate-600 dark:text-slate-300 mb-1" size={20} />
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">Text</span>
+                                    </button>
+                                    <button className="flex flex-col items-center justify-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                                        <Square className="text-slate-600 dark:text-slate-300 mb-1" size={20} />
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">Button</span>
+                                    </button>
+                                    <button className="flex flex-col items-center justify-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                                        <Square className="text-slate-600 dark:text-slate-300 mb-1" size={20} />
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">Input</span>
+                                    </button>
+                                    <button className="flex flex-col items-center justify-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                                        <Square className="text-slate-600 dark:text-slate-300 mb-1" size={20} />
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">Image</span>
+                                    </button>
+                                    <button className="flex flex-col items-center justify-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                                        <ToggleLeft className="text-slate-600 dark:text-slate-300 mb-1" size={20} />
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">Toggle</span>
+                                    </button>
+                                    <button className="flex flex-col items-center justify-center p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                                        <SlidersHorizontal className="text-slate-600 dark:text-slate-300 mb-1" size={20} />
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">Slider</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Screen List */}
+                            <h4 className="font-bold text-slate-700 dark:text-slate-200 mb-2 text-sm uppercase tracking-wide">Screens</h4>
+                            <div className="space-y-2">
+                                {Object.keys(appState.screens).length > 0 ? (
+                                    Object.keys(appState.screens).map(screenName => (
+                                        <div 
+                                            key={screenName}
+                                            className={`p-3 rounded-lg border flex items-center justify-between ${appState.activeScreen === screenName ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 dark:border-slate-700'}`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <PanelTop size={16} />
+                                                <span className="font-medium">{screenName}</span>
+                                            </div>
+                                            <button className="text-slate-400 hover:text-red-500">
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="p-3 text-center text-slate-400 text-sm rounded-lg border border-dashed border-slate-300 dark:border-slate-700">
+                                        No screens created yet
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 ) : activeTab === 'design' && mode === AppMode.GAME ? (
                     // --- CHARACTER STUDIO PANEL ---
                     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
@@ -1010,7 +1346,7 @@ export const App: React.FC = () => {
                             </h3>
                             <p className="text-xs text-slate-400">Design your hero!</p>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }}>
 
                             {/* Preview Box */}
                             <div className="aspect-square bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 mb-6 flex items-center justify-center relative overflow-hidden shadow-inner group">
@@ -1137,7 +1473,7 @@ export const App: React.FC = () => {
                                  />
                              </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }} >
                              {/* Grouped Components Rendering */}
                              {(Object.entries(groupedComponents) as [string, any[]][]).map(([category, components]) => {
                                  const filtered = components.filter((c: any) => c.label.toLowerCase().includes(circuitSearch.toLowerCase()));
@@ -1199,7 +1535,7 @@ export const App: React.FC = () => {
                                  />
                              </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }} >
                              {/* Grouped Blocks Rendering */}
                              {(Object.entries(groupedBlocks) as [string, BlockDefinition[]][]).map(([category, blocks]) => {
                                  // Filter logic within group

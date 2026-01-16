@@ -69,18 +69,19 @@ export enum CommandType {
   ADD_IMAGE = 'ADD_IMAGE',
   ADD_VIDEO = 'ADD_VIDEO',
   ADD_CAMERA = 'ADD_CAMERA', 
-  ADD_DRAWING_CANVAS = 'ADD_DRAWING_CANVAS', // New
-  ADD_LIST_VIEW = 'ADD_LIST_VIEW', // New
+  ADD_DRAWING_CANVAS = 'ADD_DRAWING_CANVAS', 
+  ADD_LIST_VIEW = 'ADD_LIST_VIEW',
   ADD_AUDIO_PLAYER = 'ADD_AUDIO_PLAYER',
+  ADD_AUDIO_RECORDER = 'ADD_AUDIO_RECORDER', // New
   ADD_SWITCH = 'ADD_SWITCH',
   ADD_SLIDER = 'ADD_SLIDER',
-  ADD_CHECKBOX = 'ADD_CHECKBOX',
+  ADD_CHECKBOX = 'ADD_CHECKBOX', 
   ADD_RADIO = 'ADD_RADIO',
   ADD_DROPDOWN = 'ADD_DROPDOWN',
   ADD_DATE_PICKER = 'ADD_DATE_PICKER',
   ADD_TIME_PICKER = 'ADD_TIME_PICKER',
   ADD_COLOR_PICKER = 'ADD_COLOR_PICKER',
-  ADD_PROGRESS = 'ADD_PROGRESS',
+  ADD_PROGRESS = 'ADD_PROGRESS', 
   ADD_MAP = 'ADD_MAP',
   ADD_CHART = 'ADD_CHART',
   ADD_QR_CODE = 'ADD_QR_CODE',
@@ -88,7 +89,6 @@ export enum CommandType {
   ADD_DIVIDER = 'ADD_DIVIDER',
   ADD_SPACER = 'ADD_SPACER',
   ADD_ICON = 'ADD_ICON',
-  ADD_AUDIO_RECORDER = 'ADD_AUDIO_RECORDER', // New
   
   // UI Actions
   SPEAK = 'SPEAK', 
@@ -431,13 +431,21 @@ export interface HardwareState {
   laserActive: boolean; // For laser
   bulbOn: boolean; // For light bulb
   continuousServoSpeed: number; // For continuous servo
+  rgbLedColor: string; // For RGB LED
   rgbStripColors: string[]; // For RGB strip
   sdCardData: string[]; // For SD card
   rtcTime: Date; // For RTC
   logicGateOutput: boolean; // For logic gates
   timerOutput: boolean; // For 555 timer
   
-    variables: Record<string, any>; // Variables for hardware state
+  // Microcontroller-specific features
+  wifiConnected: boolean; // For ESP32, ESP8266, Pi, etc.
+  bluetoothConnected: boolean; // For ESP32, Pi, etc.
+  cpuTemperature: number; // CPU temperature for microcontrollers
+  freeMemory: number; // Available memory
+  uptime: number; // Time since last reset
+  
+  variables: Record<string, any>; // Variables for hardware state
   
   // Data Logging
   sensorHistory: SensorDataPoint[];
@@ -445,16 +453,16 @@ export interface HardwareState {
 
 export interface AppElement {
   id: string;
-  blockId?: string;
+  blockId?: string; 
   type: 'button' | 'text' | 'input' | 'image' | 'switch' | 'slider' | 'checkbox' | 'progress' | 'video' | 'map' | 'chart' | 'date' | 'camera' | 'drawing_canvas' | 'list' | 'divider' | 'spacer' | 'color_picker' | 'qr_code' | 'audio_recorder';
   content: string;
   actionMessage?: string;
-  targetScreen?: string;
+  targetScreen?: string; 
   // Styling & Binding
   color?: string;
   textSize?: 'xs'|'sm'|'md'|'lg'|'xl'|'2xl';
-  variableName?: string;
-  max?: number;
+  variableName?: string; 
+  max?: number; 
   value?: number;
   placeholder?: string;
 }
@@ -472,6 +480,9 @@ export interface AppState {
 }
 
 export type ComponentType = 
+  // MICROCONTROLLERS
+  'ARDUINO_UNO' | 'ARDUINO_NANO' | 'ARDUINO_MEGA' | 'ESP32_DEVKIT' | 'ESP8266' | 'NODEMCU' | 'RASPBERRY_PI_ZERO' | 'RASPBERRY_PI_4' | 'MICROBIT' |
+  
   // OUTPUTS
   'LED_RED' | 'LED_BLUE' | 'LED_GREEN' | 'LED_WHITE' | 'LED_YELLOW' | 'LED_ORANGE' |
   'RGB_LED' | 'RGB_STRIP' | 'LASER' | 'BULB' |

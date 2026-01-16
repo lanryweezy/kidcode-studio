@@ -18,7 +18,7 @@ import { playSoundEffect, playTone, playSpeakerSound } from './services/soundSer
 import { getProjects, saveProject, createNewProject, SavedProject, exportProjectToFile, importProjectFromFile } from './services/storageService';
 import { generateCode } from './services/codeGenerator';
 import { getUserProfile, addXp, DEFAULT_USER } from './services/userService';
-import { Play, Trash, Plus, ChevronDown, ChevronRight, Undo2, Redo2, FileCode, Camera, Trophy, Search, Sliders, Code2, Paintbrush, Zap, Upload, Box, TableProperties, Terminal, Car, User, Music, X, ZoomIn, ZoomOut, RotateCcw, Cloud, Check, Bug, Pause, StepForward, Disc, Home, Save, Ghost, Palette, Cpu, Sparkles } from 'lucide-react';
+import { Play, Trash, Plus, ChevronDown, ChevronRight, Undo2, Redo2, FileCode, Camera, Trophy, Search, Sliders, Code2, Paintbrush, Zap, Upload, Box, TableProperties, Terminal, Car, User, Music, X, ZoomIn, ZoomOut, RotateCcw, Cloud, Check, Bug, Pause, StepForward, Disc, Home, Save, Ghost, Palette, Cpu, Sparkles, Layout, Square, ToggleLeft, SlidersHorizontal, PanelTop, Trash2 } from 'lucide-react';
 
 const MIN_LEFT_WIDTH = 220;
 const MAX_LEFT_WIDTH = 400;
@@ -1168,7 +1168,7 @@ const App: React.FC = () => {
                             </h3>
                             <p className="text-xs text-slate-400">Design your hero!</p>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }}>
                             
                             {/* Preview Box */}
                             <div className="aspect-square bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 mb-6 flex items-center justify-center relative overflow-hidden shadow-inner group">
@@ -1287,7 +1287,7 @@ const App: React.FC = () => {
                                  />
                              </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }} >
                              {/* Grouped Components Rendering */}
                              {(Object.entries(groupedComponents) as [string, any[]][]).map(([category, components]) => {
                                  const filtered = components.filter((c: any) => c.label.toLowerCase().includes(circuitSearch.toLowerCase()));
@@ -1340,16 +1340,16 @@ const App: React.FC = () => {
                              <h3 className="font-bold text-slate-700 dark:text-slate-200 mb-2">Block Library</h3>
                              <div className="relative">
                                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                 <input 
-                                    type="text" 
-                                    placeholder="Search blocks..." 
+                                 <input
+                                    type="text"
+                                    placeholder="Search blocks..."
                                     value={blockSearch}
                                     onChange={(e) => setBlockSearch(e.target.value)}
-                                    className="w-full bg-slate-100 dark:bg-slate-800 pl-9 pr-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-violet-200" 
+                                    className="w-full bg-slate-100 dark:bg-slate-800 pl-9 pr-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-violet-200"
                                  />
                              </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }} >
                              {/* Grouped Blocks Rendering */}
                              {(Object.entries(groupedBlocks) as [string, BlockDefinition[]][]).map(([category, blocks]) => {
                                  // Filter logic within group

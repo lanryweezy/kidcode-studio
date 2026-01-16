@@ -145,10 +145,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
             model: "gemini-2.5-flash-preview-tts",
             generationConfig: {
                 responseMimeType: "audio/wav",
-            },
-            voice: {
-                name: 'Puck' // Puck is nice and friendly for kids
-            },
+            }
         });
 
         const result = await speechModel.generateContent(text);

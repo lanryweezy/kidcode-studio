@@ -373,17 +373,32 @@ const HardwareStage = React.memo(({ hardwareState, hardwareStateRef, circuitComp
         let frameId: number;
         const updateVisuals = () => {
             const state = hardwareStateRef?.current || hardwareState;
+            
+            // Enhanced wire visualization with power flow animation
             wireRefs.current.forEach((path, id) => {
                 const comp = circuitComponents.find((c: any) => `wire-${c.id}` === id);
                 if (comp) {
                     const isActive = state.pins[comp.pin];
-                    if (isActive) path.classList.add('wire-active');
-                    else path.classList.remove('wire-active');
+                    if (isActive) {
+                        path.classList.add('wire-active');
+                        // Add animated power flow effect
+                        const currentTime = Date.now();
+                        const dashOffset = (currentTime * 0.1) % 20;
+                        path.setAttribute('stroke-dasharray', '5,5');
+                        path.setAttribute('stroke-dashoffset', dashOffset.toString());
+                    } else {
+                        path.classList.remove('wire-active');
+                        path.removeAttribute('stroke-dasharray');
+                        path.removeAttribute('stroke-dashoffset');
+                    }
                 }
             });
+            
             componentRefs.current.forEach((el, id) => {
                 const comp = circuitComponents.find((c: any) => c.id === id);
                 if (!comp) return;
+                
+                // Enhanced LED visualization with pulsing effect
                 if (comp.type.startsWith('LED')) {
                     const isOn = state.pins[comp.pin];
                     const lightCircle = el.querySelector('.light-part');
@@ -391,59 +406,170 @@ const HardwareStage = React.memo(({ hardwareState, hardwareStateRef, circuitComp
                         const color = comp.type.includes('RED') ? '#ef4444' : comp.type.includes('BLUE') ? '#3b82f6' : '#22c55e';
                         lightCircle.setAttribute('fill', isOn ? color : '#334155');
                         lightCircle.setAttribute('filter', isOn ? 'url(#glow)' : '');
+                        
+                        // Add pulsing effect when LED is on
+                        if (isOn) {
+                            const pulseIntensity = 0.8 + Math.sin(Date.now() * 0.01) * 0.2;
+                            lightCircle.setAttribute('opacity', pulseIntensity.toString());
+                        } else {
+                            lightCircle.setAttribute('opacity', '1');
+                        }
                     }
                 }
+                
                 if (comp.type === 'RGB_LED') {
                     const lightCircle = el.querySelector('.light-part');
-                    if (lightCircle) lightCircle.setAttribute('fill', state.rgbColor);
+                    if (lightCircle) {
+                        lightCircle.setAttribute('fill', state.rgbColor);
+                        // Add RGB color cycling effect
+                        const hue = (Date.now() * 0.05) % 360;
+                        if (state.pins[comp.pin]) {
+                            lightCircle.setAttribute('filter', 'url(#rgb-glow)');
+                        } else {
+                            lightCircle.setAttribute('filter', '');
+                        }
+                    }
                 }
+                
                 if (comp.type === 'FAN') {
                     const blades = el.querySelector('.fan-blades');
                     if (blades && state.fanSpeed > 0) {
                         const currentRot = Number(blades.getAttribute('data-rotation') || 0);
-                        const newRot = (currentRot + state.fanSpeed) % 360;
+                        const newRot = (currentRot + state.fanSpeed * 2) % 360; // Faster rotation
                         blades.setAttribute('transform', `rotate(${newRot} 10 10)`);
                         blades.setAttribute('data-rotation', String(newRot));
+                        
+                        // Add blur effect for fast spinning
+                        if (state.fanSpeed > 50) {
+                            blades.setAttribute('filter', 'url(#motion-blur)');
+                        } else {
+                            blades.removeAttribute('filter');
+                        }
+                    } else if (blades) {
+                        blades.removeAttribute('filter');
                     }
                 }
+                
                 if (comp.type === 'SERVO') {
                     const arm = el.querySelector('.servo-arm');
-                    if (arm) arm.setAttribute('transform', `rotate(${state.servoAngle} 10 10)`);
+                    if (arm) {
+                        arm.setAttribute('transform', `rotate(${state.servoAngle} 10 10)`);
+                        // Smooth servo movement
+                        const currentRot = Number(arm.getAttribute('data-current-angle') || 0);
+                        const targetRot = state.servoAngle;
+                        if (Math.abs(currentRot - targetRot) > 1) {
+                            const newRot = currentRot + (targetRot > currentRot ? 2 : -2);
+                            arm.setAttribute('transform', `rotate(${newRot} 10 10)`);
+                            arm.setAttribute('data-current-angle', String(newRot));
+                        }
+                    }
                 }
+                
                 if (comp.type === 'BUTTON') {
                     const isPressed = state.pins[comp.pin];
                     const btnCircle = el.querySelector('circle');
                     if (btnCircle) {
                         btnCircle.setAttribute('fill', isPressed ? '#991b1b' : '#ef4444');
                         btnCircle.setAttribute('r', isPressed ? '4.5' : '5');
+                        
+                        // Add press animation
+                        if (isPressed) {
+                            btnCircle.setAttribute('filter', 'url(#pressed-effect)');
+                        } else {
+                            btnCircle.removeAttribute('filter');
+                        }
                     }
                 }
+                
                 if (comp.type === 'VIBRATION' && state.pins[comp.pin]) {
-                    const shakeX = (Math.random() - 0.5) * 2;
-                    const shakeY = (Math.random() - 0.5) * 2;
+                    const shakeX = (Math.random() - 0.5) * 4; // Increased shake
+                    const shakeY = (Math.random() - 0.5) * 4;
                     el.setAttribute('transform', `translate(${comp.x + shakeX}, ${comp.y + shakeY}) rotate(${comp.rotation || 0} 10 10)`);
                 } else if (comp.type === 'VIBRATION') {
                     el.setAttribute('transform', `translate(${comp.x}, ${comp.y}) rotate(${comp.rotation || 0} 10 10)`);
                 }
+                
                 if ((comp.type === 'SPEAKER' || comp.type === 'BUZZER') && state.pins[comp.pin]) {
-                    const scale = 1 + Math.sin(Date.now() * 0.05) * 0.1;
+                    const scale = 1 + Math.sin(Date.now() * 0.1) * 0.2; // More pronounced vibration
                     el.setAttribute('transform', `translate(${comp.x}, ${comp.y}) rotate(${comp.rotation || 0} 10 10) scale(${scale})`);
+                    
+                    // Add sound wave visualization
+                    const waves = el.querySelectorAll('.sound-wave');
+                    waves.forEach((wave: any, i) => {
+                        const opacity = Math.sin(Date.now() * 0.1 + i) * 0.5 + 0.5;
+                        wave.setAttribute('opacity', opacity.toString());
+                    });
                 } else if (comp.type === 'SPEAKER' || comp.type === 'BUZZER') {
                     el.setAttribute('transform', `translate(${comp.x}, ${comp.y}) rotate(${comp.rotation || 0} 10 10)`);
                 }
+                
                 if (comp.type === 'SEVEN_SEGMENT') {
                     const val = state.sevenSegmentValue ?? 0;
                     const segs = [val!==1&&val!==4, val!==5&&val!==6, val!==2, val!==1&&val!==4&&val!==7, val===0||val===2||val===6||val===8, val!==1&&val!==2&&val!==3&&val!==7, val!==0&&val!==1&&val!==7];
-                    segs.forEach((on, i) => { const segEl = el.querySelector(`.seg-${i}`); if (segEl) segEl.setAttribute('opacity', on ? '1' : '0.1'); });
+                    segs.forEach((on, i) => { 
+                        const segEl = el.querySelector(`.seg-${i}`); 
+                        if (segEl) {
+                            segEl.setAttribute('opacity', on ? '1' : '0.1');
+                            segEl.setAttribute('filter', on ? 'url(#segment-glow)' : '');
+                        }
+                    });
                 }
+                
                 if (comp.type === 'POTENTIOMETER' || comp.type === 'SLIDE_POT') {
                     const knob = el.querySelector('.pot-knob');
-                    if (knob) { const deg = ((state.potentiometerValue / 1023) * 270) - 135; knob.setAttribute('transform', `rotate(${deg} 10 10)`); }
+                    if (knob) { 
+                        const deg = ((state.potentiometerValue / 1023) * 270) - 135; 
+                        knob.setAttribute('transform', `rotate(${deg} 10 10)`);
+                        
+                        // Add value display
+                        const valueDisplay = el.querySelector('.pot-value');
+                        if (valueDisplay) {
+                            valueDisplay.textContent = Math.round(state.potentiometerValue).toString();
+                        }
+                    }
                 }
+                
                 if (comp.type === 'SWITCH_SLIDE') {
                     const isOn = state.pins[comp.pin];
                     const knob = el.querySelector('.switch-knob');
-                    if (knob) knob.setAttribute('cx', isOn ? '14' : '6');
+                    if (knob) {
+                        knob.setAttribute('cx', isOn ? '14' : '6');
+                        // Smooth sliding animation
+                        const currentX = Number(knob.getAttribute('data-current-x') || '6');
+                        const targetX = isOn ? 14 : 6;
+                        if (Math.abs(currentX - targetX) > 0.5) {
+                            const newX = currentX + (targetX > currentX ? 0.5 : -0.5);
+                            knob.setAttribute('cx', newX.toString());
+                            knob.setAttribute('data-current-x', newX.toString());
+                        }
+                    }
+                }
+                
+                // Add microcontroller-specific visualizations
+                if (isMicrocontroller(comp.type)) {
+                    // Show WiFi/BT connectivity indicators
+                    if (comp.type.includes('ESP') || comp.type.includes('RASPBERRY_PI')) {
+                        const wifiIndicator = el.querySelector('.wifi-indicator');
+                        if (wifiIndicator) {
+                            wifiIndicator.setAttribute('opacity', state.wifiConnected ? '1' : '0.3');
+                            if (state.wifiConnected) {
+                                const signalStrength = Math.sin(Date.now() * 0.02) * 0.3 + 0.7;
+                                wifiIndicator.setAttribute('opacity', signalStrength.toString());
+                            }
+                        }
+                        
+                        const btIndicator = el.querySelector('.bt-indicator');
+                        if (btIndicator) {
+                            btIndicator.setAttribute('opacity', state.bluetoothConnected ? '1' : '0.3');
+                        }
+                    }
+                    
+                    // Show CPU temperature indicator
+                    const tempIndicator = el.querySelector('.temp-indicator');
+                    if (tempIndicator) {
+                        const tempColor = state.cpuTemperature > 70 ? '#ef4444' : state.cpuTemperature > 50 ? '#f59e0b' : '#22c55e';
+                        tempIndicator.setAttribute('fill', tempColor);
+                    }
                 }
             });
             frameId = requestAnimationFrame(updateVisuals);
@@ -459,6 +585,105 @@ const HardwareStage = React.memo(({ hardwareState, hardwareStateRef, circuitComp
         const y = 130 + (row * 20);
         if (pin >= 90) return { x: 150 + (pin - 90) * 10 - 50, y: 350 };
         return { x, y };
+    };
+    
+    // Function to get pin coordinates for specific microcontrollers - REALISTIC LAYOUT
+    const getMicrocontrollerPinCoords = (compType: string, pin: number, compX: number, compY: number) => {
+        // Arduino Uno/Nano realistic pinout layout (like actual boards)
+        if (compType === 'ARDUINO_UNO' || compType === 'ARDUINO_NANO') {
+            // Digital pins 0-13 on top row
+            if (pin <= 13) {
+                return { x: compX + 8 + (pin * 7), y: compY - 8 };
+            }
+            // Analog pins A0-A7 on bottom row
+            else if (pin >= 14 && pin <= 21) {
+                return { x: compX + 8 + ((pin - 14) * 7), y: compY + 42 };
+            }
+            // Power pins
+            else if (pin === 22) return { x: compX + 5, y: compY + 15 }; // 5V
+            else if (pin === 23) return { x: compX + 5, y: compY + 25 }; // GND
+            else if (pin === 24) return { x: compX + 60, y: compY + 15 }; // 3.3V
+            else if (pin === 25) return { x: compX + 60, y: compY + 25 }; // GND
+        }
+        
+        // Arduino Mega realistic layout
+        else if (compType === 'ARDUINO_MEGA') {
+            // Digital pins 0-53 (spaced wider)
+            if (pin <= 53) {
+                const col = pin % 12;
+                const row = Math.floor(pin / 12);
+                return { x: compX + 10 + (col * 6), y: compY - 15 + (row * 8) };
+            }
+            // Analog pins A0-A15
+            else if (pin >= 54 && pin <= 69) {
+                return { x: compX + 10 + ((pin - 54) * 6), y: compY + 55 };
+            }
+        }
+        
+        // ESP32 DevKit realistic layout
+        else if (compType === 'ESP32_DEVKIT') {
+            // GPIO pins arranged in two columns like real ESP32
+            const leftPins = [0,2,4,5,12,13,14,15,16,17,18,19];
+            const rightPins = [21,22,23,25,26,27,32,33,34,35,36,39];
+            
+            if (leftPins.includes(pin)) {
+                const index = leftPins.indexOf(pin);
+                return { x: compX + 5, y: compY + 10 + (index * 7) };
+            } else if (rightPins.includes(pin)) {
+                const index = rightPins.indexOf(pin);
+                return { x: compX + 25, y: compY + 10 + (index * 7) };
+            }
+        }
+        
+        // ESP8266/NodeMCU layout
+        else if (compType === 'ESP8266' || compType === 'NODEMCU') {
+            // Standard NodeMCU pin arrangement
+            const pinMap = {
+                0: { x: compX + 15, y: compY - 8 }, // D0
+                1: { x: compX + 25, y: compY - 8 }, // D1
+                2: { x: compX + 35, y: compY - 8 }, // D2
+                3: { x: compX + 45, y: compY - 8 }, // D3
+                4: { x: compX + 15, y: compY + 42 }, // D4
+                5: { x: compX + 25, y: compY + 42 }, // D5
+                6: { x: compX + 35, y: compY + 42 }, // D6
+                7: { x: compX + 45, y: compY + 42 }, // D7
+                8: { x: compX + 5, y: compY + 15 },  // 3V3
+                9: { x: compX + 5, y: compY + 25 },  // GND
+                10: { x: compX + 55, y: compY + 15 }, // Vin
+                11: { x: compX + 55, y: compY + 25 }  // RST
+            };
+            return pinMap[pin as keyof typeof pinMap] || { x: compX + 10, y: compY + 10 };
+        }
+        
+        // Raspberry Pi realistic 40-pin header
+        else if (compType === 'RASPBERRY_PI_ZERO' || compType === 'RASPBERRY_PI_4') {
+            const row = Math.floor((pin - 1) / 2);
+            const isOdd = pin % 2 === 1; // Odd pins on left (5V side), even on right (GND side)
+            return { 
+                x: compX + (isOdd ? 8 : 22), 
+                y: compY + 15 + (row * 6)
+            };
+        }
+        
+        // micro:bit edge connector
+        else if (compType === 'MICROBIT') {
+            if (pin <= 25) {
+                const side = pin <= 12 ? 'left' : 'right';
+                const pos = side === 'left' ? pin : pin - 13;
+                return { 
+                    x: compX + (side === 'left' ? 5 : 25), 
+                    y: compY + 12 + (pos * 5)
+                };
+            }
+        }
+        
+        // Default fallback
+        return { x: compX + 10, y: compY + 10 };
+    };
+    
+    // Function to determine if a component is a microcontroller
+    const isMicrocontroller = (type: string) => {
+        return type.includes('ARDUINO') || type.includes('ESP') || type.includes('RASPBERRY_PI') || type === 'MICROBIT' || type === 'NODEMCU';
     };
 
     const handleCompDragMove = (e: React.PointerEvent) => {
@@ -492,51 +717,803 @@ const HardwareStage = React.memo(({ hardwareState, hardwareStateRef, circuitComp
         <div className="relative w-[300px] h-[400px] border-4 border-slate-700 bg-slate-800 rounded-xl shadow-2xl overflow-hidden select-none" ref={svgRef as any} onPointerMove={handleCompDragMove} onPointerUp={handleDragEnd} onDrop={(e) => { e.preventDefault(); try { const raw = e.dataTransfer.getData('application/json'); if (!raw) return; const tool = JSON.parse(raw); if (tool && tool.type) { onCircuitUpdate([...circuitComponents, { id: crypto.randomUUID(), type: tool.type, x: 150, y: 280, pin: tool.defaultPin || 0, rotation: 0 }]); playSoundEffect('click'); } } catch(e) {} }} onDragOver={(e) => e.preventDefault()}>
             <svg width="100%" height="100%" viewBox="0 0 300 400" className="w-full h-full pointer-events-auto">
                 <defs>
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    {/* Enhanced Grid Pattern inspired by reference */}
+                    <pattern id="pcb-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <circle cx="2" cy="2" r="1.5" fill="#143629"/>
+                    </pattern>
+                    
+                    {/* Ultra Glow Filter */}
+                    <filter id="ultra-glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="8" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
                     </filter>
-                    <pattern id="pcb-grid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(0,0,0,0.4)" /></pattern>
+                    
+                    {/* Component Glow Effects */}
+                    <filter id="component-glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    
+                    {/* Sonar Animation */}
+                    <filter id="sonar-glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
                 </defs>
                 <rect width="100%" height="100%" fill={pcbColor || '#059669'} />
                 <rect width="100%" height="100%" fill="url(#pcb-grid)" />
-                <circle cx="15" cy="15" r="6" fill="#1e293b" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
-                <circle cx="285" cy="15" r="6" fill="#1e293b" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
-                <circle cx="15" cy="385" r="6" fill="#1e293b" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
-                <circle cx="285" cy="385" r="6" fill="#1e293b" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
+                {/* Removed decorative corner circles for realistic PCB look */}
                 {localComponents.map((comp: any) => {
-                    const pinCoords = getPinCoords(comp.pin); 
+                    // Determine if this is a microcontroller
+                    const isMC = isMicrocontroller(comp.type);
+                    
+                    // Get appropriate pin coordinates
+                    let pinCoords;
+                    if (isMC) {
+                        pinCoords = getMicrocontrollerPinCoords(comp.type, comp.pin, comp.x, comp.y);
+                    } else {
+                        pinCoords = getPinCoords(comp.pin);
+                    }
+                    
                     const isHigh = hardwareState.pins[comp.pin]; 
                     const wireColor = isHigh ? '#fbbf24' : 'rgba(255,255,255,0.4)';
-                    const startX = comp.x + 10; 
-                    const startY = comp.y + 10;
+                    
+                    // Start point depends on component type
+                    const startX = isMC ? pinCoords.x : comp.x + 10;
+                    const startY = isMC ? pinCoords.y : comp.y + 10;
+                    
                     return ( <path key={`wire-${comp.id}`} id={`wire-${comp.id}`} ref={(el) => { if(el) wireRefs.current.set(`wire-${comp.id}`, el); else wireRefs.current.delete(`wire-${comp.id}`); }} d={`M ${startX} ${startY} C ${startX} ${(startY + pinCoords.y)/2}, ${pinCoords.x} ${(startY + pinCoords.y)/2}, ${pinCoords.x} ${pinCoords.y}`} fill="none" stroke={wireColor} strokeWidth={isHigh ? 4 : 2} strokeLinecap="round" className="transition-all duration-300 drop-shadow-md" /> );
                 })}
-                <g transform="translate(150, 120)">
-                    <rect x="-60" y="-45" width="120" height="90" rx="4" fill="#1e293b" stroke="#334155" strokeWidth="2" />
-                    <text x="0" y="-20" textAnchor="middle" fontSize="6" fill="#94a3b8" fontFamily="monospace" fontWeight="bold" letterSpacing="1">CONTROLLER</text>
-                    <rect x="-15" y="-48" width="30" height="6" fill="#cbd5e1" rx="1" />
-                    <rect x="-20" y="-10" width="40" height="40" fill="#0f172a" rx="2" />
-                    <text x="0" y="15" textAnchor="middle" fontSize="4" fill="#64748b" fontFamily="monospace">KIDCODE</text>
-                    <g transform="translate(-60, 10)">{[0, 2, 4, 6].map((p, i) => (<g key={p} transform={`translate(0, ${i * 20})`}><text x="-8" y="3" fontSize="6" fill="#cbd5e1" textAnchor="end" fontWeight="bold">D{p}</text><circle cx="0" cy="0" r="3" fill="#fbbf24" stroke="#d97706" strokeWidth="1" /></g>))}</g>
-                    <g transform="translate(60, 10)">{[1, 3, 5, 7].map((p, i) => (<g key={p} transform={`translate(0, ${i * 20})`}><text x="8" y="3" fontSize="6" fill="#cbd5e1" textAnchor="start" fontWeight="bold">D{p}</text><circle cx="0" cy="0" r="3" fill="#fbbf24" stroke="#d97706" strokeWidth="1" /></g>))}</g>
+                <g transform="translate(150, 200)">
+                    {/* Default Arduino-like microcontroller */}
+                    <rect x="-60" y="-25" width="120" height="50" rx="4" fill="#0066cc" stroke="#004499" strokeWidth="2" />
+                    <rect x="-55" y="-20" width="110" height="5" rx="2" fill="#333333" />
+                    <rect x="-55" y="15" width="110" height="5" rx="2" fill="#333333" />
+                    
+                    {/* Digital Pin Headers - D0-D13 */}
+                    <g transform="translate(-55, -30)">
+                        {Array.from({length: 14}).map((_, i) => (
+                            <g key={`d${i}`} transform={`translate(${i * 8}, 0)`}>
+                                <rect x="0" y="0" width="6" height="8" rx="1" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.5" />
+                                <text x="3" y="5" textAnchor="middle" fontSize="3" fill="#1e293b" fontWeight="bold">D{i}</text>
+                            </g>
+                        ))}
+                    </g>
+                    
+                    {/* Analog Pin Headers - A0-A7 */}
+                    <g transform="translate(-55, 25)">
+                        {Array.from({length: 8}).map((_, i) => (
+                            <g key={`a${i}`} transform={`translate(${i * 8}, 0)`}>
+                                <rect x="0" y="0" width="6" height="8" rx="1" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.5" />
+                                <text x="3" y="5" textAnchor="middle" fontSize="3" fill="#1e293b" fontWeight="bold">A{i}</text>
+                            </g>
+                        ))}
+                    </g>
+                    
+                    {/* Power Pins */}
+                    <g transform="translate(-65, 0)">
+                        <rect x="0" y="-8" width="6" height="6" rx="1" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.5" />
+                        <text x="3" y="-3" textAnchor="middle" fontSize="3" fill="#1e293b" fontWeight="bold">5V</text>
+                        <rect x="0" y="5" width="6" height="6" rx="1" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.5" />
+                        <text x="3" y="10" textAnchor="middle" fontSize="3" fill="#1e293b" fontWeight="bold">GND</text>
+                    </g>
+                    
+                    {/* Power Pins (Right Side) */}
+                    <g transform="translate(59, 0)">
+                        <rect x="0" y="-8" width="6" height="6" rx="1" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.5" />
+                        <text x="3" y="-3" textAnchor="middle" fontSize="3" fill="#1e293b" fontWeight="bold">3V</text>
+                        <rect x="0" y="5" width="6" height="6" rx="1" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.5" />
+                        <text x="3" y="10" textAnchor="middle" fontSize="3" fill="#1e293b" fontWeight="bold">GND</text>
+                    </g>
+                    
+                    {/* Main Chip */}
+                    <rect x="-10" y="-5" width="20" height="10" rx="2" fill="#222222" stroke="#000000" strokeWidth="1" />
+                    <text x="0" y="1" textAnchor="middle" fontSize="3" fill="#aaaaaa" fontWeight="bold">ATMEGA</text>
+                    
+                    {/* Logo */}
+                    <text x="0" y="-12" textAnchor="middle" fontSize="4" fill="#ffffff" fontWeight="bold">ARDUINO</text>
+                    <text x="0" y="-7" textAnchor="middle" fontSize="3" fill="#ffffff">UNO</text>
                 </g>
                 {localComponents.map((comp: any) => (
                     <g key={comp.id} transform={`translate(${comp.x}, ${comp.y}) rotate(${comp.rotation || 0} 10 10)`} ref={(el) => { if(el) componentRefs.current.set(comp.id, el); else componentRefs.current.delete(comp.id); }} onPointerDown={(e) => { e.stopPropagation(); setDraggingCompId(comp.id); dragOffset.current = { x: e.nativeEvent.offsetX - comp.x, y: e.nativeEvent.offsetY - comp.y }; (e.target as Element).setPointerCapture(e.pointerId); }} onContextMenu={(e) => handleContextMenu(e, comp.id)} className="cursor-grab active:cursor-grabbing hover:scale-110 transition-transform">
                         <rect x="0" y="0" width="20" height="20" rx="4" fill="#334155" stroke="rgba(255,255,255,0.2)" />
-                        {comp.type.startsWith('LED') && <circle className="light-part" cx="10" cy="10" r="6" fill={hardwareState.pins[comp.pin] ? "#ef4444" : "#1e293b"} />}
-                        {comp.type === 'SERVO' && <rect className="servo-arm" x="2" y="8" width="16" height="4" fill="#fbbf24" rx="2" />}
-                        {comp.type === 'FAN' && <g className="fan-blades" transform="translate(10, 10)"><path d="M0 -8 L3 -3 L8 0 L3 3 L0 8 L-3 3 L-8 0 L-3 -3 Z" fill="#22d3ee" /></g>}
-                        {comp.type === 'BUTTON' && <circle cx="10" cy="10" r="6" fill="#ef4444" stroke="#991b1b" strokeWidth="2" className="cursor-pointer" onPointerDown={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin, true); }} onPointerUp={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin, false); }} onPointerLeave={(e) => { onHardwareInput?.(comp.pin, false); }} />}
-                        {comp.type === 'LCD' && <><rect x="-5" y="0" width="30" height="20" fill="#22c55e" opacity="0.8" rx="2" /><text x="10" y="12" fontSize="4" textAnchor="middle" fontFamily="monospace">LCD</text></>}
-                        {comp.type === 'OLED' && <><rect x="-5" y="0" width="30" height="20" fill="#000" stroke="#333" rx="2" /><text x="10" y="12" fontSize="4" fill="#22d3ee" textAnchor="middle" fontFamily="monospace">OLED</text></>}
-                        {comp.type === 'SPEAKER' && <path d="M2 7 L6 7 L10 3 L10 17 L6 13 L2 13 Z" fill="#94a3b8" stroke="none" transform="translate(2,0)"/>}
-                        {comp.type === 'VIBRATION' && <circle cx="10" cy="10" r="4" fill="#d8b4fe" />}
-                        {comp.type === 'SEVEN_SEGMENT' && <g transform="translate(2, 2) scale(0.8)"><polygon points="2,2 8,2 9,3 8,4 2,4 1,3" fill="#ef4444" className="seg-0" opacity="0.1"/><polygon points="8,4 9,3 10,4 10,10 9,11 8,10" fill="#ef4444" className="seg-1" opacity="0.1"/><polygon points="8,12 9,11 10,12 10,18 9,19 8,18" fill="#ef4444" className="seg-2" opacity="0.1"/><polygon points="2,18 8,18 9,19 8,20 2,20 1,19" fill="#ef4444" className="seg-3" opacity="0.1"/><polygon points="0,12 1,11 2,12 2,18 1,19 0,18" fill="#ef4444" className="seg-4" opacity="0.1"/><polygon points="0,4 1,3 2,4 2,10 1,11 0,10" fill="#ef4444" className="seg-5" opacity="0.1"/><polygon points="2,10 8,10 9,11 8,12 2,12 1,11" fill="#ef4444" className="seg-6" opacity="0.1"/></g>}
-                        {comp.type === 'POTENTIOMETER' && <><circle cx="10" cy="10" r="8" fill="#333" /><circle cx="10" cy="10" r="6" fill="#555" /><rect className="pot-knob" x="9" y="4" width="2" height="6" fill="white" rx="1" transform="rotate(-135 10 10)" /></>}
-                        {comp.type === 'SWITCH_SLIDE' && <><rect x="2" y="5" width="16" height="10" fill="#1e293b" rx="2" /><circle className="switch-knob" cx="6" cy="10" r="4" fill="#94a3b8" onClick={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin, !hardwareState.pins[comp.pin]); }} /></>}
-                        {comp.type === 'KEYPAD' && <g transform="translate(-2, -2) scale(0.3)">{[0,1,2,3].map(r => [0,1,2,3].map(c => (<rect key={`${r}-${c}`} x={c*20} y={r*20} width="18" height="18" rx="2" fill="#333" />)))}</g>}
-                        <text x="10" y="30" textAnchor="middle" fontSize="6" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>P{comp.pin}</text>
+                        {comp.type.startsWith('LED') && (
+                            <g className="led-component">
+                                {/* LED Bulb */}
+                                <ellipse cx="10" cy="11" rx="6" ry="8" fill={
+                                    hardwareState.pins[comp.pin] ?
+                                    (comp.type === 'LED_RED' ? '#f87171' :
+                                     comp.type === 'LED_GREEN' ? '#4ade80' :
+                                     comp.type === 'LED_BLUE' ? '#60a5fa' :
+                                     comp.type === 'LED_YELLOW' ? '#facc15' :
+                                     comp.type === 'LED_ORANGE' ? '#fb923c' :
+                                     comp.type === 'LED_WHITE' ? '#f3f4f6' : '#f87171')
+                                    :
+                                    (comp.type === 'LED_RED' ? '#450a0a' :
+                                     comp.type === 'LED_GREEN' ? '#064e3b' :
+                                     comp.type === 'LED_BLUE' ? '#1e3a8a' :
+                                     comp.type === 'LED_YELLOW' ? '#713f12' :
+                                     comp.type === 'LED_ORANGE' ? '#7c2d12' :
+                                     comp.type === 'LED_WHITE' ? '#374151' : '#374151')
+                                } stroke="#6b7280" strokeWidth="1" />
+                                
+                                {/* LED Bulb Highlight */}
+                                <ellipse cx="8" cy="8" rx="2" ry="3" fill="#ffffff" opacity="0.4" />
+                                
+                                {/* LED Base */}
+                                <rect x="7" y="17" width="6" height="4" fill="#4b5563" stroke="#374151" strokeWidth="0.5" />
+                                
+                                {/* Two Wire Pins */}
+                                <line x1="6" y1="19" x2="2" y2="22" stroke="#9ca3af" strokeWidth="1.5" />
+                                <line x1="14" y1="19" x2="18" y2="22" stroke="#9ca3af" strokeWidth="1.5" />
+                                
+                                {/* LED Glow effect when on */}
+                                {hardwareState.pins[comp.pin] && (
+                                    <ellipse cx="10" cy="11" rx="9" ry="11" fill="none" stroke={
+                                        comp.type === 'LED_RED' ? '#f87171' :
+                                        comp.type === 'LED_GREEN' ? '#4ade80' :
+                                        comp.type === 'LED_BLUE' ? '#60a5fa' :
+                                        comp.type === 'LED_YELLOW' ? '#facc15' :
+                                        comp.type === 'LED_ORANGE' ? '#fb923c' :
+                                        comp.type === 'LED_WHITE' ? '#e5e7eb' : '#f87171'
+                                    } strokeWidth="2" opacity="0.5" className="led-glow" />
+                                )}
+                            </g>
+                        )}
+                        {comp.type === 'SERVO' && (
+                            <g className="servo-component">
+                                {/* Servo Body */}
+                                <rect x="2" y="4" width="16" height="12" rx="2" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Servo Horn */}
+                                <g transform={`rotate(${hardwareState.servoAngle - 90} 10 10)`}>
+                                    <rect className="servo-arm" x="9" y="2" width="2" height="8" fill="#9ca3af" stroke="#6b7280" strokeWidth="0.5" />
+                                    <circle cx="10" cy="10" r="1.5" fill="#4b5563" />
+                                </g>
+                                
+                                {/* Servo Label */}
+                                <text x="10" y="12" textAnchor="middle" fontSize="3" fill="#ffffff" fontWeight="bold">SERVO</text>
+                            </g>
+                        )}
+                        {comp.type === 'FAN' && (
+                            <g className="fan-component">
+                                {/* Fan Housing */}
+                                <circle cx="10" cy="10" r="9" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Fan Blades - Animated when active */}
+                                <g className="fan-blades" transform={`rotate(${hardwareState.fanSpeed > 0 ? Date.now() * 0.1 * (hardwareState.fanSpeed/100) : 0} 10 10)`}>
+                                    <path d="M 10 2 Q 18 4 10 10 Q 18 8 10 18 Q 2 8 10 10 Q 2 4 10 2" fill="#93c5fd" stroke="#60a5fa" strokeWidth="0.5" />
+                                    <path d="M 2 10 Q 4 2 10 10 Q 4 18 10 10 Q 18 18 10 10 Q 18 2 10 10" fill="#93c5fd" stroke="#60a5fa" strokeWidth="0.5" />
+                                </g>
+                                
+                                {/* Fan Center Hub */}
+                                <circle cx="10" cy="10" r="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+                                
+                                {/* Fan Label */}
+                                <text x="10" y="15" textAnchor="middle" fontSize="3" fill="#ffffff" fontWeight="bold">FAN</text>
+                            </g>
+                        )}
+                        {comp.type === 'MOTOR_DC' && (
+                            <g className="motor-dc-component">
+                                {/* Motor Body */}
+                                <rect x="2" y="4" width="16" height="12" rx="6" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Motor Shaft - Rotates when active */}
+                                <g transform={`rotate(${hardwareState.pins[comp.pin] ? Date.now() * 0.2 * (hardwareState.fanSpeed/100 || 1) : 0} 10 10)`}>
+                                    <rect x="9" y="2" width="2" height="4" fill="#9ca3af" stroke="#6b7280" strokeWidth="0.5" />
+                                    <circle cx="10" cy="10" r="1.5" fill="#4b5563" />
+                                </g>
+                                
+                                {/* Motor Label */}
+                                <text x="10" y="12" textAnchor="middle" fontSize="3" fill="#ffffff" fontWeight="bold">MOTOR</text>
+                            </g>
+                        )}
+                        {comp.type === 'BUTTON' && (
+                            <g className="button-component">
+                                {/* Button Outer Ring */}
+                                <circle cx="10" cy="10" r="8" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Button Base */}
+                                <circle cx="10" cy="10" r="6" fill="#6b7280" stroke="#4b5563" strokeWidth="1" />
+                                
+                                {/* Button Cap - changes when pressed */}
+                                <circle cx="10" cy="10" r={hardwareState.pins[comp.pin] ? "4" : "5"} 
+                                      fill={hardwareState.pins[comp.pin] ? "#dc2626" : "#f87171"} 
+                                      stroke="#b91c1c" strokeWidth="1" 
+                                      className="cursor-pointer" 
+                                      onPointerDown={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin, true); }} 
+                                      onPointerUp={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin, false); }} 
+                                      onPointerLeave={(e) => { onHardwareInput?.(comp.pin, false); }} />
+                                
+                                {/* Button Highlight */}
+                                <circle cx="8" cy="8" r="1.5" fill="#ffffff" opacity={hardwareState.pins[comp.pin] ? "0.3" : "0.5"} />
+                            </g>
+                        )}
+                        {comp.type === 'LCD' && (
+                            <g className="lcd-component">
+                                {/* LCD Screen Border */}
+                                <rect x="-5" y="0" width="30" height="20" rx="3" fill="#1f2937" stroke="#111827" strokeWidth="2" />
+                                
+                                {/* LCD Screen */}
+                                <rect x="-3" y="2" width="26" height="16" rx="1" fill="#0f766e" stroke="#047857" strokeWidth="1" />
+                                
+                                {/* LCD Content - Display Text */}
+                                <text x="10" y="8" fontSize="3" fill="#6ee7b7" fontFamily="monospace" textAnchor="middle">HELLO</text>
+                                <text x="10" y="14" fontSize="3" fill="#6ee7b7" fontFamily="monospace" textAnchor="middle">WORLD</text>
+                                
+                                {/* LCD Pin Markers */}
+                                {Array.from({length: 4}).map((_, i) => (
+                                    <rect key={i} x={-2 + i * 6} y="22" width="3" height="4" rx="0.5" fill="#9ca3af" stroke="#6b7280" strokeWidth="0.5" />
+                                ))}
+                            </g>
+                        )}
+                        {comp.type === 'OLED' && (
+                            <g className="oled-component">
+                                {/* OLED Screen Border */}
+                                <rect x="-5" y="0" width="30" height="20" rx="3" fill="#1f2937" stroke="#111827" strokeWidth="2" />
+                                
+                                {/* OLED Screen - Black when off, blue when on */}
+                                <rect x="-3" y="2" width="26" height="16" rx="1" fill={hardwareState.pins[comp.pin] ? "#1e40af" : "#000000"} stroke="#1d4ed8" strokeWidth="1" />
+                                
+                                {/* OLED Content - Sample Text */}
+                                <text x="10" y="8" fontSize="3" fill={hardwareState.pins[comp.pin] ? "#dbeafe" : "#333333"} fontFamily="monospace" textAnchor="middle">OLED</text>
+                                <text x="10" y="14" fontSize="3" fill={hardwareState.pins[comp.pin] ? "#dbeafe" : "#333333"} fontFamily="monospace" textAnchor="middle">DISP</text>
+                                
+                                {/* OLED Pin Markers */}
+                                {Array.from({length: 4}).map((_, i) => (
+                                    <rect key={`oled-${i}`} x={-2 + i * 6} y="22" width="3" height="4" rx="0.5" fill="#9ca3af" stroke="#6b7280" strokeWidth="0.5" />
+                                ))}
+                            </g>
+                        )}
+                        {comp.type === 'SPEAKER' && (
+                            <g className="speaker-component">
+                                {/* Speaker Grill */}
+                                <rect x="3" y="3" width="14" height="14" rx="2" fill="#1f2937" stroke="#111827" strokeWidth="1" />
+                                
+                                {/* Speaker Grille Pattern */}
+                                {Array.from({length: 5}).map((_, i) => (
+                                    <g key={i}>
+                                        <line x1="4" y1={5 + i*2} x2="16" y2={5 + i*2} stroke="#374151" strokeWidth="0.5" />
+                                    </g>
+                                ))}
+                                
+                                {/* Speaker Cone */}
+                                <circle cx="10" cy="10" r="3" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Sound Waves - when active */}
+                                {hardwareState.pins[comp.pin] && (
+                                    <g>
+                                        <circle cx="18" cy="10" r="2" fill="none" stroke="#94a3b8" strokeWidth="1" opacity="0.7" className="sound-wave" />
+                                        <circle cx="18" cy="10" r="4" fill="none" stroke="#94a3b8" strokeWidth="1" opacity="0.5" className="sound-wave" />
+                                        <circle cx="18" cy="10" r="6" fill="none" stroke="#94a3b8" strokeWidth="1" opacity="0.3" className="sound-wave" />
+                                    </g>
+                                )}
+                                
+                                {/* Speaker Label */}
+                                <text x="10" y="18" textAnchor="middle" fontSize="3" fill="#ffffff" fontWeight="bold">SPKR</text>
+                            </g>
+                        )}
+                        {comp.type === 'BUZZER' && (
+                            <g className="buzzer-component">
+                                {/* Buzzer Body */}
+                                <circle cx="10" cy="10" r="8" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Buzzer Symbol */}
+                                <path d="M 6 8 Q 10 6 14 8 M 6 12 Q 10 14 14 12" stroke="#fbbf24" strokeWidth="1.5" fill="none" />
+                                
+                                {/* Sound Waves - when active */}
+                                {hardwareState.pins[comp.pin] && (
+                                    <g>
+                                        <circle cx="18" cy="10" r="2" fill="none" stroke="#fbbf24" strokeWidth="1" opacity="0.7" className="sound-wave" />
+                                        <circle cx="18" cy="10" r="4" fill="none" stroke="#fbbf24" strokeWidth="1" opacity="0.5" className="sound-wave" />
+                                        <circle cx="18" cy="10" r="6" fill="none" stroke="#fbbf24" strokeWidth="1" opacity="0.3" className="sound-wave" />
+                                    </g>
+                                )}
+                                
+                                {/* Buzzer Label */}
+                                <text x="10" y="18" textAnchor="middle" fontSize="3" fill="#ffffff" fontWeight="bold">BUZZ</text>
+                            </g>
+                        )}
+                        {comp.type === 'VIBRATION' && (
+                            <g className="vibration-component">
+                                {/* Vibration Motor Body */}
+                                <rect x="4" y="6" width="12" height="8" rx="4" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Vibration Effect - when active */}
+                                {hardwareState.pins[comp.pin] && (
+                                    <g>
+                                        <path d="M 2 8 Q 4 6 6 8 T 10 8" stroke="#d8b4fe" strokeWidth="1" fill="none" opacity="0.7" className="vibration-line" />
+                                        <path d="M 2 12 Q 4 14 6 12 T 10 12" stroke="#d8b4fe" strokeWidth="1" fill="none" opacity="0.7" className="vibration-line" />
+                                    </g>
+                                )}
+                                
+                                {/* Vibration Label */}
+                                <text x="10" y="17" textAnchor="middle" fontSize="3" fill="#ffffff" fontWeight="bold">VIB</text>
+                            </g>
+                        )}
+                        {comp.type === 'SEVEN_SEGMENT' && (
+                            <g className="seven-segment-component" transform="translate(2, 2) scale(0.8)">
+                                {/* Seven Segment Display Frame */}
+                                <rect x="0" y="0" width="12" height="22" rx="2" fill="#1f2937" stroke="#111827" strokeWidth="1" />
+                                
+                                {/* Individual Segments */}
+                                <polygon points="2,2 8,2 9,3 8,4 2,4 1,3" fill="#ef4444" className="seg-0" opacity={hardwareState.sevenSegmentValue === 0 || hardwareState.sevenSegmentValue === 1 || hardwareState.sevenSegmentValue === 2 || hardwareState.sevenSegmentValue === 3 || hardwareState.sevenSegmentValue === 4 || hardwareState.sevenSegmentValue === 7 || hardwareState.sevenSegmentValue === 8 || hardwareState.sevenSegmentValue === 9 ? "1" : "0.2"}/>
+                                <polygon points="8,4 9,3 10,4 10,10 9,11 8,10" fill="#ef4444" className="seg-1" opacity={hardwareState.sevenSegmentValue === 0 || hardwareState.sevenSegmentValue === 1 || hardwareState.sevenSegmentValue === 2 || hardwareState.sevenSegmentValue === 3 || hardwareState.sevenSegmentValue === 6 || hardwareState.sevenSegmentValue === 7 || hardwareState.sevenSegmentValue === 8 || hardwareState.sevenSegmentValue === 9 ? "1" : "0.2"}/>
+                                <polygon points="8,12 9,11 10,12 10,18 9,19 8,18" fill="#ef4444" className="seg-2" opacity={hardwareState.sevenSegmentValue === 0 || hardwareState.sevenSegmentValue === 1 || hardwareState.sevenSegmentValue === 3 || hardwareState.sevenSegmentValue === 4 || hardwareState.sevenSegmentValue === 5 || hardwareState.sevenSegmentValue === 6 || hardwareState.sevenSegmentValue === 8 || hardwareState.sevenSegmentValue === 9 ? "1" : "0.2"}/>
+                                <polygon points="2,18 8,18 9,19 8,20 2,20 1,19" fill="#ef4444" className="seg-3" opacity={hardwareState.sevenSegmentValue === 0 || hardwareState.sevenSegmentValue === 2 || hardwareState.sevenSegmentValue === 3 || hardwareState.sevenSegmentValue === 5 || hardwareState.sevenSegmentValue === 6 || hardwareState.sevenSegmentValue === 8 || hardwareState.sevenSegmentValue === 9 ? "1" : "0.2"}/>
+                                <polygon points="0,12 1,11 2,12 2,18 1,19 0,18" fill="#ef4444" className="seg-4" opacity={hardwareState.sevenSegmentValue === 0 || hardwareState.sevenSegmentValue === 2 || hardwareState.sevenSegmentValue === 4 || hardwareState.sevenSegmentValue === 5 || hardwareState.sevenSegmentValue === 6 || hardwareState.sevenSegmentValue === 8 || hardwareState.sevenSegmentValue === 9 ? "1" : "0.2"}/>
+                                <polygon points="0,4 1,3 2,4 2,10 1,11 0,10" fill="#ef4444" className="seg-5" opacity={hardwareState.sevenSegmentValue === 0 || hardwareState.sevenSegmentValue === 4 || hardwareState.sevenSegmentValue === 5 || hardwareState.sevenSegmentValue === 6 || hardwareState.sevenSegmentValue === 8 || hardwareState.sevenSegmentValue === 9 ? "1" : "0.2"}/>
+                                <polygon points="2,10 8,10 9,11 8,12 2,12 1,11" fill="#ef4444" className="seg-6" opacity={hardwareState.sevenSegmentValue === 2 || hardwareState.sevenSegmentValue === 3 || hardwareState.sevenSegmentValue === 4 || hardwareState.sevenSegmentValue === 5 || hardwareState.sevenSegmentValue === 6 || hardwareState.sevenSegmentValue === 8 || hardwareState.sevenSegmentValue === 9 ? "1" : "0.2"}/>
+                                
+                                {/* Decimal Point */}
+                                <circle cx="10" cy="20" r="1" fill="#ef4444" opacity={hardwareState.pins[comp.pin] ? "1" : "0.2"}/>
+                            </g>
+                        )}
+                        {comp.type === 'POTENTIOMETER' && (
+                            <g className="potentiometer-component">
+                                {/* Potentiometer Body */}
+                                <circle cx="10" cy="10" r="8" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Potentiometer Label */}
+                                <text x="10" y="14" textAnchor="middle" fontSize="3" fill="#ffffff" fontWeight="bold">POT</text>
+                                
+                                {/* Potentiometer Knob - Rotates based on value */}
+                                <g transform={`rotate(${(hardwareState.potentiometerValue / 1023) * 270 - 135} 10 10)`}>
+                                    <rect className="pot-knob" x="9" y="4" width="2" height="6" fill="#f3f4f6" rx="1" />
+                                </g>
+                                
+                                {/* Potentiometer Value Display */}
+                                <text x="10" y="20" textAnchor="middle" fontSize="2.5" fill="#9ca3af" fontWeight="normal" className="pot-value">{Math.round(hardwareState.potentiometerValue)}</text>
+                            </g>
+                        )}
+                        {comp.type === 'SWITCH_SLIDE' && (
+                            <g className="switch-slide-component">
+                                {/* Switch Base */}
+                                <rect x="2" y="7" width="16" height="6" rx="3" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Switch Knob - moves based on state */}
+                                <circle className="switch-knob" 
+                                      cx={hardwareState.pins[comp.pin] ? "14" : "6"} 
+                                      cy="10" r="4" fill="#9ca3af" stroke="#6b7280" strokeWidth="1"
+                                      onClick={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin, !hardwareState.pins[comp.pin]); }} />
+                                
+                                {/* Position Labels */}
+                                <text x="4" y="6" fontSize="2.5" fill="#d1d5db">OFF</text>
+                                <text x="13" y="6" fontSize="2.5" fill="#d1d5db">ON</text>
+                            </g>
+                        )}
+                        {comp.type === 'KEYPAD' && (
+                            <g className="keypad-component" transform="translate(-2, -2) scale(0.3)">
+                                {/* Keypad Frame */}
+                                <rect x="0" y="0" width="80" height="80" rx="5" fill="#1f2937" stroke="#111827" strokeWidth="2" />
+                                
+                                {/* Keypad Buttons */}
+                                {[0,1,2,3].map(r => [0,1,2,3].map(c => (
+                                    <g key={`${r}-${c}`} transform={`translate(${c*20}, ${r*20})`}>
+                                        <rect x="0" y="0" width="18" height="18" rx="3" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                        <text x="9" y="12" textAnchor="middle" fontSize="8" fill="#f8fafc" fontWeight="bold">
+                                            {r*4 + c + 1 === 13 ? '*' : r*4 + c + 1 === 15 ? '#' : r*4 + c + 1 > 15 ? '' : r*4 + c + 1}
+                                        </text>
+                                    </g>
+                                )))}
+                                
+                                {/* Additional Keys */}
+                                <g transform="translate(0, 60)">
+                                    <rect x="0" y="0" width="18" height="18" rx="3" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                    <text x="9" y="12" textAnchor="middle" fontSize="8" fill="#f8fafc" fontWeight="bold">*</text>
+                                </g>
+                                <g transform="translate(40, 60)">
+                                    <rect x="0" y="0" width="18" height="18" rx="3" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                    <text x="9" y="12" textAnchor="middle" fontSize="8" fill="#f8fafc" fontWeight="bold">0</text>
+                                </g>
+                                <g transform="translate(60, 60)">
+                                    <rect x="0" y="0" width="18" height="18" rx="3" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                    <text x="9" y="12" textAnchor="middle" fontSize="8" fill="#f8fafc" fontWeight="bold">#</text>
+                                </g>
+                            </g>
+                        )}
+                        {comp.type === 'RGB_LED' && (
+                            <g className="rgb-led-component">
+                                {/* RGB LED Bulb */}
+                                <circle cx="10" cy="10" r="8" fill={
+                                    hardwareState.pins[comp.pin] ? 
+                                    (hardwareState.rgbLedColor || '#ff0000') : 
+                                    '#374151'
+                                } stroke="#6b7280" strokeWidth="1" />
+                                
+                                {/* RGB LED Highlight */}
+                                <circle cx="7" cy="7" r="2" fill="#ffffff" opacity="0.4" />
+                                
+                                {/* RGB LED Base */}
+                                <rect x="7" y="16" width="6" height="4" fill="#4b5563" stroke="#374151" strokeWidth="0.5" />
+                                
+                                {/* Two Wire Pins */}
+                                <line x1="6" y1="18" x2="2" y2="22" stroke="#9ca3af" strokeWidth="1.5" />
+                                <line x1="14" y1="18" x2="18" y2="22" stroke="#9ca3af" strokeWidth="1.5" />
+                                
+                                {/* RGB LED Glow effect when on */}
+                                {hardwareState.pins[comp.pin] && (
+                                    <circle cx="10" cy="10" r="11" fill="none" stroke={hardwareState.rgbLedColor || '#ff0000'} strokeWidth="2" opacity="0.5" className="led-glow" />
+                                )}
+                            </g>
+                        )}
+                        {comp.type === 'RGB_STRIP' && (
+                            <g className="rgb-strip-component">
+                                {/* RGB Strip - Multiple LEDs */}
+                                <rect x="2" y="6" width="16" height="8" rx="2" fill="#1f2937" stroke="#111827" strokeWidth="1" />
+                                
+                                {/* Individual LED Elements */}
+                                {Array.from({length: 5}).map((_, i) => (
+                                    <circle 
+                                        key={i} 
+                                        cx={4 + i * 3} 
+                                        cy="10" 
+                                        r="1.5" 
+                                        fill={hardwareState.pins[comp.pin] ? 
+                                            (i === 0 ? (hardwareState.rgbLedColor || '#ff0000') : 
+                                             i === 1 ? '#00ff00' : 
+                                             i === 2 ? '#0000ff' : 
+                                             i === 3 ? '#ffff00' : '#ff00ff') 
+                                            : '#374151'}
+                                    />
+                                ))}
+                                
+                                {/* RGB Strip Label */}
+                                <text x="10" y="18" textAnchor="middle" fontSize="2.5" fill="#9ca3af" fontWeight="normal">RGB STRIP</text>
+                            </g>
+                        )}
+                        {comp.type === 'LASER' && (
+                            <g className="laser-component">
+                                {/* Laser Diode Body */}
+                                <rect x="3" y="7" width="14" height="6" rx="3" fill="#1f2937" stroke="#111827" strokeWidth="1" />
+                                
+                                {/* Laser Lens */}
+                                <circle cx="10" cy="10" r="2" fill="#60a5fa" stroke="#3b82f6" strokeWidth="1" />
+                                
+                                {/* Laser Beam - when active */}
+                                {hardwareState.pins[comp.pin] && (
+                                    <g>
+                                        <line x1="12" y1="10" x2="25" y2="10" stroke="#ef4444" strokeWidth="1" strokeDasharray="2,2" className="laser-beam" />
+                                        <circle cx="25" cy="10" r="1" fill="#ef4444" className="laser-dot" />
+                                    </g>
+                                )}
+                                
+                                {/* Laser Label */}
+                                <text x="10" y="18" textAnchor="middle" fontSize="2.5" fill="#9ca3af" fontWeight="normal">LASER</text>
+                            </g>
+                        )}
+                        {comp.type === 'SWITCH_TOGGLE' && (
+                            <g className="switch-toggle-component">
+                                {/* Toggle Switch Base */}
+                                <rect x="4" y="7" width="12" height="6" rx="3" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Toggle Handle - moves based on state */}
+                                <rect 
+                                    x={hardwareState.pins[comp.pin] ? "12" : "4"} 
+                                    y="5" 
+                                    width="4" 
+                                    height="10" 
+                                    rx="2" 
+                                    fill="#9ca3af" 
+                                    stroke="#6b7280" 
+                                    strokeWidth="1"
+                                    className="cursor-pointer"
+                                    onClick={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin, !hardwareState.pins[comp.pin]); }}
+                                />
+                                
+                                {/* Position Labels */}
+                                <text x="3" y="9" fontSize="2.5" fill="#d1d5db">OFF</text>
+                                <text x="16" y="9" fontSize="2.5" fill="#d1d5db">ON</text>
+                            </g>
+                        )}
+                        {comp.type === 'SWITCH_DIP' && (
+                            <g className="switch-dip-component">
+                                {/* DIP Switch Pack */}
+                                <rect x="2" y="5" width="16" height="10" rx="2" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Individual DIP Switches */}
+                                {Array.from({length: 4}).map((_, i) => (
+                                    <g key={i}>
+                                        {/* Switch Base */}
+                                        <rect x={4 + i * 3} y="6" width="2" height="4" rx="1" fill="#6b7280" stroke="#4b5563" strokeWidth="0.5" />
+                                        
+                                        {/* Switch Toggle */}
+                                        <rect 
+                                            x={4 + i * 3} 
+                                            y={hardwareState.pins[comp.pin + i] ? "7" : "9"} 
+                                            width="2" 
+                                            height="1.5" 
+                                            rx="0.5" 
+                                            fill="#f3f4f6" 
+                                            className="cursor-pointer"
+                                            onClick={(e) => { e.stopPropagation(); onHardwareInput?.(comp.pin + i, !hardwareState.pins[comp.pin + i]); }}
+                                        />
+                                    </g>
+                                ))}
+                                
+                                {/* DIP Label */}
+                                <text x="10" y="18" textAnchor="middle" fontSize="2.5" fill="#9ca3af" fontWeight="normal">DIP</text>
+                            </g>
+                        )}
+                        {comp.type === 'SLIDE_POT' && (
+                            <g className="slide-pot-component">
+                                {/* Slide Pot Body */}
+                                <rect x="2" y="8" width="16" height="4" rx="2" fill="#4b5563" stroke="#374151" strokeWidth="1" />
+                                
+                                {/* Slide Knob - moves based on value */}
+                                <rect 
+                                    className="pot-knob" 
+                                    x={2 + (hardwareState.potentiometerValue / 1023) * 12} 
+                                    y="6" 
+                                    width="3" 
+                                    height="8" 
+                                    rx="1" 
+                                    fill="#f3f4f6" 
+                                />
+                                
+                                {/* Slide Pot Label */}
+                                <text x="10" y="18" textAnchor="middle" fontSize="2.5" fill="#9ca3af" fontWeight="normal">SLIDE POT</text>
+                                
+                                {/* Slide Pot Value Display */}
+                                <text x="10" y="22" textAnchor="middle" fontSize="2" fill="#9ca3af" fontWeight="normal" className="pot-value">{Math.round(hardwareState.potentiometerValue)}</text>
+                            </g>
+                        )}
+                        {comp.type === 'ULTRASONIC' && (
+                            <g className="ultrasonic-component" style={{filter: hardwareState.distance > 0 ? "url(#ultra-glow)" : "none"}}>
+                                {/* Ultrasonic Sensor Base */}
+                                <rect x="-50" y="-25" width="100" height="50" rx="4" fill="#004d99" stroke="#003366" />
+                                
+                                {/* Transmitter Circle */}
+                                <g transform="translate(-25, 0)">
+                                    <circle r="18" fill="#94a3b8" stroke="#475569" strokeWidth="2" />
+                                    <circle r="14" fill="#1e293b" />
+                                    <rect x="-10" y="-1" width="20" height="2" fill="#475569" opacity="0.5" />
+                                    <rect x="-1" y="-10" width="2" height="20" fill="#475569" opacity="0.5" />
+                                </g>
+                                
+                                {/* Receiver Circle */}
+                                <g transform="translate(25, 0)">
+                                    <circle r="18" fill="#94a3b8" stroke="#475569" strokeWidth="2" />
+                                    <circle r="14" fill="#1e293b" />
+                                    <rect x="-10" y="-1" width="20" height="2" fill="#475569" opacity="0.5" />
+                                    <rect x="-1" y="-10" width="2" height="20" fill="#475569" opacity="0.5" />
+                                </g>
+                                
+                                {/* Distance Indicator LEDs */}
+                                <rect x="-15" y="25" width="4" height="10" fill="#eab308" />
+                                <rect x="-5" y="25" width="4" height="10" fill="#eab308" />
+                                <rect x="5" y="25" width="4" height="10" fill="#eab308" />
+                                <rect x="15" y="25" width="4" height="10" fill="#eab308" />
+                                
+                                {/* Component Label */}
+                                <text x="0" y="-10" fill="white" fontSize="6" textAnchor="middle" opacity="0.5">HC-SR04</text>
+                                
+                                {/* Sonar Wave Animation */}
+                                {hardwareState.distance > 0 && (
+                                    <path 
+                                        d="M -25 0 Q 0 -50 25 0" 
+                                        fill="none" 
+                                        stroke="#3b82f6" 
+                                        strokeWidth="2" 
+                                        strokeDasharray="4 2"
+                                    >
+                                        <animate attributeName="stroke-dashoffset" from="20" to="0" dur="1s" repeatCount="indefinite" />
+                                    </path>
+                                )}
+                            </g>
+                        )}
+                        {comp.type === 'MOTION' && (
+                            <g className="motion-component" style={{filter: hardwareState.motionDetected ? "url(#ultra-glow)" : "none"}}>
+                                {/* Motion Sensor Base */}
+                                <rect x="-35" y="-35" width="70" height="70" rx="4" fill="#2D5A27" />
+                                
+                                {/* Radar Circles */}
+                                <circle cx="0" cy="0" r="28" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" transform="translate(10, 10)" />
+                                
+                                {/* Radar Lines */}
+                                {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(angle => (
+                                    <line 
+                                        key={angle}
+                                        x1="0" y1="0" x2="28" y2="0" 
+                                        stroke="#cbd5e1" 
+                                        strokeWidth="0.5" 
+                                        transform={`translate(10, 10) rotate(${angle})`} 
+                                    />
+                                ))}
+                                
+                                {/* Motion Detection Indicator */}
+                                {hardwareState.motionDetected && (
+                                    <g transform="translate(10, 10)">
+                                        <circle cx="0" cy="0" r="20" fill="none" stroke="#ef4444" strokeWidth="2" opacity="0.7">
+                                            <animate attributeName="r" values="20;25;20" dur="1s" repeatCount="indefinite" />
+                                            <animate attributeName="opacity" values="0.7;0.3;0.7" dur="1s" repeatCount="indefinite" />
+                                        </circle>
+                                    </g>
+                                )}
+                                
+                                {/* Component Label */}
+                                <text x="10" y="45" textAnchor="middle" fontSize="6" fill="white" opacity="0.5">PIR SENSOR</text>
+                            </g>
+                        )}
+                        {/* Microcontroller visualizations */}
+                        {comp.type === 'ARDUINO_UNO' && (
+                          <g>
+                            {/* Arduino Uno Board */}
+                            <rect x="-8" y="-12" width="40" height="50" rx="3" fill="#0066cc" stroke="#004499" strokeWidth="1.5" />
+                            <rect x="-6" y="-10" width="36" height="8" rx="2" fill="#333333" />
+                            <rect x="-6" y="34" width="36" height="8" rx="2" fill="#333333" />
+                            
+                            {/* Silver Pin Headers - Digital Pins 0-13 */}
+                            {Array.from({length: 14}).map((_, i) => (
+                              <rect key={`d${i}`} x={-6 + i * 2.5} y="-14" width="1.5" height="4" rx="0.3" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.2" />
+                            ))}
+                            
+                            {/* Silver Pin Headers - Analog Pins A0-A7 */}
+                            {Array.from({length: 8}).map((_, i) => (
+                              <rect key={`a${i}`} x={-6 + i * 2.5} y="42" width="1.5" height="4" rx="0.3" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.2" />
+                            ))}
+                            
+                            {/* Power Pins */}
+                            <rect x="-10" y="18" width="2" height="4" rx="0.3" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.2" />
+                            <rect x="-10" y="26" width="2" height="4" rx="0.3" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.2" />
+                            <rect x="32" y="18" width="2" height="4" rx="0.3" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.2" />
+                            <rect x="32" y="26" width="2" height="4" rx="0.3" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.2" />
+                            
+                            {/* Status LEDs */}
+                            <circle cx="-2" cy="0" r="1.2" fill="#ff0000" />
+                            <circle cx="1" cy="0" r="1.2" fill="#ff7f00" />
+                            <circle cx="4" cy="0" r="1.2" fill="#ffff00" />
+                            <circle cx="7" cy="0" r="1.2" fill="#00ff00" />
+                            
+                            {/* Chip */}
+                            <rect x="8" y="12" width="12" height="8" rx="1" fill="#222222" stroke="#000000" strokeWidth="0.5" />
+                            <text x="14" y="17" fontSize="2" fill="#aaaaaa" textAnchor="middle">ATMEGA</text>
+                            
+                            <text x="12" y="5" fontSize="3" fill="#ffffff" textAnchor="middle" fontWeight="bold">ARDUINO</text>
+                            <text x="12" y="9" fontSize="2.5" fill="#ffffff" textAnchor="middle">UNO</text>
+                            <text x="12" y="48" textAnchor="middle" fontSize="2" fill="#dddddd">D{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'ARDUINO_NANO' && (
+                          <g>
+                            <rect x="-3" y="-6" width="20" height="24" rx="1" fill="#0071a0" stroke="#005a82" strokeWidth="1" />
+                            <rect x="-1" y="-5" width="16" height="3" fill="#cccccc" />
+                            <rect x="-1" y="15" width="16" height="3" fill="#cccccc" />
+                            <circle cx="2" cy="-2" r="1" fill="#ff0000" />
+                            <circle cx="5" cy="-2" r="1" fill="#ff7f00" />
+                            <circle cx="8" cy="-2" r="1" fill="#ffff00" />
+                            <circle cx="11" cy="-2" r="1" fill="#00ff00" />
+                            <text x="10" y="8" fontSize="2.5" fill="#ffffff" textAnchor="middle">NANO</text>
+                            <text x="10" y="22" textAnchor="middle" fontSize="4" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>D{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'ARDUINO_MEGA' && (
+                          <g>
+                            <rect x="-7" y="-10" width="40" height="44" rx="2" fill="#0071a0" stroke="#005a82" strokeWidth="1" />
+                            <rect x="-4" y="-8" width="34" height="5" fill="#cccccc" />
+                            <rect x="-4" y="28" width="34" height="5" fill="#cccccc" />
+                            <circle cx="2" cy="-4" r="1.5" fill="#ff0000" />
+                            <circle cx="6" cy="-4" r="1.5" fill="#ff7f00" />
+                            <circle cx="10" cy="-4" r="1.5" fill="#ffff00" />
+                            <circle cx="14" cy="-4" r="1.5" fill="#00ff00" />
+                            <text x="13" y="15" fontSize="4" fill="#ffffff" textAnchor="middle">MEGA</text>
+                            <text x="13" y="38" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>D{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'ESP32_DEVKIT' && (
+                          <g>
+                            {/* ESP32 DevKit Board */}
+                            <rect x="-12" y="-15" width="44" height="50" rx="4" fill="#ff4444" stroke="#cc0000" strokeWidth="2" />
+                            <rect x="-10" y="-12" width="40" height="8" rx="2" fill="#222222" />
+                            <rect x="-10" y="30" width="40" height="8" rx="2" fill="#222222" />
+                            
+                            {/* Silver Pin Headers - Left Column */}
+                            {Array.from({length: 12}).map((_, i) => (
+                              <rect key={`l${i}`} x="-14" y={-8 + i * 3.5} width="2" height="1.5" rx="0.2" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.15" />
+                            ))}
+                            
+                            {/* Silver Pin Headers - Right Column */}
+                            {Array.from({length: 12}).map((_, i) => (
+                              <rect key={`r${i}`} x="32" y={-8 + i * 3.5} width="2" height="1.5" rx="0.2" fill="#c0c0c0" stroke="#a0a0a0" strokeWidth="0.15" />
+                            ))}
+                            
+                            {/* USB Connector */}
+                            <rect x="15" y="-18" width="8" height="3" rx="1" fill="#333333" stroke="#000000" strokeWidth="0.5" />
+                            
+                            {/* Reset Button */}
+                            <circle cx="25" cy="-12" r="1.5" fill="#666666" stroke="#333333" strokeWidth="0.3" />
+                            
+                            {/* Status LEDs */}
+                            <circle cx="-6" cy="-4" r="0.8" fill="#ff0000" />
+                            <circle cx="-2" cy="-4" r="0.8" fill="#00ff00" />
+                            <circle cx="2" cy="-4" r="0.8" fill="#0000ff" />
+                            
+                            {/* ESP32-WROOM Module */}
+                            <rect x="-4" y="8" width="24" height="12" rx="2" fill="#111111" stroke="#000000" strokeWidth="0.5" />
+                            <text x="8" y="15" fontSize="2" fill="#aaaaaa" textAnchor="middle">ESP32-WROOM</text>
+                            
+                            <text x="8" y="2" fontSize="3" fill="#ffffff" textAnchor="middle" fontWeight="bold">ESP32</text>
+                            <text x="8" y="6" fontSize="2" fill="#dddddd" textAnchor="middle">DEVKIT</text>
+                            <text x="8" y="45" textAnchor="middle" fontSize="2" fill="#dddddd">GPIO{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'ESP8266' && (
+                          <g>
+                            <rect x="-4" y="-6" width="24" height="28" rx="2" fill="#e67e22" stroke="#d35400" strokeWidth="1" />
+                            <rect x="-1" y="-4" width="18" height="3" fill="#cccccc" />
+                            <rect x="-1" y="19" width="18" height="3" fill="#cccccc" />
+                            <circle cx="3" cy="-1" r="1" fill="#ffffff" />
+                            <circle cx="7" cy="-1" r="1" fill="#ffffff" />
+                            <circle cx="11" cy="-1" r="1" fill="#ffffff" />
+                            <text x="12" y="10" fontSize="3" fill="#ffffff" textAnchor="middle">ESP</text>
+                            <text x="12" y="26" textAnchor="middle" fontSize="4" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>G{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'NODEMCU' && (
+                          <g>
+                            <rect x="-5" y="-8" width="30" height="36" rx="2" fill="#e74c3c" stroke="#c0392b" strokeWidth="1" />
+                            <rect x="-2" y="-6" width="24" height="4" fill="#cccccc" />
+                            <rect x="-2" y="22" width="24" height="4" fill="#cccccc" />
+                            <circle cx="2" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="6" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="10" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="14" cy="0" r="1.5" fill="#ffffff" />
+                            <rect x="4" y="-4" width="12" height="8" fill="#ffffff" />
+                            <text x="10" y="12" fontSize="3" fill="#ffffff" textAnchor="middle">NODE</text>
+                            <text x="10" y="30" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>D{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'RASPBERRY_PI_ZERO' && (
+                          <g>
+                            <rect x="-5" y="-8" width="30" height="36" rx="2" fill="#cc0000" stroke="#990000" strokeWidth="1" />
+                            <rect x="-2" y="-6" width="24" height="4" fill="#cccccc" />
+                            <rect x="-2" y="22" width="24" height="4" fill="#cccccc" />
+                            <circle cx="2" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="6" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="10" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="14" cy="0" r="1.5" fill="#ffffff" />
+                            <rect x="4" y="-4" width="12" height="8" fill="#ffffff" />
+                            <text x="10" y="12" fontSize="3" fill="#ffffff" textAnchor="middle">RPi0</text>
+                            <text x="10" y="30" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>GPIO{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'RASPBERRY_PI_4' && (
+                          <g>
+                            <rect x="-6" y="-10" width="36" height="44" rx="2" fill="#cc0000" stroke="#990000" strokeWidth="1" />
+                            <rect x="-3" y="-8" width="30" height="5" fill="#cccccc" />
+                            <rect x="-3" y="28" width="30" height="5" fill="#cccccc" />
+                            <circle cx="2" cy="-4" r="1.5" fill="#ffffff" />
+                            <circle cx="6" cy="-4" r="1.5" fill="#ffffff" />
+                            <circle cx="10" cy="-4" r="1.5" fill="#ffffff" />
+                            <circle cx="14" cy="-4" r="1.5" fill="#ffffff" />
+                            <rect x="5" y="-5" width="10" height="10" fill="#ffffff" />
+                            <text x="15" y="15" fontSize="3" fill="#ffffff" textAnchor="middle">RPi4</text>
+                            <text x="15" y="38" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>GPIO{comp.pin}</text>
+                          </g>
+                        )}
+                        {comp.type === 'MICROBIT' && (
+                          <g>
+                            <rect x="-5" y="-8" width="30" height="36" rx="3" fill="#007acc" stroke="#005ca3" strokeWidth="1" />
+                            <rect x="-2" y="-6" width="24" height="4" fill="#cccccc" />
+                            <rect x="-2" y="22" width="24" height="4" fill="#cccccc" />
+                            <circle cx="2" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="6" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="10" cy="0" r="1.5" fill="#ffffff" />
+                            <circle cx="14" cy="0" r="1.5" fill="#ffffff" />
+                            <rect x="3" y="-4" width="14" height="8" fill="#ffff00" />
+                            <text x="10" y="12" fontSize="3" fill="#ffffff" textAnchor="middle">µBIT</text>
+                            <text x="10" y="30" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>P{comp.pin}</text>
+                          </g>
+                        )}
+                        {!isMicrocontroller(comp.type) && (
+                          <text x="10" y="30" textAnchor="middle" fontSize="6" fill="white" fontWeight="bold" style={{textShadow: '0 1px 2px black'}}>P{comp.pin}</text>
+                        )}
                     </g>
                 ))}
             </svg>

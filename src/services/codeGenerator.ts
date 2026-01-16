@@ -154,6 +154,28 @@ export const generateCode = (commands: CommandBlock[], mode: AppMode): string =>
       case CommandType.LOG_DATA:
         code += `${i}${mode === AppMode.HARDWARE ? 'Serial.println' : 'console.log'}("${cmd.params.text}");\n`;
         break;
+      case CommandType.CONNECT_WIFI:
+        code += `${i}// Connect to WiFi network\n`;
+        code += `${i}WiFi.begin("${cmd.params.ssid || 'NETWORK_NAME'}", "${cmd.params.password || 'PASSWORD'}");\n`;
+        code += `${i}while (WiFi.status() != WL_CONNECTED) {\n`;
+        code += `${i}  delay(1000);\n`;
+        code += `${i}  Serial.println("Connecting to WiFi...");\n`;
+        code += `${i}}\n`;
+        code += `${i}Serial.println("WiFi connected successfully");\n`;
+        break;
+      case CommandType.SEND_HTTP:
+        code += `${i}// Send HTTP request\n`;
+        code += `${i}if (WiFi.status() == WL_CONNECTED) {\n`;
+        code += `${i}  HTTPClient http;\n`;
+        code += `${i}  http.begin("${cmd.params.url || 'http://example.com'}");\n`;
+        code += `${i}  int httpResponseCode = http.GET();\n`;
+        code += `${i}  if (httpResponseCode > 0) {\n`;
+        code += `${i}    String response = http.getString();\n`;
+        code += `${i}    Serial.println(response);\n`;
+        code += `${i}  }\n`;
+        code += `${i}  http.end();\n`;
+        code += `${i}}\n`;
+        break;
 
       // --- DATA & MATH ---
       case CommandType.SET_VAR:

@@ -192,6 +192,21 @@ export enum CommandType {
   // --- HARDWARE: SENSORS / INPUT ---
   READ_DIGITAL = 'READ_DIGITAL',
   READ_ANALOG = 'READ_ANALOG',
+  READ_TEMPERATURE = 'READ_TEMPERATURE',
+  READ_HUMIDITY = 'READ_HUMIDITY',
+  READ_DISTANCE = 'READ_DISTANCE',
+  READ_GAS_LEVEL = 'READ_GAS_LEVEL',
+  READ_FLAME = 'READ_FLAME',
+  READ_RAIN = 'READ_RAIN',
+  READ_SOIL = 'READ_SOIL',
+  READ_HEARTBEAT = 'READ_HEARTBEAT',
+  READ_COMPASS = 'READ_COMPASS',
+  READ_GYRO = 'READ_GYRO',
+  READ_GPS = 'READ_GPS',
+  READ_COLOR = 'READ_COLOR',
+  READ_PRESSURE = 'READ_PRESSURE',
+  READ_FLEX = 'READ_FLEX',
+  READ_MAGNETIC = 'READ_MAGNETIC',
   SET_VIBRATION = 'SET_VIBRATION',
   
   // --- SYSTEM ---
@@ -242,6 +257,16 @@ export interface CommandBlock {
     height?: number;
     direction?: 'cw' | 'ccw';
     effect?: 'color' | 'fisheye' | 'whirl' | 'pixelate' | 'mosaic' | 'brightness' | 'ghost';
+    
+    // Additional params for new components
+    steps?: number; // For stepper motors
+    state?: boolean; // For relays, solenoids, lasers, etc.
+    note?: string; // For musical notes
+    shape?: string; // For OLED shapes
+    pattern?: string; // For matrix patterns
+    ssid?: string; // For WiFi
+    password?: string; // For WiFi
+    method?: string; // For HTTP requests
   };
 }
 
@@ -387,6 +412,41 @@ export interface HardwareState {
   magneticField: number; 
   detectedColor: string;
   
+  // Enhanced States for New Components
+  humidity: number; // For DHT sensors
+  gasLevel: number; // For gas sensors
+  flameDetected: boolean; // For flame sensors
+  rainLevel: number; // For rain sensors
+  soilMoisture: number; // For soil sensors
+  heartbeatRate: number; // For heartbeat sensors
+  compassHeading: number; // For compass
+  gyroData: { x: number; y: number; z: number }; // For gyro/accel
+  gpsLocation: { lat: number; lng: number }; // For GPS
+  fingerprintMatch: boolean; // For fingerprint sensor
+  rfidTag: string | null; // For RFID reader
+  stepperPosition: number; // For stepper motor
+  pumpFlowRate: number; // For water pump
+  solenoidActive: boolean; // For solenoid
+  relayState: boolean; // For relay
+  laserActive: boolean; // For laser
+  bulbOn: boolean; // For light bulb
+  continuousServoSpeed: number; // For continuous servo
+  rgbLedColor: string; // For RGB LED
+  rgbStripColors: string[]; // For RGB strip
+  sdCardData: string[]; // For SD card
+  rtcTime: Date; // For RTC
+  logicGateOutput: boolean; // For logic gates
+  timerOutput: boolean; // For 555 timer
+  
+  // Microcontroller-specific features
+  wifiConnected: boolean; // For ESP32, ESP8266, Pi, etc.
+  bluetoothConnected: boolean; // For ESP32, Pi, etc.
+  cpuTemperature: number; // CPU temperature for microcontrollers
+  freeMemory: number; // Available memory
+  uptime: number; // Time since last reset
+  
+  variables: Record<string, any>; // Variables for hardware state
+  
   // Data Logging
   sensorHistory: SensorDataPoint[];
 }
@@ -420,6 +480,9 @@ export interface AppState {
 }
 
 export type ComponentType = 
+  // MICROCONTROLLERS
+  'ARDUINO_UNO' | 'ARDUINO_NANO' | 'ARDUINO_MEGA' | 'ESP32_DEVKIT' | 'ESP8266' | 'NODEMCU' | 'RASPBERRY_PI_ZERO' | 'RASPBERRY_PI_4' | 'MICROBIT' |
+  
   // OUTPUTS
   'LED_RED' | 'LED_BLUE' | 'LED_GREEN' | 'LED_WHITE' | 'LED_YELLOW' | 'LED_ORANGE' |
   'RGB_LED' | 'RGB_STRIP' | 'LASER' | 'BULB' |

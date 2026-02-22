@@ -12,7 +12,7 @@ const LUMA_API_BASE = 'https://api.lumalabs.ai/v1';
 const LUMA_API_KEY = import.meta.env.VITE_LUMA_API_KEY || '';
 
 // Tripo AI API Configuration
-const TRIPO_API_BASE = 'https://api.tripo3d.ai/v2';
+const TRIPO_API_BASE = 'https://api.tripo3d.ai/v2/openapi';
 const TRIPO_API_KEY = import.meta.env.VITE_TRIPO_API_KEY || '';
 
 export interface AI3DProvider {
@@ -102,20 +102,33 @@ export const generate3DModel = async (
   options: Generate3DOptions,
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<Generated3DAsset> => {
-  const provider = options.provider || 'meshy';
+  const provider = options.provider || 'tripo'; // Default to Tripo (faster)
 
   if (!options.prompt && !options.imageUrl) {
     throw new Error('Either prompt or imageUrl is required');
   }
 
   try {
-    // Use Meshy API for generation
+    // Use Tripo API for generation (faster - 10-30 seconds)
+    if (provider === 'tripo') {
+      if (options.imageUrl) {
+        return await tripoAPI.generateFromImage(options.imageUrl, onProgress);
+      } else {
+        return await tripoAPI.generateFromText(
+          options.prompt!,
+          options.style || 'cartoon',
+          onProgress
+        );
+      }
+    }
+
+    // Use Meshy API for generation (higher quality - 60-90 seconds)
     if (provider === 'meshy') {
       if (options.imageUrl) {
         return await meshyAPI.generateFromImage(options.imageUrl, onProgress);
       } else {
         return await meshyAPI.generateFromText(
-          options.prompt!, 
+          options.prompt!,
           options.style || 'cartoon',
           onProgress
         );
@@ -290,6 +303,192 @@ export const convert2DTo3D = async (spriteUrl: string): Promise<Generated3DAsset
 
 // Helper function
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Tripo AI API Integration
+ * Fast 3D generation (10-30 seconds)
+ */
+const tripoAPI = {
+  /**
+   * Generate 3D model from text prompt
+   */
+  async generateFromText(
+    prompt: string,
+    style: string = 'cartoon',
+    onProgress?: (progress: GenerationProgress) => void
+  ): Promise<Generated3DAsset> {
+    if (!TRIPO_API_KEY) {
+      throw new Error('Tripo API key not configured');
+    }
+
+    onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
+
+    try {
+      // Step 1: Create task
+      const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${TRIPO_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'text_to_model',
+          prompt: prompt,
+          style: style
+        })
+      });
+
+      if (!createResponse.ok) {
+        throw new Error(`Tripo API error: ${createResponse.statusText}`);
+      }
+
+      const createData = await createResponse.json();
+      const taskId = createData.data.task_id;
+
+      // Step 2: Poll for completion (Tripo is fast - 10-30 seconds)
+      onProgress?.({ status: 'processing', progress: 20, message: 'Generating 3D model...' });
+
+      while (true) {
+        const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
+          headers: {
+            'Authorization': `Bearer ${TRIPO_API_KEY}`
+          }
+        });
+
+        const statusData = await statusResponse.json();
+        
+        if (statusData.data.status === 'success') {
+          onProgress?.({ status: 'complete', progress: 100, message: 'Generation complete!' });
+          
+          const output = statusData.data.output;
+          
+          return {
+            id: taskId,
+            url: output.model || output.glb_file,
+            thumbnailUrl: output.thumbnail || '',
+            format: 'glb',
+            vertices: 5000,
+            textures: ['diffuse', 'normal', 'roughness'],
+            isRigged: false,
+            provider: 'tripo',
+            prompt: prompt,
+            createdAt: Date.now(),
+            downloadUrl: output.model || output.glb_file
+          };
+        } else if (statusData.data.status === 'failed') {
+          throw new Error('Tripo generation failed');
+        }
+
+        const progress = statusData.data.progress || 50;
+        onProgress?.({ 
+          status: 'processing', 
+          progress, 
+          message: `Generating... ${progress}%` 
+        });
+
+        await sleep(2000); // Poll every 2 seconds
+      }
+    } catch (error) {
+      onProgress?.({ 
+        status: 'error', 
+        progress: 0, 
+        message: 'Tripo generation failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
+  },
+
+  /**
+   * Generate 3D model from image
+   * Tripo excels at image-to-3D (faster than Meshy)
+   */
+  async generateFromImage(
+    imageUrl: string,
+    onProgress?: (progress: GenerationProgress) => void
+  ): Promise<Generated3DAsset> {
+    if (!TRIPO_API_KEY) {
+      throw new Error('Tripo API key not configured');
+    }
+
+    onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
+
+    try {
+      // Step 1: Create task
+      const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${TRIPO_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'image_to_model',
+          image_url: imageUrl,
+          quality: 'high'
+        })
+      });
+
+      if (!createResponse.ok) {
+        throw new Error(`Tripo API error: ${createResponse.statusText}`);
+      }
+
+      const createData = await createResponse.json();
+      const taskId = createData.data.task_id;
+
+      // Step 2: Poll for completion
+      onProgress?.({ status: 'processing', progress: 20, message: 'Processing image...' });
+
+      while (true) {
+        const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
+          headers: {
+            'Authorization': `Bearer ${TRIPO_API_KEY}`
+          }
+        });
+
+        const statusData = await statusResponse.json();
+        
+        if (statusData.data.status === 'success') {
+          onProgress?.({ status: 'complete', progress: 100, message: 'Generation complete!' });
+          
+          const output = statusData.data.output;
+          
+          return {
+            id: taskId,
+            url: output.model || output.glb_file,
+            thumbnailUrl: output.thumbnail || '',
+            format: 'glb',
+            vertices: 5000,
+            textures: ['diffuse', 'normal', 'roughness'],
+            isRigged: false,
+            provider: 'tripo',
+            prompt: 'Image upload',
+            createdAt: Date.now(),
+            downloadUrl: output.model || output.glb_file
+          };
+        } else if (statusData.data.status === 'failed') {
+          throw new Error('Tripo generation failed');
+        }
+
+        const progress = statusData.data.progress || 50;
+        onProgress?.({ 
+          status: 'processing', 
+          progress, 
+          message: `Processing... ${progress}%` 
+        });
+
+        await sleep(2000);
+      }
+    } catch (error) {
+      onProgress?.({ 
+        status: 'error', 
+        progress: 0, 
+        message: 'Tripo generation failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
+  }
+};
 
 /**
  * Meshy AI API Integration

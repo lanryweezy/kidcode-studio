@@ -2,6 +2,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AppMode, CommandBlock, CommandType } from "../types";
 
+// Vite environment variable type declaration
+declare const VITE_GEMINI_API_KEY: string | undefined;
+
 const SYSTEM_PROMPT = `
 You are "KidCode Bot", a friendly, enthusiastic coding tutor for children (ages 8-12).
 Your goal is to help them write code for the "KidCode Studio" app.
@@ -20,9 +23,10 @@ APP MAKER (UI):
 - Actions: SHOW_ALERT, SPEAK, VIBRATE_DEVICE, OPEN_URL.
 
 GAME MAKER (Sprites):
-- Movement: MOVE_X, MOVE_Y, GO_TO_XY, GLIDE_TO_XY, POINT_DIR.
+- Movement: MOVE_X, MOVE_Y, MOVE_Z (3D), GO_TO_XY, GLIDE_TO_XY, POINT_DIR.
 - Physics: JUMP, SET_GRAVITY, SET_VELOCITY_X/Y, BOUNCE_ON_EDGE.
 - Looks: SAY, THINK, SET_EMOJI, SET_SIZE, CHANGE_EFFECT, SHOW/HIDE.
+- 3D: SET_VIEW_3D (condition: 'true'/'false'), ROTATE_Y, GENERATE_ENVIRONMENT (text: description).
 - World: SET_SCENE, SET_WEATHER, SET_CAMERA, SHAKE_CAMERA.
 - Actions: SHOOT, SPAWN_ENEMY, SPAWN_ITEM, CREATE_CLONE.
 - Sound: PLAY_SOUND, PLAY_TONE.
@@ -52,13 +56,12 @@ If generating code, put the JSON array inside a markdown code block labeled 'jso
 `;
 
 export const generateCodeFromPrompt = async (
-  userPrompt: string, 
+  userPrompt: string,
   currentMode: AppMode
 ): Promise<{ text: string; commands?: Omit<CommandBlock, 'id'>[] }> => {
   try {
-    // Lazily initialize to avoid crash if process is missing on load in some browser envs
-    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
-    
+    const apiKey = VITE_GEMINI_API_KEY;
+
     if (!apiKey) {
         console.warn("API Key missing");
         return { text: "I can't access my brain right now (API Key missing)." };
@@ -112,9 +115,64 @@ export const generateCodeFromPrompt = async (
   }
 };
 
+export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {
+    try {
+        const apiKey = VITE_GEMINI_API_KEY;
+        if (!apiKey) return "I can't review your code without my AI brain! (API Key missing)";
+
+        const ai = new GoogleGenerativeAI(apiKey);
+        const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+        const prompt = `
+            You are a friendly senior coding mentor for kids. 
+            Review this ${mode} project which uses these blocks: ${JSON.stringify(commands)}.
+            
+            1. Find any potential bugs (e.g. forever loop without a wait).
+            2. Suggest 1 cool feature they could add.
+            3. Explain 1 coding concept they used well.
+            Keep it very encouraging, simple, and use emojis! Max 150 words.
+        `;
+
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+    } catch (e) {
+        console.error("AI Review error:", e);
+        return "I couldn't review your code right now, but keep building! 🚀";
+    }
+};
+
+export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Promise<Omit<CommandBlock, 'id'>[] | null> => {
+    try {
+        const apiKey = VITE_GEMINI_API_KEY;
+        if (!apiKey) return null;
+
+        const ai = new GoogleGenerativeAI(apiKey);
+        const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+        const prompt = `
+            You are an expert KidCode block fixer. 
+            Fix the bugs in this ${mode} project: ${JSON.stringify(commands)}.
+            Focus on logic errors (infinite loops, missing variables).
+            Only return a valid JSON array of CommandBlocks. No text. No IDs.
+        `;
+
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        const jsonMatch = text.match(/\[[\s\S]*?\]/);
+        
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[0]);
+        }
+        return null;
+    } catch (e) {
+        console.error("AI Fix error:", e);
+        return null;
+    }
+};
+
 export const generateSprite = async (description: string): Promise<string | null> => {
     try {
-        const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
+        const apiKey = VITE_GEMINI_API_KEY;
         if (!apiKey) return null;
         const ai = new GoogleGenerativeAI(apiKey);
         const spriteModel = ai.getGenerativeModel({ model: 'gemini-2.5-flash-image' });
@@ -138,7 +196,7 @@ export const generateSprite = async (description: string): Promise<string | null
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
     try {
-        const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
+        const apiKey = VITE_GEMINI_API_KEY;
         if (!apiKey) return null;
         const ai = new GoogleGenerativeAI(apiKey);
         const speechModel = ai.getGenerativeModel({

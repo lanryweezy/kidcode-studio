@@ -4,26 +4,33 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
-    "./*.tsx",
-    "./*.ts"
+    "./src/components/**/*.{js,ts,jsx,tsx}",
+    "./src/services/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        slate: {
-          850: '#151e2e',
-          950: '#020617',
-        }
-      },
-      fontFamily: {
-        hand: ['"Patrick Hand"', 'cursive'],
-      },
-      animation: {
-        'pop-in': 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-        'slide-up': 'slideUp 0.3s ease-out forwards',
-        'bounce-sm': 'bounceSmall 0.2s infinite',
-      }
-    },
+    extend: {},
   },
   plugins: [],
+  safelist: [
+    // Common spacing classes
+    /^p-/, /^m-/, /^my-/, /^mx-/, /^mt-/, /^mb-/, /^ml-/, /^mr-/, /^py-/, /^px-/, /^pt-/, /^pb-/, /^pl-/, /^pr-/, 
+    // Width and height classes
+    /^w-/, /^h-/, /^min-w-/, /^min-h-/, /^max-w-/, /^max-h-/, /^size-/, 
+    // Flex and grid classes
+    /^flex-/, /^grid-/, /^gap-/, /^col-/, /^row-/, /^order-/, 
+    // Display and position classes
+    /^block$/, /^inline$/, /^flex$/, /^grid$/, /^hidden$/, /^absolute$/, /^relative$/, /^fixed$/, 
+    // Color classes
+    /^(bg|text|border|ring)-/, 
+    // Border classes
+    /^border-/, /^rounded/, 
+    // Typography
+    /^text-/, /^font-/, /^leading-/, /^tracking-/, 
+    // Shadow and ring
+    /^shadow-/, /^ring-/, 
+    // Animation and transition
+    /^animate-/, /^transition/, /^duration-/, /^ease-/, 
+    // State variants
+    /^hover:/, /^focus:/, /^active:/, /^group-hover:/, /^dark:/,
+  ],
 }

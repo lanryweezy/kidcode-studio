@@ -30,13 +30,30 @@ export const getProjects = (): SavedProject[] => {
   }
 };
 
-export const saveProject = (project: SavedProject) => {
+export const captureThumbnail = (canvas: HTMLCanvasElement): string => {
+    try {
+        return canvas.toDataURL('image/jpeg', 0.5); // Low quality for storage size
+    } catch (e) {
+        console.error("Failed to capture thumbnail", e);
+        return '';
+    }
+};
+
+export const saveProject = (project: SavedProject, thumbnail?: string) => {
   try {
     const projects = getProjects();
     const index = projects.findIndex(p => p.id === project.id);
     
+    if (thumbnail) {
+        project.thumbnail = thumbnail;
+    }
+    
     if (index >= 0) {
-      projects[index] = project;
+        // Preserve existing thumbnail if not provided
+        if (!thumbnail && projects[index].thumbnail) {
+            project.thumbnail = projects[index].thumbnail;
+        }
+        projects[index] = project;
     } else {
       projects.unshift(project);
     }
@@ -48,6 +65,17 @@ export const saveProject = (project: SavedProject) => {
   } catch (e) {
     console.error("Failed to save project", e);
   }
+};
+
+export const remixProject = (project: SavedProject): SavedProject => {
+    const remixed: SavedProject = {
+        ...project,
+        id: crypto.randomUUID(),
+        name: `${project.name} (Remix)`,
+        lastEdited: Date.now()
+    };
+    saveProject(remixed);
+    return remixed;
 };
 
 export const deleteProject = (id: string) => {

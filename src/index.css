@@ -1998,6 +1998,89 @@ body {
 .grid-cols-11 {
   grid-template-columns: repeat(11, minmax(0, 1fr));
 }
+
+/* KidCode 2.0 Glassmorphism & 3D Juice */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-3d {
+  position: relative;
+  transition: all 0.1s active;
+  border-bottom: 4px solid rgba(0,0,0,0.2);
+}
+
+.btn-3d:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+@keyframes bounceSmall {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* HACKER MODE - MATRIX THEME */
+.hacker-mode {
+  background-color: #000 !important;
+  color: #00ff41 !important;
+  font-family: 'Share Tech Mono', monospace !important;
+}
+
+.hacker-mode * {
+  border-color: #00ff41 !important;
+}
+
+.hacker-mode .glass, .hacker-mode .glass-dark {
+  background: rgba(0, 20, 0, 0.9) !important;
+  border: 1px solid #00ff41 !important;
+}
+
+.hacker-mode button {
+  background: #000 !important;
+  color: #00ff41 !important;
+  border: 1px solid #00ff41 !important;
+  text-shadow: 0 0 5px #00ff41;
+}
+
+.hacker-mode button:hover {
+  background: #00ff41 !important;
+  color: #000 !important;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+
+.hacker-scanline {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0, 255, 65, 0.1), transparent);
+  height: 100px;
+  pointer-events: none;
+  z-index: 999;
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+  50% { box-shadow: 0 0 20px 4px rgba(139, 92, 246, 0.2); }
+}
 .grid-cols-12 {
   grid-template-columns: repeat(12, minmax(0, 1fr));
 }

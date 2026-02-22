@@ -4,12 +4,17 @@ import { UserProfile } from '../types';
 const USER_STORAGE_KEY = 'kidcode_user_profile';
 
 export const DEFAULT_USER: UserProfile = {
+  id: 'default-user',
   name: 'Junior Coder',
   avatar: '🚀',
   xp: 0,
   level: 1,
+  coins: 100,
   plan: 'free',
-  badges: []
+  streak: 1,
+  badges: [],
+  quests: [],
+  projects: []
 };
 
 export const getUserProfile = (): UserProfile => {
@@ -23,6 +28,47 @@ export const getUserProfile = (): UserProfile => {
 
 export const saveUserProfile = (profile: UserProfile) => {
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(profile));
+};
+
+export const updateStreak = (): UserProfile => {
+    const profile = getUserProfile();
+    const now = new Date();
+    const lastLoginStr = localStorage.getItem('kidcode_last_login');
+    
+    if (lastLoginStr) {
+        const lastLogin = new Date(lastLoginStr);
+        const diffDays = Math.floor((now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+            profile.streak += 1;
+        } else if (diffDays > 1) {
+            profile.streak = 1;
+        }
+    } else {
+        profile.streak = 1;
+    }
+    
+    localStorage.setItem('kidcode_last_login', now.toISOString());
+    saveUserProfile(profile);
+    return profile;
+};
+
+export const checkAndUnlockBadge = (badgeId: string, badgeName: string, icon: string): { profile: UserProfile, unlocked: boolean } => {
+    const profile = getUserProfile();
+    const hasBadge = profile.badges.some(b => b.id === badgeId);
+    
+    if (!hasBadge) {
+        profile.badges.push({
+            id: badgeId,
+            name: badgeName,
+            icon: icon,
+            unlockedAt: new Date().toISOString()
+        });
+        saveUserProfile(profile);
+        return { profile, unlocked: true };
+    }
+    
+    return { profile, unlocked: false };
 };
 
 export const addXp = (amount: number): { profile: UserProfile, leveledUp: boolean } => {

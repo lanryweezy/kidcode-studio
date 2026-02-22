@@ -20,8 +20,11 @@ export default defineConfig(({ mode }) => {
         '@': resolve(__dirname, './src'),
       },
     },
-    define: {
-      'process.env.API_KEY': JSON.stringify(env.API_KEY)
+
+    server: {
+      port: 3000,
+      strictPort: false,
+      open: true
     }
   };
 });

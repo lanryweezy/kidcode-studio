@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KidCode Studio - Create Games with AI Magic! ✨</title>
+  <meta name="description" content="The easiest way for kids to create games, apps, and circuits using AI-powered block coding. Free forever for learners!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #8B5CF6;
+      --secondary: #EC4899;
+      --accent: #06B6D4;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --dark: #1E293B;
+      --light: #F8FAFC;
+    }
+
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .animate-float { animation: float 3s ease-in-out infinite; }
+    .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+    .animate-bounce { animation: bounce 2s ease-in-out infinite; }
+    .animate-gradient { 
+      background-size: 200% 200%;
+      animation: gradient 3s ease infinite;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8rem 2rem 4rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .hero-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-text h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .hero-text p {
+      font-size: 1.25rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-buttons .cta-button {
+      background: white;
+      color: var(--primary);
+    }
+
+    .hero-buttons .secondary-button {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: all 0.3s;
+    }
+
+    .hero-buttons .secondary-button:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    .hero-image {
+      position: relative;
+    }
+
+    .hero-image img {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .floating-badge {
+      position: absolute;
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      font-weight: 700;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .badge-1 { top: -20px; right: -20px; animation-delay: 0s; }
+    .badge-2 { bottom: -20px; left: -20px; animation-delay: 1s; }
+    .badge-3 { top: 50%; right: -40px; animation-delay: 2s; }
+
+    /* Features Section */
+    .features {
+      padding: 6rem 2rem;
+      background: white;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto 4rem;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-header p {
+      font-size: 1.125rem;
+      color: #64748B;
+    }
+
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--light);
+      padding: 2rem;
+      border-radius: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border-color: var(--primary);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+      color: #64748B;
+      line-height: 1.6;
+    }
+
+    /* AI Features Section */
+    .ai-features {
+      padding: 6rem 2rem;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .ai-features .section-header h2 {
+      background: white;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .ai-features .section-header p {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .ai-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .ai-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 20px;
+      border: 2px solid rgba(255,255,255,0.2);
+      text-align: center;
+    }
+
+    .ai-card-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .ai-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .ai-card p {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .ai-card .free-badge {
+      display: inline-block;
+      background: var(--success);
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-top: 1rem;
+    }
+
+    /* How It Works */
+    .how-it-works {
+      padding: 6rem 2rem;
+      background: white;
+    }
+
+    .steps {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 3rem;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+    }
+
+    .step-number {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 auto 1.5rem;
+    }
+
+    .step h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step p {
+      color: #64748B;
+    }
+
+    /* Testimonials */
+    .testimonials {
+      padding: 6rem 2rem;
+      background: var(--light);
+    }
+
+    .testimonial-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .testimonial-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .testimonial-stars {
+      color: var(--warning);
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .testimonial-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      color: #475569;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .author-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .author-info h4 {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .author-info p {
+      font-size: 0.875rem;
+      color: #64748B;
+    }
+
+    /* Pricing */
+    .pricing {
+      padding: 6rem 2rem;
+      background: white;
+    }
+
+    .pricing-grid {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .pricing-card {
+      background: var(--light);
+      padding: 3rem 2rem;
+      border-radius: 20px;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+    }
+
+    .pricing-card.featured {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .pricing-card.featured:hover {
+      transform: scale(1.05) translateY(-10px);
+    }
+
+    .pricing-card .popular-badge {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--success);
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .pricing-card h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .pricing-card .price {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 1.5rem 0;
+    }
+
+    .pricing-card .price span {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin: 2rem 0;
+      text-align: left;
+    }
+
+    .pricing-features li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .pricing-features li::before {
+      content: '✓';
+      color: var(--success);
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .pricing-card.featured .pricing-features li {
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .pricing-card .cta-button {
+      display: block;
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      padding: 6rem 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      text-align: center;
+      color: white;
+    }
+
+    .cta-section h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .cta-section p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--dark);
+      color: white;
+      padding: 4rem 2rem 2rem;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-section h4 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .footer-section ul {
+      list-style: none;
+    }
+
+    .footer-section ul li {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-section a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-section a:hover {
+      color: white;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.875rem;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-text h1 {
+        font-size: 2.5rem;
+      }
+
+      .hero-buttons {
+        justify-content: center;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .features-grid,
+      .ai-grid,
+      .steps,
+      .testimonial-grid,
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-card.featured {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <div class="logo">🚀 KidCode Studio</div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#ai-tools">AI Tools</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+      <a href="#" class="cta-button">Start Creating Free</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Create Games with AI Magic! ✨</h1>
+        <p>The easiest way for kids ages 8-16 to create games, apps, and circuits using AI-powered block coding. No experience needed!</p>
+        <div class="hero-buttons">
+          <a href="#" class="cta-button">🎮 Start Creating Free</a>
+          <a href="#how-it-works" class="secondary-button">📚 See How It Works</a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1555617778-02518510b9fa?w=600" alt="Kid coding" class="animate-float">
+        <div class="floating-badge badge-1">🎯 10,000+ Kids</div>
+        <div class="floating-badge badge-2">⭐ 4.9/5 Rating</div>
+        <div class="floating-badge badge-3">🆓 100% Free</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <h2>🎯 Everything Kids Need to Create</h2>
+      <p>Powerful features wrapped in a fun, kid-friendly interface</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧊</div>
+        <h3>2D & 3D Games</h3>
+        <p>Create both 2D and 3D games with one click! Switch between dimensions instantly while keeping the same blocks.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>AI 3D Generator</h3>
+        <p>Turn text into 3D models! Just type "cute robot" and watch AI create your character in 60 seconds.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎵</div>
+        <h3>AI Music Studio</h3>
+        <p>Generate royalty-free game music with AI. Describe your song and get a custom soundtrack!</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✂️</div>
+        <h3>Sprite Extractor</h3>
+        <p>Turn photos into game sprites! Upload a photo and AI extracts the character with transparent background.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👾</div>
+        <h3>Multiplayer</h3>
+        <p>Build games for up to 4 players! Add co-op or competitive multiplayer with drag-and-drop blocks.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>Infinite Worlds</h3>
+        <p>Generate endless terrain with biomes, caves, and structures. Procedural generation made easy!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Features Section -->
+  <section class="ai-features" id="ai-tools">
+    <div class="section-header">
+      <h2>🤖 FREE AI Tools Built-In</h2>
+      <p>Professional AI tools, completely FREE for all users!</p>
+    </div>
+    <div class="ai-grid">
+      <div class="ai-card">
+        <div class="ai-card-icon">🧊</div>
+        <h3>3D Model Generator</h3>
+        <p>Text to 3D models in 60 seconds</p>
+        <span class="free-badge">FREE</span>
+      </div>
+      <div class="ai-card">
+        <div class="ai-card-icon">🎵</div>
+        <h3>Music Generator</h3>
+        <p>Custom game soundtracks from text</p>
+        <span class="free-badge">FREE</span>
+      </div>
+      <div class="ai-card">
+        <div class="ai-card-icon">✂️</div>
+        <h3>Sprite Extractor</h3>
+        <p>AI-powered background removal</p>
+        <span class="free-badge">FREE</span>
+      </div>
+      <div class="ai-card">
+        <div class="ai-card-icon">💻</div>
+        <h3>Code Helper</h3>
+        <p>AI tutor explains coding concepts</p>
+        <span class="free-badge">FREE</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="section-header">
+      <h2>📚 How It Works</h2>
+      <p>Create your first game in 4 simple steps!</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Choose Your Mode</h3>
+        <p>Pick Game Maker, App Builder, or Circuit Lab</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Drag & Drop Blocks</h3>
+        <p>Connect colorful blocks to create logic</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Add AI Magic</h3>
+        <p>Generate 3D models, music, and sprites with AI</p>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <h3>Share Your Game!</h3>
+        <p>Publish to web, mobile, or desktop</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="section-header">
+      <h2>❤️ Loved by Kids & Teachers</h2>
+      <p>See what our community is saying</p>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testimonial-text">"I made my first 3D game in just one afternoon! The AI tools make it so easy to create anything I imagine."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">👦</div>
+          <div class="author-info">
+            <h4>Alex, Age 11</h4>
+            <p>Created 15 games</p>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testimonial-text">"My students are obsessed with coding now! KidCode Studio makes learning feel like play."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">👩‍🏫</div>
+          <div class="author-info">
+            <h4>Mrs. Johnson</h4>
+            <p>5th Grade Teacher</p>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testimonial-text">"The 2D to 3D switch is mind-blowing! Same blocks, different dimension. This is the future of learning."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">👨‍💻</div>
+          <div class="author-info">
+            <h4>David Chen</h4>
+            <p>Parent & Software Engineer</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="section-header">
+      <h2>💰 Free Forever for Learners</h2>
+      <p>Start creating at no cost, upgrade for more power</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Free</h3>
+        <div class="price">$0<span>/forever</span></div>
+        <ul class="pricing-features">
+          <li>All core features</li>
+          <li>10 AI generations/month</li>
+          <li>5 projects</li>
+          <li>Web export</li>
+          <li>Community gallery</li>
+        </ul>
+        <a href="#" class="cta-button">Start Free</a>
+      </div>
+      <div class="pricing-card featured">
+        <span class="popular-badge">MOST POPULAR</span>
+        <h3>Maker</h3>
+        <div class="price">$9.99<span>/month</span></div>
+        <ul class="pricing-features">
+          <li>Everything in Free</li>
+          <li>100 AI generations/month</li>
+          <li>Unlimited projects</li>
+          <li>All export formats</li>
+          <li>Multiplayer games</li>
+          <li>No watermarks</li>
+        </ul>
+        <a href="#" class="cta-button" style="background: white; color: var(--primary);">Get Started</a>
+      </div>
+      <div class="pricing-card">
+        <h3>Inventor</h3>
+        <div class="price">$19.99<span>/month</span></div>
+        <ul class="pricing-features">
+          <li>Everything in Maker</li>
+          <li>Unlimited AI</li>
+          <li>Priority support</li>
+          <li>Cloud builds</li>
+          <li>Team collaboration</li>
+          <li>Early access features</li>
+        </ul>
+        <a href="#" class="cta-button">Go Pro</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <h2>🚀 Ready to Start Creating?</h2>
+    <p>Join thousands of kids already making amazing games!</p>
+    <a href="#" class="cta-button" style="background: white; color: var(--primary); font-size: 1.25rem; padding: 1rem 3rem;">Create Your First Game Free!</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>🚀 KidCode Studio</h4>
+        <p style="opacity: 0.7; line-height: 1.6;">Empowering the next generation of creators with AI-powered coding tools.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">AI Tools</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Templates</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Tutorials</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Community</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 KidCode Studio. Made with ❤️ for future creators.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      if (window.scrollY > 50) {
+        nav.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
+      } else {
+        nav.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+      }
+    });
+  </script>
+</body>
+</html>

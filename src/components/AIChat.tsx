@@ -1,12 +1,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, Bot, User, Volume2, StopCircle } from 'lucide-react';
-import { generateCodeFromPrompt, generateSpeech } from '../services/geminiService';
+import { Send, Loader2, Sparkles, Bot, User, Volume2, StopCircle, Bug, Glasses, Mic, Wand2 } from 'lucide-react';
+import { generateCodeFromPrompt, generateSpeech, reviewCode, getFixedCode } from '../services/geminiService';
 import { AppMode, CommandBlock } from '../types';
+import { useStore } from '../store/useStore';
+import { playSoundEffect } from '../services/soundService';
 
 interface AIChatProps {
   currentMode: AppMode;
   onAppendCode: (commands: Omit<CommandBlock, 'id'>[]) => void;
+  onReplaceCode?: (commands: Omit<CommandBlock, 'id'>[]) => void;
 }
 
 interface Message {
@@ -23,7 +26,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
   const [isPlaying, setIsPlaying] = useState<number | null>(null); // Index of message playing
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
-  
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,13 +48,44 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
     
     setMessages(prev => [...prev, { role: 'assistant', text: response.text }]);
     
-    if (response.commands && response.commands.length > 0) {
-      onAppendCode(response.commands);
-    }
+        if (response.commands && response.commands.length > 0) {
+          onAppendCode(response.commands);
+        }
+        setIsLoading(false);
+      };
     
-    setIsLoading(false);
-  };
-
+      const handleReview = async () => {
+          const { commands, mode } = useStore.getState();
+          if (commands.length === 0) {
+              setMessages(prev => [...prev, { role: 'assistant', text: "Your code is empty! Add some blocks first so I can review them. 😊" }]);
+              return;
+          }
+    
+          setIsLoading(true);
+          setMessages(prev => [...prev, { role: 'user', text: "Can you review my code?" }]);
+          
+                const review = await reviewCode(commands, mode);
+                setMessages(prev => [...prev, { role: 'assistant', text: review }]);
+                setIsLoading(false);
+            };
+          
+            const handleFix = async () => {
+                // Feature temporarily disabled - needs onReplaceCode prop from parent
+                setMessages(prev => [...prev, { role: 'assistant', text: "Code fix feature is coming soon! For now, try asking me to explain the issue." }]);
+                
+                // const { commands, mode } = useStore.getState();
+                // setIsLoading(true);
+                // setMessages(prev => [...prev, { role: 'user', text: "Can you fix the bugs for me?" }]);
+                // const fixedBlocks = await getFixedCode(commands, mode);
+                // if (fixedBlocks && onReplaceCode) {
+                //     onReplaceCode(fixedBlocks);
+                //     setMessages(prev => [...prev, { role: 'assistant', text: "Abracadabra! ✨ I've replaced your blocks with a corrected version. Try running it now!" }]);
+                //     playSoundEffect('powerup');
+                // } else {
+                //     setMessages(prev => [...prev, { role: 'assistant', text: "I couldn't find an automatic fix this time, but I believe in you! Keep trying! 🚀" }]);
+                // }
+                // setIsLoading(false);
+            };
   const playMessage = async (text: string, index: number) => {
       if (isPlaying === index) {
           // Stop
@@ -143,6 +177,24 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
 
       {/* Input Area */}
       <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+        <div className="flex gap-2 mb-3">
+            <button 
+                type="button"
+                onClick={handleReview}
+                disabled={isLoading}
+                className="flex-1 py-2 bg-violet-100 text-violet-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-violet-200 transition-all disabled:opacity-50"
+            >
+                <Glasses size={14} /> Review Code
+            </button>
+            <button 
+                type="button"
+                onClick={handleFix}
+                disabled={isLoading}
+                className="flex-1 py-2 bg-orange-100 text-orange-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-orange-200 transition-all disabled:opacity-50"
+            >
+                <Wand2 size={14} /> Fix It!
+            </button>
+        </div>
         <form onSubmit={handleSubmit} className="relative">
           <textarea
             value={input}
@@ -155,10 +207,10 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
             }}
             placeholder="Ask to create a game, app, or circuit..."
             className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-10 py-3 text-sm focus:ring-2 focus:ring-violet-200 focus:border-violet-300 outline-none resize-none custom-scrollbar"
-            rows={2} 
+            rows={2}
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isLoading || !input.trim()}
             className="absolute right-2 bottom-2 p-1.5 bg-violet-500 hover:bg-violet-600 disabled:bg-slate-300 text-white rounded-lg transition-all"
           >

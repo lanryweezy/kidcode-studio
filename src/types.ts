@@ -2,6 +2,7 @@
 export enum AppMode {
   APP = 'APP',
   GAME = 'GAME',
+  GAME_3D = 'GAME_3D',
   HARDWARE = 'HARDWARE'
 }
 
@@ -15,6 +16,23 @@ export enum CommandType {
   BREAK = 'BREAK',
   COMMENT = 'COMMENT', 
   
+  // --- 3D COMMANDS ---
+  MOVE_Z = 'MOVE_Z',
+  ROTATE_X = 'ROTATE_X',
+  ROTATE_Y = 'ROTATE_Y',
+  ROTATE_Z = 'ROTATE_Z',
+  SET_VIEW_3D = 'SET_VIEW_3D',
+  SPAWN_3D_OBJECT = 'SPAWN_3D_OBJECT',
+  SET_LIGHTING = 'SET_LIGHTING',
+  GENERATE_ENVIRONMENT = 'GENERATE_ENVIRONMENT',
+  
+  // --- EVENTS & MESSAGING ---
+  ON_COLLIDE = 'ON_COLLIDE',
+  ON_CLICK = 'ON_CLICK',
+  BROADCAST = 'BROADCAST',
+  WHEN_I_RECEIVE = 'WHEN_I_RECEIVE',
+  END_EVENT = 'END_EVENT',
+
   // --- LOGIC & CONDITIONS ---
   IF = 'IF', 
   ELSE = 'ELSE', 
@@ -82,6 +100,8 @@ export enum CommandType {
   ADD_TIME_PICKER = 'ADD_TIME_PICKER',
   ADD_COLOR_PICKER = 'ADD_COLOR_PICKER',
   ADD_PROGRESS = 'ADD_PROGRESS', 
+  ADD_NEWS_FEED = 'ADD_NEWS_FEED',
+  ADD_CHAT_MESSAGE = 'ADD_CHAT_MESSAGE',
   ADD_MAP = 'ADD_MAP',
   ADD_CHART = 'ADD_CHART',
   ADD_QR_CODE = 'ADD_QR_CODE',
@@ -89,6 +109,8 @@ export enum CommandType {
   ADD_DIVIDER = 'ADD_DIVIDER',
   ADD_SPACER = 'ADD_SPACER',
   ADD_ICON = 'ADD_ICON',
+  DEFINE_PLUGIN = 'DEFINE_PLUGIN',
+  USE_PLUGIN = 'USE_PLUGIN',
   
   // UI Actions
   SPEAK = 'SPEAK', 
@@ -98,6 +120,8 @@ export enum CommandType {
   OPEN_URL = 'OPEN_URL',
   SHARE_TEXT = 'SHARE_TEXT',
   CLEAR_UI = 'CLEAR_UI',
+  CLOUD_SAVE = 'CLOUD_SAVE',
+  CLOUD_LOAD = 'CLOUD_LOAD',
   
   // --- GAME MAKER: MOVEMENT ---
   MOVE_X = 'MOVE_X',
@@ -119,6 +143,11 @@ export enum CommandType {
   SET_MASS = 'SET_MASS',
   SET_FRICTION = 'SET_FRICTION',
   SET_BOUNCINESS = 'SET_BOUNCINESS',
+  
+  // --- PHYSICS 2.0 (Matter.js) ---
+  SET_PHYSICS_TYPE = 'SET_PHYSICS_TYPE', // Static, Dynamic, Bouncy
+  CREATE_JOINT = 'CREATE_JOINT', // Connect two bodies
+  APPLY_FORCE = 'APPLY_FORCE', // Push object
 
   // Looks
   SAY = 'SAY',
@@ -130,6 +159,7 @@ export enum CommandType {
   HIDE = 'HIDE',
   SET_OPACITY = 'SET_OPACITY',
   CHANGE_EFFECT = 'CHANGE_EFFECT', // Color, Ghost, etc.
+  PLAY_ANIMATION = 'PLAY_ANIMATION',
   GO_TO_FRONT = 'GO_TO_FRONT',
   GO_TO_BACK = 'GO_TO_BACK',
   
@@ -140,14 +170,68 @@ export enum CommandType {
   SHAKE_CAMERA = 'SHAKE_CAMERA',
   
   // Game Objects
-  SHOOT = 'SHOOT', 
-  SPAWN_ENEMY = 'SPAWN_ENEMY', 
-  SPAWN_ITEM = 'SPAWN_ITEM', 
+  SHOOT = 'SHOOT',
+  SPAWN_ENEMY = 'SPAWN_ENEMY',
+  SPAWN_ITEM = 'SPAWN_ITEM',
   SPAWN_PARTICLES = 'SPAWN_PARTICLES',
-  ADD_PLATFORM = 'ADD_PLATFORM', 
-  CREATE_CLONE = 'CREATE_CLONE', 
+  NPC_TALK = 'NPC_TALK',
+  CREATE_DIALOGUE = 'CREATE_DIALOGUE',
+  END_DIALOGUE = 'END_DIALOGUE',
+  ADD_PLATFORM = 'ADD_PLATFORM',
+  CREATE_CLONE = 'CREATE_CLONE',
   DELETE_CLONE = 'DELETE_CLONE',
   SET_TILE = 'SET_TILE',
+  
+  // === 3D GAME COMMANDS ===
+  SPAWN_3D_MODEL = 'SPAWN_3D_MODEL',
+  SET_3D_POSITION = 'SET_3D_POSITION',
+  ROTATE_3D_MODEL = 'ROTATE_3D_MODEL',
+  SCALE_3D_MODEL = 'SCALE_3D_MODEL',
+  PLAY_3D_ANIMATION = 'PLAY_3D_ANIMATION',
+  SET_3D_CAMERA = 'SET_3D_CAMERA',
+  SET_3D_LIGHTING = 'SET_3D_LIGHTING',
+  ENABLE_PHYSICS_3D = 'ENABLE_PHYSICS_3D',
+  SWITCH_TO_3D_MODE = 'SWITCH_TO_3D_MODE',
+  SWITCH_TO_2D_MODE = 'SWITCH_TO_2D_MODE',
+  
+  // Inventory & Items
+  ADD_TO_INVENTORY = 'ADD_TO_INVENTORY',
+  REMOVE_FROM_INVENTORY = 'REMOVE_FROM_INVENTORY',
+  USE_ITEM = 'USE_ITEM',
+  SHOW_INVENTORY = 'SHOW_INVENTORY',
+  CRAFT_ITEM = 'CRAFT_ITEM',
+  
+  // Audio & Music
+  SET_BACKGROUND_MUSIC = 'SET_BACKGROUND_MUSIC',
+  PLAY_MUSIC = 'PLAY_MUSIC',
+  STOP_MUSIC = 'STOP_MUSIC',
+  SET_MUSIC_VOLUME = 'SET_MUSIC_VOLUME',
+  PLAY_AMBIENT = 'PLAY_AMBIENT',
+  
+  // Cutscenes & Events
+  TRIGGER_CUTSCENE = 'TRIGGER_CUTSCENE',
+  FADE_IN = 'FADE_IN',
+  FADE_OUT = 'FADE_OUT',
+  SHAKE_SCREEN = 'SHAKE_SCREEN',
+  SLOW_MOTION = 'SLOW_MOTION',
+  FREEZE_FRAME = 'FREEZE_FRAME',
+  
+  // Boss Battles
+  SPAWN_BOSS = 'SPAWN_BOSS',
+  SET_BOSS_HEALTH = 'SET_BOSS_HEALTH',
+  BOSS_ATTACK = 'BOSS_ATTACK',
+  BOSS_PHASE = 'BOSS_PHASE',
+  
+  // Advanced Movement
+  DASH = 'DASH',
+  WALL_JUMP = 'WALL_JUMP',
+  DOUBLE_JUMP = 'DOUBLE_JUMP',
+  GRAPPLE = 'GRAPPLE',
+  
+  // Checkpoints & Saves
+  CREATE_CHECKPOINT = 'CREATE_CHECKPOINT',
+  LOAD_CHECKPOINT = 'LOAD_CHECKPOINT',
+  AUTO_SAVE = 'AUTO_SAVE',
   
   // Game Data
   CHANGE_SCORE = 'CHANGE_SCORE',
@@ -215,6 +299,12 @@ export enum CommandType {
   RESET_BOARD = 'RESET_BOARD',
   CONNECT_WIFI = 'CONNECT_WIFI',
   SEND_HTTP = 'SEND_HTTP',
+  
+  // --- HARDWARE: LOGIC ---
+  LOGIC_AND = 'LOGIC_AND',
+  LOGIC_OR = 'LOGIC_OR',
+  LOGIC_NOT = 'LOGIC_NOT',
+  
   READ_FILE = 'READ_FILE',
   WRITE_FILE = 'WRITE_FILE'
 }
@@ -223,6 +313,7 @@ export interface CommandBlock {
   id: string;
   type: CommandType;
   hasBreakpoint?: boolean;
+  screenId?: string; // For organizing blocks by screen/page
   params: {
     // Basic values
     value?: number;
@@ -231,33 +322,33 @@ export interface CommandBlock {
     text2?: string;
     message?: string;
     color?: string;
-    
+
     // Hardware params
     pin?: number;
     duration?: number;
     speed?: number;
     angle?: number;
-    row?: number; 
-    col?: number; 
-    
+    row?: number;
+    col?: number;
+
     // Logic/Vars
-    condition?: string; 
+    condition?: string;
     varName?: string;
     listName?: string;
-    
+
     // App/UI
-    screenName?: string; 
-    textSize?: 'xs'|'sm'|'md'|'lg'|'xl'|'2xl'; 
+    screenName?: string;
+    textSize?: 'xs'|'sm'|'md'|'lg'|'xl'|'2xl';
     url?: string;
-    
+
     // Game/Physics
-    x?: number; 
-    y?: number; 
-    width?: number; 
+    x?: number;
+    y?: number;
+    width?: number;
     height?: number;
     direction?: 'cw' | 'ccw';
     effect?: 'color' | 'fisheye' | 'whirl' | 'pixelate' | 'mosaic' | 'brightness' | 'ghost';
-    
+
     // Additional params for new components
     steps?: number; // For stepper motors
     state?: boolean; // For relays, solenoids, lasers, etc.
@@ -268,6 +359,19 @@ export interface CommandBlock {
     password?: string; // For WiFi
     method?: string; // For HTTP requests
   };
+}
+
+// New interface for organized page code
+export interface PageCode {
+  screenId: string;
+  screenName: string;
+  blocks: CommandBlock[];
+  generatedCode: {
+    python: string;
+    javascript: string;
+    arduino: string;
+  };
+  lastEdited: number;
 }
 
 export interface BlockDefinition {
@@ -284,19 +388,30 @@ export interface GameEntity {
   id: string;
   x: number;
   y: number;
+  z?: number;
+  rotationX?: number;
+  rotationY?: number;
+  rotationZ?: number;
   width?: number;
   height?: number;
+  depth?: number;
   emoji?: string;
-  type: 'enemy' | 'item' | 'projectile' | 'platform' | 'clone' | 'powerup';
+  modelUrl?: string; // For 3D GLTF
+  animations?: Record<string, number[]>;
+  currentAnimation?: string;
+  type: 'enemy' | 'item' | 'projectile' | 'platform' | 'clone' | 'powerup' | 'object3d';
   vx?: number;
   vy?: number;
+  vz?: number;
   color?: string;
   lifeTime?: number;
+  physicsType?: 'static' | 'dynamic' | 'bouncy'; // Physics 2.0
   // AI/Behavior
   initialX?: number;
   initialY?: number;
+  initialZ?: number;
   range?: number;
-  behavior?: 'patrol' | 'chase' | 'float_h' | 'float_v';
+  behavior?: 'patrol' | 'chase' | 'float_h' | 'float_v' | 'orbit';
   subtype?: 'speed' | 'shield' | 'ghost'; // for powerups
 }
 
@@ -331,20 +446,30 @@ export interface FloatingText {
 export interface SpriteState {
   x: number;
   y: number;
+  z: number;
   rotation: number;
+  rotationX: number;
+  rotationY: number;
+  rotationZ: number;
   emoji: string;
   texture: string | null;
   frames: string[]; // Animation Frames
+  animations: Record<string, number[]>; // Named animation sequences
+  currentAnimation: string | null;
   animationSpeed: number; // FPS-like
   speech: string | null;
   scene?: string;
-  weather: 'none' | 'rain' | 'snow'; 
+  weather: 'none' | 'rain' | 'snow';
   score: number;
   keys: number; // Inventory
   health: number;
   maxHealth: number;
   variables: Record<string, any>;
-  
+
+  is3D: boolean;
+  cameraMode: 'first_person' | 'third_person' | 'top_down';
+  skyboxUrl?: string;
+
   // Powerups (active duration)
   powerups: {
     speed?: number; // Frames remaining
@@ -353,30 +478,124 @@ export interface SpriteState {
   };
 
   // Physics & Entities
-  vy: number; 
+  vy: number;
   vx: number;
+  vz: number;
   opacity: number;
   scale: number;
-  gravity: boolean; 
+  gravity: boolean;
   gravityForce: number;
   jumpForce: number;
   isJumping: boolean;
+  canDoubleJump: boolean;
+  canDash: boolean;
+  dashCooldown: number;
   projectiles: GameEntity[];
   enemies: GameEntity[];
   items: GameEntity[];
   platforms: GameEntity[];
-  clones: GameEntity[]; 
+  clones: GameEntity[];
   cameraFollow: boolean;
-  
+
   // Visual Effects
-  // NOTE: particles are managed locally in GameCanvas for performance, 
-  // but we use this trigger to signal a burst.
-  effectTrigger?: { type: 'explosion' | 'sparkle' | 'poof', x: number, y: number, color?: string };
-  particles: ParticleEffect[]; // Keep for legacy/save
+  effectTrigger?: { type: 'explosion' | 'sparkle' | 'poof', x: number, y: number, z?: number, color?: string };
+  particles: ParticleEffect[];
   floatingTexts: FloatingText[];
-  
+
   // Level Data
   tilemap: Tile[];
+  
+  // === ENHANCED GAME FEATURES ===
+  
+  // Inventory System
+  inventory: InventoryItem[];
+  maxInventorySize: number;
+  equippedItem?: InventoryItem;
+  
+  // Dialogue System
+  activeDialogue?: DialogueNode;
+  dialogueHistory: string[];
+  isDialogueActive: boolean;
+  
+  // Music & Audio
+  backgroundMusic?: string;
+  musicVolume: number;
+  ambientSound?: string;
+  
+  // Checkpoints
+  checkpoints: Checkpoint[];
+  lastCheckpoint?: Checkpoint;
+  
+  // Cutscenes
+  isCutsceneActive: boolean;
+  screenShake: number;
+  screenFreeze: number;
+  timeScale: number;
+  fadeAlpha: number;
+  
+  // Boss Battles
+  activeBoss?: BossState;
+  bossHealth: number;
+  bossMaxHealth: number;
+  bossPhase: number;
+}
+
+// === NEW INTERFACES FOR ENHANCED FEATURES ===
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  type: 'weapon' | 'consumable' | 'key' | 'material' | 'quest';
+  quantity: number;
+  maxStack: number;
+  effect?: {
+    type: 'heal' | 'damage' | 'speed' | 'shield' | 'teleport';
+    value: number;
+    duration?: number;
+  };
+  craftable?: boolean;
+  recipe?: { itemId: string; quantity: number }[];
+}
+
+export interface DialogueNode {
+  id: string;
+  speaker: string;
+  speakerEmoji: string;
+  text: string;
+  choices?: DialogueChoice[];
+  nextId?: string;
+  onChoose?: { itemId?: string; condition?: string };
+}
+
+export interface DialogueChoice {
+  text: string;
+  nextId: string;
+  condition?: string; // e.g., "hasItem:key"
+  effect?: { type: string; value: any };
+}
+
+export interface Checkpoint {
+  id: string;
+  x: number;
+  y: number;
+  name: string;
+  unlocked: boolean;
+}
+
+export interface BossState {
+  id: string;
+  name: string;
+  emoji: string;
+  x: number;
+  y: number;
+  health: number;
+  maxHealth: number;
+  phase: number;
+  attackPattern: string;
+  isInvulnerable: boolean;
+  attackCooldown: number;
 }
 
 export interface SensorDataPoint {
@@ -535,11 +754,94 @@ export interface Mission {
 
 export type PlanType = 'free' | 'maker' | 'inventor';
 
-export interface UserProfile {
+export interface Badge {
+  id: string;
   name: string;
-  avatar: string;
+  icon: string;
+  description?: string;
+  xpReward?: number;
+  unlockedAt?: string;
+}
+
+export interface Quest {
+  id: string;
+  name: string;
+  description: string;
+  xpReward: number;
+  completed: boolean;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  progress?: number;
+  maxProgress?: number;
+}
+
+export interface Trophy {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  xpReward?: number;
+  unlockedAt?: string;
+}
+
+export interface SkillNode {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  requirements: string[];
+  category: 'coding' | 'creativity' | 'community' | 'mastery';
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  name: string;
   xp: number;
   level: number;
+  avatar: string;
+}
+
+export interface Cosmetic {
+  id: string;
+  type: 'avatar' | 'theme' | 'effect';
+  name: string;
+  unlocked: boolean;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  avatar: string;
   plan: PlanType;
-  badges: string[]; // IDs of badges
+  xp: number;
+  level: number;
+  coins: number;
+  streak: number;
+  badges: Badge[];
+  quests: Quest[];
+  trophies?: Trophy[];
+  projects: string[]; // IDs
+  creatorScore?: number;
+  skillTree?: SkillNode[];
+  cosmetics?: Cosmetic[];
+  leaderboards?: LeaderboardEntry[];
+}
+
+// === 3D ASSET TYPES ===
+export interface Model3D {
+  id: string;
+  name: string;
+  url: string;
+  thumbnailUrl: string;
+  format: 'glb' | 'gltf' | 'fbx' | 'obj';
+  vertices: number;
+  textures: string[];
+  isRigged: boolean;
+  animations?: string[];
+  category: 'character' | 'prop' | 'vehicle' | 'building' | 'environment';
+  style: 'cartoon' | 'realistic' | 'lowpoly' | 'anime' | 'voxel';
+  aiGenerated: boolean;
+  createdAt: number;
 }

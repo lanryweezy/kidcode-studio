@@ -66,14 +66,20 @@ export const INITIAL_HARDWARE_STATE = {
 };
 
 export const INITIAL_SPRITE_STATE = {
-  x: 200, 
+  x: 200,
   y: 200,
+  z: 0,
   rotation: 0,
+  rotationX: 0,
+  rotationY: 0,
+  rotationZ: 0,
   opacity: 1,
   scale: 1,
   emoji: '🤖',
   texture: null,
   frames: [],
+  animations: {},
+  currentAnimation: null,
   animationSpeed: 5,
   speech: null,
   scene: 'grid',
@@ -83,6 +89,10 @@ export const INITIAL_SPRITE_STATE = {
   health: 3,
   maxHealth: 3,
   variables: {},
+  
+  is3D: false,
+  cameraMode: 'third_person' as 'first_person' | 'third_person' | 'top_down',
+  
   // Powerups
   powerups: {
     speed: 0,
@@ -92,10 +102,14 @@ export const INITIAL_SPRITE_STATE = {
   // Physics & Entities
   vy: 0,
   vx: 0,
+  vz: 0,
   gravity: false,
   gravityForce: 1,
   jumpForce: 15,
   isJumping: false,
+  canDoubleJump: false,
+  canDash: false,
+  dashCooldown: 0,
   projectiles: [],
   enemies: [],
   items: [],
@@ -106,7 +120,40 @@ export const INITIAL_SPRITE_STATE = {
   particles: [],
   floatingTexts: [],
   // Level Data
-  tilemap: []
+  tilemap: [],
+  
+  // === ENHANCED GAME FEATURES ===
+  // Inventory
+  inventory: [],
+  maxInventorySize: 10,
+  equippedItem: undefined,
+  
+  // Dialogue
+  activeDialogue: undefined,
+  dialogueHistory: [],
+  isDialogueActive: false,
+  
+  // Music & Audio
+  backgroundMusic: undefined,
+  musicVolume: 0.5,
+  ambientSound: undefined,
+  
+  // Checkpoints
+  checkpoints: [],
+  lastCheckpoint: undefined,
+  
+  // Cutscenes
+  isCutsceneActive: false,
+  screenShake: 0,
+  screenFreeze: 0,
+  timeScale: 1,
+  fadeAlpha: 0,
+  
+  // Boss Battles
+  activeBoss: undefined,
+  bossHealth: 0,
+  bossMaxHealth: 0,
+  bossPhase: 0
 };
 
 export const INITIAL_APP_STATE = {
@@ -189,6 +236,77 @@ export const EXAMPLE_TEMPLATES = [
       { id: 'c2', type: 'LED_BLUE', x: 200, y: 100, pin: 1 },
       { id: 'c3', type: 'SPEAKER', x: 150, y: 300, pin: 8 }
     ] as CircuitComponent[]
+  },
+  {
+    id: 'tpl_game_quest',
+    mode: AppMode.GAME,
+    name: 'AI Quest RPG',
+    description: 'Talk to an NPC to start your adventure!',
+    icon: MessageSquare,
+    color: 'bg-indigo-600',
+    commands: [
+      { id: '1', type: CommandType.SET_SCENE, params: { text: 'forest' } },
+      { id: '2', type: CommandType.NPC_TALK, params: { text: 'Wizard', message: 'The forest is dangerous! Take this fireball!' } },
+      { id: '3', type: CommandType.SPAWN_PARTICLES, params: { text: 'sparkle', color: '#fbbf24' } },
+      { id: '4', type: CommandType.SET_VAR, params: { varName: 'has_spell', value: 1 } }
+    ]
+  },
+  {
+    id: 'tpl_app_social',
+    mode: AppMode.APP,
+    name: 'Profile Bio',
+    description: 'Uses Global Variables to share your name.',
+    icon: User,
+    color: 'bg-blue-600',
+    commands: [
+      { id: '1', type: CommandType.CREATE_SCREEN, params: { text: 'login' } },
+      { id: '2', type: CommandType.ADD_TEXT_BLOCK, params: { text: 'Welcome!', textSize: 'xl' } },
+      { id: '3', type: CommandType.ADD_INPUT, params: { varName: 'global_username', text: 'Enter your name' } },
+      { id: '4', type: CommandType.ADD_BUTTON, params: { text: 'Go to Profile', screenName: 'main' } },
+      { id: '5', type: CommandType.CREATE_SCREEN, params: { text: 'main' } },
+      { id: '6', type: CommandType.ADD_CHAT_MESSAGE, params: { text: 'Hello, User!', message: 'left' } }
+    ]
+  },
+  {
+    id: 'tpl_hw_logic',
+    mode: AppMode.HARDWARE,
+    name: 'Smart Security',
+    description: 'Unlock with Logic AND (Switch + Light).',
+    icon: Lock,
+    color: 'bg-emerald-600',
+    commands: [
+      { id: '1', type: CommandType.FOREVER, params: {} },
+      { id: '2', type: CommandType.READ_DIGITAL, params: { pin: 4, varName: 'sw' } },
+      { id: '3', type: CommandType.READ_ANALOG, params: { pin: 5, varName: 'light' } },
+      { id: '4', type: CommandType.LOGIC_AND, params: { varName: 'safe', value: true, value2: true } },
+      { id: '5', type: CommandType.IF, params: { condition: 'true' } },
+      { id: '6', type: CommandType.LED_ON, params: { pin: 2 } },
+      { id: '7', type: CommandType.END_IF, params: {} },
+      { id: '8', type: CommandType.END_FOREVER, params: {} }
+    ],
+    circuitComponents: [
+      { id: 'c1', type: 'SWITCH_SLIDE', x: 50, y: 100, pin: 4 },
+      { id: 'c2', type: 'LIGHT_SENSOR', x: 150, y: 100, pin: 5 },
+      { id: 'c3', type: 'LED_GREEN', x: 100, y: 300, pin: 2 }
+    ] as CircuitComponent[]
+  },
+  {
+    id: 'tpl_game_3d',
+    mode: AppMode.GAME,
+    name: '3D World Explorer',
+    description: 'Build and walk through a 3D world!',
+    icon: Box,
+    color: 'bg-cyan-600',
+    commands: [
+      { id: '1', type: CommandType.SET_VIEW_3D, params: { condition: 'true' } },
+      { id: '2', type: CommandType.GENERATE_ENVIRONMENT, params: { text: 'Sci-fi Moon Base' } },
+      { id: '3', type: CommandType.SET_EMOJI, params: { text: '👨‍🚀' } },
+      { id: '4', type: CommandType.SAY, params: { text: 'One small step for a kid...' } },
+      { id: '5', type: CommandType.FOREVER, params: {} },
+      { id: '6', type: CommandType.MOVE_Z, params: { value: 1 } },
+      { id: '7', type: CommandType.ROTATE_Y, params: { value: 5 } },
+      { id: '8', type: CommandType.END_FOREVER, params: {} }
+    ]
   }
 ];
 
@@ -304,6 +422,10 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.ADD_CAMERA, label: 'Camera View', icon: Camera, defaultParams: {}, color: 'bg-slate-800', category: 'Widgets', description: 'Display live camera feed.' },
     { type: CommandType.ADD_DATE_PICKER, label: 'Date Picker', icon: Calendar, defaultParams: { varName: 'date1' }, color: 'bg-blue-400', category: 'Widgets', description: 'Pick a date from a calendar.' },
     { type: CommandType.ADD_COLOR_PICKER, label: 'Color Picker', icon: Palette, defaultParams: { varName: 'color1' }, color: 'bg-pink-500', category: 'Widgets', description: 'Pick a color.' },
+    { type: CommandType.DEFINE_PLUGIN, label: 'Define Widget', icon: Box, defaultParams: { text: 'MyWidget' }, color: 'bg-violet-700', category: 'Plugins', description: 'Save current screen as a reusable widget.' },
+    { type: CommandType.USE_PLUGIN, label: 'Use Widget', icon: Box, defaultParams: { text: 'MyWidget' }, color: 'bg-violet-600', category: 'Plugins', description: 'Add a custom widget to screen.' },
+    { type: CommandType.ADD_NEWS_FEED, label: 'News Feed', icon: Globe, defaultParams: { text: 'Latest Updates' }, color: 'bg-sky-500', category: 'Social', description: 'Display a list of posts.' },
+    { type: CommandType.ADD_CHAT_MESSAGE, label: 'Chat Bubble', icon: MessageSquare, defaultParams: { text: 'Hi!', message: 'left' }, color: 'bg-indigo-400', category: 'Social', description: 'Add a chat message bubble.' },
     { type: CommandType.ADD_CHART, label: 'Chart', icon: Activity, defaultParams: { text: 'Data', varName: 'data1' }, color: 'bg-purple-500', category: 'Widgets', description: 'Show a data chart.' },
     { type: CommandType.ADD_AUDIO_PLAYER, label: 'Audio Player', icon: Music, defaultParams: { }, color: 'bg-rose-500', category: 'Widgets', description: 'Play an audio file.' },
     { type: CommandType.ADD_QR_CODE, label: 'QR Code', icon: Scan, defaultParams: { }, color: 'bg-slate-700', category: 'Widgets', description: 'Display a QR code.' },
@@ -315,6 +437,8 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.VIBRATE_DEVICE, label: 'Vibrate', icon: Waves, defaultParams: { value: 0.5 }, color: 'bg-orange-600', category: 'Actions', description: 'Vibrate the device (if supported).' },
     { type: CommandType.OPEN_URL, label: 'Open Website', icon: Link, defaultParams: { text: 'https://google.com' }, color: 'bg-blue-700', category: 'Actions', description: 'Open a website in a new tab.' },
     { type: CommandType.CLEAR_UI, label: 'Clear Screen', icon: Eraser, defaultParams: {}, color: 'bg-red-400', category: 'Actions', description: 'Remove all widgets from the screen.' },
+    { type: CommandType.CLOUD_SAVE, label: 'Cloud Save', icon: Cloud, defaultParams: {}, color: 'bg-blue-500', category: 'Actions', description: 'Save variables to the cloud.' },
+    { type: CommandType.CLOUD_LOAD, label: 'Cloud Load', icon: Download, defaultParams: {}, color: 'bg-blue-400', category: 'Actions', description: 'Load variables from the cloud.' },
     
     // --- LOGIC & DATA ---
     { type: CommandType.SET_VAR, label: 'Set Variable', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value to a variable.' },
@@ -348,6 +472,13 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.BOUNCE_ON_EDGE, label: 'Bounce on Edge', icon: RefreshCw, defaultParams: {}, color: 'bg-blue-400', category: 'Motion', description: 'Bounce off screen edges.' },
     { type: CommandType.POINT_DIR, label: 'Point Direction', icon: Compass, defaultParams: { value: 90 }, color: 'bg-blue-500', category: 'Motion', description: 'Rotate character.' },
 
+    { type: CommandType.SET_BOUNCINESS, label: 'Set Bounciness', icon: Activity, defaultParams: { value: 0.8 }, color: 'bg-blue-400', category: 'Physics', description: 'Make object bouncy.' },
+    
+    // --- PHYSICS 2.0 ---
+    { type: CommandType.SET_PHYSICS_TYPE, label: 'Physics Body', icon: Box, defaultParams: { text: 'dynamic' }, color: 'bg-cyan-600', category: 'Physics', description: 'Static, Dynamic, or Bouncy.' },
+    { type: CommandType.CREATE_JOINT, label: 'Connect Joint', icon: Link, defaultParams: { text: 'wheel' }, color: 'bg-cyan-700', category: 'Physics', description: 'Connect two objects.' },
+    { type: CommandType.APPLY_FORCE, label: 'Push Force', icon: ArrowBigUp, defaultParams: { x: 10, y: -10 }, color: 'bg-cyan-500', category: 'Physics', description: 'Apply physics force.' },
+
     // --- LOOKS & SCENE ---
     { type: CommandType.SAY, label: 'Say', icon: MessageSquare, defaultParams: { text: 'Hello!' }, color: 'bg-purple-500', category: 'Looks', description: 'Show a speech bubble.' },
     { type: CommandType.SET_SCENE, label: 'Set Scene', icon: Image, defaultParams: { text: 'grid' }, color: 'bg-purple-500', category: 'Looks', description: 'Change the background.' },
@@ -358,16 +489,63 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.SET_SIZE, label: 'Set Size %', icon: ZoomIn, defaultParams: { value: 100 }, color: 'bg-purple-400', category: 'Looks', description: 'Set character size.' },
     { type: CommandType.CHANGE_SIZE, label: 'Change Size', icon: ZoomIn, defaultParams: { value: 10 }, color: 'bg-purple-400', category: 'Looks', description: 'Grow or shrink.' },
     { type: CommandType.SET_OPACITY, label: 'Set Opacity', icon: Eye, defaultParams: { value: 100 }, color: 'bg-purple-400', category: 'Looks', description: 'Set transparency.' },
+  { type: CommandType.PLAY_ANIMATION, label: 'Play Animation', icon: Film, defaultParams: { text: 'walk' }, color: 'bg-purple-600', category: 'Looks', description: 'Play a named animation.' },
 
     // --- ACTIONS ---
     { type: CommandType.SHOOT, label: 'Shoot', icon: Crosshair, defaultParams: { text: '⚡' }, color: 'bg-red-500', category: 'Actions', description: 'Fire a projectile.' },
     { type: CommandType.SPAWN_ENEMY, label: 'Spawn Enemy', icon: Ghost, defaultParams: { text: '👾' }, color: 'bg-red-600', category: 'Actions', description: 'Create a bad guy.' },
     { type: CommandType.SPAWN_ITEM, label: 'Spawn Item', icon: Coins, defaultParams: { text: '💎' }, color: 'bg-yellow-500', category: 'Actions', description: 'Create a collectable.' },
     { type: CommandType.SPAWN_PARTICLES, label: 'Explosion', icon: Sparkles, defaultParams: { value: 10 }, color: 'bg-orange-500', category: 'Actions', description: 'Make cool effects.' },
+    { type: CommandType.NPC_TALK, label: 'NPC Chat', icon: MessageSquare, defaultParams: { text: 'Guard', message: 'Stop right there!' }, color: 'bg-indigo-600', category: 'Actions', description: 'Open an AI dialogue box.' },
     { type: CommandType.CREATE_CLONE, label: 'Clone Self', icon: Copy, defaultParams: {}, color: 'bg-orange-400', category: 'Actions', description: 'Make a copy of player.' },
+    { type: CommandType.CLOUD_SAVE, label: 'Save Progress', icon: Cloud, defaultParams: {}, color: 'bg-indigo-500', category: 'Data', description: 'Save score and health to cloud.' },
+    { type: CommandType.CLOUD_LOAD, label: 'Load Progress', icon: Download, defaultParams: {}, color: 'bg-indigo-400', category: 'Data', description: 'Load saved stats.' },
 
     // --- SOUND ---
     { type: CommandType.PLAY_SOUND, label: 'Play Sound', icon: Volume2, defaultParams: { text: 'coin' }, color: 'bg-pink-500', category: 'Sound', description: 'Play a sound effect.' },
+
+    // === ENHANCED GAME FEATURES ===
+    // Dialogue System
+    { type: CommandType.CREATE_DIALOGUE, label: 'Start Dialogue', icon: MessageSquare, defaultParams: { text: 'Elder', message: 'Welcome, hero!' }, color: 'bg-indigo-600', category: 'Dialogue', description: 'Open dialogue with choices.' },
+    { type: CommandType.END_DIALOGUE, label: 'End Dialogue', icon: XCircle, defaultParams: {}, color: 'bg-indigo-500', category: 'Dialogue', description: 'Close dialogue box.' },
+    
+    // Inventory
+    { type: CommandType.ADD_TO_INVENTORY, label: 'Add to Inventory', icon: Box, defaultParams: { text: 'Health Potion', value: 1 }, color: 'bg-amber-600', category: 'Inventory', description: 'Add item to inventory.' },
+    { type: CommandType.REMOVE_FROM_INVENTORY, label: 'Remove from Inventory', icon: Trash, defaultParams: { text: 'Health Potion' }, color: 'bg-amber-700', category: 'Inventory', description: 'Remove item from inventory.' },
+    { type: CommandType.USE_ITEM, label: 'Use Item', icon: Play, defaultParams: { text: 'Health Potion' }, color: 'bg-green-600', category: 'Inventory', description: 'Use an item.' },
+    { type: CommandType.SHOW_INVENTORY, label: 'Show Inventory', icon: Box, defaultParams: {}, color: 'bg-amber-500', category: 'Inventory', description: 'Open inventory UI.' },
+    { type: CommandType.CRAFT_ITEM, label: 'Craft Item', icon: Sparkles, defaultParams: { text: 'Sword', value: 2 }, color: 'bg-orange-600', category: 'Inventory', description: 'Craft item from materials.' },
+    
+    // Music & Audio
+    { type: CommandType.SET_BACKGROUND_MUSIC, label: 'Set BGM', icon: Music, defaultParams: { text: 'adventure.mp3' }, color: 'bg-purple-600', category: 'Audio', description: 'Set background music.' },
+    { type: CommandType.PLAY_MUSIC, label: 'Play Music', icon: Play, defaultParams: { text: 'battle.mp3' }, color: 'bg-purple-500', category: 'Audio', description: 'Play music track.' },
+    { type: CommandType.STOP_MUSIC, label: 'Stop Music', icon: Square, defaultParams: {}, color: 'bg-purple-700', category: 'Audio', description: 'Stop music.' },
+    { type: CommandType.SET_MUSIC_VOLUME, label: 'Music Volume', icon: SlidersHorizontal, defaultParams: { value: 50 }, color: 'bg-purple-400', category: 'Audio', description: 'Set music volume.' },
+    { type: CommandType.PLAY_AMBIENT, label: 'Play Ambient', icon: Wind, defaultParams: { text: 'forest' }, color: 'bg-cyan-600', category: 'Audio', description: 'Play ambient sound.' },
+    
+    // Cutscenes
+    { type: CommandType.TRIGGER_CUTSCENE, label: 'Trigger Cutscene', icon: Video, defaultParams: { text: 'intro' }, color: 'bg-slate-700', category: 'Cutscene', description: 'Start cutscene.' },
+    { type: CommandType.FADE_IN, label: 'Fade In', icon: Sun, defaultParams: { value: 1 }, color: 'bg-slate-600', category: 'Cutscene', description: 'Fade screen in.' },
+    { type: CommandType.FADE_OUT, label: 'Fade Out', icon: Moon, defaultParams: { value: 1 }, color: 'bg-slate-600', category: 'Cutscene', description: 'Fade screen out.' },
+    { type: CommandType.SHAKE_SCREEN, label: 'Shake Screen', icon: Activity, defaultParams: { value: 0.5 }, color: 'bg-red-600', category: 'Cutscene', description: 'Shake the screen.' },
+    { type: CommandType.SLOW_MOTION, label: 'Slow Motion', icon: Timer, defaultParams: { value: 0.5 }, color: 'bg-blue-600', category: 'Cutscene', description: 'Slow down time.' },
+    
+    // Boss Battles
+    { type: CommandType.SPAWN_BOSS, label: 'Spawn Boss', icon: Ghost, defaultParams: { text: 'Dragon', value: 100 }, color: 'bg-red-700', category: 'Boss', description: 'Spawn boss enemy.' },
+    { type: CommandType.SET_BOSS_HEALTH, label: 'Set Boss HP', icon: Heart, defaultParams: { value: 100 }, color: 'bg-red-600', category: 'Boss', description: 'Set boss health.' },
+    { type: CommandType.BOSS_ATTACK, label: 'Boss Attack', icon: Crosshair, defaultParams: { text: 'fireball' }, color: 'bg-orange-700', category: 'Boss', description: 'Boss performs attack.' },
+    { type: CommandType.BOSS_PHASE, label: 'Boss Phase', icon: Layers, defaultParams: { value: 2 }, color: 'bg-purple-700', category: 'Boss', description: 'Change boss phase.' },
+    
+    // Advanced Movement
+    { type: CommandType.DASH, label: 'Dash', icon: Zap, defaultParams: { value: 10 }, color: 'bg-cyan-600', category: 'Motion', description: 'Quick dash movement.' },
+    { type: CommandType.DOUBLE_JUMP, label: 'Enable Double Jump', icon: ArrowUpCircle, defaultParams: { condition: 'true' }, color: 'bg-blue-500', category: 'Motion', description: 'Enable double jump.' },
+    { type: CommandType.WALL_JUMP, label: 'Enable Wall Jump', icon: ArrowUp, defaultParams: { condition: 'true' }, color: 'bg-blue-500', category: 'Motion', description: 'Enable wall jumping.' },
+    { type: CommandType.GRAPPLE, label: 'Grapple', icon: Anchor, defaultParams: { value: 100 }, color: 'bg-amber-600', category: 'Motion', description: 'Grapple to position.' },
+    
+    // Checkpoints
+    { type: CommandType.CREATE_CHECKPOINT, label: 'Create Checkpoint', icon: Flag, defaultParams: { text: 'Save Point' }, color: 'bg-green-600', category: 'Progress', description: 'Create save point.' },
+    { type: CommandType.LOAD_CHECKPOINT, label: 'Load Checkpoint', icon: RotateCcw, defaultParams: {}, color: 'bg-green-500', category: 'Progress', description: 'Load last checkpoint.' },
+    { type: CommandType.AUTO_SAVE, label: 'Auto Save', icon: Save, defaultParams: {}, color: 'bg-blue-600', category: 'Progress', description: 'Auto-save progress.' },
 
     // --- DATA ---
     { type: CommandType.CHANGE_SCORE, label: 'Change Score', icon: Trophy, defaultParams: { value: 1 }, color: 'bg-yellow-600', category: 'Data', description: 'Add points.' },
@@ -375,6 +553,19 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.CHANGE_VAR, label: 'Change Var', icon: Variable, defaultParams: { varName: 'hp', value: -10 }, color: 'bg-orange-600', category: 'Data', description: 'Change a variable.' },
     { type: CommandType.GAME_OVER, label: 'Game Over', icon: XCircle, defaultParams: {}, color: 'bg-slate-800', category: 'Control', description: 'End the game.' },
     { type: CommandType.WIN_GAME, label: 'Win Game', icon: Trophy, defaultParams: {}, color: 'bg-yellow-500', category: 'Control', description: 'Win the level!' },
+
+    // --- EVENTS ---
+    { type: CommandType.BROADCAST, label: 'Broadcast', icon: Megaphone, defaultParams: { text: 'message1' }, color: 'bg-amber-500', category: 'Events', description: 'Send a message to other objects.' },
+    { type: CommandType.WHEN_I_RECEIVE, label: 'When I Receive', icon: MessageSquare, defaultParams: { text: 'message1' }, color: 'bg-amber-600', category: 'Events', description: 'Run blocks when message is received.' },
+    { type: CommandType.ON_CLICK, label: 'When Clicked', icon: MousePointer2, defaultParams: {}, color: 'bg-amber-600', category: 'Events', description: 'Run blocks when clicked.' },
+    { type: CommandType.ON_COLLIDE, label: 'When I Collide', icon: Zap, defaultParams: { text: 'any' }, color: 'bg-amber-600', category: 'Events', description: 'Run blocks on collision.' },
+    { type: CommandType.END_EVENT, label: 'End Event', icon: XCircle, defaultParams: {}, color: 'bg-amber-700', category: 'Events', description: 'Mark end of event blocks.' },
+
+    // --- 3D ---
+    { type: CommandType.SET_VIEW_3D, label: '3D Mode', icon: Box, defaultParams: { condition: 'true' }, color: 'bg-cyan-600', category: '3D', description: 'Toggle 3D View.' },
+    { type: CommandType.MOVE_Z, label: 'Move Z', icon: ArrowUpCircle, defaultParams: { value: 10 }, color: 'bg-cyan-500', category: '3D', description: 'Move forward/backward in 3D.' },
+    { type: CommandType.ROTATE_Y, label: 'Turn 3D', icon: RotateCw, defaultParams: { value: 15 }, color: 'bg-cyan-500', category: '3D', description: 'Rotate character in 3D.' },
+    { type: CommandType.GENERATE_ENVIRONMENT, label: 'AI World', icon: Sparkles, defaultParams: { text: 'Snowy Mountains' }, color: 'bg-gradient-to-r from-cyan-500 to-blue-500', category: '3D', description: 'AI Generate a 3D environment.' },
   ],
   [AppMode.HARDWARE]: [
     // --- CONTROL ---
@@ -433,6 +624,11 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.READ_FLEX, label: 'Read Flex', icon: Move, defaultParams: { varName: 'flex' }, color: 'bg-purple-500', category: 'Input', description: 'Read flex sensor.' },
     { type: CommandType.READ_MAGNETIC, label: 'Read Mag Field', icon: Magnet, defaultParams: { varName: 'magnetic' }, color: 'bg-blue-600', category: 'Input', description: 'Read hall sensor.' },
     
+    // --- LOGIC ---
+    { type: CommandType.LOGIC_AND, label: 'AND Gate', icon: GitBranch, defaultParams: { varName: 'out', value: true, value2: true }, color: 'bg-indigo-600', category: 'Logic', description: 'True if both inputs are true.' },
+    { type: CommandType.LOGIC_OR, label: 'OR Gate', icon: GitBranch, defaultParams: { varName: 'out', value: true, value2: false }, color: 'bg-indigo-600', category: 'Logic', description: 'True if either input is true.' },
+    { type: CommandType.LOGIC_NOT, label: 'NOT Gate', icon: GitBranch, defaultParams: { varName: 'out', value: true }, color: 'bg-indigo-600', category: 'Logic', description: 'Inverts the input.' },
+
     // --- DATA ---
     { type: CommandType.LOG_DATA, label: 'Log Data', icon: Terminal, defaultParams: { text: 'Value' }, color: 'bg-slate-600', category: 'Data', description: 'Print to console.' },
     { type: CommandType.SET_VAR, label: 'Set Var', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value.' },

@@ -1,23 +1,23 @@
-
-import { AppMode, CommandType, BlockDefinition, ComponentType, Mission, CircuitComponent } from './types';
-import { 
-  Gamepad2, Cpu, ArrowUp, Type, Eye, Lightbulb, Music, Repeat, XCircle, Layout, MousePointer2, PaintBucket, MessageSquare, Hand, Moon, GitBranch, Battery, Fan, Terminal, Thermometer, Disc, Zap, Volume2, Image, Eraser, TextCursorInput, Move, ToggleLeft, Gauge, Tv, Split, Image as ImageIcon, Trophy, Target, Palette, Hash, Radar, Activity, Waves, Flame, CloudRain, Droplets, Mic, Lock, Keyboard, Gamepad, Power, Variable, Fingerprint, Box, Sun, Wind, CloudFog, Wifi, Bluetooth, Radio, Network, Smartphone, Speaker, Headphones, Watch, Camera, Printer, HardDrive, Shield, Key, Crosshair, RotateCcw, Settings, Signal, SlidersHorizontal, ToggleRight, CheckSquare, BarChart3, Megaphone, StickyNote, Ghost, Apple, Rocket, ArrowBigUp, Minus, MapPin, Grid, Scan, Heart, Layers, CloudSnow, List, Copy, Video, Trash, PanelTop, BrickWall, Coins, Triangle, Flag, Calendar, Clock, Globe, Link, Share2, AlertTriangle, Play, Pause, Square, Circle, Anchor, ArrowRight, ArrowLeft, RotateCw, RefreshCw, ZoomIn, ZoomOut, EyeOff, Tag, Calculator, Percent, Binary, Sigma, Ruler, Compass, Timer, Hourglass, SmartphoneCharging, FileText, FolderOpen, Save, Download, Upload, Cloud, Server, Database, Truck, Bike, Car, Boxes, Mountain, DoorOpen, Key as KeyIcon, ArrowUpCircle, Sparkles, StopCircle, User, Pencil, Grip, View, Mouse, Magnet
+import { AppMode, CommandType, BlockDefinition, ComponentType, Mission, CircuitComponent, CommandBlock } from './types';
+import {
+  Gamepad2, Cpu, ArrowUp, Type, Eye, Lightbulb, Music, Repeat, XCircle, Layout, MousePointer2, PaintBucket, MessageSquare, Hand, Moon, GitBranch, Battery, Fan, Terminal, Thermometer, Disc, Zap, Volume2, Image, Eraser, TextCursorInput, Move, ToggleLeft, Gauge, Tv, Split, Image as ImageIcon, Trophy, Target, Palette, Hash, Radar, Activity, Waves, Flame, CloudRain, Droplets, Mic, Lock, Keyboard, Gamepad, Power, Variable, Fingerprint, Box, Sun, Wind, CloudFog, Wifi, Bluetooth, Radio, Network, Smartphone, Speaker, Watch, Camera, Printer, HardDrive, Shield, Key, Crosshair, RotateCcw,
+  Settings, Signal, SlidersHorizontal, ToggleRight, CheckSquare, BarChart3, Megaphone, StickyNote, Ghost, Apple, Rocket, ArrowBigUp, Minus, MapPin, Grid, Scan, Heart, Layers, CloudSnow, List, Copy, Video, Trash, PanelTop, BrickWall, Coins, Triangle, Flag, Calendar, Clock, Globe, Link, Share2, AlertTriangle, Play, Pause, Square, Circle, Anchor, ArrowRight, ArrowLeft, RotateCw, RefreshCw, ZoomIn, ZoomOut, EyeOff, Tag, Calculator, Percent, Binary, Sigma, Ruler, Compass, Timer, Hourglass, SmartphoneCharging, FileText, FolderOpen, Save, Download, Upload, Cloud, Server, Database, Truck, Bike, Car, Boxes, Mountain, DoorOpen, Key as KeyIcon, ArrowUpCircle, Sparkles, StopCircle, User, Pencil, Grip, View, Mouse, Magnet, Film, Maximize, Headphones
 } from 'lucide-react';
 
 export const INITIAL_HARDWARE_STATE = {
   // 0-3: LEDs, 4: Button, 5: Light, 6: Switch
-  pins: Array(50).fill(false).map((_, i) => i === 5), 
+  pins: Array(50).fill(false).map((_, i) => i === 5),
   buzzerActive: false,
   fanSpeed: 0,
-  temperature: 25, 
+  temperature: 25,
   servoAngle: 90,
-  lcdLines: ["Ready...", ""], 
+  lcdLines: ["Ready...", ""],
   potentiometerValue: 0,
   speakerVolume: 50,
   rgbColor: '#ff0000',
   rgbLedColor: '#FF0000', // For RGB LED
   sevenSegmentValue: null,
-  distance: 100, 
+  distance: 100,
   motionDetected: false,
   vibrationActive: false,
   keypadValue: null,
@@ -27,7 +27,7 @@ export const INITIAL_HARDWARE_STATE = {
   tilt: false,
   magneticField: 0,
   detectedColor: '#ffffff',
-  
+
   // Enhanced States for New Components
   humidity: 50, // For DHT sensors
   gasLevel: 0, // For gas sensors
@@ -52,16 +52,16 @@ export const INITIAL_HARDWARE_STATE = {
   rtcTime: new Date(), // For RTC
   logicGateOutput: false, // For logic gates
   timerOutput: false, // For 555 timer
-  
+
   // Microcontroller-specific features
   wifiConnected: false, // For ESP32, ESP8266, Pi, etc.
   bluetoothConnected: false, // For ESP32, Pi, etc.
   cpuTemperature: 35, // CPU temperature for microcontrollers
   freeMemory: 100, // Available memory percentage
   uptime: 0, // Time since last reset in seconds
-  
+
   variables: {}, // Variables for hardware state
-  
+
   sensorHistory: []
 };
 
@@ -89,10 +89,10 @@ export const INITIAL_SPRITE_STATE = {
   health: 3,
   maxHealth: 3,
   variables: {},
-  
+
   is3D: false,
   cameraMode: 'third_person' as 'first_person' | 'third_person' | 'top_down',
-  
+
   // Powerups
   powerups: {
     speed: 0,
@@ -121,34 +121,34 @@ export const INITIAL_SPRITE_STATE = {
   floatingTexts: [],
   // Level Data
   tilemap: [],
-  
+
   // === ENHANCED GAME FEATURES ===
   // Inventory
   inventory: [],
   maxInventorySize: 10,
   equippedItem: undefined,
-  
+
   // Dialogue
   activeDialogue: undefined,
   dialogueHistory: [],
   isDialogueActive: false,
-  
+
   // Music & Audio
   backgroundMusic: undefined,
   musicVolume: 0.5,
   ambientSound: undefined,
-  
+
   // Checkpoints
   checkpoints: [],
   lastCheckpoint: undefined,
-  
+
   // Cutscenes
   isCutsceneActive: false,
   screenShake: 0,
   screenFreeze: 0,
   timeScale: 1,
   fadeAlpha: 0,
-  
+
   // Boss Battles
   activeBoss: undefined,
   bossHealth: 0,
@@ -169,229 +169,239 @@ export const INITIAL_APP_STATE = {
 export const MODE_CONFIG = {
   [AppMode.APP]: { label: 'App Builder', color: 'bg-blue-500', icon: Layout },
   [AppMode.GAME]: { label: 'Game Maker', color: 'bg-orange-500', icon: Gamepad2 },
-  [AppMode.HARDWARE]: { label: 'Circuit Lab', color: 'bg-emerald-500', icon: Cpu }
+  [AppMode.HARDWARE]: { label: 'Circuit Lab', color: 'bg-emerald-500', icon: Cpu },
+  [AppMode.GAME_3D]: { label: '3D World', color: 'bg-cyan-500', icon: Box }
 };
 
-export const EXAMPLE_TEMPLATES = [
-  {
-    id: 'tpl_game_jump',
-    mode: AppMode.GAME,
-    name: 'Jumping Bot',
-    description: 'A platformer starter with gravity and jump logic.',
-    icon: ArrowUpCircle,
-    color: 'bg-orange-500',
-    commands: [
-      { id: '1', type: CommandType.SET_SCENE, params: { text: 'forest' } },
-      { id: '2', type: CommandType.SET_GRAVITY, params: { condition: 'true' } },
-      { id: '3', type: CommandType.FOREVER, params: {} },
-      { id: '4', type: CommandType.IF, params: { condition: 'IS_PRESSED', pin: 38 } }, // Up Arrow code usually
-      { id: '5', type: CommandType.JUMP, params: { value: 15 } },
-      { id: '6', type: CommandType.END_IF, params: {} },
-      { id: '7', type: CommandType.IF, params: { condition: 'IS_PRESSED', pin: 39 } }, // Right
-      { id: '8', type: CommandType.MOVE_X, params: { value: 5 } },
-      { id: '9', type: CommandType.END_IF, params: {} },
-      { id: '10', type: CommandType.IF, params: { condition: 'IS_PRESSED', pin: 37 } }, // Left
-      { id: '11', type: CommandType.MOVE_X, params: { value: -5 } },
-      { id: '12', type: CommandType.END_IF, params: {} },
-      { id: '13', type: CommandType.END_FOREVER, params: {} }
-    ]
-  },
-  {
-    id: 'tpl_app_talk',
-    mode: AppMode.APP,
-    name: 'Talk to Me',
-    description: 'Type text and hear the robot speak it!',
-    icon: Megaphone,
-    color: 'bg-blue-500',
-    commands: [
-      { id: '1', type: CommandType.SET_TITLE, params: { text: 'Voice App' } },
-      { id: '2', type: CommandType.ADD_TEXT_BLOCK, params: { text: 'What should I say?', textSize: 'lg' as const } },
-      { id: '3', type: CommandType.ADD_INPUT, params: { varName: 'speech', text: 'Type here...' } },
-      { id: '4', type: CommandType.ADD_SPACER, params: { value: 20 } },
-      { id: '5', type: CommandType.ADD_BUTTON, params: { text: 'Speak Now', message: '' } },
-      { id: '6', type: CommandType.IF, params: { condition: 'true' } }, // Usually button trigger logic needs improving, simplified here
-      { id: '7', type: CommandType.SPEAK, params: { text: 'Hello World' } }, // Placeholder for var usage
-      { id: '8', type: CommandType.END_IF, params: {} }
-    ]
-  },
-  {
-    id: 'tpl_hw_siren',
-    mode: AppMode.HARDWARE,
-    name: 'Police Siren',
-    description: 'Flashing Red/Blue LEDs with sound.',
-    icon: Zap,
-    color: 'bg-emerald-500',
-    commands: [
-      { id: '1', type: CommandType.FOREVER, params: {} },
-      { id: '2', type: CommandType.LED_ON, params: { pin: 0 } }, // Red
-      { id: '3', type: CommandType.LED_OFF, params: { pin: 1 } }, // Blue
-      { id: '4', type: CommandType.PLAY_TONE, params: { duration: 0.5 } },
-      { id: '5', type: CommandType.LED_OFF, params: { pin: 0 } },
-      { id: '6', type: CommandType.LED_ON, params: { pin: 1 } },
-      { id: '7', type: CommandType.PLAY_TONE, params: { duration: 0.5 } },
-      { id: '8', type: CommandType.END_FOREVER, params: {} }
-    ],
-    circuitComponents: [
-      { id: 'c1', type: 'LED_RED', x: 100, y: 100, pin: 0 },
-      { id: 'c2', type: 'LED_BLUE', x: 200, y: 100, pin: 1 },
-      { id: 'c3', type: 'SPEAKER', x: 150, y: 300, pin: 8 }
-    ] as CircuitComponent[]
-  },
-  {
-    id: 'tpl_game_quest',
-    mode: AppMode.GAME,
-    name: 'AI Quest RPG',
-    description: 'Talk to an NPC to start your adventure!',
-    icon: MessageSquare,
-    color: 'bg-indigo-600',
-    commands: [
-      { id: '1', type: CommandType.SET_SCENE, params: { text: 'forest' } },
-      { id: '2', type: CommandType.NPC_TALK, params: { text: 'Wizard', message: 'The forest is dangerous! Take this fireball!' } },
-      { id: '3', type: CommandType.SPAWN_PARTICLES, params: { text: 'sparkle', color: '#fbbf24' } },
-      { id: '4', type: CommandType.SET_VAR, params: { varName: 'has_spell', value: 1 } }
-    ]
-  },
-  {
-    id: 'tpl_app_social',
-    mode: AppMode.APP,
-    name: 'Profile Bio',
-    description: 'Uses Global Variables to share your name.',
-    icon: User,
-    color: 'bg-blue-600',
-    commands: [
-      { id: '1', type: CommandType.CREATE_SCREEN, params: { text: 'login' } },
-      { id: '2', type: CommandType.ADD_TEXT_BLOCK, params: { text: 'Welcome!', textSize: 'xl' } },
-      { id: '3', type: CommandType.ADD_INPUT, params: { varName: 'global_username', text: 'Enter your name' } },
-      { id: '4', type: CommandType.ADD_BUTTON, params: { text: 'Go to Profile', screenName: 'main' } },
-      { id: '5', type: CommandType.CREATE_SCREEN, params: { text: 'main' } },
-      { id: '6', type: CommandType.ADD_CHAT_MESSAGE, params: { text: 'Hello, User!', message: 'left' } }
-    ]
-  },
-  {
-    id: 'tpl_hw_logic',
-    mode: AppMode.HARDWARE,
-    name: 'Smart Security',
-    description: 'Unlock with Logic AND (Switch + Light).',
-    icon: Lock,
-    color: 'bg-emerald-600',
-    commands: [
-      { id: '1', type: CommandType.FOREVER, params: {} },
-      { id: '2', type: CommandType.READ_DIGITAL, params: { pin: 4, varName: 'sw' } },
-      { id: '3', type: CommandType.READ_ANALOG, params: { pin: 5, varName: 'light' } },
-      { id: '4', type: CommandType.LOGIC_AND, params: { varName: 'safe', value: true, value2: true } },
-      { id: '5', type: CommandType.IF, params: { condition: 'true' } },
-      { id: '6', type: CommandType.LED_ON, params: { pin: 2 } },
-      { id: '7', type: CommandType.END_IF, params: {} },
-      { id: '8', type: CommandType.END_FOREVER, params: {} }
-    ],
-    circuitComponents: [
-      { id: 'c1', type: 'SWITCH_SLIDE', x: 50, y: 100, pin: 4 },
-      { id: 'c2', type: 'LIGHT_SENSOR', x: 150, y: 100, pin: 5 },
-      { id: 'c3', type: 'LED_GREEN', x: 100, y: 300, pin: 2 }
-    ] as CircuitComponent[]
-  },
-  {
-    id: 'tpl_game_3d',
-    mode: AppMode.GAME,
-    name: '3D World Explorer',
-    description: 'Build and walk through a 3D world!',
-    icon: Box,
-    color: 'bg-cyan-600',
-    commands: [
-      { id: '1', type: CommandType.SET_VIEW_3D, params: { condition: 'true' } },
-      { id: '2', type: CommandType.GENERATE_ENVIRONMENT, params: { text: 'Sci-fi Moon Base' } },
-      { id: '3', type: CommandType.SET_EMOJI, params: { text: '👨‍🚀' } },
-      { id: '4', type: CommandType.SAY, params: { text: 'One small step for a kid...' } },
-      { id: '5', type: CommandType.FOREVER, params: {} },
-      { id: '6', type: CommandType.MOVE_Z, params: { value: 1 } },
-      { id: '7', type: CommandType.ROTATE_Y, params: { value: 5 } },
-      { id: '8', type: CommandType.END_FOREVER, params: {} }
-    ]
-  }
-];
+export const EXAMPLE_TEMPLATES: {
+  id: string,
+  mode: AppMode,
+  name: string,
+  description: string,
+  icon: any,
+  color: string,
+  commands: CommandBlock[],
+  circuitComponents?: CircuitComponent[]
+}[] = [
+    {
+      id: 'tpl_game_jump',
+      mode: AppMode.GAME,
+      name: 'Jumping Bot',
+      description: 'A platformer starter with gravity and jump logic.',
+      icon: ArrowUpCircle,
+      color: 'bg-orange-500',
+      commands: [
+        { id: '1', type: CommandType.SET_SCENE, params: { text: 'forest' } },
+        { id: '2', type: CommandType.SET_GRAVITY, params: { condition: 'true' } },
+        { id: '3', type: CommandType.FOREVER, params: {} },
+        { id: '4', type: CommandType.IF, params: { condition: 'IS_PRESSED', pin: 38 } }, // Up Arrow code usually
+        { id: '5', type: CommandType.JUMP, params: { value: 15 } },
+        { id: '6', type: CommandType.END_IF, params: {} },
+        { id: '7', type: CommandType.IF, params: { condition: 'IS_PRESSED', pin: 39 } }, // Right
+        { id: '8', type: CommandType.MOVE_X, params: { value: 5 } },
+        { id: '9', type: CommandType.END_IF, params: {} },
+        { id: '10', type: CommandType.IF, params: { condition: 'IS_PRESSED', pin: 37 } }, // Left
+        { id: '11', type: CommandType.MOVE_X, params: { value: -5 } },
+        { id: '12', type: CommandType.END_IF, params: {} },
+        { id: '13', type: CommandType.END_FOREVER, params: {} }
+      ]
+    },
+    {
+      id: 'tpl_app_talk',
+      mode: AppMode.APP,
+      name: 'Talk to Me',
+      description: 'Type text and hear the robot speak it!',
+      icon: Megaphone,
+      color: 'bg-blue-500',
+      commands: [
+        { id: '1', type: CommandType.SET_TITLE, params: { text: 'Voice App' } },
+        { id: '2', type: CommandType.ADD_TEXT_BLOCK, params: { text: 'What should I say?', textSize: 'lg' as const } },
+        { id: '3', type: CommandType.ADD_INPUT, params: { varName: 'speech', text: 'Type here...' } },
+        { id: '4', type: CommandType.ADD_SPACER, params: { value: 20 } },
+        { id: '5', type: CommandType.ADD_BUTTON, params: { text: 'Speak Now', message: '' } },
+        { id: '6', type: CommandType.IF, params: { condition: 'true' } }, // Usually button trigger logic needs improving, simplified here
+        { id: '7', type: CommandType.SPEAK, params: { text: 'Hello World' } }, // Placeholder for var usage
+        { id: '8', type: CommandType.END_IF, params: {} }
+      ]
+    },
+    {
+      id: 'tpl_hw_siren',
+      mode: AppMode.HARDWARE,
+      name: 'Police Siren',
+      description: 'Flashing Red/Blue LEDs with sound.',
+      icon: Zap,
+      color: 'bg-emerald-500',
+      commands: [
+        { id: '1', type: CommandType.FOREVER, params: {} },
+        { id: '2', type: CommandType.LED_ON, params: { pin: 0 } }, // Red
+        { id: '3', type: CommandType.LED_OFF, params: { pin: 1 } }, // Blue
+        { id: '4', type: CommandType.PLAY_TONE, params: { duration: 0.5 } },
+        { id: '5', type: CommandType.LED_OFF, params: { pin: 0 } },
+        { id: '6', type: CommandType.LED_ON, params: { pin: 1 } },
+        { id: '7', type: CommandType.PLAY_TONE, params: { duration: 0.5 } },
+        { id: '8', type: CommandType.END_FOREVER, params: {} }
+      ],
+      circuitComponents: [
+        { id: 'c1', type: 'LED_RED', x: 100, y: 100, pin: 0 },
+        { id: 'c2', type: 'LED_BLUE', x: 200, y: 100, pin: 1 },
+        { id: 'c3', type: 'SPEAKER', x: 150, y: 300, pin: 8 }
+      ] as CircuitComponent[]
+    },
+    {
+      id: 'tpl_game_quest',
+      mode: AppMode.GAME,
+      name: 'AI Quest RPG',
+      description: 'Talk to an NPC to start your adventure!',
+      icon: MessageSquare,
+      color: 'bg-indigo-600',
+      commands: [
+        { id: '1', type: CommandType.SET_SCENE, params: { text: 'forest' } },
+        { id: '2', type: CommandType.NPC_TALK, params: { text: 'Wizard', message: 'The forest is dangerous! Take this fireball!' } },
+        { id: '3', type: CommandType.SPAWN_PARTICLES, params: { text: 'sparkle', color: '#fbbf24' } },
+        { id: '4', type: CommandType.SET_VAR, params: { varName: 'has_spell', value: 1 } }
+      ]
+    },
+    {
+      id: 'tpl_app_social',
+      mode: AppMode.APP,
+      name: 'Profile Bio',
+      description: 'Uses Global Variables to share your name.',
+      icon: User,
+      color: 'bg-blue-600',
+      commands: [
+        { id: '1', type: CommandType.CREATE_SCREEN, params: { text: 'login' } },
+        { id: '2', type: CommandType.ADD_TEXT_BLOCK, params: { text: 'Welcome!', textSize: 'xl' } },
+        { id: '3', type: CommandType.ADD_INPUT, params: { varName: 'global_username', text: 'Enter your name' } },
+        { id: '4', type: CommandType.ADD_BUTTON, params: { text: 'Go to Profile', screenName: 'main' } },
+        { id: '5', type: CommandType.CREATE_SCREEN, params: { text: 'main' } },
+        { id: '6', type: CommandType.ADD_CHAT_MESSAGE, params: { text: 'Hello, User!', message: 'left' } }
+      ]
+    },
+    {
+      id: 'tpl_hw_logic',
+      mode: AppMode.HARDWARE,
+      name: 'Smart Security',
+      description: 'Unlock with Logic AND (Switch + Light).',
+      icon: Lock,
+      color: 'bg-emerald-600',
+      commands: [
+        { id: '1', type: CommandType.FOREVER, params: {} },
+        { id: '2', type: CommandType.READ_DIGITAL, params: { pin: 4, varName: 'sw' } },
+        { id: '3', type: CommandType.READ_ANALOG, params: { pin: 5, varName: 'light' } },
+        { id: '4', type: CommandType.LOGIC_AND, params: { varName: 'safe', value: 1, value2: 1 } },
+        { id: '5', type: CommandType.IF, params: { condition: 'true' } },
+        { id: '6', type: CommandType.LED_ON, params: { pin: 2 } },
+        { id: '7', type: CommandType.END_IF, params: {} },
+        { id: '8', type: CommandType.END_FOREVER, params: {} }
+      ],
+      circuitComponents: [
+        { id: 'c1', type: 'SWITCH_SLIDE', x: 50, y: 100, pin: 4 },
+        { id: 'c2', type: 'LIGHT_SENSOR', x: 150, y: 100, pin: 5 },
+        { id: 'c3', type: 'LED_GREEN', x: 100, y: 300, pin: 2 }
+      ] as CircuitComponent[]
+    },
+    {
+      id: 'tpl_game_3d',
+      mode: AppMode.GAME,
+      name: '3D World Explorer',
+      description: 'Build and walk through a 3D world!',
+      icon: Box,
+      color: 'bg-cyan-600',
+      commands: [
+        { id: '1', type: CommandType.SET_VIEW_3D, params: { condition: 'true' } },
+        { id: '2', type: CommandType.GENERATE_ENVIRONMENT, params: { text: 'Sci-fi Moon Base' } },
+        { id: '3', type: CommandType.SET_EMOJI, params: { text: '👨‍🚀' } },
+        { id: '4', type: CommandType.SAY, params: { text: 'One small step for a kid...' } },
+        { id: '5', type: CommandType.FOREVER, params: {} },
+        { id: '6', type: CommandType.MOVE_Z, params: { value: 1 } },
+        { id: '7', type: CommandType.ROTATE_Y, params: { value: 5 } },
+        { id: '8', type: CommandType.END_FOREVER, params: {} }
+      ]
+    }
+  ];
 
 export const UI_PALETTE = [
-    { type: CommandType.ADD_BUTTON, label: 'Button', icon: MousePointer2, color: 'bg-blue-600' },
-    { type: CommandType.ADD_TEXT_BLOCK, label: 'Text Block', icon: MessageSquare, color: 'bg-indigo-500' },
-    { type: CommandType.ADD_INPUT, label: 'Input Field', icon: TextCursorInput, color: 'bg-teal-500' },
-    { type: CommandType.ADD_IMAGE, label: 'Image', icon: Image, color: 'bg-fuchsia-500' },
-    { type: CommandType.ADD_SWITCH, label: 'Switch', icon: ToggleRight, color: 'bg-emerald-600' },
-    { type: CommandType.ADD_CHECKBOX, label: 'Checkbox', icon: CheckSquare, color: 'bg-emerald-500' },
-    { type: CommandType.ADD_SLIDER, label: 'Slider', icon: SlidersHorizontal, color: 'bg-cyan-600' },
-    { type: CommandType.ADD_PROGRESS, label: 'Progress Bar', icon: BarChart3, color: 'bg-green-600' },
-    { type: CommandType.ADD_LIST_VIEW, label: 'List View', icon: List, color: 'bg-amber-500' },
-    { type: CommandType.ADD_DRAWING_CANVAS, label: 'Drawing Canvas', icon: Pencil, color: 'bg-purple-600' },
-    { type: CommandType.ADD_MAP, label: 'Map', icon: MapPin, color: 'bg-orange-500' },
-    { type: CommandType.ADD_VIDEO, label: 'Video Player', icon: Video, color: 'bg-red-500' },
-    { type: CommandType.ADD_CAMERA, label: 'Camera View', icon: Camera, color: 'bg-slate-800' },
-    { type: CommandType.ADD_CHART, label: 'Chart', icon: Activity, color: 'bg-purple-500' },
-    { type: CommandType.ADD_DATE_PICKER, label: 'Date', icon: Calendar, color: 'bg-blue-400' },
-    { type: CommandType.ADD_COLOR_PICKER, label: 'Color Picker', icon: Palette, color: 'bg-pink-500' },
-    { type: CommandType.ADD_AUDIO_RECORDER, label: 'Audio Recorder', icon: Mic, color: 'bg-rose-600' },
-    { type: CommandType.ADD_DIVIDER, label: 'Divider', icon: Minus, color: 'bg-slate-400' },
-    { type: CommandType.ADD_SPACER, label: 'Spacer', icon: ArrowUp, color: 'bg-slate-300' },
+  { type: CommandType.ADD_BUTTON, label: 'Button', icon: MousePointer2, color: 'bg-blue-600' },
+  { type: CommandType.ADD_TEXT_BLOCK, label: 'Text Block', icon: MessageSquare, color: 'bg-indigo-500' },
+  { type: CommandType.ADD_INPUT, label: 'Input Field', icon: TextCursorInput, color: 'bg-teal-500' },
+  { type: CommandType.ADD_IMAGE, label: 'Image', icon: Image, color: 'bg-fuchsia-500' },
+  { type: CommandType.ADD_SWITCH, label: 'Switch', icon: ToggleRight, color: 'bg-emerald-600' },
+  { type: CommandType.ADD_CHECKBOX, label: 'Checkbox', icon: CheckSquare, color: 'bg-emerald-500' },
+  { type: CommandType.ADD_SLIDER, label: 'Slider', icon: SlidersHorizontal, color: 'bg-cyan-600' },
+  { type: CommandType.ADD_PROGRESS, label: 'Progress Bar', icon: BarChart3, color: 'bg-green-600' },
+  { type: CommandType.ADD_LIST_VIEW, label: 'List View', icon: List, color: 'bg-amber-500' },
+  { type: CommandType.ADD_DRAWING_CANVAS, label: 'Drawing Canvas', icon: Pencil, color: 'bg-purple-600' },
+  { type: CommandType.ADD_MAP, label: 'Map', icon: MapPin, color: 'bg-orange-500' },
+  { type: CommandType.ADD_VIDEO, label: 'Video Player', icon: Video, color: 'bg-red-500' },
+  { type: CommandType.ADD_CAMERA, label: 'Camera View', icon: Camera, color: 'bg-slate-800' },
+  { type: CommandType.ADD_CHART, label: 'Chart', icon: Activity, color: 'bg-purple-500' },
+  { type: CommandType.ADD_DATE_PICKER, label: 'Date', icon: Calendar, color: 'bg-blue-400' },
+  { type: CommandType.ADD_COLOR_PICKER, label: 'Color Picker', icon: Palette, color: 'bg-pink-500' },
+  { type: CommandType.ADD_AUDIO_RECORDER, label: 'Audio Recorder', icon: Mic, color: 'bg-rose-600' },
+  { type: CommandType.ADD_DIVIDER, label: 'Divider', icon: Minus, color: 'bg-slate-400' },
+  { type: CommandType.ADD_SPACER, label: 'Spacer', icon: ArrowUp, color: 'bg-slate-300' },
 ];
 
 export const LEVEL_PALETTE = [
-    { type: 'brick', label: 'Brick', icon: BrickWall, color: 'text-amber-800' },
-    { type: 'grass', label: 'Grass', icon: Square, color: 'text-green-500' },
-    { type: 'dirt', label: 'Dirt', icon: Square, color: 'text-yellow-800' },
-    { type: 'stone', label: 'Stone', icon: Square, color: 'text-stone-500' },
-    { type: 'water', label: 'Water', icon: Waves, color: 'text-blue-400' },
-    { type: 'lava', label: 'Lava', icon: Flame, color: 'text-orange-600' },
-    { type: 'crate', label: 'Crate', icon: Boxes, color: 'text-amber-600' },
-    { type: 'ladder', label: 'Ladder', icon: ArrowUp, color: 'text-amber-900' },
-    { type: 'spring', label: 'Spring', icon: ArrowUpCircle, color: 'text-pink-500' },
-    { type: 'coin', label: 'Coin', icon: Coins, color: 'text-yellow-500' },
-    { type: 'key', label: 'Key', icon: KeyIcon, color: 'text-yellow-400' },
-    { type: 'door', label: 'Door', icon: DoorOpen, color: 'text-slate-800' },
-    { type: 'spike', label: 'Spike', icon: Triangle, color: 'text-red-600' },
-    { type: 'flag', label: 'Finish', icon: Flag, color: 'text-green-600' },
-    { type: 'eraser', label: 'Eraser', icon: Eraser, color: 'text-slate-400' },
+  { type: 'brick', label: 'Brick', icon: BrickWall, color: 'text-amber-800' },
+  { type: 'grass', label: 'Grass', icon: Square, color: 'text-green-500' },
+  { type: 'dirt', label: 'Dirt', icon: Square, color: 'text-yellow-800' },
+  { type: 'stone', label: 'Stone', icon: Square, color: 'text-stone-500' },
+  { type: 'water', label: 'Water', icon: Waves, color: 'text-blue-400' },
+  { type: 'lava', label: 'Lava', icon: Flame, color: 'text-orange-600' },
+  { type: 'crate', label: 'Crate', icon: Boxes, color: 'text-amber-600' },
+  { type: 'ladder', label: 'Ladder', icon: ArrowUp, color: 'text-amber-900' },
+  { type: 'spring', label: 'Spring', icon: ArrowUpCircle, color: 'text-pink-500' },
+  { type: 'coin', label: 'Coin', icon: Coins, color: 'text-yellow-500' },
+  { type: 'key', label: 'Key', icon: KeyIcon, color: 'text-yellow-400' },
+  { type: 'door', label: 'Door', icon: DoorOpen, color: 'text-slate-800' },
+  { type: 'spike', label: 'Spike', icon: Triangle, color: 'text-red-600' },
+  { type: 'flag', label: 'Finish', icon: Flag, color: 'text-green-600' },
+  { type: 'eraser', label: 'Eraser', icon: Eraser, color: 'text-slate-400' },
 ];
 
 export const CHARACTER_PALETTE = [
-    { emoji: '🤖', label: 'Robot' },
-    { emoji: '👾', label: 'Alien' },
-    { emoji: '👦', label: 'Boy' },
-    { emoji: '👧', label: 'Girl' },
-    { emoji: '👨', label: 'Man' },
-    { emoji: '👩', label: 'Woman' },
-    { emoji: '👸', label: 'Princess' },
-    { emoji: '🤴', label: 'Prince' },
-    { emoji: '🥷', label: 'Ninja' },
-    { emoji: '🧛', label: 'Vampire' },
-    { emoji: '🧟', label: 'Zombie' },
-    { emoji: '🧙', label: 'Wizard' },
-    { emoji: '🧚', label: 'Fairy' },
-    { emoji: '😎', label: 'Cool Hero' },
-    { emoji: '🤠', label: 'Cowboy' },
-    { emoji: '👮', label: 'Officer' },
-    { emoji: '💃', label: 'Dancer' },
-    { emoji: '🕺', label: 'Disco' },
-    { emoji: '🐱', label: 'Cat' },
-    { emoji: '🐶', label: 'Dog' },
-    { emoji: '🐯', label: 'Tiger' },
-    { emoji: '🦄', label: 'Unicorn' },
-    { emoji: '🐲', label: 'Dragon' },
-    { emoji: '👻', label: 'Ghost' },
+  { emoji: '🤖', label: 'Robot' },
+  { emoji: '👾', label: 'Alien' },
+  { emoji: '👦', label: 'Boy' },
+  { emoji: '👧', label: 'Girl' },
+  { emoji: '👨', label: 'Man' },
+  { emoji: '👩', label: 'Woman' },
+  { emoji: '👸', label: 'Princess' },
+  { emoji: '🤴', label: 'Prince' },
+  { emoji: '🥷', label: 'Ninja' },
+  { emoji: '🧛', label: 'Vampire' },
+  { emoji: '🧟', label: 'Zombie' },
+  { emoji: '🧙', label: 'Wizard' },
+  { emoji: '🧚', label: 'Fairy' },
+  { emoji: '😎', label: 'Cool Hero' },
+  { emoji: '🤠', label: 'Cowboy' },
+  { emoji: '👮', label: 'Officer' },
+  { emoji: '💃', label: 'Dancer' },
+  { emoji: '🕺', label: 'Disco' },
+  { emoji: '🐱', label: 'Cat' },
+  { emoji: '🐶', label: 'Dog' },
+  { emoji: '🐯', label: 'Tiger' },
+  { emoji: '🦄', label: 'Unicorn' },
+  { emoji: '🐲', label: 'Dragon' },
+  { emoji: '👻', label: 'Ghost' },
 ];
 
 export const VEHICLE_PALETTE = [
-    { emoji: '🚗', label: 'Car' },
-    { emoji: '🏎️', label: 'Racer' },
-    { emoji: '🚓', label: 'Police' },
-    { emoji: '🚑', label: 'Ambulance' },
-    { emoji: '🚌', label: 'Bus' },
-    { emoji: '🚛', label: 'Truck' },
-    { emoji: '🚜', label: 'Tractor' },
-    { emoji: '🚲', label: 'Bike' },
-    { emoji: '🏍️', label: 'Motorcycle' },
-    { emoji: '🚀', label: 'Rocket' },
-    { emoji: '🛸', label: 'UFO' },
-    { emoji: '🚁', label: 'Helicopter' },
-    { emoji: '✈️', label: 'Plane' },
-    { emoji: '⛵', label: 'Boat' },
+  { emoji: '🚗', label: 'Car' },
+  { emoji: '🏎️', label: 'Racer' },
+  { emoji: '🚓', label: 'Police' },
+  { emoji: '🚑', label: 'Ambulance' },
+  { emoji: '🚌', label: 'Bus' },
+  { emoji: '🚛', label: 'Truck' },
+  { emoji: '🚜', label: 'Tractor' },
+  { emoji: '🚲', label: 'Bike' },
+  { emoji: '🏍️', label: 'Motorcycle' },
+  { emoji: '🚀', label: 'Rocket' },
+  { emoji: '🛸', label: 'UFO' },
+  { emoji: '🚁', label: 'Helicopter' },
+  { emoji: '✈️', label: 'Plane' },
+  { emoji: '⛵', label: 'Boat' },
 ];
 
 export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
@@ -399,13 +409,13 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     // --- NAVIGATION ---
     { type: CommandType.CREATE_SCREEN, label: 'New Screen', icon: PanelTop, defaultParams: { text: 'main' }, color: 'bg-slate-800', category: 'Navigation', description: 'Creates a new screen for your app.' },
     { type: CommandType.NAVIGATE, label: 'Navigate To', icon: ArrowRight, defaultParams: { text: 'screen2' }, color: 'bg-blue-600', category: 'Navigation', description: 'Switch to a different screen.' },
-    
+
     // --- UI DESIGN ---
     { type: CommandType.SET_TITLE, label: 'Set Title', icon: Type, defaultParams: { text: 'My App' }, color: 'bg-indigo-500', category: 'Design', description: 'Change the title bar text.' },
     { type: CommandType.SET_BACKGROUND, label: 'Background', icon: PaintBucket, defaultParams: { color: '#ffffff' }, color: 'bg-indigo-400', category: 'Design', description: 'Change the screen background color.' },
     { type: CommandType.ADD_DIVIDER, label: 'Divider', icon: Minus, defaultParams: {}, color: 'bg-slate-400', category: 'Design', description: 'Horizontal line separator.' },
     { type: CommandType.ADD_SPACER, label: 'Spacer', icon: ArrowUp, defaultParams: { value: 20 }, color: 'bg-slate-300', category: 'Design', description: 'Add empty space.' },
-    
+
     // --- WIDGETS ---
     { type: CommandType.ADD_TEXT_BLOCK, label: 'Text', icon: MessageSquare, defaultParams: { text: 'Hello', color: '#000000' }, color: 'bg-slate-500', category: 'Widgets', description: 'Add a block of text to the screen.' },
     { type: CommandType.ADD_BUTTON, label: 'Button', icon: MousePointer2, defaultParams: { text: 'Click Me', message: 'Hello!' }, color: 'bg-blue-500', category: 'Widgets', description: 'A button that shows a message or switches screens.' },
@@ -416,7 +426,7 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.ADD_CHECKBOX, label: 'Checkbox', icon: CheckSquare, defaultParams: { text: 'Check', varName: 'cb1' }, color: 'bg-emerald-500', category: 'Widgets', description: 'A box to check or uncheck.' },
     { type: CommandType.ADD_PROGRESS, label: 'Progress', icon: BarChart3, defaultParams: { text: 'Loading', value: 50 }, color: 'bg-green-600', category: 'Widgets', description: 'Show a progress bar.' },
     { type: CommandType.ADD_LIST_VIEW, label: 'List View', icon: List, defaultParams: { varName: 'items' }, color: 'bg-amber-500', category: 'Widgets', description: 'Display items from a list variable.' },
-    { type: CommandType.ADD_DRAWING_CANVAS, label: 'Drawing Pad', icon: Pencil, defaultParams: { }, color: 'bg-purple-600', category: 'Widgets', description: 'Area for drawing with finger.' },
+    { type: CommandType.ADD_DRAWING_CANVAS, label: 'Drawing Pad', icon: Pencil, defaultParams: {}, color: 'bg-purple-600', category: 'Widgets', description: 'Area for drawing with finger.' },
     { type: CommandType.ADD_MAP, label: 'Map View', icon: MapPin, defaultParams: { text: 'New York' }, color: 'bg-orange-500', category: 'Widgets', description: 'Show a map location.' },
     { type: CommandType.ADD_VIDEO, label: 'Video Player', icon: Video, defaultParams: { text: 'video_url' }, color: 'bg-red-500', category: 'Widgets', description: 'Play a video.' },
     { type: CommandType.ADD_CAMERA, label: 'Camera View', icon: Camera, defaultParams: {}, color: 'bg-slate-800', category: 'Widgets', description: 'Display live camera feed.' },
@@ -427,8 +437,8 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.ADD_NEWS_FEED, label: 'News Feed', icon: Globe, defaultParams: { text: 'Latest Updates' }, color: 'bg-sky-500', category: 'Social', description: 'Display a list of posts.' },
     { type: CommandType.ADD_CHAT_MESSAGE, label: 'Chat Bubble', icon: MessageSquare, defaultParams: { text: 'Hi!', message: 'left' }, color: 'bg-indigo-400', category: 'Social', description: 'Add a chat message bubble.' },
     { type: CommandType.ADD_CHART, label: 'Chart', icon: Activity, defaultParams: { text: 'Data', varName: 'data1' }, color: 'bg-purple-500', category: 'Widgets', description: 'Show a data chart.' },
-    { type: CommandType.ADD_AUDIO_PLAYER, label: 'Audio Player', icon: Music, defaultParams: { }, color: 'bg-rose-500', category: 'Widgets', description: 'Play an audio file.' },
-    { type: CommandType.ADD_QR_CODE, label: 'QR Code', icon: Scan, defaultParams: { }, color: 'bg-slate-700', category: 'Widgets', description: 'Display a QR code.' },
+    { type: CommandType.ADD_AUDIO_PLAYER, label: 'Audio Player', icon: Music, defaultParams: {}, color: 'bg-rose-500', category: 'Widgets', description: 'Play an audio file.' },
+    { type: CommandType.ADD_QR_CODE, label: 'QR Code', icon: Scan, defaultParams: {}, color: 'bg-slate-700', category: 'Widgets', description: 'Display a QR code.' },
 
     // --- ACTIONS & ALERTS ---
     { type: CommandType.SHOW_ALERT, label: 'Show Alert', icon: AlertTriangle, defaultParams: { text: 'Warning!' }, color: 'bg-red-600', category: 'Actions', description: 'Pop up a message box.' },
@@ -439,7 +449,7 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.CLEAR_UI, label: 'Clear Screen', icon: Eraser, defaultParams: {}, color: 'bg-red-400', category: 'Actions', description: 'Remove all widgets from the screen.' },
     { type: CommandType.CLOUD_SAVE, label: 'Cloud Save', icon: Cloud, defaultParams: {}, color: 'bg-blue-500', category: 'Actions', description: 'Save variables to the cloud.' },
     { type: CommandType.CLOUD_LOAD, label: 'Cloud Load', icon: Download, defaultParams: {}, color: 'bg-blue-400', category: 'Actions', description: 'Load variables from the cloud.' },
-    
+
     // --- LOGIC & DATA ---
     { type: CommandType.SET_VAR, label: 'Set Variable', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value to a variable.' },
     { type: CommandType.CHANGE_VAR, label: 'Change Var', icon: Variable, defaultParams: { varName: 'x', value: 1 }, color: 'bg-orange-600', category: 'Data', description: 'Add or subtract from a variable.' },
@@ -473,7 +483,7 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.POINT_DIR, label: 'Point Direction', icon: Compass, defaultParams: { value: 90 }, color: 'bg-blue-500', category: 'Motion', description: 'Rotate character.' },
 
     { type: CommandType.SET_BOUNCINESS, label: 'Set Bounciness', icon: Activity, defaultParams: { value: 0.8 }, color: 'bg-blue-400', category: 'Physics', description: 'Make object bouncy.' },
-    
+
     // --- PHYSICS 2.0 ---
     { type: CommandType.SET_PHYSICS_TYPE, label: 'Physics Body', icon: Box, defaultParams: { text: 'dynamic' }, color: 'bg-cyan-600', category: 'Physics', description: 'Static, Dynamic, or Bouncy.' },
     { type: CommandType.CREATE_JOINT, label: 'Connect Joint', icon: Link, defaultParams: { text: 'wheel' }, color: 'bg-cyan-700', category: 'Physics', description: 'Connect two objects.' },
@@ -489,7 +499,7 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.SET_SIZE, label: 'Set Size %', icon: ZoomIn, defaultParams: { value: 100 }, color: 'bg-purple-400', category: 'Looks', description: 'Set character size.' },
     { type: CommandType.CHANGE_SIZE, label: 'Change Size', icon: ZoomIn, defaultParams: { value: 10 }, color: 'bg-purple-400', category: 'Looks', description: 'Grow or shrink.' },
     { type: CommandType.SET_OPACITY, label: 'Set Opacity', icon: Eye, defaultParams: { value: 100 }, color: 'bg-purple-400', category: 'Looks', description: 'Set transparency.' },
-  { type: CommandType.PLAY_ANIMATION, label: 'Play Animation', icon: Film, defaultParams: { text: 'walk' }, color: 'bg-purple-600', category: 'Looks', description: 'Play a named animation.' },
+    { type: CommandType.PLAY_ANIMATION, label: 'Play Animation', icon: Film, defaultParams: { text: 'walk' }, color: 'bg-purple-600', category: 'Looks', description: 'Play a named animation.' },
 
     // --- ACTIONS ---
     { type: CommandType.SHOOT, label: 'Shoot', icon: Crosshair, defaultParams: { text: '⚡' }, color: 'bg-red-500', category: 'Actions', description: 'Fire a projectile.' },
@@ -508,40 +518,40 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     // Dialogue System
     { type: CommandType.CREATE_DIALOGUE, label: 'Start Dialogue', icon: MessageSquare, defaultParams: { text: 'Elder', message: 'Welcome, hero!' }, color: 'bg-indigo-600', category: 'Dialogue', description: 'Open dialogue with choices.' },
     { type: CommandType.END_DIALOGUE, label: 'End Dialogue', icon: XCircle, defaultParams: {}, color: 'bg-indigo-500', category: 'Dialogue', description: 'Close dialogue box.' },
-    
+
     // Inventory
     { type: CommandType.ADD_TO_INVENTORY, label: 'Add to Inventory', icon: Box, defaultParams: { text: 'Health Potion', value: 1 }, color: 'bg-amber-600', category: 'Inventory', description: 'Add item to inventory.' },
     { type: CommandType.REMOVE_FROM_INVENTORY, label: 'Remove from Inventory', icon: Trash, defaultParams: { text: 'Health Potion' }, color: 'bg-amber-700', category: 'Inventory', description: 'Remove item from inventory.' },
     { type: CommandType.USE_ITEM, label: 'Use Item', icon: Play, defaultParams: { text: 'Health Potion' }, color: 'bg-green-600', category: 'Inventory', description: 'Use an item.' },
     { type: CommandType.SHOW_INVENTORY, label: 'Show Inventory', icon: Box, defaultParams: {}, color: 'bg-amber-500', category: 'Inventory', description: 'Open inventory UI.' },
     { type: CommandType.CRAFT_ITEM, label: 'Craft Item', icon: Sparkles, defaultParams: { text: 'Sword', value: 2 }, color: 'bg-orange-600', category: 'Inventory', description: 'Craft item from materials.' },
-    
+
     // Music & Audio
     { type: CommandType.SET_BACKGROUND_MUSIC, label: 'Set BGM', icon: Music, defaultParams: { text: 'adventure.mp3' }, color: 'bg-purple-600', category: 'Audio', description: 'Set background music.' },
     { type: CommandType.PLAY_MUSIC, label: 'Play Music', icon: Play, defaultParams: { text: 'battle.mp3' }, color: 'bg-purple-500', category: 'Audio', description: 'Play music track.' },
     { type: CommandType.STOP_MUSIC, label: 'Stop Music', icon: Square, defaultParams: {}, color: 'bg-purple-700', category: 'Audio', description: 'Stop music.' },
     { type: CommandType.SET_MUSIC_VOLUME, label: 'Music Volume', icon: SlidersHorizontal, defaultParams: { value: 50 }, color: 'bg-purple-400', category: 'Audio', description: 'Set music volume.' },
     { type: CommandType.PLAY_AMBIENT, label: 'Play Ambient', icon: Wind, defaultParams: { text: 'forest' }, color: 'bg-cyan-600', category: 'Audio', description: 'Play ambient sound.' },
-    
+
     // Cutscenes
     { type: CommandType.TRIGGER_CUTSCENE, label: 'Trigger Cutscene', icon: Video, defaultParams: { text: 'intro' }, color: 'bg-slate-700', category: 'Cutscene', description: 'Start cutscene.' },
     { type: CommandType.FADE_IN, label: 'Fade In', icon: Sun, defaultParams: { value: 1 }, color: 'bg-slate-600', category: 'Cutscene', description: 'Fade screen in.' },
     { type: CommandType.FADE_OUT, label: 'Fade Out', icon: Moon, defaultParams: { value: 1 }, color: 'bg-slate-600', category: 'Cutscene', description: 'Fade screen out.' },
     { type: CommandType.SHAKE_SCREEN, label: 'Shake Screen', icon: Activity, defaultParams: { value: 0.5 }, color: 'bg-red-600', category: 'Cutscene', description: 'Shake the screen.' },
     { type: CommandType.SLOW_MOTION, label: 'Slow Motion', icon: Timer, defaultParams: { value: 0.5 }, color: 'bg-blue-600', category: 'Cutscene', description: 'Slow down time.' },
-    
+
     // Boss Battles
     { type: CommandType.SPAWN_BOSS, label: 'Spawn Boss', icon: Ghost, defaultParams: { text: 'Dragon', value: 100 }, color: 'bg-red-700', category: 'Boss', description: 'Spawn boss enemy.' },
     { type: CommandType.SET_BOSS_HEALTH, label: 'Set Boss HP', icon: Heart, defaultParams: { value: 100 }, color: 'bg-red-600', category: 'Boss', description: 'Set boss health.' },
     { type: CommandType.BOSS_ATTACK, label: 'Boss Attack', icon: Crosshair, defaultParams: { text: 'fireball' }, color: 'bg-orange-700', category: 'Boss', description: 'Boss performs attack.' },
     { type: CommandType.BOSS_PHASE, label: 'Boss Phase', icon: Layers, defaultParams: { value: 2 }, color: 'bg-purple-700', category: 'Boss', description: 'Change boss phase.' },
-    
+
     // Advanced Movement
     { type: CommandType.DASH, label: 'Dash', icon: Zap, defaultParams: { value: 10 }, color: 'bg-cyan-600', category: 'Motion', description: 'Quick dash movement.' },
     { type: CommandType.DOUBLE_JUMP, label: 'Enable Double Jump', icon: ArrowUpCircle, defaultParams: { condition: 'true' }, color: 'bg-blue-500', category: 'Motion', description: 'Enable double jump.' },
     { type: CommandType.WALL_JUMP, label: 'Enable Wall Jump', icon: ArrowUp, defaultParams: { condition: 'true' }, color: 'bg-blue-500', category: 'Motion', description: 'Enable wall jumping.' },
     { type: CommandType.GRAPPLE, label: 'Grapple', icon: Anchor, defaultParams: { value: 100 }, color: 'bg-amber-600', category: 'Motion', description: 'Grapple to position.' },
-    
+
     // Checkpoints
     { type: CommandType.CREATE_CHECKPOINT, label: 'Create Checkpoint', icon: Flag, defaultParams: { text: 'Save Point' }, color: 'bg-green-600', category: 'Progress', description: 'Create save point.' },
     { type: CommandType.LOAD_CHECKPOINT, label: 'Load Checkpoint', icon: RotateCcw, defaultParams: {}, color: 'bg-green-500', category: 'Progress', description: 'Load last checkpoint.' },
@@ -603,8 +613,7 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.SET_LCD, label: 'LCD Print', icon: Type, defaultParams: { text: 'Hello', row: 0, col: 0 }, color: 'bg-lime-600', category: 'Display', description: 'Show text on screen.' },
     { type: CommandType.CLEAR_LCD, label: 'Clear LCD', icon: Eraser, defaultParams: {}, color: 'bg-lime-700', category: 'Display', description: 'Wipe screen.' },
     { type: CommandType.SCROLL_LCD, label: 'Scroll LCD', icon: ArrowUp, defaultParams: { text: 'Scrolling text' }, color: 'bg-lime-500', category: 'Display', description: 'Scroll text on LCD.' },
-    { type: CommandType.SET_SEGMENT, label: 'Show Number', icon: Binary, defaultParams: { value: 0 }, color: 'bg-red-600', category: 'Display', description: 'Display digit.' },
-
+    { type: CommandType.SET_SEGMENT, label: '7-Segment', icon: Hash, defaultParams: { value: 0 }, color: 'bg-slate-700', category: 'Display', description: 'Set segment display.' },
     // --- INPUT ---
     { type: CommandType.READ_DIGITAL, label: 'Read Digital', icon: ToggleLeft, defaultParams: { pin: 4, varName: 'btnState' }, color: 'bg-indigo-500', category: 'Input', description: 'Read Button/Switch.' },
     { type: CommandType.READ_ANALOG, label: 'Read Analog', icon: Gauge, defaultParams: { pin: 97, varName: 'val' }, color: 'bg-indigo-500', category: 'Input', description: 'Read Sensor value.' },
@@ -623,12 +632,10 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.READ_PRESSURE, label: 'Read Pressure', icon: Gauge, defaultParams: { varName: 'pressure' }, color: 'bg-cyan-500', category: 'Input', description: 'Read pressure sensor.' },
     { type: CommandType.READ_FLEX, label: 'Read Flex', icon: Move, defaultParams: { varName: 'flex' }, color: 'bg-purple-500', category: 'Input', description: 'Read flex sensor.' },
     { type: CommandType.READ_MAGNETIC, label: 'Read Mag Field', icon: Magnet, defaultParams: { varName: 'magnetic' }, color: 'bg-blue-600', category: 'Input', description: 'Read hall sensor.' },
-    
     // --- LOGIC ---
     { type: CommandType.LOGIC_AND, label: 'AND Gate', icon: GitBranch, defaultParams: { varName: 'out', value: true, value2: true }, color: 'bg-indigo-600', category: 'Logic', description: 'True if both inputs are true.' },
     { type: CommandType.LOGIC_OR, label: 'OR Gate', icon: GitBranch, defaultParams: { varName: 'out', value: true, value2: false }, color: 'bg-indigo-600', category: 'Logic', description: 'True if either input is true.' },
     { type: CommandType.LOGIC_NOT, label: 'NOT Gate', icon: GitBranch, defaultParams: { varName: 'out', value: true }, color: 'bg-indigo-600', category: 'Logic', description: 'Inverts the input.' },
-
     // --- DATA ---
     { type: CommandType.LOG_DATA, label: 'Log Data', icon: Terminal, defaultParams: { text: 'Value' }, color: 'bg-slate-600', category: 'Data', description: 'Print to console.' },
     { type: CommandType.SET_VAR, label: 'Set Var', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value.' },
@@ -636,7 +643,17 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     { type: CommandType.RESET_BOARD, label: 'Reset Board', icon: RotateCcw, defaultParams: {}, color: 'bg-slate-600', category: 'System', description: 'Reset hardware state.' },
     { type: CommandType.CONNECT_WIFI, label: 'Connect WiFi', icon: Wifi, defaultParams: { ssid: 'network', password: 'password' }, color: 'bg-blue-500', category: 'System', description: 'Connect to WiFi.' },
     { type: CommandType.SEND_HTTP, label: 'HTTP Request', icon: Cloud, defaultParams: { url: 'http://api.example.com', method: 'GET' }, color: 'bg-blue-400', category: 'System', description: 'Send HTTP request.' },
-  ]
+  ],
+  [AppMode.GAME_3D]: [
+    { type: CommandType.SPAWN_3D_MODEL, label: 'Spawn 3D Model', icon: Box, defaultParams: { text: 'Robot', x: 0, y: 0, z: 0 }, color: 'bg-cyan-600', category: '3D', description: 'Create a 3D model.' },
+    { type: CommandType.SET_3D_POSITION, label: 'Position 3D', icon: Move, defaultParams: { x: 0, y: 0, z: 0 }, color: 'bg-cyan-500', category: '3D', description: 'Move object in 3D.' },
+    { type: CommandType.ROTATE_3D_MODEL, label: 'Rotate 3D', icon: RotateCw, defaultParams: { x: 0, y: 0, z: 0 }, color: 'bg-cyan-500', category: '3D', description: 'Rotate object in 3D.' },
+    { type: CommandType.SCALE_3D_MODEL, label: 'Scale 3D', icon: Maximize, defaultParams: { value: 1 }, color: 'bg-cyan-500', category: '3D', description: 'Resize object in 3D.' },
+    { type: CommandType.PLAY_3D_ANIMATION, label: '3D Action', icon: Play, defaultParams: { text: 'idle' }, color: 'bg-cyan-500', category: '3D', description: 'Play 3D animation.' },
+    { type: CommandType.SET_3D_CAMERA, label: '3D Camera', icon: Camera, defaultParams: { text: 'third_person' }, color: 'bg-slate-700', category: '3D', description: 'Move 3D camera.' },
+    { type: CommandType.SET_3D_LIGHTING, label: '3D Lighting', icon: Sun, defaultParams: { color: '#ffffff', intensity: 1 }, color: 'bg-amber-500', category: '3D', description: 'Set 3D world lights.' },
+    { type: CommandType.ENABLE_PHYSICS_3D, label: '3D Physics', icon: Zap, defaultParams: { condition: 'true' }, color: 'bg-orange-600', category: '3D', description: 'Turn on 3D gravity.' },
+  ],
 };
 
 export const CIRCUIT_PALETTE = [
@@ -650,7 +667,7 @@ export const CIRCUIT_PALETTE = [
   { type: 'RASPBERRY_PI_ZERO', label: 'Raspberry Pi Zero', icon: Cpu, color: 'text-green-600', category: 'Microcontrollers', defaultPin: 18, description: 'ARM11, 40-pin GPIO header, compact single-board computer' },
   { type: 'RASPBERRY_PI_4', label: 'Raspberry Pi 4', icon: Cpu, color: 'text-green-700', category: 'Microcontrollers', defaultPin: 18, description: 'Quad-core ARM Cortex-A72, 40-pin GPIO header' },
   { type: 'MICROBIT', label: 'micro:bit', icon: Cpu, color: 'text-blue-600', category: 'Microcontrollers', defaultPin: 0, description: 'ARM Cortex-M0+, 25-pin edge connector, educational board' },
-  
+
   // --- OUTPUTS ---
   { type: 'LED_RED', label: 'Red LED', icon: Lightbulb, color: 'text-red-500', category: 'Outputs', defaultPin: 0, description: 'Lights up red.' },
   { type: 'LED_BLUE', label: 'Blue LED', icon: Lightbulb, color: 'text-blue-500', category: 'Outputs', defaultPin: 1, description: 'Lights up blue.' },
@@ -672,7 +689,7 @@ export const CIRCUIT_PALETTE = [
   { type: 'MOTOR_DC', label: 'DC Motor', icon: Settings, color: 'text-yellow-600', category: 'Outputs', defaultPin: 6, description: 'Basic motor.' },
   { type: 'BUZZER', label: 'Piezo Buzzer', icon: Volume2, color: 'text-stone-700', category: 'Outputs', defaultPin: 8, description: 'Basic beeps.' },
   { type: 'VIBRATION', label: 'Vibration Motor', icon: Waves, color: 'text-indigo-500', category: 'Outputs', defaultPin: 7, description: 'Shakes the device.' },
-  
+
   // --- INPUTS ---
   { type: 'BUTTON', label: 'Push Button', icon: MousePointer2, color: 'text-red-600', category: 'Inputs', defaultPin: 4, description: 'Push to activate.' },
   { type: 'BUTTON_TACTILE', label: 'Tactile Button', icon: MousePointer2, color: 'text-red-700', category: 'Inputs', defaultPin: 5, description: 'Small tactile switch.' },
@@ -709,38 +726,38 @@ export const CIRCUIT_PALETTE = [
   { type: 'HEARTBEAT', label: 'Heartbeat', icon: Heart, color: 'text-red-500', category: 'Sensors', defaultPin: 40, description: 'Pulse sensor.' },
 
   { type: 'TILT_SENSOR', label: 'Tilt Switch', icon: RefreshCw, color: 'text-purple-500', category: 'Sensors', defaultPin: 93, description: 'Detects orientation.' },
-  
+
   // --- DISPLAYS ---
   { type: 'LCD', label: 'LCD Screen', icon: Type, color: 'text-green-700', category: 'Displays', defaultPin: 95, description: 'Displays text.' },
   { type: 'OLED', label: 'OLED Screen', icon: Tv, color: 'text-cyan-400', category: 'Displays', defaultPin: 11, description: 'Graphics display.' },
   { type: 'SEVEN_SEGMENT', label: '7-Segment', icon: Binary, color: 'text-red-600', category: 'Displays', defaultPin: 96, description: 'Shows numbers.' },
   { type: 'MATRIX', label: 'LED Matrix', icon: Grid, color: 'text-red-500', category: 'Displays', defaultPin: 10, description: 'Dot display.' },
-  
+
   // --- COMMUNICATION ---
   { type: 'WIFI', label: 'WiFi Module', icon: Wifi, color: 'text-blue-400', category: 'Comms', defaultPin: 2, description: 'Connect internet.' },
   { type: 'BLUETOOTH', label: 'Bluetooth', icon: Bluetooth, color: 'text-blue-500', category: 'Comms', defaultPin: 43, description: 'Wireless comms.' },
   { type: 'RADIO', label: 'Radio Module', icon: Radio, color: 'text-purple-500', category: 'Comms', defaultPin: 44, description: 'RF communication.' },
-  
+
   // --- STORAGE ---
   { type: 'SD_CARD', label: 'SD Card', icon: Save, color: 'text-slate-500', category: 'Storage', defaultPin: 45, description: 'Memory card.' },
   { type: 'RTC', label: 'RTC', icon: Clock, color: 'text-slate-600', category: 'Components', defaultPin: 46, description: 'Real-time clock.' },
-  
+
   // --- POWER ---
   { type: 'BATTERY_9V', label: '9V Battery', icon: Battery, color: 'text-orange-500', category: 'Power', defaultPin: 90, description: 'Power source.' },
   { type: 'BATTERY_AA', label: 'AA Battery', icon: Battery, color: 'text-orange-600', category: 'Power', defaultPin: 91, description: 'Standard battery.' },
   { type: 'SOLAR', label: 'Solar Panel', icon: Sun, color: 'text-blue-600', category: 'Power', defaultPin: 91, description: 'Sun power.' },
-  
+
   // --- COMPONENTS ---
   { type: 'BREADBOARD', label: 'Breadboard', icon: Layout, color: 'text-slate-400', category: 'Misc', defaultPin: 98, description: 'Prototyping base.' },
   { type: 'RESISTOR', label: 'Resistor', icon: Ruler, color: 'text-amber-800', category: 'Components', defaultPin: 40, description: 'Electrical resistor.' },
   { type: 'RFID', label: 'RFID Reader', icon: Fingerprint, color: 'text-violet-500', category: 'Components', defaultPin: 41, description: 'RFID card reader.' },
   { type: 'FINGERPRINT', label: 'Fingerprint', icon: Fingerprint, color: 'text-indigo-600', category: 'Components', defaultPin: 42, description: 'Biometric scanner.' },
-  
+
   // --- LOGIC ---
   { type: 'LOGIC_AND', label: 'AND Gate', icon: Zap, color: 'text-amber-500', category: 'Logic', defaultPin: 47, description: 'Logical AND gate.' },
   { type: 'LOGIC_OR', label: 'OR Gate', icon: Zap, color: 'text-emerald-500', category: 'Logic', defaultPin: 48, description: 'Logical OR gate.' },
   { type: '555_TIMER', label: '555 Timer', icon: Timer, color: 'text-cyan-600', category: 'Logic', defaultPin: 49, description: 'Timer IC.' },
-  
+
   // --- MISC ---
   { type: 'KEYPAD_MATRIX', label: 'Matrix Keypad', icon: Grid, color: 'text-slate-700', category: 'Inputs', defaultPin: 12, description: 'Advanced matrix keypad.' },
   { type: 'SERVO_CONTINUOUS', label: 'Continuous Servo', icon: Move, color: 'text-orange-400', category: 'Outputs', defaultPin: 11, description: '360° rotation servo.' },
@@ -750,7 +767,7 @@ export const CIRCUIT_PALETTE = [
   { type: 'RELAY_MODULE', label: 'Relay Module', icon: Zap, color: 'text-red-600', category: 'Outputs', defaultPin: 14, description: 'Electronic switch.' },
   { type: 'LASER_DIODE', label: 'Laser Diode', icon: Zap, color: 'text-red-500', category: 'Outputs', defaultPin: 13, description: 'Laser beam.' },
 
-  
+
   // --- POWER / OTHER ---
   { type: 'BATTERY_9V', label: '9V Battery', icon: Battery, color: 'text-orange-500', category: 'Power', defaultPin: 90, description: 'Power source.' },
   { type: 'SOLAR', label: 'Solar Panel', icon: Sun, color: 'text-blue-600', category: 'Power', defaultPin: 91, description: 'Sun power.' },

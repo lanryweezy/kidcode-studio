@@ -4,45 +4,52 @@ import HardwareStage from './HardwareStage';
 import GameStage from './GameStage';
 import GameStage3D from './GameStage3D';
 import AppStage from './AppStage';
+import { captureThumbnail } from '../services/storageService';
 
-interface StageProps {
-  mode: AppMode;
-  hardwareState: any;
-  hardwareStateRef: React.MutableRefObject<any>;
-  spriteState: any;
-  spriteStateRef: React.MutableRefObject<any>;
-  appState: any;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  circuitComponents: any[];
-  onCircuitUpdate: (components: any[]) => void;
-  pcbColor: string;
-  setPcbColor: (color: string) => void;
-  isExecuting: boolean;
-  onNavigate: (screen: string) => void;
-  highlightPin: number | null;
-  inputState: any;
-  onInput: (id: string, value: boolean) => void;
-  onHardwareInput: (pin: number, value: any) => void;
-  onUpdateSpriteState: (state: any) => void;
-  shakeAmount: number;
-  onAppInteraction: (varName: string, value: any) => void;
-  onTick?: () => void;
+export interface StageHandle {
+    getCanvas: () => HTMLCanvasElement | null;
+    getGameSize: () => { w: number; h: number };
+    getThumbnail: () => string | null;
 }
 
-const Stage = forwardRef(({ 
-    mode, 
-    hardwareState, 
+interface StageProps {
+    mode: AppMode;
+    hardwareState: any;
+    hardwareStateRef: React.MutableRefObject<any>;
+    spriteState: any;
+    spriteStateRef: React.MutableRefObject<any>;
+    appState: any;
+    canvasRef: React.RefObject<HTMLCanvasElement>;
+    circuitComponents: any[];
+    onCircuitUpdate: (components: any[]) => void;
+    pcbColor: string;
+    setPcbColor: (color: string) => void;
+    isExecuting: boolean;
+    onNavigate: (screen: string) => void;
+    highlightPin: number | null;
+    inputState: any;
+    onInput: (id: string, value: boolean) => void;
+    onHardwareInput: (pin: number, value: any) => void;
+    onUpdateSpriteState: (state: any) => void;
+    shakeAmount: number;
+    onAppInteraction: (varName: string, value: any) => void;
+    onTick?: () => void;
+}
+
+const Stage = forwardRef(({
+    mode,
+    hardwareState,
     hardwareStateRef,
-    spriteState, 
+    spriteState,
     spriteStateRef,
-    appState, 
-    canvasRef, 
-    circuitComponents, 
-    onCircuitUpdate, 
-    pcbColor, 
-    setPcbColor, 
-    isExecuting, 
-    onNavigate, 
+    appState,
+    canvasRef,
+    circuitComponents,
+    onCircuitUpdate,
+    pcbColor,
+    setPcbColor,
+    isExecuting,
+    onNavigate,
     highlightPin,
     inputState,
     onInput,
@@ -56,7 +63,11 @@ const Stage = forwardRef(({
 
     useImperativeHandle(ref, () => ({
         getCanvas: () => canvasRef.current,
-        getGameSize: () => gameCanvasSize
+        getGameSize: () => gameCanvasSize,
+        getThumbnail: () => {
+            if (canvasRef.current) return captureThumbnail(canvasRef.current);
+            return null;
+        }
     }));
 
     return (
@@ -68,7 +79,7 @@ const Stage = forwardRef(({
             </div>
 
             {mode === AppMode.HARDWARE && (
-                <HardwareStage 
+                <HardwareStage
                     hardwareState={hardwareState}
                     hardwareStateRef={hardwareStateRef}
                     circuitComponents={circuitComponents}
@@ -81,7 +92,7 @@ const Stage = forwardRef(({
 
             {mode === AppMode.GAME && (
                 spriteState.is3D ? (
-                    <GameStage3D 
+                    <GameStage3D
                         spriteState={spriteState}
                         spriteStateRef={spriteStateRef}
                         isExecuting={isExecuting}
@@ -89,7 +100,7 @@ const Stage = forwardRef(({
                         height={gameCanvasSize.h}
                     />
                 ) : (
-                    <GameStage 
+                    <GameStage
                         spriteState={spriteState}
                         spriteStateRef={spriteStateRef}
                         appState={appState}
@@ -106,7 +117,7 @@ const Stage = forwardRef(({
             )}
 
             {mode === AppMode.APP && (
-                <AppStage 
+                <AppStage
                     appState={appState}
                     onNavigate={onNavigate}
                     onAppInteraction={onAppInteraction}

@@ -7,14 +7,16 @@ import {
   HardwareState,
   SpriteState,
   CircuitComponent,
+  ComponentType,
   UserProfile,
   PlanType,
-  AppElement
+  AppElement,
+  Mission
 } from '../types';
-import { 
-  INITIAL_HARDWARE_STATE, 
-  INITIAL_SPRITE_STATE, 
-  INITIAL_APP_STATE 
+import {
+  INITIAL_HARDWARE_STATE,
+  INITIAL_SPRITE_STATE,
+  INITIAL_APP_STATE
 } from '../constants';
 import { DEFAULT_USER } from '../services/userService';
 import { SavedProject } from '../services/storageService';
@@ -72,6 +74,8 @@ interface UIState {
   showTutorial: boolean;
   isLive: boolean;
   showMarketplace: boolean;
+  showMusicGenerator: boolean;
+  activeMission: Mission | null;
   // Search and filter states
   circuitSearch: string;
   blockSearch: string;
@@ -100,7 +104,7 @@ interface StoreState extends ProjectState, UIState, UserState {
   setSaveStatus: (status: 'saved' | 'saving' | 'unsaved') => void;
   setUserProfile: (profile: UserProfile) => void;
   addAsset: (asset: { name: string, type: 'image' | 'model', url: string }) => void;
-  
+
   // UI Toggles
   toggleConsole: () => void;
   setShowProfile: (show: boolean) => void;
@@ -127,6 +131,8 @@ interface StoreState extends ProjectState, UIState, UserState {
   setShowTutorial: (show: boolean) => void;
   setIsLive: (live: boolean) => void;
   setShowMarketplace: (show: boolean) => void;
+  setShowMusicGenerator: (show: boolean) => void;
+  setActiveMission: (mission: Mission | null) => void;
   addCoins: (amount: number) => void;
   spendCoins: (amount: number) => boolean;
   setAdvancedPhysics: (advanced: boolean) => void;
@@ -138,9 +144,9 @@ interface StoreState extends ProjectState, UIState, UserState {
   setConsoleLogs: (logs: string[]) => void;
   clearLogs: () => void;
   // Panel width actions
-  setLeftPanelWidth: (width: number) => void;
-  setRightPanelWidth: (width: number) => void;
-  
+  setLeftPanelWidth: (width: number | ((prev: number) => number)) => void;
+  setRightPanelWidth: (width: number | ((prev: number) => number)) => void;
+
   // History Actions
   pushHistory: () => void;
   undo: () => void;
@@ -199,6 +205,8 @@ export const useStore = create<StoreState>((set, get) => ({
   showTutorial: false,
   isLive: false,
   showMarketplace: false,
+  showMusicGenerator: false,
+  activeMission: null,
   circuitSearch: '',
   blockSearch: '',
   expandedCategories: {},
@@ -211,8 +219,8 @@ export const useStore = create<StoreState>((set, get) => ({
   setShowHome: (show) => set({ showHome: show }),
   setActiveTab: (tab) => set({ activeTab: tab }),
   setDarkMode: (dark) => set({ darkMode: dark }),
-  
-  setProject: (project) => set({ 
+
+  setProject: (project) => set({
     currentProject: project,
     commands: project.data.commands,
     hardwareState: project.data.hardwareState,
@@ -226,25 +234,25 @@ export const useStore = create<StoreState>((set, get) => ({
   }),
 
   setCommands: (commands) => set({ commands, saveStatus: 'unsaved' }),
-  
-  updateHardwareState: (state) => set((prev) => ({ 
-    hardwareState: { ...prev.hardwareState, ...state } 
+
+  updateHardwareState: (state) => set((prev) => ({
+    hardwareState: { ...prev.hardwareState, ...state }
   })),
-  
-  updateSpriteState: (state) => set((prev) => ({ 
-    spriteState: { ...prev.spriteState, ...state } 
+
+  updateSpriteState: (state) => set((prev) => ({
+    spriteState: { ...prev.spriteState, ...state }
   })),
-  
-  updateAppState: (state) => set((prev) => ({ 
-    appState: { ...prev.appState, ...state } 
+
+  updateAppState: (state) => set((prev) => ({
+    appState: { ...prev.appState, ...state }
   })),
-  
+
   setCircuitComponents: (circuitComponents) => set({ circuitComponents, saveStatus: 'unsaved' }),
   setPcbColor: (pcbColor) => set({ pcbColor, saveStatus: 'unsaved' }),
   setSaveStatus: (saveStatus) => set({ saveStatus }),
   setUserProfile: (userProfile) => set({ userProfile }),
-  addAsset: (asset) => set((state) => ({ 
-    assets: [{ ...asset, id: crypto.randomUUID() }, ...state.assets] 
+  addAsset: (asset) => set((state) => ({
+    assets: [{ ...asset, id: crypto.randomUUID() }, ...state.assets]
   })),
 
   toggleConsole: () => set((state) => ({ showConsole: !state.showConsole })),
@@ -273,11 +281,13 @@ export const useStore = create<StoreState>((set, get) => ({
   setShowAssetManager: (showAssetManager) => set({ showAssetManager }),
   setShowAI3DCreator: (showAI3DCreator) => set({ showAI3DCreator }),
   setShowSpriteExtractor: (showSpriteExtractor) => set({ showSpriteExtractor }),
-  setShowTutorial: (showTutorial) => set({ showTutorial }),
-  setIsLive: (isLive) => set({ isLive }),
-  setShowMarketplace: (showMarketplace) => set({ showMarketplace }),
-  addCoins: (amount) => set((state) => ({ 
-    userProfile: { ...state.userProfile, coins: state.userProfile.coins + amount } 
+  setShowTutorial: (show) => set({ showTutorial: show }),
+  setIsLive: (live) => set({ isLive: live }),
+  setShowMarketplace: (show) => set({ showMarketplace: show }),
+  setShowMusicGenerator: (show) => set({ showMusicGenerator: show }),
+  setActiveMission: (mission) => set({ activeMission: mission }),
+  addCoins: (amount) => set((state) => ({
+    userProfile: { ...state.userProfile, coins: state.userProfile.coins + amount }
   })),
   spendCoins: (amount) => {
     const { userProfile } = useStore.getState();
@@ -293,8 +303,8 @@ export const useStore = create<StoreState>((set, get) => ({
   setExpandedCategories: (expandedCategories) => set({ expandedCategories }),
   setConsoleLogs: (consoleLogs) => set({ consoleLogs }),
   clearLogs: () => set({ consoleLogs: [] }),
-  setLeftPanelWidth: (leftPanelWidth) => set({ leftPanelWidth }),
-  setRightPanelWidth: (rightPanelWidth) => set({ rightPanelWidth }),
+  setLeftPanelWidth: (width) => set((state) => ({ leftPanelWidth: typeof width === 'function' ? width(state.leftPanelWidth) : (width as number) })),
+  setRightPanelWidth: (width) => set((state) => ({ rightPanelWidth: typeof width === 'function' ? width(state.rightPanelWidth) : (width as number) })),
 
   pushHistory: () => set((state) => ({
     history: [...state.history.slice(-20), state.commands],

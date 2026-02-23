@@ -14,8 +14,8 @@ export enum CommandType {
   FOREVER = 'FOREVER',
   END_FOREVER = 'END_FOREVER',
   BREAK = 'BREAK',
-  COMMENT = 'COMMENT', 
-  
+  COMMENT = 'COMMENT',
+
   // --- 3D COMMANDS ---
   MOVE_Z = 'MOVE_Z',
   ROTATE_X = 'ROTATE_X',
@@ -25,7 +25,7 @@ export enum CommandType {
   SPAWN_3D_OBJECT = 'SPAWN_3D_OBJECT',
   SET_LIGHTING = 'SET_LIGHTING',
   GENERATE_ENVIRONMENT = 'GENERATE_ENVIRONMENT',
-  
+
   // --- EVENTS & MESSAGING ---
   ON_COLLIDE = 'ON_COLLIDE',
   ON_CLICK = 'ON_CLICK',
@@ -34,17 +34,17 @@ export enum CommandType {
   END_EVENT = 'END_EVENT',
 
   // --- LOGIC & CONDITIONS ---
-  IF = 'IF', 
-  ELSE = 'ELSE', 
+  IF = 'IF',
+  ELSE = 'ELSE',
   END_IF = 'END_IF',
   WAIT_FOR_PRESS = 'WAIT_FOR_PRESS',
   LISTEN_FOR = 'LISTEN_FOR', // Voice command
-  
+
   // --- VARIABLES & DATA ---
   SET_VAR = 'SET_VAR',
   CHANGE_VAR = 'CHANGE_VAR',
   CALC_RANDOM = 'CALC_RANDOM', // Set var to random(min, max)
-  
+
   // --- MATH & CALCULATION (Stored in Variable) ---
   CALC_ADD = 'CALC_ADD', // var = val1 + val2
   CALC_SUB = 'CALC_SUB',
@@ -61,7 +61,7 @@ export enum CommandType {
   STR_LENGTH = 'STR_LENGTH',
   STR_UPPER = 'STR_UPPER',
   STR_LOWER = 'STR_LOWER',
-  
+
   // --- LISTS / ARRAYS ---
   LIST_ADD = 'LIST_ADD',
   LIST_REMOVE = 'LIST_REMOVE',
@@ -70,14 +70,14 @@ export enum CommandType {
   LIST_GET = 'LIST_GET',
   LIST_CLEAR = 'LIST_CLEAR',
   LIST_CONTAINS = 'LIST_CONTAINS',
-  
+
   // --- APP MAKER: UI ---
-  CREATE_SCREEN = 'CREATE_SCREEN', 
+  CREATE_SCREEN = 'CREATE_SCREEN',
   NAVIGATE = 'NAVIGATE',
   SET_TITLE = 'SET_TITLE',
   SET_BACKGROUND = 'SET_BACKGROUND',
   SET_THEME = 'SET_THEME',
-  
+
   // UI Elements
   ADD_BUTTON = 'ADD_BUTTON',
   ADD_TEXT_BLOCK = 'ADD_TEXT_BLOCK',
@@ -86,20 +86,20 @@ export enum CommandType {
   ADD_TEXTAREA = 'ADD_TEXTAREA',
   ADD_IMAGE = 'ADD_IMAGE',
   ADD_VIDEO = 'ADD_VIDEO',
-  ADD_CAMERA = 'ADD_CAMERA', 
-  ADD_DRAWING_CANVAS = 'ADD_DRAWING_CANVAS', 
+  ADD_CAMERA = 'ADD_CAMERA',
+  ADD_DRAWING_CANVAS = 'ADD_DRAWING_CANVAS',
   ADD_LIST_VIEW = 'ADD_LIST_VIEW',
   ADD_AUDIO_PLAYER = 'ADD_AUDIO_PLAYER',
   ADD_AUDIO_RECORDER = 'ADD_AUDIO_RECORDER', // New
   ADD_SWITCH = 'ADD_SWITCH',
   ADD_SLIDER = 'ADD_SLIDER',
-  ADD_CHECKBOX = 'ADD_CHECKBOX', 
+  ADD_CHECKBOX = 'ADD_CHECKBOX',
   ADD_RADIO = 'ADD_RADIO',
   ADD_DROPDOWN = 'ADD_DROPDOWN',
   ADD_DATE_PICKER = 'ADD_DATE_PICKER',
   ADD_TIME_PICKER = 'ADD_TIME_PICKER',
   ADD_COLOR_PICKER = 'ADD_COLOR_PICKER',
-  ADD_PROGRESS = 'ADD_PROGRESS', 
+  ADD_PROGRESS = 'ADD_PROGRESS',
   ADD_NEWS_FEED = 'ADD_NEWS_FEED',
   ADD_CHAT_MESSAGE = 'ADD_CHAT_MESSAGE',
   ADD_MAP = 'ADD_MAP',
@@ -111,9 +111,9 @@ export enum CommandType {
   ADD_ICON = 'ADD_ICON',
   DEFINE_PLUGIN = 'DEFINE_PLUGIN',
   USE_PLUGIN = 'USE_PLUGIN',
-  
+
   // UI Actions
-  SPEAK = 'SPEAK', 
+  SPEAK = 'SPEAK',
   VIBRATE_DEVICE = 'VIBRATE_DEVICE',
   SHOW_ALERT = 'SHOW_ALERT',
   SHOW_TOAST = 'SHOW_TOAST',
@@ -122,7 +122,7 @@ export enum CommandType {
   CLEAR_UI = 'CLEAR_UI',
   CLOUD_SAVE = 'CLOUD_SAVE',
   CLOUD_LOAD = 'CLOUD_LOAD',
-  
+
   // --- GAME MAKER: MOVEMENT ---
   MOVE_X = 'MOVE_X',
   MOVE_Y = 'MOVE_Y',
@@ -134,16 +134,16 @@ export enum CommandType {
   TURN_LEFT = 'TURN_LEFT',
   SET_ROTATION_STYLE = 'SET_ROTATION_STYLE',
   BOUNCE_ON_EDGE = 'BOUNCE_ON_EDGE',
-  
+
   // Physics
-  JUMP = 'JUMP', 
-  SET_GRAVITY = 'SET_GRAVITY', 
+  JUMP = 'JUMP',
+  SET_GRAVITY = 'SET_GRAVITY',
   SET_VELOCITY_X = 'SET_VELOCITY_X',
   SET_VELOCITY_Y = 'SET_VELOCITY_Y',
   SET_MASS = 'SET_MASS',
   SET_FRICTION = 'SET_FRICTION',
   SET_BOUNCINESS = 'SET_BOUNCINESS',
-  
+
   // --- PHYSICS 2.0 (Matter.js) ---
   SET_PHYSICS_TYPE = 'SET_PHYSICS_TYPE', // Static, Dynamic, Bouncy
   CREATE_JOINT = 'CREATE_JOINT', // Connect two bodies
@@ -162,13 +162,13 @@ export enum CommandType {
   PLAY_ANIMATION = 'PLAY_ANIMATION',
   GO_TO_FRONT = 'GO_TO_FRONT',
   GO_TO_BACK = 'GO_TO_BACK',
-  
+
   // World
   SET_SCENE = 'SET_SCENE',
-  SET_WEATHER = 'SET_WEATHER', 
-  SET_CAMERA = 'SET_CAMERA', 
+  SET_WEATHER = 'SET_WEATHER',
+  SET_CAMERA = 'SET_CAMERA',
   SHAKE_CAMERA = 'SHAKE_CAMERA',
-  
+
   // Game Objects
   SHOOT = 'SHOOT',
   SPAWN_ENEMY = 'SPAWN_ENEMY',
@@ -181,7 +181,7 @@ export enum CommandType {
   CREATE_CLONE = 'CREATE_CLONE',
   DELETE_CLONE = 'DELETE_CLONE',
   SET_TILE = 'SET_TILE',
-  
+
   // === 3D GAME COMMANDS ===
   SPAWN_3D_MODEL = 'SPAWN_3D_MODEL',
   SET_3D_POSITION = 'SET_3D_POSITION',
@@ -193,21 +193,21 @@ export enum CommandType {
   ENABLE_PHYSICS_3D = 'ENABLE_PHYSICS_3D',
   SWITCH_TO_3D_MODE = 'SWITCH_TO_3D_MODE',
   SWITCH_TO_2D_MODE = 'SWITCH_TO_2D_MODE',
-  
+
   // Inventory & Items
   ADD_TO_INVENTORY = 'ADD_TO_INVENTORY',
   REMOVE_FROM_INVENTORY = 'REMOVE_FROM_INVENTORY',
   USE_ITEM = 'USE_ITEM',
   SHOW_INVENTORY = 'SHOW_INVENTORY',
   CRAFT_ITEM = 'CRAFT_ITEM',
-  
+
   // Audio & Music
   SET_BACKGROUND_MUSIC = 'SET_BACKGROUND_MUSIC',
   PLAY_MUSIC = 'PLAY_MUSIC',
   STOP_MUSIC = 'STOP_MUSIC',
   SET_MUSIC_VOLUME = 'SET_MUSIC_VOLUME',
   PLAY_AMBIENT = 'PLAY_AMBIENT',
-  
+
   // Cutscenes & Events
   TRIGGER_CUTSCENE = 'TRIGGER_CUTSCENE',
   FADE_IN = 'FADE_IN',
@@ -215,24 +215,24 @@ export enum CommandType {
   SHAKE_SCREEN = 'SHAKE_SCREEN',
   SLOW_MOTION = 'SLOW_MOTION',
   FREEZE_FRAME = 'FREEZE_FRAME',
-  
+
   // Boss Battles
   SPAWN_BOSS = 'SPAWN_BOSS',
   SET_BOSS_HEALTH = 'SET_BOSS_HEALTH',
   BOSS_ATTACK = 'BOSS_ATTACK',
   BOSS_PHASE = 'BOSS_PHASE',
-  
+
   // Advanced Movement
   DASH = 'DASH',
   WALL_JUMP = 'WALL_JUMP',
   DOUBLE_JUMP = 'DOUBLE_JUMP',
   GRAPPLE = 'GRAPPLE',
-  
+
   // Checkpoints & Saves
   CREATE_CHECKPOINT = 'CREATE_CHECKPOINT',
   LOAD_CHECKPOINT = 'LOAD_CHECKPOINT',
   AUTO_SAVE = 'AUTO_SAVE',
-  
+
   // Game Data
   CHANGE_SCORE = 'CHANGE_SCORE',
   SET_SCORE = 'SET_SCORE',
@@ -247,22 +247,22 @@ export enum CommandType {
   LED_TOGGLE = 'LED_TOGGLE',
   SET_RGB = 'SET_RGB',
   SET_RGB_BRIGHTNESS = 'SET_RGB_BRIGHTNESS',
-  
+
   PLAY_TONE = 'PLAY_TONE',
   PLAY_NOTE = 'PLAY_NOTE',
   PLAY_SOUND = 'PLAY_SOUND',
   STOP_SOUND = 'STOP_SOUND',
-  
+
   SET_FAN = 'SET_FAN',
   SET_SERVO = 'SET_SERVO',
   SET_MOTOR_SPEED = 'SET_MOTOR_SPEED',
   SET_MOTOR_DIR = 'SET_MOTOR_DIR',
   SET_STEPPER = 'SET_STEPPER',
-  
+
   SET_RELAY = 'SET_RELAY',
   SET_SOLENOID = 'SET_SOLENOID',
   SET_LASER = 'SET_LASER',
-  
+
   // Displays
   SET_LCD = 'SET_LCD',
   CLEAR_LCD = 'CLEAR_LCD',
@@ -272,7 +272,7 @@ export enum CommandType {
   SET_SEGMENT = 'SET_SEGMENT',
   SET_MATRIX_ROW = 'SET_MATRIX_ROW',
   CLEAR_MATRIX = 'CLEAR_MATRIX',
-  
+
   // --- HARDWARE: SENSORS / INPUT ---
   READ_DIGITAL = 'READ_DIGITAL',
   READ_ANALOG = 'READ_ANALOG',
@@ -292,19 +292,19 @@ export enum CommandType {
   READ_FLEX = 'READ_FLEX',
   READ_MAGNETIC = 'READ_MAGNETIC',
   SET_VIBRATION = 'SET_VIBRATION',
-  
+
   // --- SYSTEM ---
   SLEEP = 'SLEEP',
   LOG_DATA = 'LOG_DATA',
   RESET_BOARD = 'RESET_BOARD',
   CONNECT_WIFI = 'CONNECT_WIFI',
   SEND_HTTP = 'SEND_HTTP',
-  
+
   // --- HARDWARE: LOGIC ---
   LOGIC_AND = 'LOGIC_AND',
   LOGIC_OR = 'LOGIC_OR',
   LOGIC_NOT = 'LOGIC_NOT',
-  
+
   READ_FILE = 'READ_FILE',
   WRITE_FILE = 'WRITE_FILE'
 }
@@ -338,7 +338,7 @@ export interface CommandBlock {
 
     // App/UI
     screenName?: string;
-    textSize?: 'xs'|'sm'|'md'|'lg'|'xl'|'2xl';
+    textSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
     url?: string;
 
     // Game/Physics
@@ -448,6 +448,8 @@ export interface SpriteState {
   y: number;
   z: number;
   rotation: number;
+  scaleX?: number;
+  scaleY?: number;
   rotationX: number;
   rotationY: number;
   rotationZ: number;
@@ -504,35 +506,35 @@ export interface SpriteState {
 
   // Level Data
   tilemap: Tile[];
-  
+
   // === ENHANCED GAME FEATURES ===
-  
+
   // Inventory System
   inventory: InventoryItem[];
   maxInventorySize: number;
   equippedItem?: InventoryItem;
-  
+
   // Dialogue System
   activeDialogue?: DialogueNode;
   dialogueHistory: string[];
   isDialogueActive: boolean;
-  
+
   // Music & Audio
   backgroundMusic?: string;
   musicVolume: number;
   ambientSound?: string;
-  
+
   // Checkpoints
   checkpoints: Checkpoint[];
   lastCheckpoint?: Checkpoint;
-  
+
   // Cutscenes
   isCutsceneActive: boolean;
   screenShake: number;
   screenFreeze: number;
   timeScale: number;
   fadeAlpha: number;
-  
+
   // Boss Battles
   activeBoss?: BossState;
   bossHealth: number;
@@ -606,31 +608,31 @@ export interface SensorDataPoint {
 }
 
 export interface HardwareState {
-  pins: boolean[]; 
+  pins: boolean[];
   buzzerActive: boolean;
-  fanSpeed: number; 
-  temperature: number; 
-  servoAngle: number; 
-  lcdLines: string[]; 
-  potentiometerValue: number; 
-  speakerVolume: number; 
-  
+  fanSpeed: number;
+  temperature: number;
+  servoAngle: number;
+  lcdLines: string[];
+  potentiometerValue: number;
+  speakerVolume: number;
+
   // New States
   rgbColor: string;
-  sevenSegmentValue: number | null; 
-  distance: number; 
+  sevenSegmentValue: number | null;
+  distance: number;
   motionDetected: boolean;
   vibrationActive: boolean;
-  keypadValue: string | null; 
-  joystick: { x: number; y: number }; 
-  
+  keypadValue: string | null;
+  joystick: { x: number; y: number };
+
   // Advanced Sensors
-  pressure: number; 
-  flex: number; 
-  tilt: boolean; 
-  magneticField: number; 
+  pressure: number;
+  flex: number;
+  tilt: boolean;
+  magneticField: number;
   detectedColor: string;
-  
+
   // Enhanced States for New Components
   humidity: number; // For DHT sensors
   gasLevel: number; // For gas sensors
@@ -656,32 +658,32 @@ export interface HardwareState {
   rtcTime: Date; // For RTC
   logicGateOutput: boolean; // For logic gates
   timerOutput: boolean; // For 555 timer
-  
+
   // Microcontroller-specific features
   wifiConnected: boolean; // For ESP32, ESP8266, Pi, etc.
   bluetoothConnected: boolean; // For ESP32, Pi, etc.
   cpuTemperature: number; // CPU temperature for microcontrollers
   freeMemory: number; // Available memory
   uptime: number; // Time since last reset
-  
+
   variables: Record<string, any>; // Variables for hardware state
-  
+
   // Data Logging
   sensorHistory: SensorDataPoint[];
 }
 
 export interface AppElement {
   id: string;
-  blockId?: string; 
+  blockId?: string;
   type: 'button' | 'text' | 'input' | 'image' | 'switch' | 'slider' | 'checkbox' | 'progress' | 'video' | 'map' | 'chart' | 'date' | 'camera' | 'drawing_canvas' | 'list' | 'divider' | 'spacer' | 'color_picker' | 'qr_code' | 'audio_recorder';
   content: string;
   actionMessage?: string;
-  targetScreen?: string; 
+  targetScreen?: string;
   // Styling & Binding
   color?: string;
-  textSize?: 'xs'|'sm'|'md'|'lg'|'xl'|'2xl';
-  variableName?: string; 
-  max?: number; 
+  textSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  variableName?: string;
+  max?: number;
   value?: number;
   placeholder?: string;
 }
@@ -689,8 +691,8 @@ export interface AppElement {
 export interface AppState {
   title: string;
   backgroundColor: string;
-  activeScreen: string; 
-  screens: Record<string, AppElement[]>; 
+  activeScreen: string;
+  screens: Record<string, AppElement[]>;
   score: number;
   variables: Record<string, any>;
   // UI State
@@ -698,24 +700,24 @@ export interface AppState {
   activeLevelTool?: string; // Relaxed type to allow new entities
 }
 
-export type ComponentType = 
+export type ComponentType =
   // MICROCONTROLLERS
   'ARDUINO_UNO' | 'ARDUINO_NANO' | 'ARDUINO_MEGA' | 'ESP32_DEVKIT' | 'ESP8266' | 'NODEMCU' | 'RASPBERRY_PI_ZERO' | 'RASPBERRY_PI_4' | 'MICROBIT' |
-  
+
   // OUTPUTS
   'LED_RED' | 'LED_BLUE' | 'LED_GREEN' | 'LED_WHITE' | 'LED_YELLOW' | 'LED_ORANGE' |
   'RGB_LED' | 'RGB_STRIP' | 'LASER' | 'BULB' |
-  
+
   // INPUTS
   'BUTTON' | 'BUTTON_TACTILE' | 'SWITCH_SLIDE' | 'SWITCH_TOGGLE' | 'SWITCH_DIP' | 'SWITCH_ROTARY' |
   'POTENTIOMETER' | 'SLIDE_POT' | 'JOYSTICK' | 'KEYPAD' | 'KEYPAD_MATRIX' | 'ENCODER' |
-  
+
   // SENSORS
   'LIGHT_SENSOR' | 'TEMP_SENSOR' | 'DHT11' | 'DHT22' | 'THERMISTOR' |
-  'ULTRASONIC' | 'MOTION' | 'SOUND_SENSOR' | 'GAS_SENSOR' | 'FLAME_SENSOR' | 'RAIN_SENSOR' | 
+  'ULTRASONIC' | 'MOTION' | 'SOUND_SENSOR' | 'GAS_SENSOR' | 'FLAME_SENSOR' | 'RAIN_SENSOR' |
   'SOIL_SENSOR' | 'PRESSURE_SENSOR' | 'FLEX_SENSOR' | 'TILT_SENSOR' | 'HALL_SENSOR' | 'COMPASS' |
   'GYRO' | 'GPS' | 'HEARTBEAT' | 'COLOR_SENSOR' |
-  
+
   // COMPONENTS
   'RESISTOR' | 'RFID' | 'FINGERPRINT' | 'BUZZER' | 'SPEAKER' | 'RELAY' | 'SOLENOID' |
   'SERVO' | 'SERVO_CONTINUOUS' | 'MOTOR_DC' | 'FAN' | 'STEPPER' | 'PUMP' | 'VIBRATION' |
@@ -735,21 +737,21 @@ export interface CircuitComponent {
 }
 
 export interface MissionStep {
-    id: string;
-    text: string;
-    isCompleted: boolean;
-    criteria?: {
-        requiredBlock?: CommandType;
-    };
+  id: string;
+  text: string;
+  isCompleted: boolean;
+  criteria?: {
+    requiredBlock?: CommandType;
+  };
 }
 
 export interface Mission {
-    id: string;
-    mode: AppMode;
-    title: string;
-    description: string;
-    completed: boolean;
-    steps: MissionStep[];
+  id: string;
+  mode: AppMode;
+  title: string;
+  description: string;
+  completed: boolean;
+  steps: MissionStep[];
 }
 
 export type PlanType = 'free' | 'maker' | 'inventor';

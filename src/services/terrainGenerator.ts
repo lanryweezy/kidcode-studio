@@ -143,7 +143,7 @@ const determineBiome = (height: number, x: number, y: number, config: TerrainCon
 /**
  * Determine tile type based on biome
  */
-const determineTileType = (biome: BiomeType, height: number, seaLevel: number): string => {
+const determineTileType = (biome: BiomeType, height: number, seaLevel: number): TerrainTile['type'] => {
   switch (biome) {
     case 'ocean': return 'water';
     case 'desert': return 'sand';

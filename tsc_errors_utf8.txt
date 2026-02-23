@@ -1,0 +1,21 @@
+﻿src/App.tsx(423,35): error TS2345: Argument of type '(prev: number) => 0 | 300' is not assignable to parameter of type 'number'.
+src/App.tsx(582,61): error TS2322: Type '{ onClose: () => void; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'onClose' does not exist on type 'IntrinsicAttributes'.
+src/components/Block.tsx(233,13): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/components/GameStage.tsx(310,29): error TS2551: Property 'scaleX' does not exist on type 'SpriteState'. Did you mean 'scale'?
+src/components/GameStage.tsx(310,50): error TS2551: Property 'scaleY' does not exist on type 'SpriteState'. Did you mean 'scale'?
+src/components/GameStage.tsx(351,76): error TS2322: Type 'string' is not assignable to type '"brick" | "coin" | "spike" | "flag" | "water" | "grass" | "dirt" | "stone" | "lava" | "crate" | "ladder" | "spring" | "key" | "door"'.
+src/components/GameStage3D.tsx(111,41): error TS2345: Argument of type '{ x: number; y: number; z: number; rotation: number; rotationX: number; rotationY: number; rotationZ: number; emoji: string; texture: string | null; frames: string[]; animations: Record<string, number[]>; ... 56 more ...; id: string; }' is not assignable to parameter of type '{ id: string; emoji?: string | undefined; texture?: string | undefined; modelUrl?: string | undefined; }'.
+  Types of property 'texture' are incompatible.
+    Type 'string | null' is not assignable to type 'string | undefined'.
+      Type 'null' is not assignable to type 'string | undefined'.
+src/components/HomeScreen.tsx(123,37): error TS2322: Type '({ id: string; type: CommandType; params: { text: string; condition?: undefined; pin?: undefined; value?: undefined; }; } | { id: string; type: CommandType; params: { condition: string; text?: undefined; pin?: undefined; value?: undefined; }; } | ... 26 more ... | { ...; })[]' is not assignable to type 'CommandBlock[]'.
+  Type '{ id: string; type: CommandType; params: { text: string; condition?: undefined; pin?: undefined; value?: undefined; }; } | { id: string; type: CommandType; params: { condition: string; text?: undefined; pin?: undefined; value?: undefined; }; } | ... 26 more ... | { ...; }' is not assignable to type 'CommandBlock'.
+    Type '{ id: string; type: CommandType; params: { text: string; textSize: string; varName?: undefined; screenName?: undefined; message?: undefined; }; }' is not assignable to type 'CommandBlock'.
+      The types of 'params.textSize' are incompatible between these types.
+        Type 'string' is not assignable to type '"xs" | "sm" | "md" | "lg" | "xl" | "2xl" | undefined'.
+src/components/MarketplaceModal.tsx(44,25): error TS2345: Argument of type '"collision"' is not assignable to parameter of type '"powerup" | "coin" | "explosion" | "camera" | "move" | "turn" | "ui" | "click" | "laser" | "hurt" | "jump"'.
+src/components/MusicStudio.tsx(33,53): error TS2554: Expected 1-2 arguments, but got 3.
+src/components/MusicStudio.tsx(54,44): error TS2554: Expected 1-2 arguments, but got 3.
+src/components/SpriteExtractor.tsx(50,101): error TS2304: Cannot find name 'handleFileUpload'.
+src/components/SpriteExtractor.tsx(73,38): error TS2552: Cannot find name 'sliceFrames'. Did you mean 'setFrames'?

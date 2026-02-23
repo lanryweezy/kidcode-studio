@@ -92,6 +92,7 @@ const getDefaultValue = (): UserProfile => ({
   avatar: '🚀',
   xp: 0,
   level: 1,
+  coins: 0,
   plan: 'free',
   streak: 1,
   badges: [],
@@ -162,7 +163,7 @@ export const checkAndUnlockBadge = (profile: UserProfile, badgeId: string): bool
 export const unlockBadge = (badgeId: string): { unlocked: boolean; badge?: Badge } => {
   const profile = getUserProfile();
   const badgeDef = BADGE_DEFINITIONS.find(b => b.id === badgeId);
-  
+
   if (!badgeDef) return { unlocked: false };
 
   const hasBadge = profile.badges.some(b => b.id === badgeId);
@@ -203,23 +204,23 @@ export const getDailyQuests = (): Quest[] => {
       return data.quests;
     }
   }
-  
+
   // Generate new daily quests
   const shuffled = [...DAILY_QUESTS].sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, 3).map(q => ({ ...q, completed: false }));
-  
+
   localStorage.setItem(QUESTS_STORAGE_KEY, JSON.stringify({
     date: new Date().toDateString(),
     quests: selected
   }));
-  
+
   return selected;
 };
 
 export const getWeeklyQuests = (): Quest[] => {
   const stored = localStorage.getItem('kidcode_weekly_quests');
   const currentWeekStart = getWeekStart(new Date());
-  
+
   if (stored) {
     const data = JSON.parse(stored);
     if (data.weekStart === currentWeekStart) {
@@ -293,7 +294,7 @@ export const checkQuestCompletion = (criteria: {
 export const checkAndUnlockTrophy = (trophyId: string): { unlocked: boolean; trophy?: Trophy } => {
   const profile = getUserProfile();
   const trophyDef = TROPHY_DEFINITIONS.find(t => t.id === trophyId);
-  
+
   if (!trophyDef) return { unlocked: false };
 
   const hasTrophy = profile.trophies?.some(t => t.id === trophyId);
@@ -326,13 +327,13 @@ export const getAllTrophies = (): Trophy[] => {
 export const addXP = (amount: number): { profile: UserProfile, leveledUp: boolean, newLevel: number } => {
   const profile = getUserProfile();
   const oldLevel = profile.level;
-  
+
   profile.xp += amount;
   const newLevel = 1 + Math.floor(profile.xp / 100);
   profile.level = Math.max(1, newLevel);
-  
+
   saveUserProfile(profile);
-  
+
   return {
     profile,
     leveledUp: newLevel > oldLevel,
@@ -349,7 +350,7 @@ export const getProgressToNextLevel = (profile: UserProfile): { current: number;
   const nextLevelXP = getXPForLevel(profile.level + 1);
   const progress = profile.xp - currentLevelXP;
   const max = nextLevelXP - currentLevelXP;
-  
+
   return {
     current: progress,
     max,
@@ -367,7 +368,7 @@ export const updateCreatorScore = (action: 'like' | 'remix' | 'comment' | 'publi
     comment: 2,
     publish: 10
   };
-  
+
   profile.creatorScore = (profile.creatorScore || 0) + points[action];
   saveUserProfile(profile);
   return profile.creatorScore;
@@ -391,17 +392,17 @@ export const SKILL_TREE: SkillNode[] = [
   { id: 'loops', name: 'Loop Expert', description: 'Master loops', icon: '🔄', unlocked: false, requirements: ['basic_blocks'], category: 'coding' },
   { id: 'conditions', name: 'Logic Master', description: 'Master conditions', icon: '🔀', unlocked: false, requirements: ['loops'], category: 'coding' },
   { id: 'variables', name: 'Variable Wizard', description: 'Master variables', icon: '📦', unlocked: false, requirements: ['conditions'], category: 'coding' },
-  
+
   // Creativity Skills
   { id: 'sprite_design', name: 'Sprite Artist', description: 'Create 10 sprites', icon: '🎨', unlocked: false, requirements: [], category: 'creativity' },
   { id: 'level_design', name: 'Level Designer', description: 'Build 5 levels', icon: '🗺️', unlocked: false, requirements: ['sprite_design'], category: 'creativity' },
   { id: 'storytelling', name: 'Storyteller', description: 'Create narrative games', icon: '📖', unlocked: false, requirements: ['level_design'], category: 'creativity' },
-  
+
   // Community Skills
   { id: 'sharing', name: 'Sharer', description: 'Publish first project', icon: '📤', unlocked: false, requirements: [], category: 'community' },
   { id: 'collaboration', name: 'Collaborator', description: 'Remix 10 projects', icon: '🤝', unlocked: false, requirements: ['sharing'], category: 'community' },
   { id: 'mentorship', name: 'Mentor', description: 'Help 20 learners', icon: '🎓', unlocked: false, requirements: ['collaboration'], category: 'community' },
-  
+
   // Mastery Skills
   { id: 'export_code', name: 'Code Exporter', description: 'Export to text languages', icon: '📝', unlocked: false, requirements: ['variables'], category: 'mastery' },
   { id: 'hardware', name: 'Hardware Hacker', description: 'Connect real hardware', icon: '🔌', unlocked: false, requirements: ['export_code'], category: 'mastery' },
@@ -418,20 +419,20 @@ export const updateSkillTree = (): SkillNode[] => {
       // Check if it's another skill
       return false;
     });
-    
+
     // Check XP threshold (for some skills)
     const xpThresholds: Record<string, number> = {
       'mastery': 2500 // Level 25
     };
-    
+
     const xpMet = !xpThresholds[skill.id] || profile.xp >= xpThresholds[skill.id];
-    
+
     return {
       ...skill,
       unlocked: requirementsMet && xpMet
     };
   });
-  
+
   return updatedSkills;
 };
 
@@ -469,6 +470,6 @@ export const getUserRank = (): number => {
     level: profile.level,
     avatar: profile.avatar
   }].sort((a, b) => b.xp - a.xp);
-  
+
   return sorted.findIndex(e => e.userId === profile.id) + 1;
 };

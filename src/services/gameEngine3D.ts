@@ -42,7 +42,7 @@ export interface PhysicsConfig {
 
 export class GameEngine3D {
   private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
+  private camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
   private renderer: THREE.WebGLRenderer;
   private clock: THREE.Clock;
   private models: Map<string, THREE.Object3D>;
@@ -122,7 +122,7 @@ export class GameEngine3D {
     if (config.type === 'perspective') {
       this.camera = new THREE.PerspectiveCamera(
         config.fov,
-        this.camera.aspect,
+        (this.camera as THREE.PerspectiveCamera).aspect || 1,
         config.near,
         config.far
       );
@@ -216,11 +216,11 @@ export class GameEngine3D {
 
   public async loadModel(id: string, url: string): Promise<void> {
     try {
-      const loader = new THREE.GLTFLoader();
+      const loader = new (THREE as any).GLTFLoader();
       const gltf = await loader.loadAsync(url);
       const model = gltf.scene;
 
-      model.traverse((child) => {
+      model.traverse((child: any) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
           mesh.castShadow = true;
@@ -233,7 +233,7 @@ export class GameEngine3D {
 
       // Store animations
       if (gltf.animations && gltf.animations.length > 0) {
-        gltf.animations.forEach((clip) => {
+        gltf.animations.forEach((clip: any) => {
           this.animations.set(`${id}_${clip.name}`, clip);
         });
       }
@@ -352,8 +352,10 @@ export class GameEngine3D {
 
   private handleResize() {
     const canvas = this.renderer.domElement;
-    this.camera.aspect = canvas.width / canvas.height;
-    this.camera.updateProjectionMatrix();
+    if (this.camera instanceof THREE.PerspectiveCamera) {
+      this.camera.aspect = canvas.width / canvas.height;
+      this.camera.updateProjectionMatrix();
+    }
     this.renderer.setSize(canvas.width, canvas.height);
   }
 

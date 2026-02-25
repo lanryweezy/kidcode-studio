@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export interface Camera3D {
   position: { x: number; y: number; z: number };
@@ -216,7 +217,7 @@ export class GameEngine3D {
 
   public async loadModel(id: string, url: string): Promise<void> {
     try {
-      const loader = new (THREE as any).GLTFLoader();
+      const loader = new GLTFLoader();
       const gltf = await loader.loadAsync(url);
       const model = gltf.scene;
 
@@ -379,20 +380,3 @@ export class GameEngine3D {
     this.renderer.dispose();
   }
 }
-
-// GLTF Loader (lazy loaded)
-class GLTFLoader {
-  loadAsync(url: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const loader = new (window as any).THREE.GLTFLoader();
-      loader.load(
-        url,
-        (gltf: any) => resolve(gltf),
-        undefined,
-        reject
-      );
-    });
-  }
-}
-
-(THREE as any).GLTFLoader = GLTFLoader;

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { SpriteState } from '../types';
+import * as THREE from 'three';
 import { GameEngine3D, Camera3D, Light3D, GameObject3D, PhysicsConfig } from '../services/gameEngine3D';
 import { playSoundEffect } from '../services/soundService';
 
@@ -66,12 +67,12 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
     });
 
     // Add ground plane
-    const groundGeometry = new (window as any).THREE.PlaneGeometry(100, 100);
-    const groundMaterial = new (window as any).THREE.MeshStandardMaterial({ 
+    const groundGeometry = new THREE.PlaneGeometry(100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x228B22,
-      side: (window as any).THREE.DoubleSide
+      side: THREE.DoubleSide
     });
-    const ground = new (window as any).THREE.Mesh(groundGeometry, groundMaterial);
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     engine.getScene().add(ground);
@@ -109,7 +110,7 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
 
     // Update player position
     if (state.x !== undefined && state.y !== undefined) {
-      engine.setGameObjectTransform('player', 
+      engine.setGameObjectTransform('player',
         { x: state.x - 200, y: state.y - 200, z: 0 },
         { x: 0, y: 0, z: state.rotation || 0 },
         { x: state.scale || 1, y: state.scale || 1, z: state.scale || 1 }
@@ -148,11 +149,11 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
   }, [isReady, onInput, inputState]);
 
   return (
-    <div 
+    <div
       className="relative bg-slate-900 rounded-2xl overflow-hidden shadow-2xl"
-      style={{ 
-        width: gameCanvasSize?.w || 400, 
-        height: gameCanvasSize?.h || 400 
+      style={{
+        width: gameCanvasSize?.w || 400,
+        height: gameCanvasSize?.h || 400
       }}
     >
       <canvas
@@ -161,7 +162,7 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
         height={gameCanvasSize?.h || 400}
         className="block"
       />
-      
+
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
           <div className="text-center">

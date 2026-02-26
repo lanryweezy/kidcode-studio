@@ -3,6 +3,7 @@ import { SpriteState } from '../types';
 import * as THREE from 'three';
 import { GameEngine3D, Camera3D, Light3D, GameObject3D, PhysicsConfig } from '../services/gameEngine3D';
 import { playSoundEffect } from '../services/soundService';
+import { generateTerrain, TerrainConfig } from '../services/terrainGenerator';
 
 export interface Stage3DHandle {
   takeScreenshot: () => string;
@@ -77,44 +78,76 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
     ground.receiveShadow = true;
     engine.getScene().add(ground);
 
-    setIsReady(true);
-
     // Start render loop
     engine.render();
 
+    setIsReady(true);
+
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
       engine.dispose();
     };
   }, []);
+
+  const lastWorldSeed = useRef<number | undefined>(undefined);
 
   // Update scene based on sprite state
   useEffect(() => {
     if (!engineRef.current || !isReady) return;
 
     const engine = engineRef.current;
-    const state = isExecuting && spriteStateRef ? spriteStateRef.current : spriteState;
+    const state = (isExecuting && spriteStateRef) ? spriteStateRef.current : spriteState;
 
-    // Update background color based on scene
-    const sceneColors: Record<string, string> = {
-      grid: '#ffffff',
-      space: '#0f172a',
-      forest: '#ecfccb',
-      desert: '#fef3c7',
-      night: '#1e1b4b'
-    };
-    const bgColor = sceneColors[state.scene || 'grid'] || '#87ceeb';
-    engine.setBackgroundColor(bgColor);
+    // Sync all baseline 3D state
+    engine.updateFromSpriteState(state);
 
-    // Update player position
-    if (state.x !== undefined && state.y !== undefined) {
-      engine.setGameObjectTransform('player',
-        { x: state.x - 200, y: state.y - 200, z: 0 },
-        { x: 0, y: 0, z: state.rotation || 0 },
-        { x: state.scale || 1, y: state.scale || 1, z: state.scale || 1 }
-      );
+    // Sync dynamic 3D objects spawned via blocks
+    engine.updateObjects3D(state.objects3d || []);
+
+    // Reactive World Generation (Triggered by code blocks)
+    if (state.worldSeed !== lastWorldSeed.current) {
+      console.log('Regenerating 3D world with seed:', state.worldSeed);
+      lastWorldSeed.current = state.worldSeed;
+
+      // Clean up old environment instances
+      const scene = engine.getScene();
+      const toRemove: THREE.Object3D[] = [];
+      scene.children.forEach(child => {
+        if (child.name.endsWith('_instances')) {
+          toRemove.push(child);
+        }
+      });
+      toRemove.forEach(c => scene.remove(c));
+
+      const config: TerrainConfig = {
+        seed: worldSeed,
+        width: 50,
+        height: 50,
+        scale: 15,
+        octaves: 4,
+        persistence: 0.5,
+        lacunarity: 2.0,
+        seaLevel: 0.3,
+        theme: state.worldPrompt
+      };
+
+      const terrain = generateTerrain(config);
+      const decorations = new Map<string, Array<any>>();
+      terrain.tiles.forEach(row => {
+        row.forEach(tile => {
+          if (tile.decoration) {
+            if (!decorations.has(tile.decoration)) decorations.set(tile.decoration, []);
+            decorations.get(tile.decoration)?.push({
+              position: { x: (tile.x - 25) * 2, y: 0.5, z: (tile.y - 25) * 2 },
+              rotation: { x: 0, y: Math.random() * Math.PI, z: 0 },
+              scale: { x: 1, y: 1, z: 1 }
+            });
+          }
+        });
+      });
+
+      decorations.forEach((transforms, type) => {
+        engine.addInstancedMesh(`${type}_instances`, `/models/${type}.glb`, transforms);
+      });
     }
 
     // Screen shake
@@ -123,8 +156,7 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
       camera.position.x += (Math.random() - 0.5) * shakeAmount;
       camera.position.y += (Math.random() - 0.5) * shakeAmount;
     }
-
-  }, [spriteState, isExecuting, isReady, shakeAmount, spriteStateRef]);
+  }, [spriteState.worldSeed, spriteState.objects3d, isExecuting, isReady, shakeAmount, spriteStateRef, spriteState]);
 
   // Handle keyboard input
   useEffect(() => {
@@ -174,52 +206,49 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
 
       {/* 3D Controls Overlay */}
       {isReady && isExecuting && (
-        <div className="absolute bottom-4 left-4 right-4 flex justify-between pointer-events-none">
-          {/* D-Pad */}
-          <div className="flex flex-col items-center gap-1 pointer-events-auto">
-            <button
-              className="w-12 h-12 bg-slate-700/80 hover:bg-slate-600 rounded-lg flex items-center justify-center text-white active:scale-95 transition-transform"
-              onTouchStart={() => onInput?.('ArrowUp', true)}
-              onTouchEnd={() => onInput?.('ArrowUp', false)}
+        <div className="absolute inset-x-0 bottom-0 p-8 flex justify-between items-end pointer-events-none">
+          {/* Virtual Joystick */}
+          <div className="relative w-32 h-32 bg-slate-800/40 rounded-full border-2 border-white/10 backdrop-blur-sm pointer-events-auto overflow-hidden">
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              onTouchMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const touch = e.touches[0];
+                const x = touch.clientX - (rect.left + rect.width / 2);
+                const y = touch.clientY - (rect.top + rect.height / 2);
+                const dist = Math.sqrt(x * x + y * y);
+                const angle = Math.atan2(y, x);
+
+                // Map joystick to Arrow keys
+                if (dist > 10) {
+                  onInput?.('ArrowUp', y < -dist * 0.5);
+                  onInput?.('ArrowDown', y > dist * 0.5);
+                  onInput?.('ArrowLeft', x < -dist * 0.5);
+                  onInput?.('ArrowRight', x > dist * 0.5);
+                }
+              }}
+              onTouchEnd={() => {
+                onInput?.('ArrowUp', false);
+                onInput?.('ArrowDown', false);
+                onInput?.('ArrowLeft', false);
+                onInput?.('ArrowRight', false);
+              }}
             >
-              ▲
-            </button>
-            <div className="flex gap-1">
-              <button
-                className="w-12 h-12 bg-slate-700/80 hover:bg-slate-600 rounded-lg flex items-center justify-center text-white active:scale-95 transition-transform"
-                onTouchStart={() => onInput?.('ArrowLeft', true)}
-                onTouchEnd={() => onInput?.('ArrowLeft', false)}
-              >
-                ◀
-              </button>
-              <button
-                className="w-12 h-12 bg-slate-700/80 hover:bg-slate-600 rounded-lg flex items-center justify-center text-white active:scale-95 transition-transform"
-                onTouchStart={() => onInput?.('ArrowDown', true)}
-                onTouchEnd={() => onInput?.('ArrowDown', false)}
-              >
-                ▼
-              </button>
-              <button
-                className="w-12 h-12 bg-slate-700/80 hover:bg-slate-600 rounded-lg flex items-center justify-center text-white active:scale-95 transition-transform"
-                onTouchStart={() => onInput?.('ArrowRight', true)}
-                onTouchEnd={() => onInput?.('ArrowRight', false)}
-              >
-                ▶
-              </button>
+              <div className="w-12 h-12 bg-indigo-500 rounded-full shadow-lg border-2 border-white/20" />
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-4 pointer-events-auto">
             <button
-              className="w-14 h-14 bg-red-500/80 hover:bg-red-600 rounded-full flex items-center justify-center text-white font-bold active:scale-95 transition-transform"
+              className="w-16 h-16 bg-red-500/80 hover:bg-red-600 rounded-full flex items-center justify-center text-white font-bold active:scale-95 transition-transform"
               onTouchStart={() => onInput?.('KeyZ', true)}
               onTouchEnd={() => onInput?.('KeyZ', false)}
             >
               B
             </button>
             <button
-              className="w-14 h-14 bg-green-500/80 hover:bg-green-600 rounded-full flex items-center justify-center text-white font-bold active:scale-95 transition-transform"
+              className="w-16 h-16 bg-green-500/80 hover:bg-green-600 rounded-full flex items-center justify-center text-white font-bold active:scale-95 transition-transform"
               onTouchStart={() => onInput?.('KeyX', true)}
               onTouchEnd={() => onInput?.('KeyX', false)}
             >

@@ -486,7 +486,7 @@ export const App: React.FC = () => {
                             />
 
                             {/* Main Workspace */}
-                            <div className="flex-1 bg-slate-100 dark:bg-slate-950 relative flex flex-col overflow-y-auto">
+                            <div key={`workspace-${mode}`} className="flex-1 bg-slate-100 dark:bg-slate-950 relative flex flex-col overflow-y-auto animate-in fade-in zoom-in-95 duration-300">
                                 <div className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-violet-500 transition-colors z-50 hidden lg:block" onMouseDown={handleMouseDownLeft} />
 
                                 {draggedBlockId && (
@@ -510,17 +510,25 @@ export const App: React.FC = () => {
                                     )}
                                     {commands.map((cmd, idx) => (
                                         <div key={cmd.id} className="block-wrapper">
-                                            {dropIndex === idx && <div className="h-1 bg-blue-500 rounded-full mb-1 animate-pulse" />}
+                                            {dropIndex === idx && (
+                                                <div className="border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-xl h-14 mb-2 flex items-center justify-center animate-pulse transition-all shadow-inner">
+                                                    <span className="text-blue-500 font-bold text-sm tracking-widest">+ SNAP HERE</span>
+                                                </div>
+                                            )}
                                             <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} onDragStart={(e) => { setDraggedBlockId(cmd.id); e.dataTransfer.effectAllowed = 'move'; const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; e.dataTransfer.setDragImage(img, 0, 0); }} isActive={false} />
                                         </div>
                                     ))}
-                                    {dropIndex === commands.length && <div className="h-1 bg-blue-500 rounded-full mb-1 animate-pulse" />}
+                                    {dropIndex === commands.length && (
+                                        <div className="border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-xl h-14 mb-2 flex items-center justify-center animate-pulse transition-all shadow-inner">
+                                            <span className="text-blue-500 font-bold text-sm tracking-widest">+ SNAP HERE</span>
+                                        </div>
+                                    )}
                                     <div className="h-40" />
                                 </div>
                             </div>
 
                             {/* Stage Area */}
-                            <div className="bg-white dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 flex flex-col relative z-20 shrink-0" style={{ width: isMobile ? '100%' : rightPanelWidth }}>
+                            <div key={`stage-${mode}`} className="bg-white dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 flex flex-col relative z-20 shrink-0 animate-in fade-in slide-in-from-right-4 duration-500" style={{ width: isMobile ? '100%' : rightPanelWidth }}>
                                 <div className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-violet-500 transition-colors z-50 hidden lg:block" onMouseDown={handleMouseDownRight} />
                                 <div className="flex-1 p-4 bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center overflow-hidden relative min-h-[300px]">
                                     {is3DMode && mode === AppMode.GAME ? (

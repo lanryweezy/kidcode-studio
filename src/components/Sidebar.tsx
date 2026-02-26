@@ -74,7 +74,7 @@ const Sidebar: React.FC<any> = ({
                 onShowStats={() => setShowStats(true)}
             />
 
-            <div className="glass dark:glass-dark border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-75 relative z-20" style={{ width: leftPanelWidth }}>
+            <div className="glass dark:glass-dark border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transition-all duration-75 relative z-20" style={{ width: leftPanelWidth }}>
                 {activeTab === 'export' && (
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50 dark:bg-slate-900/50">
                         <div className="flex items-center gap-2 mb-6">
@@ -220,7 +220,7 @@ const Sidebar: React.FC<any> = ({
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-1">
-                            {Object.entries(groupedComponents).map(([category, components]) => {
+                            {(Object.entries(groupedComponents) as [string, any[]][]).map(([category, components]) => {
                                 const filtered = components.filter((c: any) => c.label.toLowerCase().includes(circuitSearch.toLowerCase()));
                                 if (filtered.length === 0) return null;
                                 const isExpanded = expandedCategories[category] !== false;
@@ -230,19 +230,21 @@ const Sidebar: React.FC<any> = ({
                                             {category}
                                             {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                         </button>
-                                        {isExpanded && (
-                                            <div className="space-y-2">
-                                                {filtered.map((comp: any) => (
-                                                    <div key={comp.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className="flex items-center gap-3 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-transform">
-                                                        <ComponentThumbnail type={comp.type} />
-                                                        <div className="flex flex-col">
-                                                            <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{comp.label}</span>
-                                                            <span className="text-[10px] text-slate-400 line-clamp-1">{comp.description}</span>
+                                        <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0'}`}>
+                                            <div className="overflow-hidden">
+                                                <div className="space-y-2 py-1">
+                                                    {filtered.map((comp: any) => (
+                                                        <div key={comp.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className="flex items-center gap-3 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all">
+                                                            <ComponentThumbnail type={comp.type} />
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{comp.label}</span>
+                                                                <span className="text-[10px] text-slate-400 line-clamp-1">{comp.description}</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -268,18 +270,20 @@ const Sidebar: React.FC<any> = ({
                                             {category}
                                             {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                         </button>
-                                        {isExpanded && (
-                                            <div className="space-y-2">
-                                                {filtered.map((def) => (
-                                                    <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-transform">
-                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
-                                                            {React.createElement(def.icon, { size: 16 })}
+                                        <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0'}`}>
+                                            <div className="overflow-hidden">
+                                                <div className="space-y-2 py-1">
+                                                    {filtered.map((def) => (
+                                                        <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all">
+                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
+                                                                {React.createElement(def.icon, { size: 16 })}
+                                                            </div>
+                                                            <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{def.label}</span>
                                                         </div>
-                                                        <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{def.label}</span>
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
                                 );
                             })}

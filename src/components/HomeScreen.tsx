@@ -70,9 +70,9 @@ const HomeScreen: React.FC = () => {
                         onClick={() => setShowProfile(true)}
                         className="flex items-center gap-2 py-2 px-4 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:border-violet-400 transition-all hover:scale-105"
                     >
-                        <span className="text-2xl">{userProfile.avatar}</span>
-                        <span className="font-bold text-sm hidden sm:block">{userProfile.name}</span>
-                        <div className="bg-yellow-400 text-yellow-900 text-xs font-black px-1.5 rounded ml-1 animate-pulse">{userProfile.level}</div>
+                        <span className="text-2xl">{userProfile?.avatar || '👤'}</span>
+                        <span className="font-bold text-sm hidden sm:block">{userProfile?.name || 'Explorer'}</span>
+                        <div className="bg-yellow-400 text-yellow-900 text-xs font-black px-1.5 rounded ml-1 animate-pulse">{userProfile?.level || 1}</div>
                     </button>
                 </div>
             </div>
@@ -101,7 +101,7 @@ const HomeScreen: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-black mb-2">{config.label}</h3>
-                                    <p className="opacity-90 font-medium">Create {m === 'APP' ? 'mobile apps' : m === 'GAME' ? 'video games' : 'inventions'} with blocks.</p>
+                                    <p className="opacity-90 font-medium">Create {m === AppMode.APP ? 'mobile apps' : m === AppMode.GAME ? 'video games' : 'inventions'} with blocks.</p>
                                 </div>
                                 <div className="absolute bottom-6 right-6 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 group-hover:rotate-90 duration-300">
                                     <Plus size={24} />
@@ -178,7 +178,10 @@ const HomeScreen: React.FC = () => {
                                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl hover:shadow-md transition-all text-left relative group"
                             >
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${MODE_CONFIG[proj.mode].color}`}>{proj.mode}</span>
+                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${(MODE_CONFIG as any)[proj.mode]?.color || 'bg-slate-500'}`}>
+                                        {(MODE_CONFIG as any)[proj.mode]?.label || proj.mode}
+                                    </span>
+
                                     <span className="text-[10px] text-slate-400">{new Date(proj.lastEdited).toLocaleDateString()}</span>
                                 </div>
                                 <h4 className="font-bold text-slate-800 dark:text-white truncate mb-4">{proj.name}</h4>

@@ -2,7 +2,6 @@
 export enum AppMode {
   APP = 'APP',
   GAME = 'GAME',
-  GAME_3D = 'GAME_3D',
   HARDWARE = 'HARDWARE'
 }
 
@@ -344,6 +343,7 @@ export interface CommandBlock {
     // Game/Physics
     x?: number;
     y?: number;
+    z?: number;
     width?: number;
     height?: number;
     direction?: 'cw' | 'ccw';
@@ -506,6 +506,9 @@ export interface SpriteState {
 
   // Level Data
   tilemap: Tile[];
+  worldPrompt?: string;
+  worldSeed?: number;
+  objects3d: GameEntity[];
 
   // === ENHANCED GAME FEATURES ===
 
@@ -706,7 +709,7 @@ export type ComponentType =
 
   // OUTPUTS
   'LED_RED' | 'LED_BLUE' | 'LED_GREEN' | 'LED_WHITE' | 'LED_YELLOW' | 'LED_ORANGE' |
-  'RGB_LED' | 'RGB_STRIP' | 'LASER' | 'BULB' |
+  'RGB_LED' | 'RGB_STRIP' | 'LASER' | 'LASER_DIODE' | 'BULB' |
 
   // INPUTS
   'BUTTON' | 'BUTTON_TACTILE' | 'SWITCH_SLIDE' | 'SWITCH_TOGGLE' | 'SWITCH_DIP' | 'SWITCH_ROTARY' |
@@ -719,8 +722,8 @@ export type ComponentType =
   'GYRO' | 'GPS' | 'HEARTBEAT' | 'COLOR_SENSOR' |
 
   // COMPONENTS
-  'RESISTOR' | 'RFID' | 'FINGERPRINT' | 'BUZZER' | 'SPEAKER' | 'RELAY' | 'SOLENOID' |
-  'SERVO' | 'SERVO_CONTINUOUS' | 'MOTOR_DC' | 'FAN' | 'STEPPER' | 'PUMP' | 'VIBRATION' |
+  'RESISTOR' | 'RFID' | 'FINGERPRINT' | 'BUZZER' | 'SPEAKER' | 'RELAY' | 'RELAY_MODULE' | 'SOLENOID' | 'MOTOR_SOL' |
+  'SERVO' | 'SERVO_CONTINUOUS' | 'MOTOR_DC' | 'FAN' | 'STEPPER' | 'PUMP' | 'MOTOR_PUMP' | 'VIBRATION' |
   'LCD' | 'OLED' | 'SEVEN_SEGMENT' | 'MATRIX' |
   'WIFI' | 'BLUETOOTH' | 'RADIO' | 'SD_CARD' | 'RTC' |
   'BATTERY_9V' | 'BATTERY_AA' | 'SOLAR' | 'BREADBOARD' |

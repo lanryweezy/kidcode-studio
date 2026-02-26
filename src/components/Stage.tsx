@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { AppMode } from '../types';
 import HardwareStage from './HardwareStage';
 import GameStage from './GameStage';
-import GameStage3D from './GameStage3D';
+import Stage3D from './Stage3D';
 import AppStage from './AppStage';
 import { captureThumbnail } from '../services/storageService';
 
@@ -92,12 +92,14 @@ const Stage = forwardRef(({
 
             {mode === AppMode.GAME && (
                 spriteState.is3D ? (
-                    <GameStage3D
+                    <Stage3D
                         spriteState={spriteState}
                         spriteStateRef={spriteStateRef}
                         isExecuting={isExecuting}
-                        width={gameCanvasSize.w}
-                        height={gameCanvasSize.h}
+                        shakeAmount={shakeAmount}
+                        gameCanvasSize={gameCanvasSize}
+                        onInput={onInput}
+                        inputState={inputState}
                     />
                 ) : (
                     <GameStage

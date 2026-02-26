@@ -215,33 +215,120 @@ export class GameEngine3D {
     }
   }
 
-  public async loadModel(id: string, url: string): Promise<void> {
+  public async addInstancedMesh(
+    id: string,
+    modelUrl: string,
+    transforms: Array<{
+      position: { x: number; y: number; z: number };
+      rotation: { x: number; y: number; z: number };
+      scale: { x: number; y: number; z: number };
+    }>
+  ) {
     try {
       const loader = new GLTFLoader();
-      const gltf = await loader.loadAsync(url);
-      const model = gltf.scene;
+      const gltf = await loader.loadAsync(modelUrl);
+      const sourceMesh = gltf.scene.children.find(c => (c as THREE.Mesh).isMesh) as THREE.Mesh;
 
-      model.traverse((child: any) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          mesh.castShadow = true;
-          mesh.receiveShadow = true;
-        }
+      if (!sourceMesh) {
+        console.warn('No mesh found in GLTF for instancing:', modelUrl);
+        return;
+      }
+
+      const instancedMesh = new THREE.InstancedMesh(
+        sourceMesh.geometry,
+        sourceMesh.material,
+        transforms.length
+      );
+
+      const matrix = new THREE.Matrix4();
+      const quaternion = new THREE.Quaternion();
+      const position = new THREE.Vector3();
+      const rotation = new THREE.Euler();
+      const scale = new THREE.Vector3();
+
+      transforms.forEach((t, i) => {
+        position.set(t.position.x, t.position.y, t.position.z);
+        rotation.set(t.rotation.x, t.rotation.y, t.rotation.z);
+        quaternion.setFromEuler(rotation);
+        scale.set(t.scale.x, t.scale.y, t.scale.z);
+
+        matrix.compose(position, quaternion, scale);
+        instancedMesh.setMatrixAt(i, matrix);
       });
 
-      this.scene.add(model);
-      this.models.set(id, model);
-
-      // Store animations
-      if (gltf.animations && gltf.animations.length > 0) {
-        gltf.animations.forEach((clip: any) => {
-          this.animations.set(`${id}_${clip.name}`, clip);
-        });
-      }
+      instancedMesh.castShadow = true;
+      instancedMesh.receiveShadow = true;
+      this.scene.add(instancedMesh);
+      this.models.set(id, instancedMesh);
     } catch (error) {
-      console.error('Failed to load model:', error);
-      throw error;
+      console.error('Failed to create instanced mesh:', error);
     }
+  }
+
+  private loadingModels: Map<string, Promise<void>> = new Map();
+
+  public async loadModel(id: string, url: string): Promise<void> {
+    if (this.models.has(id)) return;
+    if (this.loadingModels.has(id)) return this.loadingModels.get(id);
+
+    const loadPromise = (async () => {
+      try {
+        const loader = new GLTFLoader();
+        const gltf = await loader.loadAsync(url);
+        const model = gltf.scene;
+
+        model.traverse((child: any) => {
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+          }
+        });
+
+        this.scene.add(model);
+        this.models.set(id, model);
+
+        if (gltf.animations && gltf.animations.length > 0) {
+          gltf.animations.forEach((clip: any) => {
+            this.animations.set(`${id}_${clip.name}`, clip);
+          });
+        }
+      } catch (error) {
+        console.error(`Failed to load model from ${url}:`, error);
+      } finally {
+        this.loadingModels.delete(id);
+      }
+    })();
+
+    this.loadingModels.set(id, loadPromise);
+    return loadPromise;
+  }
+
+  public updateObjects3D(objects: any[]) {
+    const currentIds = new Set(objects.map(o => o.id));
+
+    // Remove old objects
+    for (const [id, model] of this.models.entries()) {
+      if (id.startsWith('env_')) continue; // Don't remove environment/instanced meshes
+      if (id === 'ground') continue;
+      if (!currentIds.has(id)) {
+        this.scene.remove(model);
+        this.models.delete(id);
+      }
+    }
+
+    // Add/Update objects
+    objects.forEach(obj => {
+      if (this.models.has(obj.id)) {
+        const model = this.models.get(obj.id)!;
+        model.position.set(obj.x, obj.y, obj.z || 0);
+        model.rotation.set(obj.rotationX || 0, obj.rotationY || 0, obj.rotationZ || 0);
+        const s = obj.scale || 1;
+        model.scale.set(s, s, s);
+      } else {
+        this.loadModel(obj.id, obj.modelUrl || `/models/${obj.emoji}.glb`);
+      }
+    });
   }
 
   public addGameObject(obj: GameObject3D) {
@@ -358,6 +445,87 @@ export class GameEngine3D {
       this.camera.updateProjectionMatrix();
     }
     this.renderer.setSize(canvas.width, canvas.height);
+  }
+
+  public updateFromSpriteState(state: any) {
+    // Background color
+    const sceneColors: Record<string, string> = {
+      grid: '#ffffff',
+      space: '#0f172a',
+      forest: '#ecccae',
+      desert: '#fef3c7',
+      night: '#1e1b4b'
+    };
+    if (state.scene) {
+      this.setBackgroundColor(sceneColors[state.scene] || '#87ceeb');
+    }
+
+    // Update player
+    this.updatePlayer(state);
+
+    // Update entities (items, enemies)
+    this.updateEntities([...(state.items || []), ...(state.enemies || [])]);
+
+    // Update camera
+    this.updateCameraFromState(state);
+  }
+
+  private updatePlayer(state: any) {
+    const player = this.models.get('player');
+    if (!player) {
+      this.addGameObject({
+        id: 'player',
+        position: { x: (state.x - 200) / 10, y: (200 - state.y) / 10 + 0.5, z: (state.z || 0) / 10 },
+        rotation: { x: 0, y: THREE.MathUtils.degToRad(-state.rotation), z: 0 },
+        scale: { x: state.scale || 0.5, y: state.scale || 0.5, z: state.scale || 0.5 },
+        isAnimated: true,
+        modelUrl: state.modelUrl
+      });
+    } else {
+      player.position.set((state.x - 200) / 10, (200 - state.y) / 10 + 0.5, (state.z || 0) / 10);
+      player.rotation.set(0, THREE.MathUtils.degToRad(-state.rotation), 0);
+      player.scale.set(state.scale || 0.5, state.scale || 0.5, state.scale || 0.5);
+    }
+  }
+
+  private updateEntities(entities: any[]) {
+    // Simplified entity update for now
+    entities.forEach(e => {
+      let obj = this.models.get(e.id);
+      if (!obj) {
+        this.addGameObject({
+          id: e.id,
+          position: { x: (e.x - 200) / 10, y: (200 - e.y) / 10 + 0.5, z: (e.z || 0) / 10 },
+          rotation: { x: 0, y: 0, z: 0 },
+          scale: { x: 0.5, y: 0.5, z: 0.5 },
+          isAnimated: false,
+          modelUrl: e.modelUrl
+        });
+      } else {
+        obj.position.set((e.x - 200) / 10, (200 - e.y) / 10 + 0.5, (e.z || 0) / 10);
+      }
+    });
+  }
+
+  private updateCameraFromState(state: any) {
+    const player = this.models.get('player');
+    if (!player) return;
+
+    if (state.cameraMode === 'third_person') {
+      const offset = new THREE.Vector3(0, 5, 10);
+      offset.applyQuaternion(player.quaternion);
+      this.camera.position.copy(player.position).add(offset);
+      this.camera.lookAt(player.position);
+    } else if (state.cameraMode === 'first_person') {
+      this.camera.position.copy(player.position).add(new THREE.Vector3(0, 0.5, 0));
+      const lookTarget = new THREE.Vector3(0, 0, -1);
+      lookTarget.applyQuaternion(player.quaternion);
+      this.camera.lookAt(player.position.clone().add(lookTarget));
+    } else {
+      // Top down or default
+      this.camera.position.set(0, 20, 0);
+      this.camera.lookAt(0, 0, 0);
+    }
   }
 
   public getScene() {

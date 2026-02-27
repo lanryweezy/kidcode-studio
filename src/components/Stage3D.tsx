@@ -119,7 +119,7 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
       toRemove.forEach(c => scene.remove(c));
 
       const config: TerrainConfig = {
-        seed: worldSeed,
+        seed: state.worldSeed || 12345,
         width: 50,
         height: 50,
         scale: 15,
@@ -127,7 +127,7 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
         persistence: 0.5,
         lacunarity: 2.0,
         seaLevel: 0.3,
-        theme: state.worldPrompt
+        theme: state.worldPrompt || 'grassland'
       };
 
       const terrain = generateTerrain(config);

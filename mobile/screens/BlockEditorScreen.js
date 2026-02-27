@@ -1,22 +1,36 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, SafeAreaView, View, ActivityIndicator } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 export default function BlockEditorScreen() {
+    // In production, this would point to the deployed Vercel/Netlify URL
+    // For local testing on an emulator or real device, use your machine's IP address instead of localhost
+    // e.g., 'http://192.168.1.xxx:5173'
+    const WEB_APP_URL = 'http://localhost:5173'; // Change to local IP if testing on physical device
+
+    const onMessage = (event) => {
+        const data = event.nativeEvent.data;
+        console.log('Message from Web App:', data);
+        // Here we can handle native actions sent from the web app
+        // e.g., if (data === 'TRIGGER_CAMERA') { openCamera(); }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Create</Text>
-                <TouchableOpacity>
-                    <Ionicons name="play-circle" size={32} color="#8B5CF6" />
-                </TouchableOpacity>
-            </View>
-            <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.placeholder}>
-                    <Ionicons name="code-working" size={64} color="#CCCCFF" />
-                    <Text style={styles.placeholderText}>Block Editor coming soon to mobile!</Text>
-                </View>
-            </ScrollView>
+            <WebView
+                source={{ uri: WEB_APP_URL }}
+                style={styles.webview}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                startInLoadingState={true}
+                scalesPageToFit={true}
+                onMessage={onMessage}
+                renderLoading={() => (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator color="#8B5CF6" size="large" />
+                    </View>
+                )}
+            />
         </SafeAreaView>
     );
 }
@@ -26,33 +40,14 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F9FAFB',
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
+    webview: {
+        flex: 1,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#1F2937',
-    },
-    content: {
-        flexGrow: 1,
+    loadingContainer: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
-    },
-    placeholder: {
-        alignItems: 'center',
-    },
-    placeholderText: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#6B7280',
-        textAlign: 'center',
-    },
+        backgroundColor: '#FFFFFF',
+    }
 });

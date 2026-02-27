@@ -317,6 +317,7 @@ export interface CommandBlock {
     // Basic values
     value?: number;
     value2?: number; // For binary math/logic
+    intensity?: number; // For lighting/effects
     text?: string;
     text2?: string;
     message?: string;

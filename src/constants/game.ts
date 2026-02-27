@@ -59,6 +59,9 @@ export const INITIAL_SPRITE_STATE: SpriteState = {
     floatingTexts: [],
     // Level Data
     tilemap: [],
+    objects3d: [],
+    worldSeed: 12345,
+    worldPrompt: 'grassland',
 
     // === ENHANCED GAME FEATURES ===
     // Inventory

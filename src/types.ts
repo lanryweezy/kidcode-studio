@@ -353,6 +353,7 @@ export interface CommandBlock {
     // Additional params for new components
     steps?: number; // For stepper motors
     state?: boolean; // For relays, solenoids, lasers, etc.
+    max?: number; // For progress bars, sliders, etc.
     note?: string; // For musical notes
     shape?: string; // For OLED shapes
     pattern?: string; // For matrix patterns

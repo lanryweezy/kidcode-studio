@@ -78,6 +78,29 @@ const HomeScreen: React.FC = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8">
+                {/* Social Proof Stats Bar */}
+                <div className="flex flex-wrap items-center justify-center gap-6 mb-10 py-4 px-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                        <span className="text-2xl">🧑‍💻</span>
+                        <span><span className="text-violet-600 dark:text-violet-400 text-lg">200+</span> Blocks</span>
+                    </div>
+                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                        <span className="text-2xl">🎮</span>
+                        <span><span className="text-emerald-600 dark:text-emerald-400 text-lg">3D</span> Game Engine</span>
+                    </div>
+                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                        <span className="text-2xl">⚡</span>
+                        <span><span className="text-amber-600 dark:text-amber-400 text-lg">50+</span> Circuit Parts</span>
+                    </div>
+                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                        <span className="text-2xl">📱</span>
+                        <span>Publish to <span className="text-blue-600 dark:text-blue-400 text-lg">Web</span></span>
+                    </div>
+                </div>
+
                 <h2 className="text-4xl font-black mb-8 animate-in slide-in-from-left-10 fade-in duration-500">What do you want to build?</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                     {Object.values(AppMode).map((m, i) => {
@@ -101,7 +124,7 @@ const HomeScreen: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-black mb-2">{config.label}</h3>
-                                    <p className="opacity-90 font-medium">Create {m === AppMode.APP ? 'mobile apps' : m === AppMode.GAME ? 'video games' : 'inventions'} with blocks.</p>
+                                    <p className="opacity-90 font-medium">{m === AppMode.APP ? 'Design real mobile apps with buttons, inputs & screens.' : m === AppMode.GAME ? 'Build 2D platformers & 3D open-world adventures.' : 'Simulate Arduino circuits with 50+ parts.'}</p>
                                 </div>
                                 <div className="absolute bottom-6 right-6 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 group-hover:rotate-90 duration-300">
                                     <Plus size={24} />

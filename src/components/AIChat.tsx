@@ -29,6 +29,13 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Smart suggestions based on mode
+  const suggestions = currentMode === AppMode.GAME 
+    ? ["Add a player that can jump", "Create an enemy that chases", "Add coins to collect", "Make a platformer level"]
+    : currentMode === AppMode.APP
+    ? ["Create a login screen", "Add a button that speaks", "Make a color picker", "Add a slider control"]
+    : ["Make an LED blink", "Read a temperature sensor", "Control a servo motor", "Display text on LCD"];
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -177,6 +184,30 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
 
       {/* Input Area */}
       <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+        {/* Smart Suggestions */}
+        {messages.length <= 2 && (
+          <div className="mb-3">
+            <p className="text-[10px] text-slate-500 font-semibold mb-2 flex items-center gap-1">
+              <Sparkles size={10} className="text-violet-400" />
+              Try these:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((suggestion, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setInput(suggestion);
+                  }}
+                  className="px-3 py-1.5 bg-gradient-to-r from-violet-100 to-purple-100 hover:from-violet-200 hover:to-purple-200 text-violet-700 text-xs font-medium rounded-lg transition-all border border-violet-200 hover:border-violet-300"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2 mb-3">
             <button 
                 type="button"

@@ -24,10 +24,6 @@ const HomeScreen: React.FC = () => {
         setShowPricing,
         setShowProfile,
         setProject,
-        setCommands,
-        setCircuitComponents,
-        setMode,
-        setShowHome,
         setShowGallery
     } = useStore();
 
@@ -35,7 +31,7 @@ const HomeScreen: React.FC = () => {
 
     const handleRemix = (e: React.MouseEvent, proj: any) => {
         e.stopPropagation();
-        const remixed = remixProject(proj);
+        remixProject(proj);
         setRecentProjects(getProjects());
         playSoundEffect('powerup');
     };
@@ -50,34 +46,53 @@ const HomeScreen: React.FC = () => {
     };
 
     return (
-        <div className={`min-h-screen ${darkMode ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-800'} transition-colors font-sans`}>
+        <div className={`min-h-screen ${darkMode ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-800'} transition-colors font-sans pb-20`}>
             <div className="flex items-center justify-between p-6 max-w-7xl mx-auto w-full">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl flex items-center justify-center text-white shadow-lg animate-bounce-sm">
+                    <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg animate-float">
                         <Zap size={24} fill="currentColor" />
                     </div>
-                    <h1 className="text-2xl font-black tracking-tight">KidCode Studio</h1>
+                    <div className="flex flex-col">
+                        <h1 className="text-xl font-black tracking-tight leading-none">KidCode Studio</h1>
+                        <span className="text-[10px] uppercase tracking-[0.2em] font-black text-violet-500 mt-1">DASHBOARD</span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => useStore.getState().setShowLanding(true)}
+                        className="text-xs font-bold text-slate-400 hover:text-violet-500 transition-colors mr-4"
+                    >
+                        View Public Page
+                    </button>
                     <button
                         onClick={() => setShowPricing(true)}
                         className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:scale-105 transition-transform flex items-center gap-2"
                     >
                         <Crown size={16} fill="currentColor" />
-                        <span className="hidden sm:inline">Upgrade to Pro</span>
+                        <span className="hidden sm:inline">PRO</span>
                     </button>
                     <button
                         onClick={() => setShowProfile(true)}
                         className="flex items-center gap-2 py-2 px-4 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:border-violet-400 transition-all hover:scale-105"
                     >
                         <span className="text-2xl">{userProfile?.avatar || '👤'}</span>
-                        <span className="font-bold text-sm hidden sm:block">{userProfile?.name || 'Explorer'}</span>
-                        <div className="bg-yellow-400 text-yellow-900 text-xs font-black px-1.5 rounded ml-1 animate-pulse">{userProfile?.level || 1}</div>
+                        <div className="flex flex-col items-start leading-none hidden sm:flex">
+                            <span className="font-bold text-xs">{userProfile?.name || 'Explorer'}</span>
+                            <div className="bg-yellow-400 text-yellow-900 text-[8px] font-black px-1 rounded mt-0.5 uppercase">LVL {userProfile?.level || 1}</div>
+                        </div>
                     </button>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8">
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+                    <h2 className="text-4xl font-black animate-in slide-in-from-left-10 fade-in duration-500">What do you want to build?</h2>
+                    <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">324 Kids Building Live</span>
+                    </div>
+                </div>
+
                 {/* Social Proof Stats Bar */}
                 <div className="flex flex-wrap items-center justify-center gap-6 mb-10 py-4 px-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
@@ -101,7 +116,6 @@ const HomeScreen: React.FC = () => {
                     </div>
                 </div>
 
-                <h2 className="text-4xl font-black mb-8 animate-in slide-in-from-left-10 fade-in duration-500">What do you want to build?</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                     {Object.values(AppMode).map((m, i) => {
                         const config = MODE_CONFIG[m];

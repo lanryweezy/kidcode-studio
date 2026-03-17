@@ -1,126 +1,135 @@
 <div align="center">
-<img width="1200" height="475" alt="KidCode Studio Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+
+# ⚡ KidCode Studio
+
+### The Next-Gen Block Coding Platform for Kids
+
+**Build 3D Games • Design Mobile Apps • Simulate Arduino Circuits**
+
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-kidcode--studio.vercel.app-6366f1?style=for-the-badge)](https://kidcode-studio.vercel.app)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)](https://typescriptlang.org)
+
+<br />
+
+**200+ Blocks** · **3D Game Engine** · **50+ Circuit Components** · **AI World Generation** · **Multiplayer Live Rooms**
+
 </div>
 
-# KidCode Studio
+---
 
-KidCode Studio is an educational platform that allows children (ages 8-12) to learn programming through visual block-based coding. The platform offers three distinct modes:
+## 🎯 What is KidCode Studio?
 
-- 🎮 **Game Maker**: Create interactive video games with sprites, physics, and sound
-- 📱 **App Builder**: Build mobile applications with drag-and-drop UI components
-- ⚡ **Circuit Lab**: Design and simulate electronic circuits with various components
+KidCode Studio is a professional-grade creative platform where kids (ages 8-16) build real things — not toy demos — using visual drag-and-drop blocks. Think of it as **"Scratch meets Unreal Engine meets Arduino IDE"** in one unified platform.
 
-## Features
+Unlike legacy tools that haven't evolved since 2007, KidCode Studio features a **3D game engine**, **AI-generated worlds**, **realistic circuit simulation with 50+ components**, and **one-click web publishing**.
 
-- **Visual Block Programming**: Intuitive drag-and-drop interface for coding
-- **AI Integration**: Built-in AI tutor that helps with coding concepts
-- **Three Coding Modes**: Game development, app building, and electronics
-- **Real-time Preview**: See your creations come to life instantly
-- **Progressive Learning**: Missions and challenges to guide learning
-- **Creative Tools**: Sprite designer, sound editor, and pixel art editor
+## ✨ Three Powerful Modes
 
-## Tech Stack
+| Mode | What Kids Build | Key Features |
+|------|----------------|--------------|
+| 🎮 **Game Builder** | 2D platformers, 3D open-world adventures, RPGs | AI world generation, boss battles, inventory systems, physics engine, multiplayer |
+| 📱 **App Maker** | Real mobile applications with working UI | Multi-screen navigation, buttons, inputs, sliders, cameras, lists, charts |
+| ⚡ **Circuit Lab** | Arduino-compatible electronics projects | 50+ components (sensors, motors, displays), realistic simulation, no hardware needed |
 
-- **Frontend**: React 18, TypeScript
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Build Tool**: Vite
-- **AI Integration**: Google Generative AI API
+## 🚀 Why KidCode Studio?
 
-## Prerequisites
+| Feature | Scratch | Code.org | **KidCode Studio** |
+|---------|---------|----------|-------------------|
+| 3D Game Engine | ❌ | ❌ | ✅ Three.js powered |
+| AI World Generation | ❌ | ❌ | ✅ Type a prompt, get a world |
+| Circuit Simulation | ❌ | ❌ | ✅ 50+ real components |
+| Mobile App Builder | ❌ | ❌ | ✅ Multi-screen apps |
+| Boss Battle System | ❌ | ❌ | ✅ Phases, attacks, health |
+| Multiplayer Rooms | ❌ | ❌ | ✅ Live coding rooms |
+| One-Click Publishing | ❌ | ❌ | ✅ Standalone HTML export |
+| Modern UI (2024+) | ❌ | ❌ | ✅ Premium glassmorphism |
 
-- Node.js (v16 or higher)
-- npm or yarn package manager
+## 🎮 Featured Templates
 
-## Setup Instructions
+Start building in seconds with these ready-made projects:
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd kidcode-studio
-   ```
+- **🥷 3D Parkour Runner** — AI-generated cyberpunk city with gravity, jumping, and score tracking
+- **🏠 IoT Smart Home** — Auto-lights, temperature monitoring, motion alarm with 9 circuit components
+- **📱 Daily Habit Tracker** — Checkboxes, progress bar, and motivational app with multi-screen design
+- **⚔️ AI Quest RPG** — NPC dialogues, particle effects, and variable-driven storylines
+- **🚨 Police Siren** — Flashing LED circuits with buzzer sound effects
+- **🔒 Smart Security** — Logic AND gate: unlock only when switch AND light conditions are met
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+## 🛠 Tech Stack
 
-3. **Set up environment variables:**
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + TypeScript |
+| Styling | Tailwind CSS v4 |
+| 3D Engine | Three.js |
+| Build | Vite 5 |
+| AI | Google Generative AI (Gemini) |
+| Mobile | React Native + WebView |
+| Icons | Lucide React |
 
-   Create a `.env.local` file in the root directory with your Google Gemini API key:
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   ```
-
-   To get an API key:
-   - Go to [Google AI Studio](https://aistudio.google.com/)
-   - Create an account or sign in
-   - Create a new API key
-   - Copy and paste it into your `.env.local` file
-
-4. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser:**
-
-   Navigate to `http://localhost:5173` to start using KidCode Studio
-
-## Building for Production
-
-To create a production build of the application:
+## ⚡ Quick Start
 
 ```bash
-npm run build
+# Clone
+git clone https://github.com/lanryw/kidcode-studio.git
+cd kidcode-studio
+
+# Install
+npm install
+
+# Run
+npm run dev
 ```
 
-The build files will be created in the `dist` directory.
+Open `http://localhost:3000` and start building!
 
-## Project Structure
+### Environment Variables
 
-```
-kidcode-studio/
-├── components/          # React UI components
-├── services/            # Business logic and API services
-├── src/                 # Main source files
-├── public/              # Static assets
-├── types.ts             # Type definitions
-├── constants.ts         # App constants and configurations
-├── App.tsx              # Main application component
-├── index.tsx            # Application entry point
-└── ...
+Create `.env.local` for AI features:
+
+```env
+GEMINI_API_KEY=your_google_ai_api_key
 ```
 
-## Environment Variables
+## 📱 Mobile App
 
-- `GEMINI_API_KEY`: Your Google Gemini API key for AI features
+The `mobile/` directory contains a React Native shell that embeds the web engine via WebView for instant mobile parity:
 
-## API Integration
+```bash
+cd mobile
+npm install
+npx expo start
+```
 
-The application uses Google's Generative AI API for:
-- Code generation based on natural language prompts
-- AI-powered coding assistance
-- Sprite image generation
+## 🌍 Deployment
 
-## Deployment
+Deployed on **Vercel** with automatic CI/CD:
 
-The application is ready for deployment to platforms like Vercel, Netlify, or any Node.js hosting service.
+```bash
+npm run build  # Produces optimized dist/ bundle
+```
 
-For Vercel deployment:
-1. Connect your GitHub repository
-2. Configure environment variables
-3. Deploy automatically on pushes to main branch
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/lanryw/kidcode-studio)
 
-## Contributing
+## 📊 Platform Stats
+
+- **200+** drag-and-drop command blocks
+- **50+** virtual electronic components
+- **3** creative modes (Game, App, Hardware)
+- **10** built-in project templates
+- **3D** game engine with AI world generation
+- **0** lines of code required from kids
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+MIT License — Built with ❤️ by [Street Heart Technologies](https://www.linkedin.com/in/sulaiman-olanrewaju-adebayo-b7b29612a/)

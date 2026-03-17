@@ -42,6 +42,11 @@ export interface ProjectSlice {
     addPlugin: (name: string, elements: AppElement[]) => void;
     setAdvancedPhysics: (advanced: boolean) => void;
 
+    // Batch update actions for performance
+    batchUpdateSpriteState: (updates: Partial<SpriteState>) => void;
+    batchUpdateHardwareState: (updates: Partial<HardwareState>) => void;
+    batchUpdateAppState: (updates: Partial<AppState>) => void;
+
     // History Actions
     pushHistory: () => void;
     undo: () => void;
@@ -101,6 +106,19 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
         plugins: { ...state.plugins, [name]: elements }
     })),
     setAdvancedPhysics: (advancedPhysics) => set({ advancedPhysics }),
+
+    // Batch updates for performance (reduces re-renders)
+    batchUpdateSpriteState: (updates) => set((prev) => ({
+        spriteState: { ...prev.spriteState, ...updates }
+    })),
+
+    batchUpdateHardwareState: (updates) => set((prev) => ({
+        hardwareState: { ...prev.hardwareState, ...updates }
+    })),
+
+    batchUpdateAppState: (updates) => set((prev) => ({
+        appState: { ...prev.appState, ...updates }
+    })),
 
     pushHistory: () => {
         const { commands, history } = get();

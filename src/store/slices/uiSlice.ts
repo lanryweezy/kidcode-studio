@@ -3,6 +3,7 @@ import { StoreState } from '../useStore';
 import { AppMode, Mission } from '../../types';
 
 export interface UISlice {
+    showLanding: boolean;
     showHome: boolean;
     mode: AppMode;
     activeTab: string;
@@ -48,6 +49,7 @@ export interface UISlice {
 
     // Actions
     setMode: (mode: AppMode) => void;
+    setShowLanding: (show: boolean) => void;
     setShowHome: (show: boolean) => void;
     setActiveTab: (tab: string) => void;
     setDarkMode: (dark: boolean) => void;
@@ -87,7 +89,8 @@ export interface UISlice {
 }
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
-    showHome: true,
+    showLanding: true,
+    showHome: false,
     mode: AppMode.APP,
     activeTab: 'code',
     darkMode: false,
@@ -131,6 +134,7 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     consoleLogs: [],
 
     setMode: (mode) => set({ mode }),
+    setShowLanding: (show) => set({ showLanding: show }),
     setShowHome: (show) => set({ showHome: show }),
     setActiveTab: (tab) => set({ activeTab: tab }),
     setDarkMode: (dark) => set({ darkMode: dark }),

@@ -1,7 +1,92 @@
 
 import { AppMode, CommandBlock, CommandType } from '../types';
 
-export const generateCode = (commands: CommandBlock[], mode: AppMode): string => {
+interface ValidationError {
+  index: number;
+  message: string;
+  severity: 'error' | 'warning';
+}
+
+interface ValidationResult {
+  valid: boolean;
+  errors: ValidationError[];
+}
+
+/**
+ * Validates control structure matching (IF/ELSE/END_IF, REPEAT/END_REPEAT)
+ * Prevents generating broken code from mismatched blocks
+ */
+const validateControlStructures = (commands: CommandBlock[]): ValidationResult => {
+  const errors: ValidationError[] = [];
+  const stack: { type: CommandType; index: number }[] = [];
+
+  commands.forEach((cmd, idx) => {
+    // Push opening blocks onto stack
+    if ([CommandType.REPEAT, CommandType.IF, CommandType.FOREVER].includes(cmd.type)) {
+      stack.push({ type: cmd.type, index: idx });
+    }
+    
+    // Handle closing blocks
+    if (cmd.type === CommandType.END_REPEAT) {
+      const last = stack.pop();
+      if (!last || last.type !== CommandType.REPEAT) {
+        errors.push({
+          index: idx,
+          message: 'END_REPEAT without matching REPEAT',
+          severity: 'error'
+        });
+      }
+    }
+    
+    if (cmd.type === CommandType.ELSE) {
+      const last = stack[stack.length - 1];
+      if (!last || last.type !== CommandType.IF) {
+        errors.push({
+          index: idx,
+          message: 'ELSE without matching IF',
+          severity: 'error'
+        });
+      }
+    }
+    
+    if (cmd.type === CommandType.END_IF) {
+      const last = stack.pop();
+      if (!last || last.type !== CommandType.IF) {
+        errors.push({
+          index: idx,
+          message: 'END_IF without matching IF',
+          severity: 'error'
+        });
+      }
+    }
+  });
+
+  // Check for unclosed blocks
+  stack.forEach(item => {
+    errors.push({
+      index: item.index,
+      message: `Unclosed ${item.type} block`,
+      severity: 'error'
+    });
+  });
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+};
+
+export const generateCode = (
+  commands: CommandBlock[], 
+  mode: AppMode
+): { code: string; errors: ValidationError[] } => {
+  // Validate control structures first
+  const validation = validateControlStructures(commands);
+  
+  if (!validation.valid) {
+    return { code: '', errors: validation.errors };
+  }
+
   let code = '';
   let indentLevel = 0;
 
@@ -251,5 +336,5 @@ export const generateCode = (commands: CommandBlock[], mode: AppMode): string =>
      code += `}\n`;
   }
 
-  return code;
+  return { code, errors: [] };
 };

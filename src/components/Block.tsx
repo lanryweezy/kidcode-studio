@@ -266,7 +266,17 @@ const Block: React.FC<BlockProps> = ({
                 </div>
 
                 <div className="flex-1 flex flex-wrap items-center gap-2">
-                    <span className={`font-bold ${labelColor}`}>{def.label}</span>
+                    <div className="relative group">
+                        <span className={`font-bold ${labelColor} cursor-help`}>{def.label}</span>
+                        {/* Inline Tooltip */}
+                        <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50 pointer-events-none">
+                            <div className="bg-slate-900 text-white text-xs rounded-lg py-2 px-3 w-64 shadow-xl border border-slate-700">
+                                <p className="font-semibold mb-1">{def.label}</p>
+                                <p className="text-slate-300 leading-snug">{def.description || 'No description available'}</p>
+                                <div className="absolute bottom-0 left-4 transform translate-y-1/2 -translate-x-1/2 rotate-45 w-2 h-2 bg-slate-900 border-r border-b border-slate-700"></div>
+                            </div>
+                        </div>
+                    </div>
 
                     {block.type === CommandType.CREATE_SCREEN && (
                         <div className="flex items-center gap-1">

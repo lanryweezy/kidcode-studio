@@ -6,6 +6,7 @@ import Stage, { StageHandle } from './components/Stage';
 import Stage3D, { Stage3DHandle } from './components/Stage3D';
 import ContextMenu from './components/ContextMenu';
 import HomeScreen from './components/HomeScreen';
+import LandingPage from './components/LandingPage';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
 import NPCModal from './components/NPCModal';
@@ -33,6 +34,8 @@ const MarketplaceModal = React.lazy(() => import('./components/MarketplaceModal'
 const AssetManagerModal = React.lazy(() => import('./components/AssetManagerModal'));
 const ToastProvider = React.lazy(() => import('./components/ToastProvider'));
 const TutorialLauncher = React.lazy(() => import('./components/TutorialSystem'));
+const FirstWinCelebration = React.lazy(() => import('./components/FirstWinCelebration'));
+const XPNotification = React.lazy(() => import('./components/XPNotification'));
 import { useStore } from './store/useStore';
 import { useCodeInterpreter } from './hooks/useCodeInterpreter';
 import { useGamePhysics } from './hooks/useGamePhysics';
@@ -41,8 +44,11 @@ import { playSoundEffect, playTone, playSpeakerSound } from './services/soundSer
 import { getProjects, saveProject, createNewProject, SavedProject, exportProjectToFile, importProjectFromFile, captureThumbnail } from './services/storageService';
 import { generateCode } from './services/codeGenerator';
 import { generateSprite } from './services/geminiService';
-import { getUserProfile, addXp, DEFAULT_USER, upgradeUserPlan, updateStreak, checkAndUnlockBadge } from './services/userService';
+import { getUserProfile, addXp as originalAddXp, DEFAULT_USER, upgradeUserPlan, updateStreak, checkAndUnlockBadge } from './services/userService';
 import { getDailyQuests, updateQuestProgress } from './services/gamificationService';
+import { getUndoManager } from './services/undoManager';
+import { saveProjectIndexedDB } from './services/storageIndexedDB';
+import { registerBuiltInComponents } from './services/componentRegistry.tsx';
 import { Box, RotateCcw, Check, Trash, Code2, Layout, X } from 'lucide-react';
 
 const MIN_LEFT_WIDTH = 220;
@@ -53,6 +59,7 @@ const MAX_RIGHT_WIDTH = 600;
 export const App: React.FC = () => {
     // --- STORE SELECTORS ---
     const {
+        showLanding,
         showHome, setShowHome,
         mode, setMode,
         activeTab, setActiveTab,
@@ -112,6 +119,9 @@ export const App: React.FC = () => {
     const [isOverTrash, setIsOverTrash] = useState(false);
     const [showCodePageManager, setShowCodePageManager] = useState(false);
     const [is3DMode, setIs3DMode] = useState(false);
+    const [showFirstWinCelebration, setShowFirstWinCelebration] = useState(false);
+    const [hasRunCode, setHasRunCode] = useState(false);
+    const [xpNotifications, setXpNotifications] = useState<Array<{ id: string; amount: number; reason: string; icon?: 'star' | 'trophy' | 'trend' }>>([]);
 
     // --- INITIAL SETUP ---
     useEffect(() => {
@@ -127,12 +137,23 @@ export const App: React.FC = () => {
             }
         }
 
+        // Initialize undo manager with keyboard shortcuts
+        const undoManager = getUndoManager(useStore);
+        const cleanupKeyboard = undoManager.setupKeyboardShortcuts();
+
+        // Register built-in components for App Builder
+        registerBuiltInComponents();
+
         // --- AUTO-TUTORIAL ---
         const tutorialShown = localStorage.getItem('tutorial_shown');
         if (!tutorialShown) {
             setTimeout(() => setShowTutorial(true), 2000); // Wait for initial loading
             localStorage.setItem('tutorial_shown', 'true');
         }
+
+        return () => {
+            cleanupKeyboard();
+        };
     }, []);
 
     const saveTimeoutRef = useRef<number | undefined>(undefined);
@@ -164,7 +185,7 @@ export const App: React.FC = () => {
         setDebugMode,
         isPaused,
         highlightedPin,
-        runCode,
+        runCode: originalRunCode,
         stopCode,
         resumeCode
     } = useCodeInterpreter({
@@ -189,6 +210,24 @@ export const App: React.FC = () => {
         },
         appStateRef
     });
+
+    // Wrap runCode to show first win celebration
+    const runCode = useCallback(() => {
+        if (!hasRunCode && commands.length > 0) {
+            setHasRunCode(true);
+            setShowFirstWinCelebration(true);
+            addXp(50, 'First Code Run!', 'star');
+            playSoundEffect('powerup');
+        }
+        originalRunCode();
+    }, [hasRunCode, commands.length, originalRunCode]);
+
+    // Wrap addXp to show notifications
+    const addXp = useCallback((amount: number, reason: string, icon?: 'star' | 'trophy' | 'trend') => {
+        const id = crypto.randomUUID();
+        setXpNotifications(prev => [...prev, { id, amount, reason, icon }]);
+        originalAddXp(amount);
+    }, []);
 
     // Initialize Game Physics Hook
     const { tick, shakeAmount } = useGamePhysics({
@@ -219,12 +258,15 @@ export const App: React.FC = () => {
     const stageRef = useRef<StageHandle>(null);
 
     // --- PROJECT MANAGEMENT ---
-    const saveCurrentProject = useCallback((isAutoSave = false) => {
+    const saveCurrentProject = useCallback(async (isAutoSave = false) => {
         if (!currentProject) return;
         setSaveStatus('saving');
+        
         const updatedProject: SavedProject = {
             ...currentProject,
+            id: currentProject.id || crypto.randomUUID(),
             lastEdited: Date.now(),
+            lastModified: Date.now(),
             data: {
                 commands,
                 hardwareState,
@@ -235,7 +277,15 @@ export const App: React.FC = () => {
             },
             thumbnail: stageRef.current?.getThumbnail() || undefined
         };
-        saveProject(updatedProject);
+        
+        // Save to IndexedDB for unlimited storage
+        try {
+            await saveProjectIndexedDB(updatedProject);
+        } catch (error) {
+            console.error('IndexedDB save failed, using localStorage:', error);
+            saveProject(updatedProject); // Fallback to localStorage
+        }
+        
         setProject(updatedProject);
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = window.setTimeout(() => {
@@ -455,7 +505,9 @@ export const App: React.FC = () => {
         <div className={`h-screen flex flex-col overflow-hidden ${darkMode ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-800'} ${hackerMode ? 'hacker-mode' : ''}`}>
             {hackerMode && <div className="hacker-scanline" />}
             <Suspense fallback={<div className="h-screen flex items-center justify-center bg-slate-900 text-white font-black animate-pulse">LOADING KIDCODE STUDIO...</div>}>
-                {showGallery ? (
+                {showLanding ? (
+                    <LandingPage />
+                ) : showGallery ? (
                     <GalleryPage onBack={() => setShowGallery(false)} />
                 ) : showHome ? (
                     <HomeScreen />
@@ -591,6 +643,21 @@ export const App: React.FC = () => {
                     {showMarketplace && <MarketplaceModal onClose={() => setShowMarketplace(false)} />}
                     {showVariables && <VariableMonitor variables={mode === AppMode.APP ? appState.variables : spriteState.variables} isVisible={showVariables} onClose={() => setShowVariables(false)} />}
                     {showMissions && <MissionOverlay activeMission={activeMission} mode={mode} onSelectMission={(m) => { useStore.getState().setActiveMission(m); }} onClose={() => setShowMissions(false)} />}
+                    {showFirstWinCelebration && (
+                        <FirstWinCelebration
+                            projectName={currentProject?.name || 'Project'}
+                            xpEarned={50}
+                            onClose={() => setShowFirstWinCelebration(false)}
+                        />
+                    )}
+                    {/* XP Notifications */}
+                    {xpNotifications.map((notification, index) => (
+                        <XPNotification
+                            key={notification.id}
+                            notification={notification}
+                            onComplete={() => setXpNotifications(prev => prev.filter((_, i) => i !== index))}
+                        />
+                    ))}
                     {showCodePageManager && (
                         <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-[100]">
                             <CodePageManager

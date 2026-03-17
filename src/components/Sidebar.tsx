@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { exportToPython, exportToJavaScript } from '../services/codeExporter';
 import AnimationSequencer from './AnimationSequencer';
+import MissionProgress from './MissionProgress';
 
 const Sidebar: React.FC<any> = ({
     handleAppendCode,
@@ -42,7 +43,8 @@ const Sidebar: React.FC<any> = ({
         circuitSearch, setCircuitSearch,
         blockSearch, setBlockSearch,
         expandedCategories, setExpandedCategories,
-        setShowStats
+        setShowStats,
+        activeMission, setActiveMission
     } = useStore();
 
 
@@ -73,6 +75,22 @@ const Sidebar: React.FC<any> = ({
                 onOpenProfile={() => setShowProfile(true)}
                 onShowStats={() => setShowStats(true)}
             />
+
+            {/* Mission Progress Tracker */}
+            {activeMission && (
+                <div className="p-4 border-b border-slate-200 dark:border-slate-800">
+                    <MissionProgress
+                        mission={activeMission}
+                        progress={50} // Placeholder - would be calculated from actual progress
+                        tasks={[
+                            { description: 'Add 5 blocks', completed: true },
+                            { description: 'Run your code', completed: false },
+                            { description: 'Save project', completed: false }
+                        ]}
+                        onDismiss={() => setActiveMission(null)}
+                    />
+                </div>
+            )}
 
             <div className="glass dark:glass-dark border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transition-all duration-75 relative z-20" style={{ width: leftPanelWidth }}>
                 {activeTab === 'export' && (
@@ -253,21 +271,79 @@ const Sidebar: React.FC<any> = ({
                 ) : (
                     <div className="flex-1 flex flex-col">
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-                            <h3 className="font-bold text-slate-700 dark:text-slate-200 mb-2">Block Library</h3>
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="font-bold text-slate-700 dark:text-slate-200">Block Library</h3>
+                                <span className="text-[10px] bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 px-2 py-1 rounded-full font-bold">
+                                    🌟 Beginner Friendly
+                                </span>
+                            </div>
                             <div className="relative">
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input type="text" placeholder="Search blocks..." value={blockSearch} onChange={(e) => setBlockSearch(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-800 pl-9 pr-3 py-2 rounded-lg text-sm outline-none" />
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-1">
+                            {/* Starter Blocks - Always Visible */}
+                            {!blockSearch && (
+                                <div className="mb-6">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                                            <Sparkles size={12} className="text-white" />
+                                        </div>
+                                        <h4 className="font-black text-slate-700 dark:text-slate-200 text-sm">
+                                            Starter Blocks
+                                        </h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {groupedBlocks['Events']?.slice(0, 2).map((def) => (
+                                            <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-3 p-3 rounded-xl border-2 border-yellow-300 dark:border-yellow-600 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-all">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
+                                                    {React.createElement(def.icon, { size: 16 })}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{def.label}</span>
+                                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{def.description || 'Start your program'}</p>
+                                                </div>
+                                                <span className="text-[10px] bg-yellow-200 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full font-bold">START</span>
+                                            </div>
+                                        ))}
+                                        {groupedBlocks['Motion']?.slice(0, 2).map((def) => (
+                                            <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-all">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
+                                                    {React.createElement(def.icon, { size: 16 })}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{def.label}</span>
+                                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{def.description || 'Move your sprite'}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-3 text-center">
+                                        <p className="text-[10px] text-slate-400">
+                                            ↓ Scroll for more blocks ↓
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* All Block Categories */}
                             {Object.entries(groupedBlocks).map(([category, blocks]) => {
                                 const filtered = blocks.filter(b => b.label.toLowerCase().includes(blockSearch.toLowerCase()));
                                 if (filtered.length === 0) return null;
                                 const isExpanded = expandedCategories[category] !== false;
+                                const isStarterCategory = category === 'Events' || category === 'Motion';
+                                
+                                // Skip starter categories in the main list if not searching
+                                if (!blockSearch && isStarterCategory) return null;
+                                
                                 return (
                                     <div key={category} className="mb-2">
-                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2">
-                                            {category}
+                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                                            <span className="flex items-center gap-2">
+                                                {category}
+                                                <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-full">{filtered.length}</span>
+                                            </span>
                                             {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                         </button>
                                         <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0'}`}>

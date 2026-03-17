@@ -4,10 +4,12 @@ import { useStore } from '../store/useStore';
 import { MODE_CONFIG } from '../constants';
 import { AppMode } from '../types';
 import {
-  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag
+  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle
 } from 'lucide-react';
 import { exportToStandaloneHTML } from '../services/standaloneExporter';
 import { multiplayerService } from '../services/multiplayerService';
+import { diagnoseCode } from '../services/errorDiagnosis';
+import { ErrorDiagnosisHelp } from '../components/ErrorDiagnosisHelp';
 
 interface TopBarProps {
   isPlaying: boolean;
@@ -44,8 +46,11 @@ const TopBar: React.FC<TopBarProps> = ({
     setShowHome, mode, undo, redo, setShowHelp,
     setLeftPanelWidth, leftPanelWidth,
     circuitComponents, pcbColor, isLive, setIsLive,
-    setShowMarketplace
+    setShowMarketplace, commands
   } = useStore();
+  
+  const [showDiagnosis, setShowDiagnosis] = React.useState(false);
+  const diagnosis = React.useMemo(() => diagnoseCode(commands, mode), [commands, mode]);
 
   const handleToggleLive = () => {
     const next = !isLive;
@@ -154,6 +159,17 @@ const TopBar: React.FC<TopBarProps> = ({
 
         <button onClick={() => setShowHelp(true)} className="p-2 text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Academy / Help"><HelpCircle size={18} /></button>
         <button onClick={() => setShowMarketplace(true)} className="p-2 text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Marketplace"><ShoppingBag size={18} /></button>
+        
+        {/* Error Diagnosis Button */}
+        {diagnosis.errors.length > 0 && (
+          <button
+            onClick={() => setShowDiagnosis(!showDiagnosis)}
+            className="p-2 text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95 animate-pulse"
+            title={`Check code for ${diagnosis.errors.length} error(s)`}
+          >
+            <AlertCircle size={18} />
+          </button>
+        )}
 
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2" />
 
@@ -177,6 +193,17 @@ const TopBar: React.FC<TopBarProps> = ({
           {isPlaying ? <><Pause size={16} fill="currentColor" /> STOP</> : <><Play size={16} fill="currentColor" /> RUN CODE</>}
         </button>
       </div>
+      
+      {/* Error Diagnosis Panel */}
+      {showDiagnosis && diagnosis.errors.length > 0 && (
+        <div className="absolute top-14 right-4 w-96 z-50">
+          <ErrorDiagnosisHelp
+            errors={diagnosis.errors}
+            suggestions={diagnosis.suggestions}
+            onDismiss={() => setShowDiagnosis(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

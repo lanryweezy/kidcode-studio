@@ -1,6 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 import { AppMode, SpriteState, GameEntity } from '../types';
 import { playSoundEffect } from '../services/soundService';
+import { SpatialHash } from '../services/spatialHash';
 
 interface UseGamePhysicsProps {
     isPlaying: boolean;
@@ -19,6 +20,8 @@ export const useGamePhysics = ({
 }: UseGamePhysicsProps) => {
     const invincibilityTimer = useRef(0);
     const shakeTimer = useRef(0);
+    const spatialHashRef = useRef<SpatialHash>(new SpatialHash(40));
+    const lastTilemapLengthRef = useRef(0);
 
     const tick = useCallback(() => {
         if (!isPlaying || mode !== AppMode.GAME) return;
@@ -38,16 +41,27 @@ export const useGamePhysics = ({
         let newHealth = health;
         let newEffect = effectTrigger;
 
+        // Update spatial hash if tilemap changed
+        if (tilemap && tilemap.length !== lastTilemapLengthRef.current) {
+            spatialHashRef.current.buildTilemap(tilemap);
+            lastTilemapLengthRef.current = tilemap.length;
+        }
+
         // --- PHYSICS STEP 1: X AXIS ---
         let nextX = x + vx;
         let collisionX = false;
 
-        // Check Tile Collisions (X)
+        // Check Tile Collisions (X) using spatial hash for O(1) lookup
         if (tilemap) {
             const hitbox = { x: nextX + 5, y: y + 5, w: SPRITE_SIZE, h: SPRITE_SIZE }; // +5 padding
 
-            for (let i = 0; i < tilemap.length; i++) {
-                const tile = tilemap[i];
+            // Query only nearby tiles instead of checking all tiles
+            const { tiles: nearbyTiles } = spatialHashRef.current.query(
+                hitbox.x, hitbox.y, hitbox.w, hitbox.h
+            );
+
+            for (let i = 0; i < nearbyTiles.length; i++) {
+                const tile = nearbyTiles[i];
                 const tx = tile.x * TILE_SIZE;
                 const ty = tile.y * TILE_SIZE;
 
@@ -112,11 +126,16 @@ export const useGamePhysics = ({
         let collisionY = false;
         let onGround = false;
 
-        // Check Tile Collisions (Y)
+        // Check Tile Collisions (Y) using spatial hash
         if (tilemap) {
             const hitbox = { x: x + 5, y: nextY + 5, w: SPRITE_SIZE, h: SPRITE_SIZE };
 
-            for (const tile of tilemap) {
+            // Query only nearby tiles
+            const { tiles: nearbyTiles } = spatialHashRef.current.query(
+                hitbox.x, hitbox.y, hitbox.w, hitbox.h
+            );
+
+            for (const tile of nearbyTiles) {
                 const tx = tile.x * TILE_SIZE;
                 const ty = tile.y * TILE_SIZE;
 
@@ -245,6 +264,9 @@ export const useGamePhysics = ({
         });
 
         if (shakeTimer.current > 0) shakeTimer.current--;
+
+        // Update spatial hash with new entity positions for next frame
+        spatialHashRef.current.buildEntityList([...newEnemies, ...items]);
 
         spriteStateRef.current = {
             ...state,

@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Sparkles, Bot, User, Volume2, StopCircle, Bug, Glasses, Mic, Wand2 } from 'lucide-react';
-import { generateCodeFromPrompt, generateSpeech, reviewCode, getFixedCode } from '../services/geminiService';
+import { generateCodeFromPromptStream, generateSpeech, reviewCode, getFixedCode } from '../services/geminiService';
 import { AppMode, CommandBlock } from '../types';
 import { useStore } from '../store/useStore';
 import { playSoundEffect } from '../services/soundService';
@@ -50,16 +50,41 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setIsLoading(true);
+    
+    // Add an empty assistant message to stream into
+    setMessages(prev => [...prev, { role: 'assistant', text: '' }]);
 
-    const response = await generateCodeFromPrompt(userText, currentMode);
+    const response = await generateCodeFromPromptStream(
+      userText,
+      currentMode,
+      (token) => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessageIndex = newMessages.length - 1;
+          if (newMessages[lastMessageIndex].role === 'assistant') {
+             newMessages[lastMessageIndex].text += token;
+          }
+          return newMessages;
+        });
+      }
+    );
     
-    setMessages(prev => [...prev, { role: 'assistant', text: response.text }]);
-    
-        if (response.commands && response.commands.length > 0) {
-          onAppendCode(response.commands);
+    // Final update just in case, though the stream should have caught it all.
+    // We replace the full text with the cleaned up response text.
+    setMessages(prev => {
+        const newMessages = [...prev];
+        const lastMessageIndex = newMessages.length - 1;
+        if (newMessages[lastMessageIndex].role === 'assistant') {
+            newMessages[lastMessageIndex].text = response.text;
         }
-        setIsLoading(false);
-      };
+        return newMessages;
+    });
+
+    if (response.commands && response.commands.length > 0) {
+      onAppendCode(response.commands);
+    }
+    setIsLoading(false);
+  };
     
       const handleReview = async () => {
           const { commands, mode } = useStore.getState();

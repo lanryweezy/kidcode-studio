@@ -55,16 +55,19 @@ If the user asks for help or an explanation, answer in plain, encouraging text. 
 If generating code, put the JSON array inside a markdown code block labeled 'json'.
 `;
 
-export const generateCodeFromPrompt = async (
+export const generateCodeFromPromptStream = async (
   userPrompt: string,
-  currentMode: AppMode
+  currentMode: AppMode,
+  onToken: (text: string) => void
 ): Promise<{ text: string; commands?: Omit<CommandBlock, 'id'>[] }> => {
   try {
     const apiKey = VITE_GEMINI_API_KEY;
 
     if (!apiKey) {
-        console.warn("API Key missing");
-        return { text: "I can't access my brain right now (API Key missing)." };
+      console.warn("API Key missing");
+      const errorMsg = "I can't access my brain right now (API Key missing).";
+      onToken(errorMsg);
+      return { text: errorMsg };
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
@@ -84,10 +87,39 @@ export const generateCodeFromPrompt = async (
       }
     });
 
-    const result = await model.generateContent(finalPrompt);
-    const response = result.response;
+    const result = await model.generateContentStream(finalPrompt);
+    let fullText = '';
 
-    const responseText = typeof response.text === 'function' ? response.text() : response.text || "I couldn't quite understand that. Can you try again?";
+    // Stream tokens while hiding the JSON block.
+    // Use a regex-based replacement on the cumulative text to always emit the clean text up to that point.
+    // To do this simply, we emit the difference between the new clean text and the old clean text.
+    let lastEmittedLength = 0;
+
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      fullText += chunkText;
+
+      // If we're currently inside a ```json block that hasn't been closed, we'll temporarily replace it up to the end
+      // so it doesn't leak into the UI.
+      let currentClean = fullText;
+
+      // If there's an unclosed ```json, we remove from there to the end
+      const unclosedJsonMatch = fullText.match(/```json[^`]*$/);
+      if (unclosedJsonMatch) {
+         currentClean = fullText.substring(0, unclosedJsonMatch.index);
+      } else {
+         // Replace closed json blocks
+         currentClean = fullText.replace(/```json[\s\S]*?```/g, '');
+      }
+
+      const textToEmit = currentClean.substring(lastEmittedLength);
+      if (textToEmit) {
+          onToken(textToEmit);
+          lastEmittedLength = currentClean.length;
+      }
+    }
+
+    const responseText = fullText;
 
     // Extract JSON if present
     const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
@@ -102,7 +134,7 @@ export const generateCodeFromPrompt = async (
     }
 
     // Clean up the text to remove the JSON block so we don't show raw JSON to the kid in the chat bubble
-    const cleanText = responseText.replace(/```json[\s\S]*?```/, '').trim();
+    const cleanText = responseText.replace(/```json[\s\S]*?```/g, '').trim();
 
     return {
       text: cleanText || "Here is the code for you! Press the Green Play button to see it happen.",
@@ -111,8 +143,17 @@ export const generateCodeFromPrompt = async (
 
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return { text: "Oops! My brain froze. Check your internet or API key." };
+    const errorMsg = "Oops! My brain froze. Check your internet or API key.";
+    onToken(errorMsg);
+    return { text: errorMsg };
   }
+};
+
+export const generateCodeFromPrompt = async (
+  userPrompt: string,
+  currentMode: AppMode
+): Promise<{ text: string; commands?: Omit<CommandBlock, 'id'>[] }> => {
+  return generateCodeFromPromptStream(userPrompt, currentMode, () => {});
 };
 
 export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {

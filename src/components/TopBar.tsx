@@ -87,6 +87,7 @@ const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={() => setLeftPanelWidth(leftPanelWidth === 0 ? 280 : 0)}
           className="p-2 lg:hidden hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-all active:scale-95"
+          aria-label="Toggle left panel"
         >
           <Menu size={20} />
         </button>
@@ -137,6 +138,7 @@ const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={handlePublish}
           className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+          aria-label="Publish to Web"
         >
           <Globe size={12} /> Publish to Web
         </button>
@@ -147,6 +149,7 @@ const TopBar: React.FC<TopBarProps> = ({
             ? 'bg-red-500 text-white animate-pulse'
             : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
             }`}
+          aria-label={isLive ? 'Stop Live Multiplayer' : 'Go Live Multiplayer'}
         >
           {isLive ? <Radio size={12} /> : <Users size={12} />}
           {isLive ? 'Live Room' : 'Go Live'}
@@ -154,11 +157,11 @@ const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <button onClick={undo} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90" title="Undo (Ctrl+Z)"><Undo2 size={18} /></button>
-        <button onClick={redo} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90" title="Redo (Ctrl+Y)"><Redo2 size={18} /></button>
+        <button onClick={undo} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90" title="Undo (Ctrl+Z)" aria-label="Undo"><Undo2 size={18} /></button>
+        <button onClick={redo} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90" title="Redo (Ctrl+Y)" aria-label="Redo"><Redo2 size={18} /></button>
 
-        <button onClick={() => setShowHelp(true)} className="p-2 text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Academy / Help"><HelpCircle size={18} /></button>
-        <button onClick={() => setShowMarketplace(true)} className="p-2 text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Marketplace"><ShoppingBag size={18} /></button>
+        <button onClick={() => setShowHelp(true)} className="p-2 text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Academy / Help" aria-label="Help"><HelpCircle size={18} /></button>
+        <button onClick={() => setShowMarketplace(true)} className="p-2 text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Marketplace" aria-label="Marketplace"><ShoppingBag size={18} /></button>
         
         {/* Error Diagnosis Button */}
         {diagnosis.errors.length > 0 && (
@@ -173,7 +176,7 @@ const TopBar: React.FC<TopBarProps> = ({
 
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2" />
 
-        <button onClick={() => setDebugMode(!debugMode)} className={`p-2 rounded-lg transition-all active:scale-95 ${debugMode ? 'bg-orange-500 text-white shadow-inner' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 hover:shadow-sm hover:-translate-y-0.5'}`} title="Debugger"><Bug size={18} /></button>
+        <button onClick={() => setDebugMode(!debugMode)} className={`p-2 rounded-lg transition-all active:scale-95 ${debugMode ? 'bg-orange-500 text-white shadow-inner' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 hover:shadow-sm hover:-translate-y-0.5'}`} title="Debugger" aria-label="Toggle Debugger"><Bug size={18} /></button>
 
         {debugMode && (
           <button
@@ -189,6 +192,7 @@ const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={isPlaying ? stopCode : runCode}
           className={`btn-3d flex items-center gap-2 px-6 py-1.5 rounded-full font-black text-white transition-all shadow-xl active:scale-95 ${isPlaying ? 'bg-red-500 border-red-700 animate-pulse-glow' : 'bg-emerald-500 border-emerald-700 hover:bg-emerald-400'}`}
+          aria-label={isPlaying ? "Stop Code" : "Run Code"}
         >
           {isPlaying ? <><Pause size={16} fill="currentColor" /> STOP</> : <><Play size={16} fill="currentColor" /> RUN CODE</>}
         </button>

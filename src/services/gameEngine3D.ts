@@ -116,7 +116,7 @@ export class GameEngine3D {
     sun.shadow.mapSize.width = 2048;
     sun.shadow.mapSize.height = 2048;
     this.scene.add(sun);
-    this.lights.set('sun', sun);
+    this.lights.set('directional', sun); // Renamed to match update logic
   }
 
   public setCamera(config: Camera3D) {
@@ -468,6 +468,9 @@ export class GameEngine3D {
 
     // Update camera
     this.updateCameraFromState(state);
+
+    // Update lighting based on state
+    this.updateLightingFromState(state);
   }
 
   private updatePlayer(state: any) {
@@ -507,6 +510,36 @@ export class GameEngine3D {
     });
   }
 
+  private updateLightingFromState(state: any) {
+      if (state.lighting) {
+          // Ambient
+          if (state.lighting.ambientColor !== undefined || state.lighting.ambientIntensity !== undefined) {
+              let ambient = this.lights.get('ambient') as THREE.AmbientLight;
+              if (!ambient) {
+                  ambient = new THREE.AmbientLight(0xffffff, 0.5);
+                  this.scene.add(ambient);
+                  this.lights.set('ambient', ambient);
+              }
+              if (state.lighting.ambientColor) ambient.color.set(state.lighting.ambientColor);
+              if (state.lighting.ambientIntensity !== undefined) ambient.intensity = state.lighting.ambientIntensity;
+          }
+
+          // Directional
+          if (state.lighting.directionalColor !== undefined || state.lighting.directionalIntensity !== undefined || state.lighting.directionalPosition) {
+              let directional = this.lights.get('directional') as THREE.DirectionalLight;
+              if (!directional) {
+                  directional = new THREE.DirectionalLight(0xffffff, 1);
+                  directional.castShadow = true;
+                  this.scene.add(directional);
+                  this.lights.set('directional', directional);
+              }
+              if (state.lighting.directionalColor) directional.color.set(state.lighting.directionalColor);
+              if (state.lighting.directionalIntensity !== undefined) directional.intensity = state.lighting.directionalIntensity;
+              if (state.lighting.directionalPosition) directional.position.set(state.lighting.directionalPosition.x, state.lighting.directionalPosition.y, state.lighting.directionalPosition.z);
+          }
+      }
+  }
+
   private updateCameraFromState(state: any) {
     const player = this.models.get('player');
     if (!player) return;
@@ -525,6 +558,16 @@ export class GameEngine3D {
       // Top down or default
       this.camera.position.set(0, 20, 0);
       this.camera.lookAt(0, 0, 0);
+    }
+
+    // Apply Camera Constraints
+    if (state.cameraConstraints) {
+      if (state.cameraConstraints.minX !== undefined) this.camera.position.x = Math.max(this.camera.position.x, state.cameraConstraints.minX);
+      if (state.cameraConstraints.maxX !== undefined) this.camera.position.x = Math.min(this.camera.position.x, state.cameraConstraints.maxX);
+      if (state.cameraConstraints.minY !== undefined) this.camera.position.y = Math.max(this.camera.position.y, state.cameraConstraints.minY);
+      if (state.cameraConstraints.maxY !== undefined) this.camera.position.y = Math.min(this.camera.position.y, state.cameraConstraints.maxY);
+      if (state.cameraConstraints.minZ !== undefined) this.camera.position.z = Math.max(this.camera.position.z, state.cameraConstraints.minZ);
+      if (state.cameraConstraints.maxZ !== undefined) this.camera.position.z = Math.min(this.camera.position.z, state.cameraConstraints.maxZ);
     }
   }
 

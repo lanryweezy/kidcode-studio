@@ -148,6 +148,9 @@ const Block: React.FC<BlockProps> = ({
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}
                 onContextMenu={(e) => { if (onContextMenu) { e.preventDefault(); onContextMenu(e, block.id); } }}
+                tabIndex={0}
+                role="article"
+                aria-label={`Comment block`}
             >
                 <div className="flex items-center gap-2 mb-2 text-yellow-800 dark:text-yellow-100 opacity-60">
                     <StickyNote size={16} />
@@ -208,13 +211,14 @@ const Block: React.FC<BlockProps> = ({
 
     return (
         <div className="flex gap-2 items-center">
-            <div
+            <button
                 className={`w-4 h-4 rounded-full cursor-pointer flex items-center justify-center transition-all ${block.hasBreakpoint ? 'bg-red-500 hover:bg-red-600 scale-100' : 'bg-transparent hover:bg-red-200 scale-75'}`}
                 onClick={toggleBreakpoint}
                 title="Toggle Breakpoint"
+                aria-label={block.hasBreakpoint ? 'Remove breakpoint' : 'Add breakpoint'}
             >
                 {block.hasBreakpoint && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-            </div>
+            </button>
 
             <div
                 id={`block-${block.id}`}
@@ -250,6 +254,9 @@ const Block: React.FC<BlockProps> = ({
                         onContextMenu(e, block.id);
                     }
                 }}
+                tabIndex={0}
+                role="article"
+                aria-label={`Code block: ${def?.label}`}
             >
                 {isDraggable && (
                     <div className="text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400 cursor-grab active:cursor-grabbing">

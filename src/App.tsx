@@ -622,7 +622,7 @@ export const App: React.FC = () => {
                                 <div className={`h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 transition-all ${showConsole ? 'block' : 'hidden'}`}>
                                     <div className="flex justify-between items-center mb-1 text-slate-500 text-[10px] uppercase font-bold sticky top-0 bg-slate-900">
                                         <span>Console Output</span>
-                                        <button onClick={clearLogs} className="hover:text-white">Clear</button>
+                                        <button onClick={clearLogs} className="hover:text-white" aria-label="Clear console logs">Clear</button>
                                     </div>
                                     {consoleLogs.map((log, i) => <div key={i} className="border-b border-white/5 py-0.5">{log}</div>)}
                                 </div>

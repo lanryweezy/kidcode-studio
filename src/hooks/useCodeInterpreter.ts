@@ -116,6 +116,42 @@ export const useCodeInterpreter = ({
 
         try {
             switch (cmd.type) {
+                case CommandType.SAVE_GAME: {
+                    const slot = cmd.params.text || 'slot1';
+                    const saveData = {
+                        variables: spriteStateRef.current.variables,
+                        score: spriteStateRef.current.score,
+                        health: spriteStateRef.current.health,
+                        x: spriteStateRef.current.x,
+                        y: spriteStateRef.current.y
+                    };
+                    localStorage.setItem(`savegame_${slot}`, JSON.stringify(saveData));
+                    setConsoleLogs(prev => [...prev, `Game saved to ${slot}`]);
+                    break;
+                }
+                case CommandType.LOAD_GAME: {
+                    const slot = cmd.params.text || 'slot1';
+                    const savedString = localStorage.getItem(`savegame_${slot}`);
+                    if (savedString) {
+                        try {
+                            const saveData = JSON.parse(savedString);
+                            spriteStateRef.current = {
+                                ...spriteStateRef.current,
+                                variables: { ...spriteStateRef.current.variables, ...(saveData.variables || {}) },
+                                score: saveData.score ?? spriteStateRef.current.score,
+                                health: saveData.health ?? spriteStateRef.current.health,
+                                x: saveData.x ?? spriteStateRef.current.x,
+                                y: saveData.y ?? spriteStateRef.current.y
+                            };
+                            setConsoleLogs(prev => [...prev, `Game loaded from ${slot}`]);
+                        } catch (e) {
+                            setConsoleLogs(prev => [...prev, `Failed to load ${slot}`]);
+                        }
+                    } else {
+                        setConsoleLogs(prev => [...prev, `No save found in ${slot}`]);
+                    }
+                    break;
+                }
                 case CommandType.WAIT:
                 case CommandType.SLEEP:
                     await wait((cmd.params.value || 1) * 1000 * speedMultiplier);
@@ -424,6 +460,18 @@ export const useCodeInterpreter = ({
                     break;
                 case CommandType.ROTATE_Z:
                     spriteStateRef.current.rotationZ += (cmd.params.value || 0);
+                    break;
+                case CommandType.SET_CAMERA_CONSTRAINT:
+                    spriteStateRef.current.cameraConstraints = {
+                         minX: cmd.params.x ?? undefined,
+                         maxX: cmd.params.y ?? undefined, // Using y parameter for maxX block simplified mapping
+                    };
+                    break;
+                case CommandType.SET_LIGHTING:
+                    spriteStateRef.current.lighting = {
+                         ambientColor: cmd.params.color ?? undefined,
+                         ambientIntensity: cmd.params.value ?? 1,
+                    };
                     break;
                 case CommandType.SET_CAMERA:
                 case CommandType.SET_3D_CAMERA:

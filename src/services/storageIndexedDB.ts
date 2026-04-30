@@ -180,7 +180,7 @@ export const listProjectsIndexedDB = async (): Promise<Array<{
           // Skip invalid data
         }
       }
-    }
+    });
     return projects.sort((a, b) => b.timestamp - a.timestamp);
   }
 

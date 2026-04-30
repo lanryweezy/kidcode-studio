@@ -45,10 +45,14 @@ export const useMatterPhysics = ({
       playerBody = Matter.Bodies.rectangle(state.x, state.y, 40, 40, {
         label: 'player',
         inertia: Infinity, // Prevent rotation for platformer feel by default
-        friction: 0.05
+        friction: state.friction ?? 0.05,
+        restitution: state.restitution ?? 0
       });
       Matter.Composite.add(world, playerBody);
       bodiesMap.current.set('player', playerBody);
+    } else {
+        playerBody.friction = state.friction ?? 0.05;
+        playerBody.restitution = state.restitution ?? 0;
     }
 
     // 2. Create/Update Static World Bodies (Tiles)

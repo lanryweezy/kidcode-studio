@@ -34,6 +34,9 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
   const animationFrameRef = useRef<number>();
   const [isReady, setIsReady] = useState(false);
 
+  const raycaster = useRef(new THREE.Raycaster());
+  const mouse = useRef(new THREE.Vector2());
+
   useImperativeHandle(ref, () => ({
     takeScreenshot: () => {
       if (canvasRef.current) {
@@ -180,6 +183,41 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
     };
   }, [isReady, onInput, inputState]);
 
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!engineRef.current || !canvasRef.current || !isExecuting) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    // Normalize mouse coordinates to -1 to +1
+    mouse.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+    const engine = engineRef.current;
+    raycaster.current.setFromCamera(mouse.current, engine.getCamera());
+
+    // Intersect against all objects in the scene (excluding helpers)
+    const scene = engine.getScene();
+    const intersects = raycaster.current.intersectObjects(scene.children, true);
+
+    if (intersects.length > 0) {
+      // Find the first non-helper object
+      const firstHit = intersects.find(hit => !hit.object.name.includes('Helper'));
+      if (firstHit) {
+        // Find the root object that might correspond to a GameEntity id
+        let obj: THREE.Object3D | null = firstHit.object;
+        while (obj && !obj.userData?.entityId) {
+            obj = obj.parent;
+        }
+
+        if (obj && obj.userData?.entityId) {
+            // Trigger a custom event or state update for the clicked entity
+            // For now, let's log and trigger a generic click input if the entity has an ID
+            console.log('Clicked 3D Entity:', obj.userData.entityId);
+            onInput?.(`Click_${obj.userData.entityId}`, true);
+        }
+      }
+    }
+  };
+
   return (
     <div
       className="relative bg-slate-900 rounded-2xl overflow-hidden shadow-2xl"
@@ -193,6 +231,7 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
         width={gameCanvasSize?.w || 400}
         height={gameCanvasSize?.h || 400}
         className="block"
+        onClick={handleCanvasClick}
       />
 
       {!isReady && (

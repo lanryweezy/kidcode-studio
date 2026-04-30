@@ -1,3 +1,4 @@
+import { executeWithRetry, RetryPresets } from "./aiServiceWrapper";
 /**
  * AI 3D Asset Generation Service
  * Supports multiple providers: Meshy AI, Luma Genie, Tripo AI, Microsoft TRELLIS
@@ -527,7 +528,7 @@ const meshyAPI = {
     }
 
     // Step 1: Create task
-    const createResponse = await fetch(`${MESHY_API_BASE}/image-to-3d`, {
+    const createResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/image-to-3d`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${MESHY_API_KEY}`,
@@ -540,7 +541,7 @@ const meshyAPI = {
         enable_pbr: true,
         enable_rig: false
       })
-    });
+    }), RetryPresets.standard, 'meshy');
 
     if (!createResponse.ok) {
       throw new Error(`Meshy API error: ${createResponse.statusText}`);
@@ -553,11 +554,11 @@ const meshyAPI = {
     onProgress?.({ status: 'processing', progress: 10, message: 'Generating 3D model...' });
 
     while (true) {
-      const statusResponse = await fetch(`${MESHY_API_BASE}/tasks/${taskId}`, {
+      const statusResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/tasks/${taskId}`, {
         headers: {
           'Authorization': `Bearer ${MESHY_API_KEY}`
         }
-      });
+      }), RetryPresets.standard, 'meshy');
 
       const statusData = await statusResponse.json();
       
@@ -602,7 +603,7 @@ const meshyAPI = {
     }
 
     // Step 1: Create task
-    const createResponse = await fetch(`${MESHY_API_BASE}/image-to-3d`, {
+    const createResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/image-to-3d`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${MESHY_API_KEY}`,
@@ -614,7 +615,7 @@ const meshyAPI = {
         enable_pbr: true,
         enable_rig: false
       })
-    });
+    }), RetryPresets.standard, 'meshy');
 
     if (!createResponse.ok) {
       throw new Error(`Meshy API error: ${createResponse.statusText}`);
@@ -627,11 +628,11 @@ const meshyAPI = {
     onProgress?.({ status: 'processing', progress: 10, message: 'Processing image...' });
 
     while (true) {
-      const statusResponse = await fetch(`${MESHY_API_BASE}/tasks/${taskId}`, {
+      const statusResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/tasks/${taskId}`, {
         headers: {
           'Authorization': `Bearer ${MESHY_API_KEY}`
         }
-      });
+      }), RetryPresets.standard, 'meshy');
 
       const statusData = await statusResponse.json();
       
@@ -672,7 +673,7 @@ const meshyAPI = {
       throw new Error('Meshy API key not configured');
     }
 
-    const response = await fetch(`${MESHY_API_BASE}/rig`, {
+    const response = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/rig`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${MESHY_API_KEY}`,
@@ -682,7 +683,7 @@ const meshyAPI = {
         model_url: modelUrl,
         format: 'glb'
       })
-    });
+    }), RetryPresets.standard, 'meshy');
 
     if (!response.ok) {
       throw new Error('Rigging failed');

@@ -121,6 +121,13 @@ export const generateCodeFromPromptStream = async function* (
   }
 };
 
+export const generateCodeFromPrompt = async (
+  userPrompt: string,
+  currentMode: AppMode
+): Promise<{ text: string; commands?: Omit<CommandBlock, 'id'>[] }> => {
+  return generateCodeFromPromptStream(userPrompt, currentMode, () => {});
+};
+
 export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {
     try {
         const apiKey = VITE_GEMINI_API_KEY;

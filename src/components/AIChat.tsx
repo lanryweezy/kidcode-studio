@@ -77,25 +77,8 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
             };
           
             const handleFix = async () => {
-                const { commands, mode } = useStore.getState();
-                if (commands.length === 0) {
-                    setMessages(prev => [...prev, { role: 'assistant', text: "Your code is empty! Add some blocks first so I can look for bugs. 😊" }]);
-                    return;
-                }
-
-                setIsLoading(true);
-                setMessages(prev => [...prev, { role: 'user', text: "Can you fix the bugs for me?" }]);
-
-                const fixedBlocks = await getFixedCode(commands, mode);
-                
-                if (fixedBlocks && onReplaceCode) {
-                    onReplaceCode(fixedBlocks);
-                    setMessages(prev => [...prev, { role: 'assistant', text: "Abracadabra! ✨ I've replaced your blocks with a corrected version. Try running it now!" }]);
-                    playSoundEffect('powerup');
-                } else {
-                    setMessages(prev => [...prev, { role: 'assistant', text: "I couldn't find an automatic fix this time, but I believe in you! Keep trying! 🚀" }]);
-                }
-                setIsLoading(false);
+                // Feature temporarily disabled - needs onReplaceCode prop from parent
+                setMessages(prev => [...prev, { role: 'assistant', text: "Code fix feature is coming soon! For now, try asking me to explain the issue." }]);
             };
   const playMessage = async (text: string, index: number) => {
       if (isPlaying === index) {

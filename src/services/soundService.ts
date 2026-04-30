@@ -8,7 +8,7 @@ const getContext = () => {
   return audioCtx;
 };
 
-export const playSoundEffect = (type: 'move' | 'turn' | 'ui' | 'click' | 'coin' | 'camera' | 'powerup' | 'laser' | 'explosion' | 'hurt' | 'jump') => {
+export const playSoundEffect = (type: 'move' | 'turn' | 'ui' | 'click' | 'coin' | 'camera' | 'powerup' | 'laser' | 'explosion' | 'hurt' | 'jump' | 'dash') => {
   try {
     const ctx = getContext();
     if (ctx.state === 'suspended') ctx.resume();
@@ -141,6 +141,15 @@ export const playSoundEffect = (type: 'move' | 'turn' | 'ui' | 'click' | 'coin' 
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now);
         osc.stop(now + 0.2);
+        break;
+      case 'dash':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
         break;
     }
   } catch (e) {

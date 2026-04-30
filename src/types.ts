@@ -408,6 +408,8 @@ export interface GameEntity {
   color?: string;
   lifeTime?: number;
   physicsType?: 'static' | 'dynamic' | 'bouncy'; // Physics 2.0
+  restitution?: number; // Bounciness
+  friction?: number; // Surface friction
   // AI/Behavior
   initialX?: number;
   initialY?: number;
@@ -492,6 +494,8 @@ export interface SpriteState {
   jumpForce: number;
   isJumping: boolean;
   canDoubleJump: boolean;
+  restitution?: number; // Bounciness
+  friction?: number; // Surface friction
   canDash: boolean;
   dashCooldown: number;
   projectiles: GameEntity[];
@@ -500,6 +504,21 @@ export interface SpriteState {
   platforms: GameEntity[];
   clones: GameEntity[];
   cameraFollow: boolean;
+  cameraConstraints?: {
+    minX?: number;
+    maxX?: number;
+    minY?: number;
+    maxY?: number;
+    minZ?: number;
+    maxZ?: number;
+  };
+  lighting?: {
+    ambientColor?: string;
+    ambientIntensity?: number;
+    directionalColor?: string;
+    directionalIntensity?: number;
+    directionalPosition?: { x: number, y: number, z: number };
+  };
 
   // Visual Effects
   effectTrigger?: { type: 'explosion' | 'sparkle' | 'poof', x: number, y: number, z?: number, color?: string };

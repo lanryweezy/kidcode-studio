@@ -26,13 +26,46 @@ export const useGamePhysics = ({
     const tick = useCallback(() => {
         if (!isPlaying || mode !== AppMode.GAME) return;
 
+        const state = spriteStateRef.current;
+        if (!state) return;
+
+        // --- Gamepad Polling ---
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const gp = gamepads[0];
+        if (gp) {
+            // Analog sticks
+            const threshold = 0.2;
+            const lr = Math.abs(gp.axes[0]) > threshold ? gp.axes[0] : 0;
+            const ud = Math.abs(gp.axes[1]) > threshold ? gp.axes[1] : 0;
+
+            if (lr !== 0) state.vx = lr * 5; // Direct mapped movement or acceleration
+
+            // Face buttons (A = 0, B = 1, X = 2, Y = 3)
+            const aPressed = gp.buttons[0]?.pressed;
+            const bPressed = gp.buttons[1]?.pressed;
+            const xPressed = gp.buttons[2]?.pressed;
+            const yPressed = gp.buttons[3]?.pressed;
+
+            // Simple jump binding to A
+            if (aPressed && !state.isJumping) {
+               state.vy = -state.jumpForce;
+               state.isJumping = true;
+               playSoundEffect('jump');
+            }
+
+            // Dash binding to X
+            if (xPressed && state.canDash && state.dashCooldown <= 0) {
+                state.vx += lr > 0 ? 20 : (lr < 0 ? -20 : (state.scale > 0 ? 20 : -20));
+                state.dashCooldown = 30; // 30 frames
+                playSoundEffect('dash');
+            }
+        }
+        // -----------------------
+
         const GRAVITY = 0.8;
         const MAX_FALL_SPEED = 15;
         const TILE_SIZE = 40;
         const SPRITE_SIZE = 30; // Hitbox slightly smaller than visual 40px
-
-        const state = spriteStateRef.current;
-        if (!state) return;
 
         const canvasW = gameCanvasSizeRef.current.w;
         const canvasH = gameCanvasSizeRef.current.h;
@@ -74,7 +107,12 @@ export const useGamePhysics = ({
                     // Solid blocks
                     if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
                         collisionX = true;
-                        vx = 0;
+                        const restitution = state.restitution ?? 0;
+                        if (restitution > 0) {
+                            vx = -vx * restitution;
+                        } else {
+                            vx = 0;
+                        }
                         break;
                     }
                     // Door logic
@@ -153,7 +191,14 @@ export const useGamePhysics = ({
                         } else if (vy < 0) { // Jumping up
                             nextY = ty + TILE_SIZE - 5;
                         }
-                        vy = 0;
+                        const restitution = state.restitution ?? 0;
+                        if (restitution > 0) {
+                             vy = -vy * restitution;
+                             // If it bounced hard enough, it's not on the ground anymore
+                             if (Math.abs(vy) > 2) onGround = false;
+                        } else {
+                             vy = 0;
+                        }
                         collisionY = true;
                     }
                     // Platforms (One-way up)
@@ -184,8 +229,9 @@ export const useGamePhysics = ({
         if (onGround) isJumping = false;
 
         // Friction
-        if (onGround) vx *= 0.8;
-        else vx *= 0.95;
+        const surfaceFriction = state.friction ?? 0.8;
+        if (onGround) vx *= surfaceFriction;
+        else vx *= 0.95; // Air friction
 
         if (Math.abs(vx) < 0.1) vx = 0;
 

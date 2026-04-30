@@ -17,7 +17,7 @@ interface Message {
   text: string;
 }
 
-const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
+const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCode }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([

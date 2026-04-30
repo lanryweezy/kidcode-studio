@@ -376,6 +376,18 @@ export const exportToArduino = (commands: CommandBlock[]): string => {
       case CommandType.PLAY_TONE:
         code += `  tone(8, 440, ${(cmd.params.duration || 0.5) * 1000});\n`;
         break;
+      case CommandType.READ_I2C:
+        code += `  // I2C read from address ${cmd.params.address || '0x68'}\n`;
+        break;
+      case CommandType.WRITE_I2C:
+        code += `  // I2C write to address ${cmd.params.address || '0x68'}\n`;
+        break;
+      case CommandType.READ_SPI:
+        code += `  // SPI read from pin ${cmd.params.pin || 10}\n`;
+        break;
+      case CommandType.WRITE_SPI:
+        code += `  // SPI write to pin ${cmd.params.pin || 10}\n`;
+        break;
       default:
         code += `  // ${cmd.type} - not supported in Arduino\n`;
     }
@@ -447,4 +459,19 @@ ${jsCode.split('\n').map(l => '      ' + l).join('\n')}
   </script>
 </body>
 </html>`;
+};
+
+
+// Download Arduino Code as .ino file
+export const downloadArduinoCode = (commands: CommandBlock[], projectName: string = 'KidCodeProject') => {
+  const code = exportToArduino(commands);
+  const blob = new Blob([code], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${projectName.replace(/\s+/g, '_')}/${projectName.replace(/\s+/g, '_')}.ino`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };

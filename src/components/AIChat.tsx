@@ -17,7 +17,7 @@ interface Message {
   text: string;
 }
 
-const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
+const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCode }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -50,40 +50,33 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setIsLoading(true);
-    
-    // Add an empty assistant message to stream into
+
+    // Initialize an empty assistant message that we will update
     setMessages(prev => [...prev, { role: 'assistant', text: '' }]);
 
-    const response = await generateCodeFromPromptStream(
-      userText,
-      currentMode,
-      (token) => {
+    try {
+      const stream = generateCodeFromPromptStream(userText, currentMode);
+      let finalCommands: Omit<CommandBlock, 'id'>[] | undefined;
+
+      for await (const chunk of stream) {
         setMessages(prev => {
           const newMessages = [...prev];
-          const lastMessageIndex = newMessages.length - 1;
-          if (newMessages[lastMessageIndex].role === 'assistant') {
-             newMessages[lastMessageIndex].text += token;
-          }
+          newMessages[newMessages.length - 1] = { role: 'assistant', text: chunk.text };
           return newMessages;
         });
-      }
-    );
-    
-    // Final update just in case, though the stream should have caught it all.
-    // We replace the full text with the cleaned up response text.
-    setMessages(prev => {
-        const newMessages = [...prev];
-        const lastMessageIndex = newMessages.length - 1;
-        if (newMessages[lastMessageIndex].role === 'assistant') {
-            newMessages[lastMessageIndex].text = response.text;
+        if (chunk.isDone && chunk.commands && chunk.commands.length > 0) {
+            finalCommands = chunk.commands;
         }
-        return newMessages;
-    });
+      }
 
-    if (response.commands && response.commands.length > 0) {
-      onAppendCode(response.commands);
+      if (finalCommands) {
+        onAppendCode(finalCommands);
+      }
+    } catch (error) {
+      console.error("Chat Error:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
     
       const handleReview = async () => {
@@ -104,19 +97,6 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode }) => {
             const handleFix = async () => {
                 // Feature temporarily disabled - needs onReplaceCode prop from parent
                 setMessages(prev => [...prev, { role: 'assistant', text: "Code fix feature is coming soon! For now, try asking me to explain the issue." }]);
-                
-                // const { commands, mode } = useStore.getState();
-                // setIsLoading(true);
-                // setMessages(prev => [...prev, { role: 'user', text: "Can you fix the bugs for me?" }]);
-                // const fixedBlocks = await getFixedCode(commands, mode);
-                // if (fixedBlocks && onReplaceCode) {
-                //     onReplaceCode(fixedBlocks);
-                //     setMessages(prev => [...prev, { role: 'assistant', text: "Abracadabra! ✨ I've replaced your blocks with a corrected version. Try running it now!" }]);
-                //     playSoundEffect('powerup');
-                // } else {
-                //     setMessages(prev => [...prev, { role: 'assistant', text: "I couldn't find an automatic fix this time, but I believe in you! Keep trying! 🚀" }]);
-                // }
-                // setIsLoading(false);
             };
   const playMessage = async (text: string, index: number) => {
       if (isPlaying === index) {

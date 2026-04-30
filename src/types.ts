@@ -8,6 +8,8 @@ export enum AppMode {
 export enum CommandType {
   // --- COMMON FLOW ---
   WAIT = 'WAIT',
+  SAVE_GAME = 'SAVE_GAME',
+  LOAD_GAME = 'LOAD_GAME',
   REPEAT = 'REPEAT',
   END_REPEAT = 'END_REPEAT',
   FOREVER = 'FOREVER',
@@ -23,6 +25,7 @@ export enum CommandType {
   SET_VIEW_3D = 'SET_VIEW_3D',
   SPAWN_3D_OBJECT = 'SPAWN_3D_OBJECT',
   SET_LIGHTING = 'SET_LIGHTING',
+  SET_CAMERA_CONSTRAINT = 'SET_CAMERA_CONSTRAINT',
   GENERATE_ENVIRONMENT = 'GENERATE_ENVIRONMENT',
 
   // --- EVENTS & MESSAGING ---
@@ -305,6 +308,10 @@ export enum CommandType {
   LOGIC_NOT = 'LOGIC_NOT',
 
   READ_FILE = 'READ_FILE',
+  READ_I2C = 'READ_I2C',
+  WRITE_I2C = 'WRITE_I2C',
+  READ_SPI = 'READ_SPI',
+  WRITE_SPI = 'WRITE_SPI',
   WRITE_FILE = 'WRITE_FILE'
 }
 
@@ -328,6 +335,7 @@ export interface CommandBlock {
     duration?: number;
     speed?: number;
     angle?: number;
+  address?: string;
     row?: number;
     col?: number;
 
@@ -408,6 +416,8 @@ export interface GameEntity {
   color?: string;
   lifeTime?: number;
   physicsType?: 'static' | 'dynamic' | 'bouncy'; // Physics 2.0
+  restitution?: number; // Bounciness
+  friction?: number; // Surface friction
   // AI/Behavior
   initialX?: number;
   initialY?: number;
@@ -492,6 +502,8 @@ export interface SpriteState {
   jumpForce: number;
   isJumping: boolean;
   canDoubleJump: boolean;
+  restitution?: number; // Bounciness
+  friction?: number; // Surface friction
   canDash: boolean;
   dashCooldown: number;
   projectiles: GameEntity[];
@@ -500,6 +512,21 @@ export interface SpriteState {
   platforms: GameEntity[];
   clones: GameEntity[];
   cameraFollow: boolean;
+  cameraConstraints?: {
+    minX?: number;
+    maxX?: number;
+    minY?: number;
+    maxY?: number;
+    minZ?: number;
+    maxZ?: number;
+  };
+  lighting?: {
+    ambientColor?: string;
+    ambientIntensity?: number;
+    directionalColor?: string;
+    directionalIntensity?: number;
+    directionalPosition?: { x: number, y: number, z: number };
+  };
 
   // Visual Effects
   effectTrigger?: { type: 'explosion' | 'sparkle' | 'poof', x: number, y: number, z?: number, color?: string };
@@ -630,6 +657,12 @@ export interface HardwareState {
   vibrationActive: boolean;
   keypadValue: string | null;
   joystick: { x: number; y: number };
+
+  multimeterVoltage?: number;
+  multimeterCurrent?: number;
+  multimeterResistance?: number;
+  powerDraw?: number;
+  isShortCircuit?: boolean;
 
   // Advanced Sensors
   pressure: number;

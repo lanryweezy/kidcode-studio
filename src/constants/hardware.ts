@@ -153,6 +153,10 @@ export const CIRCUIT_PALETTE: any[] = [
 
     // --- COMPONENTS ---
     { type: 'BREADBOARD', label: 'Breadboard', color: 'text-slate-400', category: 'Misc', defaultPin: 98, description: 'Prototyping base.' },
+    { type: 'MULTIMETER', label: 'Multimeter', color: 'text-zinc-600', category: 'Tools', defaultPin: 100, description: 'Measures V/I/R.' },
+    { type: 'OSCILLOSCOPE', label: 'Oscilloscope', color: 'text-zinc-700', category: 'Tools', defaultPin: 101, description: 'Waveform viewer.' },
+    { type: 'I2C_SENSOR', label: 'I2C Sensor', color: 'text-teal-600', category: 'Comms', defaultPin: 20, description: 'I2C bus sensor.' },
+    { type: 'SPI_SENSOR', label: 'SPI Sensor', color: 'text-teal-700', category: 'Comms', defaultPin: 10, description: 'SPI bus sensor.' },
     { type: 'RESISTOR', label: 'Resistor', color: 'text-amber-800', category: 'Components', defaultPin: 40, description: 'Electrical resistor.' },
     { type: 'RFID', label: 'RFID Reader', color: 'text-violet-500', category: 'Components', defaultPin: 41, description: 'RFID card reader.' },
     { type: 'FINGERPRINT', label: 'Fingerprint', color: 'text-indigo-600', category: 'Components', defaultPin: 42, description: 'Biometric scanner.' },

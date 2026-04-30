@@ -8,7 +8,7 @@ const getContext = () => {
   return audioCtx;
 };
 
-export const playSoundEffect = (type: 'move' | 'turn' | 'ui' | 'click' | 'coin' | 'camera' | 'powerup' | 'laser' | 'explosion' | 'hurt' | 'jump' | 'dash') => {
+export const playSoundEffect = (type: 'move' | 'turn' | 'ui' | 'click' | 'coin' | 'camera' | 'powerup' | 'laser' | 'explosion' | 'hurt' | 'jump' | 'dash', panX: number = 0) => {
   try {
     const ctx = getContext();
     if (ctx.state === 'suspended') ctx.resume();
@@ -16,8 +16,14 @@ export const playSoundEffect = (type: 'move' | 'turn' | 'ui' | 'click' | 'coin' 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
+    // Spatial Audio (Panning)
+    const panner = ctx.createStereoPanner();
+    // Clamp panX between -1 (left) and 1 (right)
+    panner.pan.value = Math.max(-1, Math.min(1, panX));
+
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(panner);
+    panner.connect(ctx.destination);
 
     const now = ctx.currentTime;
 

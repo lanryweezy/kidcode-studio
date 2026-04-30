@@ -256,11 +256,99 @@ export const useGamePhysics = ({
         let newEnemies = enemies.map(enemy => {
             let ex = enemy.x;
             let ey = enemy.y;
-            // Simple chase AI
+
+            // Pathfinding/Chase AI
             const dist = Math.hypot(x - ex, y - ey);
-            if (dist < 200) {
-                ex += (x - ex) * 0.015;
-                ey += (y - ey) * 0.015;
+            if (dist < 200 && dist > 2) {
+                // Determine direction
+                let dx = x - ex;
+                let dy = y - ey;
+
+                // Normalize
+                const length = Math.hypot(dx, dy);
+                dx /= length;
+                dy /= length;
+
+                // Speed
+                const speed = 1.5;
+                let nextEx = ex + dx * speed;
+                let nextEy = ey + dy * speed;
+
+                // --- Simple Greedy Pathfinding (Obstacle Avoidance) ---
+                let hitObstacle = false;
+                if (tilemap) {
+                     const hitbox = { x: nextEx + 5, y: nextEy + 5, w: SPRITE_SIZE, h: SPRITE_SIZE };
+                     const { tiles: nearbyTiles } = spatialHashRef.current.query(hitbox.x, hitbox.y, hitbox.w, hitbox.h);
+
+                     for (const tile of nearbyTiles) {
+                         if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                             const tx = tile.x * TILE_SIZE;
+                             const ty = tile.y * TILE_SIZE;
+                             if (
+                                hitbox.x < tx + TILE_SIZE &&
+                                hitbox.x + hitbox.w > tx &&
+                                hitbox.y < ty + TILE_SIZE &&
+                                hitbox.y + hitbox.h > ty
+                            ) {
+                                hitObstacle = true;
+                                break;
+                            }
+                         }
+                     }
+                }
+
+                if (!hitObstacle) {
+                    ex = nextEx;
+                    ey = nextEy;
+                } else {
+                    // Try sliding along X axis if we hit something directly
+                    let slideEx = ex + dx * speed;
+                    let slideEy = ey;
+                    let slideHitX = false;
+
+                    if (tilemap) {
+                         const hitbox = { x: slideEx + 5, y: slideEy + 5, w: SPRITE_SIZE, h: SPRITE_SIZE };
+                         const { tiles: nearbyTiles } = spatialHashRef.current.query(hitbox.x, hitbox.y, hitbox.w, hitbox.h);
+                         for (const tile of nearbyTiles) {
+                             if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                                 const tx = tile.x * TILE_SIZE;
+                                 const ty = tile.y * TILE_SIZE;
+                                 if (hitbox.x < tx + TILE_SIZE && hitbox.x + hitbox.w > tx && hitbox.y < ty + TILE_SIZE && hitbox.y + hitbox.h > ty) {
+                                     slideHitX = true;
+                                     break;
+                                 }
+                             }
+                         }
+                    }
+
+                    if (!slideHitX) {
+                        ex = slideEx;
+                    } else {
+                        // Try sliding along Y axis
+                        let slideExY = ex;
+                        let slideEyY = ey + dy * speed;
+                        let slideHitY = false;
+
+                        if (tilemap) {
+                             const hitbox = { x: slideExY + 5, y: slideEyY + 5, w: SPRITE_SIZE, h: SPRITE_SIZE };
+                             const { tiles: nearbyTiles } = spatialHashRef.current.query(hitbox.x, hitbox.y, hitbox.w, hitbox.h);
+                             for (const tile of nearbyTiles) {
+                                 if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                                     const tx = tile.x * TILE_SIZE;
+                                     const ty = tile.y * TILE_SIZE;
+                                     if (hitbox.x < tx + TILE_SIZE && hitbox.x + hitbox.w > tx && hitbox.y < ty + TILE_SIZE && hitbox.y + hitbox.h > ty) {
+                                         slideHitY = true;
+                                         break;
+                                     }
+                                 }
+                             }
+                        }
+
+                        if (!slideHitY) {
+                            ey = slideEyY;
+                        }
+                    }
+                }
             }
             return { ...enemy, x: ex, y: ey };
         });
@@ -271,7 +359,8 @@ export const useGamePhysics = ({
         activeProjectiles.forEach(proj => {
             newEnemies = newEnemies.filter(enemy => {
                 if (Math.hypot(proj.x - enemy.x, proj.y - enemy.y) < 30) {
-                    playSoundEffect('explosion');
+                    const panX = (enemy.x - x) / canvasW; // -1 to 1 based on screen width
+                    playSoundEffect('explosion', panX);
                     newEffect = { type: 'explosion', x: enemy.x, y: enemy.y, color: '#ef4444' };
                     newScore += 10;
                     return false;
@@ -300,7 +389,8 @@ export const useGamePhysics = ({
         // 5. Collision: Player vs Item
         newItems = newItems.filter(item => {
             if (Math.hypot(x - item.x, y - item.y) < 30) {
-                playSoundEffect('coin');
+                const panX = (item.x - x) / canvasW;
+                playSoundEffect('coin', panX);
                 if ('vibrate' in navigator) navigator.vibrate(20);
                 newEffect = { type: 'sparkle', x: item.x, y: item.y, color: '#fbbf24' };
                 newScore += 5;

@@ -305,6 +305,10 @@ export enum CommandType {
   LOGIC_NOT = 'LOGIC_NOT',
 
   READ_FILE = 'READ_FILE',
+  READ_I2C = 'READ_I2C',
+  WRITE_I2C = 'WRITE_I2C',
+  READ_SPI = 'READ_SPI',
+  WRITE_SPI = 'WRITE_SPI',
   WRITE_FILE = 'WRITE_FILE'
 }
 
@@ -328,6 +332,7 @@ export interface CommandBlock {
     duration?: number;
     speed?: number;
     angle?: number;
+  address?: string;
     row?: number;
     col?: number;
 
@@ -630,6 +635,12 @@ export interface HardwareState {
   vibrationActive: boolean;
   keypadValue: string | null;
   joystick: { x: number; y: number };
+
+  multimeterVoltage?: number;
+  multimeterCurrent?: number;
+  multimeterResistance?: number;
+  powerDraw?: number;
+  isShortCircuit?: boolean;
 
   // Advanced Sensors
   pressure: number;

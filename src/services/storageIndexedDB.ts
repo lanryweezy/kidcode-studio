@@ -165,11 +165,10 @@ export const listProjectsIndexedDB = async (): Promise<Array<{
   if (!useIndexedDB) {
     // Fallback: list from localStorage
     const projects: any[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('kidcode_project_')) {
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('kidcode_project_')) {
         try {
-          const data = JSON.parse(localStorage.getItem(key!) || '{}');
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
           projects.push({
             id: data.id,
             name: data.name || 'Untitled',
@@ -323,11 +322,10 @@ export const listAssetsIndexedDB = async (): Promise<Array<{
 }>> => {
   if (!useIndexedDB) {
     const assets: any[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('kidcode_asset_')) {
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('kidcode_asset_')) {
         try {
-          const data = JSON.parse(localStorage.getItem(key!) || '{}');
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
           assets.push({
             id: data.id,
             name: data.name,
@@ -339,7 +337,7 @@ export const listAssetsIndexedDB = async (): Promise<Array<{
           // Skip
         }
       }
-    }
+    });
     return assets;
   }
 
@@ -376,16 +374,16 @@ export const getStorageStats = async (): Promise<{
     let projectCount = 0;
     let assetCount = 0;
     
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key) continue;
-      const value = localStorage.getItem(key);
-      if (value) {
-        totalSize += value.length;
-        if (key.startsWith('kidcode_project_')) projectCount++;
-        if (key.startsWith('kidcode_asset_')) assetCount++;
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('kidcode_')) {
+        const value = localStorage.getItem(key);
+        if (value) {
+          totalSize += value.length;
+          if (key.startsWith('kidcode_project_')) projectCount++;
+          else if (key.startsWith('kidcode_asset_')) assetCount++;
+        }
       }
-    }
+    });
     
     return {
       projectCount,
@@ -424,14 +422,11 @@ export const getStorageStats = async (): Promise<{
 export const clearAllIndexedDB = async (): Promise<void> => {
   if (!useIndexedDB) {
     // Clear localStorage
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('kidcode_')) {
-        keysToRemove.push(key);
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('kidcode_')) {
+        localStorage.removeItem(key);
       }
-    }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
+    });
     return;
   }
 

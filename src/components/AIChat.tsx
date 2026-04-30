@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Sparkles, Bot, User, Volume2, StopCircle, Bug, Glasses, Mic, Wand2 } from 'lucide-react';
-import { generateCodeFromPrompt, generateSpeech, reviewCode, getFixedCode } from '../services/geminiService';
+import { generateCodeFromPromptStream, generateSpeech, reviewCode, getFixedCode } from '../services/geminiService';
 import { AppMode, CommandBlock } from '../types';
 import { useStore } from '../store/useStore';
 import { playSoundEffect } from '../services/soundService';
@@ -51,15 +51,33 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
     setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setIsLoading(true);
 
-    const response = await generateCodeFromPrompt(userText, currentMode);
-    
-    setMessages(prev => [...prev, { role: 'assistant', text: response.text }]);
-    
-        if (response.commands && response.commands.length > 0) {
-          onAppendCode(response.commands);
+    // Initialize an empty assistant message that we will update
+    setMessages(prev => [...prev, { role: 'assistant', text: '' }]);
+
+    try {
+      const stream = generateCodeFromPromptStream(userText, currentMode);
+      let finalCommands: Omit<CommandBlock, 'id'>[] | undefined;
+
+      for await (const chunk of stream) {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = { role: 'assistant', text: chunk.text };
+          return newMessages;
+        });
+        if (chunk.isDone && chunk.commands && chunk.commands.length > 0) {
+            finalCommands = chunk.commands;
         }
-        setIsLoading(false);
-      };
+      }
+
+      if (finalCommands) {
+        onAppendCode(finalCommands);
+      }
+    } catch (error) {
+      console.error("Chat Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
     
       const handleReview = async () => {
           const { commands, mode } = useStore.getState();

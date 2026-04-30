@@ -3,6 +3,8 @@
  * Supports multiple providers: Meshy AI, Luma Genie, Tripo AI, Microsoft TRELLIS
  */
 
+import { executeWithRetry, executeWithFallback, RetryPresets } from './aiServiceWrapper';
+
 // Meshy AI API Configuration
 const MESHY_API_BASE = 'https://api.meshy.ai/v2';
 const MESHY_API_KEY = import.meta.env.VITE_MESHY_API_KEY || '';
@@ -109,30 +111,48 @@ export const generate3DModel = async (
   }
 
   try {
-    // Use Tripo API for generation (faster - 10-30 seconds)
-    if (provider === 'tripo') {
-      if (options.imageUrl) {
-        return await tripoAPI.generateFromImage(options.imageUrl, onProgress);
-      } else {
-        return await tripoAPI.generateFromText(
-          options.prompt!,
-          options.style || 'cartoon',
-          onProgress
-        );
-      }
-    }
+    const isImage = !!options.imageUrl;
 
-    // Use Meshy API for generation (higher quality - 60-90 seconds)
-    if (provider === 'meshy') {
-      if (options.imageUrl) {
-        return await meshyAPI.generateFromImage(options.imageUrl, onProgress);
-      } else {
-        return await meshyAPI.generateFromText(
-          options.prompt!,
-          options.style || 'cartoon',
-          onProgress
-        );
-      }
+    const tripoFn = async () => {
+        if (isImage) {
+            return await tripoAPI.generateFromImage(options.imageUrl!, onProgress);
+        } else {
+            return await tripoAPI.generateFromText(
+              options.prompt!,
+              options.style || 'cartoon',
+              onProgress
+            );
+        }
+    };
+
+    const meshyFn = async () => {
+        if (isImage) {
+            return await meshyAPI.generateFromImage(options.imageUrl!, onProgress);
+        } else {
+            return await meshyAPI.generateFromText(
+              options.prompt!,
+              options.style || 'cartoon',
+              onProgress
+            );
+        }
+    };
+
+    if (provider === 'tripo' || provider === 'meshy') {
+        const providers = provider === 'tripo' ?
+            [{ name: 'tripo', fn: tripoFn }, { name: 'meshy', fn: meshyFn }] :
+            [{ name: 'meshy', fn: meshyFn }, { name: 'tripo', fn: tripoFn }];
+
+        try {
+            return await executeWithFallback(providers, RetryPresets.slow);
+        } catch (error) {
+             onProgress?.({
+                status: 'error',
+                progress: 0,
+                message: 'All generation attempts failed',
+                error: error instanceof Error ? error.message : 'Unknown error'
+             });
+             throw error;
+        }
     }
 
     // Fallback to mock generation for other providers
@@ -156,7 +176,7 @@ export const generate3DModel = async (
       id: generationId,
       url: `https://storage.kidcode.io/models/${generationId}.glb`,
       thumbnailUrl: `https://storage.kidcode.io/thumbnails/${generationId}.png`,
-      format: 'glb',
+      format: 'glb' as const,
       vertices: Math.floor(Math.random() * 10000) + 5000,
       textures: ['diffuse', 'normal', 'roughness', 'metallic'],
       isRigged: options.autoRig || false,
@@ -242,7 +262,7 @@ export const autoRigCharacter = async (modelUrl: string): Promise<Generated3DAss
     id: `rig_${Date.now()}`,
     url: modelUrl,
     thumbnailUrl: '',
-    format: 'glb',
+    format: 'glb' as const,
     vertices: 0,
     textures: [],
     isRigged: true,
@@ -291,7 +311,7 @@ export const convert2DTo3D = async (spriteUrl: string): Promise<Generated3DAsset
     id: `conv_${Date.now()}`,
     url: `https://storage.kidcode.io/converted/conv_${Date.now()}.glb`,
     thumbnailUrl: '',
-    format: 'glb',
+    format: 'glb' as const,
     vertices: 2000,
     textures: ['diffuse'],
     isRigged: false,
@@ -321,74 +341,74 @@ const tripoAPI = {
       throw new Error('Tripo API key not configured');
     }
 
-    onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
+    return executeWithRetry(async () => {
+        onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
 
-    try {
-      // Step 1: Create task
-      const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${TRIPO_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: 'text_to_model',
-          prompt: prompt,
-          style: style
-        })
-      });
-
-      if (!createResponse.ok) {
-        throw new Error(`Tripo API error: ${createResponse.statusText}`);
-      }
-
-      const createData = await createResponse.json();
-      const taskId = createData.data.task_id;
-
-      // Step 2: Poll for completion (Tripo is fast - 10-30 seconds)
-      onProgress?.({ status: 'processing', progress: 20, message: 'Generating 3D model...' });
-
-      while (true) {
-        const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
+        // Step 1: Create task
+        const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${TRIPO_API_KEY}`
-          }
+            'Authorization': `Bearer ${TRIPO_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'text_to_model',
+            prompt: prompt,
+            style: style
+          })
         });
 
-        const statusData = await statusResponse.json();
-        
-        if (statusData.data.status === 'success') {
-          onProgress?.({ status: 'complete', progress: 100, message: 'Generation complete!' });
-          
-          const output = statusData.data.output;
-          
-          return {
-            id: taskId,
-            url: output.model || output.glb_file,
-            thumbnailUrl: output.thumbnail || '',
-            format: 'glb',
-            vertices: 5000,
-            textures: ['diffuse', 'normal', 'roughness'],
-            isRigged: false,
-            provider: 'tripo',
-            prompt: prompt,
-            createdAt: Date.now(),
-            downloadUrl: output.model || output.glb_file
-          };
-        } else if (statusData.data.status === 'failed') {
-          throw new Error('Tripo generation failed');
+        if (!createResponse.ok) {
+          throw new Error(`Tripo API error: ${createResponse.statusText}`);
         }
 
-        const progress = statusData.data.progress || 50;
-        onProgress?.({ 
-          status: 'processing', 
-          progress, 
-          message: `Generating... ${progress}%` 
-        });
+        const createData = await createResponse.json();
+        const taskId = createData.data.task_id;
 
-        await sleep(2000); // Poll every 2 seconds
-      }
-    } catch (error) {
+        // Step 2: Poll for completion (Tripo is fast - 10-30 seconds)
+        onProgress?.({ status: 'processing', progress: 20, message: 'Generating 3D model...' });
+
+        while (true) {
+          const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
+            headers: {
+              'Authorization': `Bearer ${TRIPO_API_KEY}`
+            }
+          });
+
+          const statusData = await statusResponse.json();
+          
+          if (statusData.data.status === 'success') {
+            onProgress?.({ status: 'complete', progress: 100, message: 'Generation complete!' });
+
+            const output = statusData.data.output;
+
+            return {
+              id: taskId,
+              url: output.model || output.glb_file,
+              thumbnailUrl: output.thumbnail || '',
+              format: 'glb' as const,
+              vertices: 5000,
+              textures: ['diffuse', 'normal', 'roughness'],
+              isRigged: false,
+              provider: 'tripo',
+              prompt: prompt,
+              createdAt: Date.now(),
+              downloadUrl: output.model || output.glb_file
+            };
+          } else if (statusData.data.status === 'failed') {
+            throw new Error('Tripo generation failed');
+          }
+
+          const progress = statusData.data.progress || 50;
+          onProgress?.({
+            status: 'processing',
+            progress,
+            message: `Generating... ${progress}%`
+          });
+
+          await sleep(2000); // Poll every 2 seconds
+        }
+    }, RetryPresets.slow, 'tripo').catch(error => {
       onProgress?.({ 
         status: 'error', 
         progress: 0, 
@@ -396,7 +416,7 @@ const tripoAPI = {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
       throw error;
-    }
+    });
   },
 
   /**
@@ -411,74 +431,74 @@ const tripoAPI = {
       throw new Error('Tripo API key not configured');
     }
 
-    onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
+    return executeWithRetry(async () => {
+        onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
 
-    try {
-      // Step 1: Create task
-      const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${TRIPO_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: 'image_to_model',
-          image_url: imageUrl,
-          quality: 'high'
-        })
-      });
-
-      if (!createResponse.ok) {
-        throw new Error(`Tripo API error: ${createResponse.statusText}`);
-      }
-
-      const createData = await createResponse.json();
-      const taskId = createData.data.task_id;
-
-      // Step 2: Poll for completion
-      onProgress?.({ status: 'processing', progress: 20, message: 'Processing image...' });
-
-      while (true) {
-        const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
+        // Step 1: Create task
+        const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${TRIPO_API_KEY}`
-          }
+            'Authorization': `Bearer ${TRIPO_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'image_to_model',
+            image_url: imageUrl,
+            quality: 'high'
+          })
         });
 
-        const statusData = await statusResponse.json();
-        
-        if (statusData.data.status === 'success') {
-          onProgress?.({ status: 'complete', progress: 100, message: 'Generation complete!' });
-          
-          const output = statusData.data.output;
-          
-          return {
-            id: taskId,
-            url: output.model || output.glb_file,
-            thumbnailUrl: output.thumbnail || '',
-            format: 'glb',
-            vertices: 5000,
-            textures: ['diffuse', 'normal', 'roughness'],
-            isRigged: false,
-            provider: 'tripo',
-            prompt: 'Image upload',
-            createdAt: Date.now(),
-            downloadUrl: output.model || output.glb_file
-          };
-        } else if (statusData.data.status === 'failed') {
-          throw new Error('Tripo generation failed');
+        if (!createResponse.ok) {
+          throw new Error(`Tripo API error: ${createResponse.statusText}`);
         }
 
-        const progress = statusData.data.progress || 50;
-        onProgress?.({ 
-          status: 'processing', 
-          progress, 
-          message: `Processing... ${progress}%` 
-        });
+        const createData = await createResponse.json();
+        const taskId = createData.data.task_id;
 
-        await sleep(2000);
-      }
-    } catch (error) {
+        // Step 2: Poll for completion
+        onProgress?.({ status: 'processing', progress: 20, message: 'Processing image...' });
+
+        while (true) {
+          const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
+            headers: {
+              'Authorization': `Bearer ${TRIPO_API_KEY}`
+            }
+          });
+
+          const statusData = await statusResponse.json();
+          
+          if (statusData.data.status === 'success') {
+            onProgress?.({ status: 'complete', progress: 100, message: 'Generation complete!' });
+
+            const output = statusData.data.output;
+
+            return {
+              id: taskId,
+              url: output.model || output.glb_file,
+              thumbnailUrl: output.thumbnail || '',
+              format: 'glb' as const,
+              vertices: 5000,
+              textures: ['diffuse', 'normal', 'roughness'],
+              isRigged: false,
+              provider: 'tripo',
+              prompt: 'Image upload',
+              createdAt: Date.now(),
+              downloadUrl: output.model || output.glb_file
+            };
+          } else if (statusData.data.status === 'failed') {
+            throw new Error('Tripo generation failed');
+          }
+
+          const progress = statusData.data.progress || 50;
+          onProgress?.({
+            status: 'processing',
+            progress,
+            message: `Processing... ${progress}%`
+          });
+
+          await sleep(2000);
+        }
+    }, RetryPresets.slow, 'tripo').catch(error => {
       onProgress?.({ 
         status: 'error', 
         progress: 0, 
@@ -486,7 +506,7 @@ const tripoAPI = {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
       throw error;
-    }
+    });
   }
 };
 
@@ -516,7 +536,7 @@ const meshyAPI = {
       body: JSON.stringify({
         prompt: prompt,
         style: style,
-        format: 'glb',
+        format: 'glb' as const,
         enable_pbr: true,
         enable_rig: false
       })
@@ -548,7 +568,7 @@ const meshyAPI = {
           id: taskId,
           url: statusData.output.model,
           thumbnailUrl: statusData.output.thumbnail || '',
-          format: 'glb',
+          format: 'glb' as const,
           vertices: statusData.output.vertex_count || 5000,
           textures: ['diffuse', 'normal', 'roughness', 'metallic'],
           isRigged: false,
@@ -590,7 +610,7 @@ const meshyAPI = {
       },
       body: JSON.stringify({
         image_url: imageUrl,
-        format: 'glb',
+        format: 'glb' as const,
         enable_pbr: true,
         enable_rig: false
       })
@@ -622,7 +642,7 @@ const meshyAPI = {
           id: taskId,
           url: statusData.output.model,
           thumbnailUrl: statusData.output.thumbnail || '',
-          format: 'glb',
+          format: 'glb' as const,
           vertices: statusData.output.vertex_count || 5000,
           textures: ['diffuse', 'normal', 'roughness', 'metallic'],
           isRigged: false,
@@ -674,7 +694,7 @@ const meshyAPI = {
       id: data.id,
       url: data.output.model,
       thumbnailUrl: data.output.thumbnail || '',
-      format: 'glb',
+      format: 'glb' as const,
       vertices: 5000,
       textures: ['diffuse'],
       isRigged: true,

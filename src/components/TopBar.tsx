@@ -7,6 +7,9 @@ import {
   Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle
 } from 'lucide-react';
 import { exportToStandaloneHTML } from '../services/standaloneExporter';
+import { downloadArduinoCode, exportToArduino } from '../services/codeExporter';
+import { serialService } from '../services/webSerialService';
+import { Download, UploadCloud } from 'lucide-react';
 import { multiplayerService } from '../services/multiplayerService';
 import { diagnoseCode } from '../services/errorDiagnosis';
 import { ErrorDiagnosisHelp } from '../components/ErrorDiagnosisHelp';
@@ -110,6 +113,36 @@ const TopBar: React.FC<TopBarProps> = ({
           {saveStatus === 'saving' && <><RotateCcw className="animate-spin" size={10} /> Saving...</>}
           {saveStatus === 'saved' && <><Check size={10} className="text-emerald-500" /> <span className="opacity-70">Project Saved</span></>}
         </div>
+
+        {mode === AppMode.HARDWARE && (
+          <>
+            <button
+              onClick={() => downloadArduinoCode(commands, currentProject?.name)}
+              className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+            >
+              <Download size={12} /> .ino
+            </button>
+            <button
+              onClick={async () => {
+                if (!serialService.isConnected()) {
+                  alert('Please connect a board first via the Hardware Stage.');
+                  return;
+                }
+                try {
+                  const inoCode = exportToArduino(commands);
+                  await serialService.sendCode(inoCode);
+                  alert('Code sent to board via WebSerial!');
+                } catch (e) {
+                  console.error(e);
+                  alert('Failed to send code.');
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+            >
+              <UploadCloud size={12} /> Push
+            </button>
+          </>
+        )}
 
         {mode === AppMode.APP && onOpenCodePages && (
           <button

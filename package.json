@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
@@ -24,6 +25,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "vitest": "^3.0.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^25.0.2",

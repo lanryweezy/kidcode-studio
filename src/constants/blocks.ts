@@ -244,7 +244,7 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
         { type: CommandType.SET_VAR, label: 'Set Var', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value.' },
         { type: CommandType.CALC_ADD, label: 'Calculate', icon: Calculator, defaultParams: { varName: 'res', value: 1, value2: 1 }, color: 'bg-orange-700', category: 'Math', description: 'Do math.' },
         { type: CommandType.RESET_BOARD, label: 'Reset Board', icon: RotateCcw, defaultParams: {}, color: 'bg-slate-600', category: 'System', description: 'Reset hardware state.' },
-        { type: CommandType.CONNECT_WIFI, label: 'Connect WiFi', icon: Wifi, defaultParams: { ssid: 'network', password: 'password' }, color: 'bg-blue-500', category: 'System', description: 'Connect to WiFi.' },
+        { type: CommandType.CONNECT_WIFI, label: 'Connect WiFi', icon: Wifi, defaultParams: { ssid: 'network', password: '' }, color: 'bg-blue-500', category: 'System', description: 'Connect to WiFi.' },
         { type: CommandType.SEND_HTTP, label: 'HTTP Request', icon: Cloud, defaultParams: { url: 'http://api.example.com', method: 'GET' }, color: 'bg-blue-400', category: 'System', description: 'Send HTTP request.' },
     ],
 };

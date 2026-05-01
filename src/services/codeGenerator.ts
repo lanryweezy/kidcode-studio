@@ -241,7 +241,7 @@ export const generateCode = (
         break;
       case CommandType.CONNECT_WIFI:
         code += `${i}// Connect to WiFi network\n`;
-        code += `${i}WiFi.begin("${cmd.params.ssid || 'NETWORK_NAME'}", "${cmd.params.password || 'PASSWORD'}");\n`;
+        code += `${i}WiFi.begin("${cmd.params.ssid || 'NETWORK_NAME'}", "${cmd.params.password || ''}");\n`;
         code += `${i}while (WiFi.status() != WL_CONNECTED) {\n`;
         code += `${i}  delay(1000);\n`;
         code += `${i}  Serial.println("Connecting to WiFi...");\n`;

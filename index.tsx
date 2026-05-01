@@ -1,3 +1,4 @@
+import { ToastProvider } from "./src/components/ToastProvider";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './src/App';
@@ -12,6 +13,6 @@ console.log("Mounting KidCode Studio...");
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <ToastProvider><App /></ToastProvider>
   </React.StrictMode>
 );

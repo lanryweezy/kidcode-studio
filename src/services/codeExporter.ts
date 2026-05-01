@@ -469,7 +469,7 @@ export const downloadArduinoCode = (commands: CommandBlock[], projectName: strin
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${projectName.replace(/\s+/g, '_')}.ino`;
+  a.download = `${projectName.replace(/\s+/g, '_')}/${projectName.replace(/\s+/g, '_')}.ino`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

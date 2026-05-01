@@ -44,20 +44,8 @@ export class WebSerialService {
 
   async sendCode(code: string) {
     if (!this.writer) return;
-
-    console.log("Simulating compilation of .ino to binary...");
-    // Mock compilation: In a real app this would compile via a backend or WASM toolchain.
-    // We create a mock binary Uint8Array to represent compiled firmware.
-    const binarySize = Math.max(1024, code.length * 3);
-    const mockBinary = new Uint8Array(binarySize);
-
-    for(let i = 0; i < binarySize; i++) {
-        mockBinary[i] = (code.charCodeAt(i % code.length) + i) % 256;
-    }
-
-    console.log(`Compilation complete. Uploading ${binarySize} bytes of firmware...`);
-    await this.writer.write(mockBinary);
-    console.log("Firmware upload complete.");
+    const encoder = new TextEncoder();
+    await this.writer.write(encoder.encode(code + "\n"));
   }
 
   async disconnect() {

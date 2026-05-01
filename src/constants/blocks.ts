@@ -67,6 +67,8 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
     [AppMode.GAME]: [
         // --- CONTROL ---
         { type: CommandType.REPEAT, label: 'Repeat', icon: Repeat, defaultParams: { value: 10 }, color: 'bg-violet-500', category: 'Control', description: 'Repeat actions multiple times.' },
+        { type: CommandType.SAVE_GAME, label: 'Save Game', icon: Save, defaultParams: { text: 'slot1' }, color: 'bg-emerald-600', category: 'Control', description: 'Save progress locally.' },
+        { type: CommandType.LOAD_GAME, label: 'Load Game', icon: Download, defaultParams: { text: 'slot1' }, color: 'bg-emerald-500', category: 'Control', description: 'Load saved progress.' },
         { type: CommandType.END_REPEAT, label: 'End Repeat', icon: XCircle, defaultParams: {}, color: 'bg-violet-500', category: 'Control', description: 'End of repeat loop.' },
         { type: CommandType.IF, label: 'If', icon: GitBranch, defaultParams: { condition: 'IS_TOUCHING_EDGE' }, color: 'bg-yellow-500', category: 'Control', description: 'Check a condition.' },
         { type: CommandType.ELSE, label: 'Else', icon: Split, defaultParams: {}, color: 'bg-yellow-500', category: 'Control', description: 'Run if condition is false.' },
@@ -172,6 +174,8 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
 
         // --- 3D ---
         { type: CommandType.SET_VIEW_3D, label: '3D Mode', icon: Box, defaultParams: { condition: 'true' }, color: 'bg-cyan-600', category: '3D', description: 'Toggle 3D View.' },
+        { type: CommandType.SET_CAMERA_CONSTRAINT, label: 'Camera Limit', icon: Crosshair, defaultParams: { x: -100, y: 100 }, color: 'bg-indigo-400', category: '3D', description: 'Constrain camera bounds.' },
+        { type: CommandType.SET_LIGHTING, label: 'Set Lighting', icon: Sun, defaultParams: { color: '#ffffff', value: 1 }, color: 'bg-yellow-400', category: '3D', description: 'Adjust 3D lighting.' },
         { type: CommandType.MOVE_Z, label: 'Move Z', icon: ArrowUpCircle, defaultParams: { value: 10 }, color: 'bg-cyan-500', category: '3D', description: 'Move forward/backward in 3D.' },
         { type: CommandType.ROTATE_Y, label: 'Turn 3D', icon: RotateCw, defaultParams: { value: 15 }, color: 'bg-cyan-500', category: '3D', description: 'Rotate character in 3D.' },
         { type: CommandType.GENERATE_ENVIRONMENT, label: 'AI World', icon: Sparkles, defaultParams: { text: 'Snowy Mountains' }, color: 'bg-gradient-to-r from-cyan-500 to-blue-500', category: '3D', description: 'AI Generate a 3D environment.' },
@@ -240,7 +244,7 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
         { type: CommandType.SET_VAR, label: 'Set Var', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value.' },
         { type: CommandType.CALC_ADD, label: 'Calculate', icon: Calculator, defaultParams: { varName: 'res', value: 1, value2: 1 }, color: 'bg-orange-700', category: 'Math', description: 'Do math.' },
         { type: CommandType.RESET_BOARD, label: 'Reset Board', icon: RotateCcw, defaultParams: {}, color: 'bg-slate-600', category: 'System', description: 'Reset hardware state.' },
-        { type: CommandType.CONNECT_WIFI, label: 'Connect WiFi', icon: Wifi, defaultParams: { ssid: 'network', password: 'password' }, color: 'bg-blue-500', category: 'System', description: 'Connect to WiFi.' },
+        { type: CommandType.CONNECT_WIFI, label: 'Connect WiFi', icon: Wifi, defaultParams: { ssid: 'network', password: '' }, color: 'bg-blue-500', category: 'System', description: 'Connect to WiFi.' },
         { type: CommandType.SEND_HTTP, label: 'HTTP Request', icon: Cloud, defaultParams: { url: 'http://api.example.com', method: 'GET' }, color: 'bg-blue-400', category: 'System', description: 'Send HTTP request.' },
         // --- COMMUNICATION PROTOCOLS ---
         { type: CommandType.READ_I2C, label: 'Read I2C', icon: Cpu, defaultParams: { address: '0x68', varName: 'data' }, color: 'bg-cyan-700', category: 'Protocols', description: 'Read data from I2C device.' },

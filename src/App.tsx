@@ -116,6 +116,7 @@ export const App: React.FC = () => {
     const [localIsGeneratingSprite, setLocalIsGeneratingSprite] = useState(false);
     const [dropIndex, setDropIndex] = useState<number | null>(null);
     const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
+    const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
     const [isOverTrash, setIsOverTrash] = useState(false);
     const [showCodePageManager, setShowCodePageManager] = useState(false);
     const [is3DMode, setIs3DMode] = useState(false);
@@ -327,10 +328,21 @@ export const App: React.FC = () => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'z') { e.preventDefault(); undo(); }
             if ((e.metaKey || e.ctrlKey) && e.key === 'y') { e.preventDefault(); redo(); }
             if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); saveCurrentProject(false); }
+            if ((e.key === 'Delete' || e.key === 'Backspace') && hoveredBlockId && !isPlaying) {
+                // Ensure we aren't typing in an input
+                if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+                e.preventDefault();
+                handleDeleteBlock(hoveredBlockId);
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd' && hoveredBlockId && !isPlaying) {
+                if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+                e.preventDefault();
+                handleDuplicateBlock(hoveredBlockId);
+            }
         };
         window.addEventListener('keydown', handleGlobalKeyDown);
         return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-    }, [undo, redo, saveCurrentProject]);
+    }, [undo, redo, saveCurrentProject, isPlaying, hoveredBlockId, handleDeleteBlock, handleDuplicateBlock]);
 
     useEffect(() => {
         if (currentProject && !showHome) {
@@ -567,7 +579,13 @@ export const App: React.FC = () => {
                                                     <span className="text-blue-500 font-bold text-sm tracking-widest">+ SNAP HERE</span>
                                                 </div>
                                             )}
-                                            <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} onDragStart={(e) => { setDraggedBlockId(cmd.id); e.dataTransfer.effectAllowed = 'move'; const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; e.dataTransfer.setDragImage(img, 0, 0); }} isActive={false} />
+                                            {/* Wrap with a div only to capture hovered state for hotkeys (without forcing full re-render of Block itself unless needed) */}
+                                            <div
+                                              onMouseEnter={() => { if (!isPlaying && hoveredBlockId !== cmd.id) setHoveredBlockId(cmd.id) }}
+                                              onMouseLeave={() => { if (!isPlaying && hoveredBlockId === cmd.id) setHoveredBlockId(null) }}
+                                            >
+                                              <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} onDragStart={(e) => { setDraggedBlockId(cmd.id); e.dataTransfer.effectAllowed = 'move'; const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; e.dataTransfer.setDragImage(img, 0, 0); }} isActive={false} />
+                                            </div>
                                         </div>
                                     ))}
                                     {dropIndex === commands.length && (
@@ -622,7 +640,7 @@ export const App: React.FC = () => {
                                 <div className={`h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 transition-all ${showConsole ? 'block' : 'hidden'}`}>
                                     <div className="flex justify-between items-center mb-1 text-slate-500 text-[10px] uppercase font-bold sticky top-0 bg-slate-900">
                                         <span>Console Output</span>
-                                        <button onClick={clearLogs} className="hover:text-white">Clear</button>
+                                        <button onClick={clearLogs} className="hover:text-white" aria-label="Clear console logs">Clear</button>
                                     </div>
                                     {consoleLogs.map((log, i) => <div key={i} className="border-b border-white/5 py-0.5">{log}</div>)}
                                 </div>

@@ -5,6 +5,12 @@ import { exportToPython, exportToJavaScript, exportToArduino, exportToHTML5 } fr
 import { AppMode } from '../types';
 import { eventBus } from '../services/eventBus';
 import { multiplayerService, RemoteUser } from '../services/multiplayerService';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
 
 interface CodePageManagerProps {
   commands: CommandBlock[];
@@ -327,7 +333,16 @@ const BlocksView: React.FC<{ commands: CommandBlock[]; screenId: string }> = ({ 
   );
 };
 
-const CodeView: React.FC<{ code: string; language: string; onCopy: () => void; onDownload: () => void }> = ({ code, language, onCopy, onDownload }) => (
+const CodeView: React.FC<{ code: string; language: string; onCopy: () => void; onDownload: () => void }> = ({ code, language, onCopy, onDownload }) => {
+  const codeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (codeRef.current) {
+        Prism.highlightElement(codeRef.current);
+    }
+  }, [code, language]);
+
+  return (
   <div className="relative">
     <div className="absolute top-4 right-4 flex gap-2 z-10">
       <button
@@ -355,11 +370,12 @@ const CodeView: React.FC<{ code: string; language: string; onCopy: () => void; o
           <span className="text-xs text-slate-400 font-mono ml-2">code.{language}</span>
         </div>
       </div>
-      <pre className="p-4 overflow-x-auto text-sm font-mono text-slate-300 leading-relaxed max-h-[600px] overflow-y-auto">
-        <code>{code}</code>
+      <pre className="p-4 overflow-x-auto text-sm font-mono text-slate-300 leading-relaxed max-h-[600px] overflow-y-auto !bg-transparent !m-0">
+        <code ref={codeRef} className={`language-${language === 'ino' ? 'cpp' : (language === 'js' ? 'javascript' : (language === 'py' ? 'python' : language))}`}>{code}</code>
       </pre>
     </div>
   </div>
-);
+  );
+};
 
 export default CodePageManager;

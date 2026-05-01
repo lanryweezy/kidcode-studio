@@ -1,14 +1,28 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X, Copy, Check } from 'lucide-react';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
 
 interface CodeViewerProps {
   code: string;
+  language?: 'javascript' | 'python' | 'arduino';
   onClose: () => void;
 }
 
-const CodeViewer: React.FC<CodeViewerProps> = ({ code, onClose }) => {
+const CodeViewer: React.FC<CodeViewerProps> = ({ code, language = 'javascript', onClose }) => {
   const [copied, setCopied] = React.useState(false);
+  const codeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (codeRef.current) {
+        Prism.highlightElement(codeRef.current);
+    }
+  }, [code, language]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -48,8 +62,8 @@ const CodeViewer: React.FC<CodeViewerProps> = ({ code, onClose }) => {
 
         {/* Code Content */}
         <div className="flex-1 overflow-auto p-6 custom-scrollbar bg-[#0f172a]">
-          <pre className="font-mono text-sm leading-relaxed">
-            <code className="text-blue-300">{code}</code>
+          <pre className="font-mono text-sm leading-relaxed !bg-transparent !m-0 !p-0">
+            <code ref={codeRef} className={`language-${language === 'arduino' ? 'cpp' : language}`}>{code}</code>
           </pre>
         </div>
         

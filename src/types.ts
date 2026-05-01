@@ -648,6 +648,7 @@ export interface HardwareState {
   lcdLines: string[];
   potentiometerValue: number;
   speakerVolume: number;
+  motorLoad?: number;
 
   // New States
   rgbColor: string;

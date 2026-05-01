@@ -382,10 +382,23 @@ export const App: React.FC = () => {
         // In production, add to store/library
     }, []);
 
-    const handleHardwareInput = useCallback((pin: number, pressed: boolean) => {
-        const newPins = [...hardwareState.pins];
-        newPins[pin] = pressed;
-        updateHardwareState({ pins: newPins });
+    const handleHardwareInput = useCallback((pin: number, value: any) => {
+        if (typeof value === 'object' && value.type === 'motorLoad') {
+            updateHardwareState({ motorLoad: value.value });
+        } else if (typeof value === 'object' && value.type === 'powerDraw') {
+            updateHardwareState({ powerDraw: value.value });
+        } else if (typeof value === 'object' && value.type === 'multimeter') {
+            updateHardwareState({
+                multimeterVoltage: value.value.v,
+                multimeterCurrent: value.value.i,
+                multimeterResistance: Math.round(value.value.r),
+                isShortCircuit: value.value.short
+            });
+        } else {
+            const newPins = [...hardwareState.pins];
+            newPins[pin] = value as boolean;
+            updateHardwareState({ pins: newPins });
+        }
     }, [hardwareState.pins, updateHardwareState]);
 
     const handleAppendCode = useCallback((newCmds: any) => {

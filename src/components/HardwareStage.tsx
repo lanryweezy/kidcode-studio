@@ -61,9 +61,69 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
         const updateVisuals = () => {
             const state = hardwareStateRef?.current || hardwareState;
 
+            // Calculate active power draw based on connected components and motor load
+            let currentPowerDraw = 0;
+            circuitComponents.forEach(comp => {
+                if (state.pins[comp.pin]) {
+                    if (comp.type === 'MOTOR_DC') {
+                        currentPowerDraw += 50 + (state.motorLoad || 0) * 2; // base 50mW + up to 200mW under load
+                    } else if (comp.type.startsWith('LED')) {
+                        currentPowerDraw += 20; // 20mW per LED
+                    } else if (comp.type === 'BUZZER') {
+                        currentPowerDraw += 30;
+                    } else {
+                        currentPowerDraw += 10;
+                    }
+                }
+            });
+            // Idle power
+            currentPowerDraw += 45; // microcontrollers draw some idle power
+
+            // Only update via onHardwareInput if significantly changed to avoid loops
+            if (state.powerDraw === undefined || Math.abs(state.powerDraw - currentPowerDraw) > 5) {
+                // We use a small timeout to avoid updating state during render
+                setTimeout(() => {
+                    onHardwareInput(-1, { type: 'powerDraw', value: currentPowerDraw });
+                }, 0);
+            }
+
+            // Oscilloscope logic uses state.pins. No missing logic here, just visualization.
             // Update signal history for monitor
             const currentPins = [state.pins[0] ? 1 : 0, state.pins[1] ? 1 : 0, state.pins[2] ? 1 : 0];
             historyRef.current = [...historyRef.current.slice(-50), currentPins];
+
+            // Multimeter and Short Circuit simulation logic based on connections
+            let totalVoltage = 0;
+            let maxCurrent = 0;
+            let minResistance = 9999;
+            let hasShort = false;
+
+            // Basic logic: if pin 0 and 1 are both high and connected to something low resistance
+            let numActive = 0;
+            circuitComponents.forEach(comp => {
+                if (state.pins[comp.pin]) {
+                    numActive++;
+                    totalVoltage = 5.0; // Standard 5V logic
+                    maxCurrent += 0.02; // 20mA per basic comp
+                    if (comp.type === 'MOTOR_DC') maxCurrent += 0.1;
+                }
+            });
+
+            // Simulated Short Circuit trigger: too many components active on same line, or specific bad combination
+            if (numActive > 5) {
+                hasShort = true;
+                maxCurrent = 2.5; // Spike!
+            }
+
+            minResistance = maxCurrent > 0 ? totalVoltage / maxCurrent : 9999;
+
+            if (state.multimeterVoltage !== totalVoltage ||
+                state.multimeterCurrent !== maxCurrent ||
+                state.isShortCircuit !== hasShort) {
+                setTimeout(() => {
+                    onHardwareInput(-1, { type: 'multimeter', value: { v: totalVoltage, i: maxCurrent, r: minResistance, short: hasShort } });
+                }, 0);
+            }
 
             // Enhanced wire visualization... (omitted but preserved)
             wireRefs.current.forEach((path, id) => {
@@ -188,8 +248,12 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
                 if (comp.type === 'MOTOR_DC') {
                     const shaft = el.querySelector('.motor-shaft');
                     if (shaft && state.pins[comp.pin]) {
+                        // Apply motor load to RPM
+                        const load = state.motorLoad || 0;
+                        const speed = Math.max(1, 20 - (load * 0.15)); // Load reduces speed (20 to ~5 max)
+
                         const currentRot = Number(shaft.getAttribute('data-rotation') || 0);
-                        const newRot = (currentRot + 20) % 360;
+                        const newRot = (currentRot + speed) % 360;
                         shaft.setAttribute('transform', `rotate(${newRot} 10 10)`);
                         shaft.setAttribute('data-rotation', String(newRot));
                     }
@@ -536,6 +600,22 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
                                     <rect x="9" y="-12" width="2" height="7" fill="url(#metal)" />
                                     <rect x="8.5" y="-12" width="3" height="1" fill="#1e293b" />
                                 </g>
+
+                                {/* Motor Load Control (only show if selected or hover) */}
+                                <foreignObject x="25" y="-10" width="80" height="40" className="opacity-0 hover:opacity-100 transition-opacity">
+                                    <div className="bg-slate-800 p-2 rounded border border-slate-600 text-[8px] text-white flex flex-col gap-1 pointer-events-auto">
+                                        <label className="flex justify-between">
+                                            Load: {hardwareState.motorLoad || 0}%
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0" max="100"
+                                            value={hardwareState.motorLoad || 0}
+                                            onChange={(e) => onHardwareInput(comp.pin, { type: 'motorLoad', value: Number(e.target.value) })}
+                                            className="w-full accent-yellow-500 h-1"
+                                        />
+                                    </div>
+                                </foreignObject>
                             </g>
                         )}
 
@@ -652,6 +732,37 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
                                 <rect x="8" y="7" width="1" height="6" fill="#000" />
                                 <rect x="10" y="7" width="1" height="6" fill="#dc2626" />
                                 <rect x="13" y="7" width="1" height="6" fill="#eab308" />
+                            </g>
+                        )}
+
+                        {comp.type === 'BREADBOARD' && (
+                            <g transform="translate(-80, -30)">
+                                <rect x="0" y="0" width="180" height="60" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+                                {/* Power Rails */}
+                                <rect x="10" y="4" width="160" height="10" fill="#f1f5f9" />
+                                <line x1="10" y1="6" x2="170" y2="6" stroke="#ef4444" strokeWidth="1" opacity="0.5" />
+                                <line x1="10" y1="12" x2="170" y2="12" stroke="#3b82f6" strokeWidth="1" opacity="0.5" />
+                                {/* Lower Power Rails */}
+                                <rect x="10" y="46" width="160" height="10" fill="#f1f5f9" />
+                                <line x1="10" y1="48" x2="170" y2="48" stroke="#ef4444" strokeWidth="1" opacity="0.5" />
+                                <line x1="10" y1="54" x2="170" y2="54" stroke="#3b82f6" strokeWidth="1" opacity="0.5" />
+                                {/* Terminal Strips */}
+                                {[...Array(30)].map((_, i) => (
+                                    <g key={`top-${i}`} transform={`translate(${14 + i * 5}, 18)`}>
+                                        {[...Array(5)].map((_, j) => (
+                                            <circle key={j} cx="0" cy={j * 2.5} r="0.8" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="0.3" />
+                                        ))}
+                                    </g>
+                                ))}
+                                {[...Array(30)].map((_, i) => (
+                                    <g key={`bot-${i}`} transform={`translate(${14 + i * 5}, 34)`}>
+                                        {[...Array(5)].map((_, j) => (
+                                            <circle key={j} cx="0" cy={j * 2.5} r="0.8" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="0.3" />
+                                        ))}
+                                    </g>
+                                ))}
+                                {/* Center Divider */}
+                                <rect x="10" y="30" width="160" height="2" fill="#e2e8f0" />
                             </g>
                         )}
 
@@ -776,7 +887,47 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
                             </g>
                         )}
 
-                        {!comp.type.startsWith('LED') && comp.type !== 'BUTTON' && comp.type !== 'BUTTON_TACTILE' && comp.type !== 'POTENTIOMETER' && comp.type !== 'FAN' && comp.type !== 'ULTRASONIC' && !isMicrocontroller(comp.type) && comp.type !== 'LCD' && comp.type !== 'OLED' && comp.type !== 'SWITCH_TOGGLE' && comp.type !== 'SWITCH_SLIDE' && comp.type !== 'BULB' && comp.type !== 'MOTOR_DC' && comp.type !== 'BUZZER' && comp.type !== 'RESISTOR' && comp.type !== 'BATTERY_9V' && comp.type !== 'BATTERY_AA' && comp.type !== 'SERVO' && comp.type !== 'SERVO_CONTINUOUS' && comp.type !== 'LIGHT_SENSOR' && comp.type !== 'DHT11' && comp.type !== 'DHT22' && comp.type !== 'RELAY' && comp.type !== 'RELAY_MODULE' && comp.type !== 'LASER' && comp.type !== 'LASER_DIODE' && comp.type !== 'PUMP' && comp.type !== 'MOTOR_PUMP' && (
+                        {comp.type === 'MULTIMETER' && (
+                            <g>
+                                <rect x="0" y="0" width="30" height="40" rx="2" fill="#facc15" stroke="#ca8a04" strokeWidth="1" />
+                                <rect x="3" y="3" width="24" height="12" rx="1" fill="#1e293b" />
+                                <text x="15" y="11" textAnchor="middle" fontSize="6" fill="#10b981" fontFamily="monospace">0.00</text>
+                                <circle cx="15" cy="24" r="6" fill="#334155" stroke="#000" strokeWidth="1" />
+                                <circle cx="15" cy="24" r="4" fill="#1e293b" />
+                                <path d="M 15 24 L 15 20" stroke="#fff" strokeWidth="1" />
+                                <circle cx="10" cy="35" r="2" fill="#ef4444" />
+                                <circle cx="20" cy="35" r="2" fill="#1e293b" />
+                            </g>
+                        )}
+
+                        {comp.type === 'OSCILLOSCOPE' && (
+                            <g>
+                                <rect x="0" y="0" width="40" height="30" rx="2" fill="#94a3b8" stroke="#64748b" strokeWidth="1" />
+                                <rect x="3" y="3" width="24" height="20" rx="1" fill="#020617" />
+                                <path d="M 3 13 Q 9 3 15 13 T 27 13" fill="none" stroke="#22c55e" strokeWidth="1" />
+                                <circle cx="34" cy="8" r="3" fill="#334155" />
+                                <circle cx="34" cy="16" r="3" fill="#334155" />
+                                <circle cx="34" cy="24" r="3" fill="#334155" />
+                            </g>
+                        )}
+
+                        {comp.type === 'I2C_SENSOR' && (
+                            <g>
+                                <rect x="0" y="0" width="20" height="15" rx="1" fill="#0d9488" stroke="#0f766e" strokeWidth="1" />
+                                <text x="10" y="9" textAnchor="middle" fontSize="4" fill="#fff" fontWeight="bold">I2C</text>
+                                <path d="M 4 15 L 4 18 M 8 15 L 8 18 M 12 15 L 12 18 M 16 15 L 16 18" stroke="url(#metal)" strokeWidth="1" />
+                            </g>
+                        )}
+
+                        {comp.type === 'SPI_SENSOR' && (
+                            <g>
+                                <rect x="0" y="0" width="25" height="15" rx="1" fill="#0369a1" stroke="#075985" strokeWidth="1" />
+                                <text x="12.5" y="9" textAnchor="middle" fontSize="4" fill="#fff" fontWeight="bold">SPI</text>
+                                <path d="M 5 15 L 5 18 M 10 15 L 10 18 M 15 15 L 15 18 M 20 15 L 20 18" stroke="url(#metal)" strokeWidth="1" />
+                            </g>
+                        )}
+
+                        {!comp.type.startsWith('LED') && comp.type !== 'BUTTON' && comp.type !== 'BUTTON_TACTILE' && comp.type !== 'POTENTIOMETER' && comp.type !== 'FAN' && comp.type !== 'ULTRASONIC' && !isMicrocontroller(comp.type) && comp.type !== 'LCD' && comp.type !== 'OLED' && comp.type !== 'SWITCH_TOGGLE' && comp.type !== 'SWITCH_SLIDE' && comp.type !== 'BULB' && comp.type !== 'MOTOR_DC' && comp.type !== 'BUZZER' && comp.type !== 'RESISTOR' && comp.type !== 'BATTERY_9V' && comp.type !== 'BATTERY_AA' && comp.type !== 'SERVO' && comp.type !== 'SERVO_CONTINUOUS' && comp.type !== 'LIGHT_SENSOR' && comp.type !== 'DHT11' && comp.type !== 'DHT22' && comp.type !== 'RELAY' && comp.type !== 'RELAY_MODULE' && comp.type !== 'LASER' && comp.type !== 'LASER_DIODE' && comp.type !== 'PUMP' && comp.type !== 'MOTOR_PUMP' && comp.type !== 'BREADBOARD' && comp.type !== 'MULTIMETER' && comp.type !== 'OSCILLOSCOPE' && comp.type !== 'I2C_SENSOR' && comp.type !== 'SPI_SENSOR' && (
 
 
                             <g>

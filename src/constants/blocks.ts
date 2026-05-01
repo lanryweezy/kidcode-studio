@@ -1,6 +1,6 @@
 import { AppMode, BlockDefinition, CommandType } from '../types';
 import {
-    PanelTop, ArrowRight, Type, PaintBucket, Minus, ArrowUp, MessageSquare, MousePointer2, TextCursorInput, Image, ToggleRight, SlidersHorizontal, CheckSquare, BarChart3, List, Pencil, MapPin, Video, Camera, Calendar, Palette, Box, AlertTriangle, Megaphone, Waves, Link, Eraser, Cloud, Download, Variable, Calculator, Hash, GitBranch, Split, XCircle, Repeat, Clock, StickyNote, ArrowUpCircle, ArrowBigUp, RefreshCw, Compass, Activity, Film, Crosshair, Ghost, Coins, Sparkles, Copy, Trash, Play, Square, Music, Wind, Sun, Moon, Timer, Heart, RotateCcw, RotateCw, Anchor, Trophy, Lightbulb, Fan, Settings, Zap, Volume2, Maximize, Terminal, Wifi, Globe, Scan, User, ZoomIn, Eye, Layers, Flag, Hand, CloudRain, Save, Move, Grid, ToggleLeft, Gauge, Thermometer, Droplets, Flame, Target, Magnet
+    PanelTop, ArrowRight, Type, PaintBucket, Minus, ArrowUp, MessageSquare, MousePointer2, TextCursorInput, Image, ToggleRight, SlidersHorizontal, CheckSquare, BarChart3, List, Pencil, MapPin, Video, Camera, Calendar, Palette, Box, AlertTriangle, Megaphone, Waves, Link, Eraser, Cloud, Download, Variable, Calculator, Hash, GitBranch, Split, XCircle, Repeat, Clock, StickyNote, ArrowUpCircle, ArrowBigUp, RefreshCw, Compass, Activity, Film, Crosshair, Ghost, Coins, Sparkles, Copy, Trash, Play, Square, Music, Wind, Sun, Moon, Timer, Heart, RotateCcw, RotateCw, Anchor, Trophy, Lightbulb, Fan, Settings, Zap, Volume2, Maximize, Terminal, Wifi, Globe, Scan, User, ZoomIn, Eye, Layers, Flag, Hand, CloudRain, Save, Move, Grid, ToggleLeft, Gauge, Thermometer, Droplets, Flame, Target, Magnet, Cpu
 } from 'lucide-react';
 
 export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
@@ -246,5 +246,10 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
         { type: CommandType.RESET_BOARD, label: 'Reset Board', icon: RotateCcw, defaultParams: {}, color: 'bg-slate-600', category: 'System', description: 'Reset hardware state.' },
         { type: CommandType.CONNECT_WIFI, label: 'Connect WiFi', icon: Wifi, defaultParams: { ssid: 'network', password: '' }, color: 'bg-blue-500', category: 'System', description: 'Connect to WiFi.' },
         { type: CommandType.SEND_HTTP, label: 'HTTP Request', icon: Cloud, defaultParams: { url: 'http://api.example.com', method: 'GET' }, color: 'bg-blue-400', category: 'System', description: 'Send HTTP request.' },
+        // --- COMMUNICATION PROTOCOLS ---
+        { type: CommandType.READ_I2C, label: 'Read I2C', icon: Cpu, defaultParams: { address: '0x68', varName: 'data' }, color: 'bg-cyan-700', category: 'Protocols', description: 'Read data from I2C device.' },
+        { type: CommandType.WRITE_I2C, label: 'Write I2C', icon: Cpu, defaultParams: { address: '0x68', value: 1 }, color: 'bg-cyan-800', category: 'Protocols', description: 'Write data to I2C device.' },
+        { type: CommandType.READ_SPI, label: 'Read SPI', icon: Cpu, defaultParams: { pin: 10, varName: 'data' }, color: 'bg-blue-700', category: 'Protocols', description: 'Read data from SPI device.' },
+        { type: CommandType.WRITE_SPI, label: 'Write SPI', icon: Cpu, defaultParams: { pin: 10, value: 1 }, color: 'bg-blue-800', category: 'Protocols', description: 'Write data to SPI device.' },
     ],
 };

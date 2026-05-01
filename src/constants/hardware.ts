@@ -10,6 +10,7 @@ export const INITIAL_HARDWARE_STATE: HardwareState = {
     lcdLines: ["Ready...", ""],
     potentiometerValue: 0,
     speakerVolume: 50,
+    motorLoad: 0,
     rgbColor: '#ff0000',
     rgbLedColor: '#FF0000', // For RGB LED
     sevenSegmentValue: null,

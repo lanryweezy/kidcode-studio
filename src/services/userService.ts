@@ -3,6 +3,8 @@ import { UserProfile } from '../types';
 
 const USER_STORAGE_KEY = 'kidcode_user_profile';
 
+let cachedProfile: UserProfile | null = null;
+
 export const DEFAULT_USER: UserProfile = {
   id: 'default-user',
   name: 'Junior Coder',
@@ -18,15 +20,18 @@ export const DEFAULT_USER: UserProfile = {
 };
 
 export const getUserProfile = (): UserProfile => {
+  if (cachedProfile) return cachedProfile;
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : DEFAULT_USER;
+    cachedProfile = raw ? JSON.parse(raw) : DEFAULT_USER;
   } catch {
-    return DEFAULT_USER;
+    cachedProfile = DEFAULT_USER;
   }
+  return cachedProfile;
 };
 
 export const saveUserProfile = (profile: UserProfile) => {
+  cachedProfile = profile;
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(profile));
 };
 

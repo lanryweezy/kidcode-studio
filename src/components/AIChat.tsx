@@ -80,7 +80,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
   };
     
       const handleReview = async () => {
-          const { commands, mode } = useStore.getState();
+          const { commands } = useStore.getState();
           if (commands.length === 0) {
               setMessages(prev => [...prev, { role: 'assistant', text: "Your code is empty! Add some blocks first so I can review them. 😊" }]);
               return;
@@ -89,14 +89,38 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
           setIsLoading(true);
           setMessages(prev => [...prev, { role: 'user', text: "Can you review my code?" }]);
           
-                const review = await reviewCode(commands, mode);
+                const review = await reviewCode(commands, currentMode);
                 setMessages(prev => [...prev, { role: 'assistant', text: review }]);
                 setIsLoading(false);
             };
           
             const handleFix = async () => {
-                // Feature temporarily disabled - needs onReplaceCode prop from parent
-                setMessages(prev => [...prev, { role: 'assistant', text: "Code fix feature is coming soon! For now, try asking me to explain the issue." }]);
+                const { commands } = useStore.getState();
+                if (commands.length === 0) {
+                    setMessages(prev => [...prev, { role: 'assistant', text: "Your code is empty! Add some blocks first so I can fix them. 😊" }]);
+                    return;
+                }
+
+                setIsLoading(true);
+                setMessages(prev => [...prev, { role: 'user', text: "Can you fix my code?" }]);
+
+                try {
+                    const fixedCommands = await getFixedCode(commands, currentMode);
+                    if (fixedCommands && onReplaceCode) {
+                        onReplaceCode(fixedCommands);
+                        setMessages(prev => [...prev, { role: 'assistant', text: "I've fixed your code! 🪄 I corrected logic errors and potential bugs for you." }]);
+                        playSoundEffect('powerup');
+                    } else if (!onReplaceCode) {
+                        setMessages(prev => [...prev, { role: 'assistant', text: "I found a way to fix it, but I can't apply the changes right now. Try asking me for advice!" }]);
+                    } else {
+                        setMessages(prev => [...prev, { role: 'assistant', text: "I couldn't find any obvious bugs to fix right now, but your code looks interesting! Keep building! 🚀" }]);
+                    }
+                } catch (error) {
+                    console.error("AI Fix error:", error);
+                    setMessages(prev => [...prev, { role: 'assistant', text: "Oops! I had trouble fixing your code. Try again in a moment." }]);
+                } finally {
+                    setIsLoading(false);
+                }
             };
   const playMessage = async (text: string, index: number) => {
       if (isPlaying === index) {

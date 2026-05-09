@@ -4,9 +4,9 @@
  * https://github.com/facebookresearch/codellama
  */
 
-// Hugging Face Inference API
-const HF_API_BASE = 'https://api-inference.huggingface.co/models';
-const HF_TOKEN = import.meta.env.VITE_HUGGINGFACE_TOKEN || '';
+/**
+ * SECURITY NOTE: API keys are handled server-side via /api/hf proxy
+ */
 
 // Code Llama models
 const CODE_LLAMA_MODELS = {
@@ -74,12 +74,8 @@ export const getCodeAssistance = async (
       message: 'Analyzing code...' 
     });
 
-    const response = await fetch(`${HF_API_BASE}/${model}`, {
+    const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HF_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({
         inputs: prompt,
         parameters: {
@@ -93,7 +89,7 @@ export const getCodeAssistance = async (
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
     }
 

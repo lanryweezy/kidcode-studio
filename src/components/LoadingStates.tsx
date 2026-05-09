@@ -105,34 +105,6 @@ export const ButtonLoader: React.FC<{ text: string }> = ({ text }) => (
 );
 
 /**
- * Progress Bar with Animation
- */
-export const AnimatedProgressBar: React.FC<{ 
-  progress: number; 
-  className?: string;
-  showLabel?: boolean;
-}> = ({ progress, className = '', showLabel = true }) => (
-  <div className={`w-full ${className}`}>
-    {showLabel && (
-      <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">
-        <span>Loading...</span>
-        <span>{Math.round(progress)}%</span>
-      </div>
-    )}
-    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-      <div
-        className="h-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 transition-all duration-300 ease-out"
-        style={{ 
-          width: `${progress}%`,
-          backgroundSize: '200% 100%',
-          animation: 'shimmer 2s infinite linear'
-        }}
-      />
-    </div>
-  </div>
-);
-
-/**
  * Shimmer Effect for Loading Cards
  */
 export const ShimmerCard: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -198,7 +170,6 @@ export default {
   LoadingSpinner,
   PageLoader,
   ButtonLoader,
-  AnimatedProgressBar,
   ShimmerCard,
   GridSkeleton,
   PulseDot,

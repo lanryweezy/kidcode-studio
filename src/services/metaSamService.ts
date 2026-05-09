@@ -4,9 +4,9 @@
  * https://github.com/facebookresearch/segment-anything
  */
 
-// Hugging Face Inference API
-const HF_API_BASE = 'https://api-inference.huggingface.co/models';
-const HF_TOKEN = import.meta.env.VITE_HUGGINGFACE_TOKEN || '';
+/**
+ * SECURITY NOTE: API keys are handled server-side via /api/hf proxy
+ */
 
 // SAM models
 const SAM_MODELS = {
@@ -106,17 +106,13 @@ export const extractSprite = async (
       ];
     }
 
-    const response = await fetch(`${HF_API_BASE}/${model}`, {
+    const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HF_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(`SAM API error: ${error.error || response.statusText}`);
     }
 

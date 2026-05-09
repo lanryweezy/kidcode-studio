@@ -4,9 +4,9 @@
  * https://github.com/facebookresearch/audiocraft
  */
 
-// Hugging Face Inference API
-const HF_API_BASE = 'https://api-inference.huggingface.co/models';
-const HF_TOKEN = import.meta.env.VITE_HUGGINGFACE_TOKEN || '';
+/**
+ * SECURITY NOTE: API keys are handled server-side via /api/hf proxy
+ */
 
 // MusicGen models
 const MUSICGEN_MODELS = {
@@ -64,13 +64,9 @@ export const generateMusic = async (
   });
 
   try {
-    // Query Hugging Face Inference API
-    const response = await fetch(`${HF_API_BASE}/${model}`, {
+    // Query Hugging Face Inference API via proxy
+    const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HF_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({
         inputs: options.prompt,
         parameters: {
@@ -84,7 +80,7 @@ export const generateMusic = async (
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(`MusicGen API error: ${error.error || response.statusText}`);
     }
 

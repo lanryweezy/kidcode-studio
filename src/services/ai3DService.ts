@@ -1,22 +1,19 @@
-import { executeWithRetry, RetryPresets } from "./aiServiceWrapper";
 /**
  * AI 3D Asset Generation Service
  * Supports multiple providers: Meshy AI, Luma Genie, Tripo AI, Microsoft TRELLIS
+ *
+ * SECURITY NOTE: API keys are handled server-side via /api/ai3d proxy
  */
 
 import { executeWithRetry, executeWithFallback, RetryPresets } from './aiServiceWrapper';
 
-// Meshy AI API Configuration
-const MESHY_API_BASE = 'https://api.meshy.ai/v2';
-const MESHY_API_KEY = import.meta.env.VITE_MESHY_API_KEY || '';
-
-// Luma AI API Configuration  
-const LUMA_API_BASE = 'https://api.lumalabs.ai/v1';
-const LUMA_API_KEY = import.meta.env.VITE_LUMA_API_KEY || '';
-
-// Tripo AI API Configuration
-const TRIPO_API_BASE = 'https://api.tripo3d.ai/v2/openapi';
-const TRIPO_API_KEY = import.meta.env.VITE_TRIPO_API_KEY || '';
+/**
+ * Proxy fetch helper to call AI services through Vercel serverless functions
+ */
+const proxyFetch = async (provider: string, path: string, options: RequestInit = {}) => {
+  const response = await fetch(`/api/ai3d?provider=${provider}&path=${encodeURIComponent(path)}`, options);
+  return response;
+};
 
 export interface AI3DProvider {
   id: string;
@@ -338,20 +335,12 @@ const tripoAPI = {
     style: string = 'cartoon',
     onProgress?: (progress: GenerationProgress) => void
   ): Promise<Generated3DAsset> {
-    if (!TRIPO_API_KEY) {
-      throw new Error('Tripo API key not configured');
-    }
-
     return executeWithRetry(async () => {
         onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
 
         // Step 1: Create task
-        const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
+        const createResponse = await proxyFetch('tripo', 'task', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${TRIPO_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({
             type: 'text_to_model',
             prompt: prompt,
@@ -360,7 +349,8 @@ const tripoAPI = {
         });
 
         if (!createResponse.ok) {
-          throw new Error(`Tripo API error: ${createResponse.statusText}`);
+          const errorData = await createResponse.json().catch(() => ({}));
+          throw new Error(`Tripo API error: ${errorData.error || createResponse.statusText}`);
         }
 
         const createData = await createResponse.json();
@@ -370,11 +360,7 @@ const tripoAPI = {
         onProgress?.({ status: 'processing', progress: 20, message: 'Generating 3D model...' });
 
         while (true) {
-          const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
-            headers: {
-              'Authorization': `Bearer ${TRIPO_API_KEY}`
-            }
-          });
+          const statusResponse = await proxyFetch('tripo', `task/${taskId}`);
 
           const statusData = await statusResponse.json();
           
@@ -428,20 +414,12 @@ const tripoAPI = {
     imageUrl: string,
     onProgress?: (progress: GenerationProgress) => void
   ): Promise<Generated3DAsset> {
-    if (!TRIPO_API_KEY) {
-      throw new Error('Tripo API key not configured');
-    }
-
     return executeWithRetry(async () => {
         onProgress?.({ status: 'queued', progress: 5, message: 'Submitting to Tripo AI...' });
 
         // Step 1: Create task
-        const createResponse = await fetch(`${TRIPO_API_BASE}/task`, {
+        const createResponse = await proxyFetch('tripo', 'task', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${TRIPO_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({
             type: 'image_to_model',
             image_url: imageUrl,
@@ -450,7 +428,8 @@ const tripoAPI = {
         });
 
         if (!createResponse.ok) {
-          throw new Error(`Tripo API error: ${createResponse.statusText}`);
+          const errorData = await createResponse.json().catch(() => ({}));
+          throw new Error(`Tripo API error: ${errorData.error || createResponse.statusText}`);
         }
 
         const createData = await createResponse.json();
@@ -460,11 +439,7 @@ const tripoAPI = {
         onProgress?.({ status: 'processing', progress: 20, message: 'Processing image...' });
 
         while (true) {
-          const statusResponse = await fetch(`${TRIPO_API_BASE}/task/${taskId}`, {
-            headers: {
-              'Authorization': `Bearer ${TRIPO_API_KEY}`
-            }
-          });
+          const statusResponse = await proxyFetch('tripo', `task/${taskId}`);
 
           const statusData = await statusResponse.json();
           
@@ -523,28 +498,21 @@ const meshyAPI = {
     style: string = 'cartoon',
     onProgress?: (progress: GenerationProgress) => void
   ): Promise<Generated3DAsset> {
-    if (!MESHY_API_KEY) {
-      throw new Error('Meshy API key not configured');
-    }
-
     // Step 1: Create task
-    const createResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/image-to-3d`, {
+    const createResponse = await executeWithRetry(() => proxyFetch('meshy', 'text-to-3d', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MESHY_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({
         prompt: prompt,
         style: style,
-        format: 'glb' as const,
+        format: 'glb',
         enable_pbr: true,
         enable_rig: false
       })
     }), RetryPresets.standard, 'meshy');
 
     if (!createResponse.ok) {
-      throw new Error(`Meshy API error: ${createResponse.statusText}`);
+      const errorData = await createResponse.json().catch(() => ({}));
+      throw new Error(`Meshy API error: ${errorData.error || createResponse.statusText}`);
     }
 
     const createData = await createResponse.json();
@@ -554,11 +522,7 @@ const meshyAPI = {
     onProgress?.({ status: 'processing', progress: 10, message: 'Generating 3D model...' });
 
     while (true) {
-      const statusResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/tasks/${taskId}`, {
-        headers: {
-          'Authorization': `Bearer ${MESHY_API_KEY}`
-        }
-      }), RetryPresets.standard, 'meshy');
+      const statusResponse = await executeWithRetry(() => proxyFetch('meshy', `tasks/${taskId}`), RetryPresets.standard, 'meshy');
 
       const statusData = await statusResponse.json();
       
@@ -598,27 +562,20 @@ const meshyAPI = {
     imageUrl: string,
     onProgress?: (progress: GenerationProgress) => void
   ): Promise<Generated3DAsset> {
-    if (!MESHY_API_KEY) {
-      throw new Error('Meshy API key not configured');
-    }
-
     // Step 1: Create task
-    const createResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/image-to-3d`, {
+    const createResponse = await executeWithRetry(() => proxyFetch('meshy', 'image-to-3d', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MESHY_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({
         image_url: imageUrl,
-        format: 'glb' as const,
+        format: 'glb',
         enable_pbr: true,
         enable_rig: false
       })
     }), RetryPresets.standard, 'meshy');
 
     if (!createResponse.ok) {
-      throw new Error(`Meshy API error: ${createResponse.statusText}`);
+      const errorData = await createResponse.json().catch(() => ({}));
+      throw new Error(`Meshy API error: ${errorData.error || createResponse.statusText}`);
     }
 
     const createData = await createResponse.json();
@@ -628,11 +585,7 @@ const meshyAPI = {
     onProgress?.({ status: 'processing', progress: 10, message: 'Processing image...' });
 
     while (true) {
-      const statusResponse = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/tasks/${taskId}`, {
-        headers: {
-          'Authorization': `Bearer ${MESHY_API_KEY}`
-        }
-      }), RetryPresets.standard, 'meshy');
+      const statusResponse = await executeWithRetry(() => proxyFetch('meshy', `tasks/${taskId}`), RetryPresets.standard, 'meshy');
 
       const statusData = await statusResponse.json();
       
@@ -669,16 +622,8 @@ const meshyAPI = {
    * Auto-rig a character model
    */
   async autoRig(modelUrl: string): Promise<Generated3DAsset> {
-    if (!MESHY_API_KEY) {
-      throw new Error('Meshy API key not configured');
-    }
-
-    const response = await executeWithRetry(() => fetch(`${MESHY_API_BASE}/rig`, {
+    const response = await executeWithRetry(() => proxyFetch('meshy', 'rig', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MESHY_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({
         model_url: modelUrl,
         format: 'glb'

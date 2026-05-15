@@ -3,6 +3,9 @@ import { AppMode, SpriteState, GameEntity } from '../types';
 import { playSoundEffect } from '../services/soundService';
 import { SpatialHash } from '../services/spatialHash';
 
+const SOLID_BLOCK_TYPES = new Set(['brick', 'grass', 'dirt', 'stone', 'crate']);
+const HAZARD_BLOCK_TYPES = new Set(['spike', 'lava']);
+
 interface UseGamePhysicsProps {
     isPlaying: boolean;
     mode: AppMode;
@@ -105,7 +108,7 @@ export const useGamePhysics = ({
                     hitbox.y + hitbox.h > ty
                 ) {
                     // Solid blocks
-                    if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                    if (SOLID_BLOCK_TYPES.has(tile.type)) {
                         collisionX = true;
                         const restitution = state.restitution ?? 0;
                         if (restitution > 0) {
@@ -138,7 +141,7 @@ export const useGamePhysics = ({
                         break;
                     }
                     // Hazards
-                    if (['spike', 'lava'].includes(tile.type)) {
+                    if (HAZARD_BLOCK_TYPES.has(tile.type)) {
                         if (invincibilityTimer.current === 0) {
                             newHealth--;
                             invincibilityTimer.current = 60;
@@ -184,7 +187,7 @@ export const useGamePhysics = ({
                     hitbox.y + hitbox.h > ty
                 ) {
                     // Solid blocks
-                    if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                    if (SOLID_BLOCK_TYPES.has(tile.type)) {
                         if (vy > 0) { // Falling down
                             nextY = ty - SPRITE_SIZE - 5;
                             onGround = true;
@@ -212,7 +215,7 @@ export const useGamePhysics = ({
                         newEffect = { type: 'sparkle', x: tx, y: ty, color: '#ec4899' };
                     }
                     // Hazards
-                    if (['spike', 'lava'].includes(tile.type)) {
+                    if (HAZARD_BLOCK_TYPES.has(tile.type)) {
                         if (invincibilityTimer.current === 0) {
                             newHealth--;
                             invincibilityTimer.current = 60;
@@ -281,7 +284,7 @@ export const useGamePhysics = ({
                      const { tiles: nearbyTiles } = spatialHashRef.current.query(hitbox.x, hitbox.y, hitbox.w, hitbox.h);
 
                      for (const tile of nearbyTiles) {
-                         if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                         if (SOLID_BLOCK_TYPES.has(tile.type)) {
                              const tx = tile.x * TILE_SIZE;
                              const ty = tile.y * TILE_SIZE;
                              if (
@@ -310,7 +313,7 @@ export const useGamePhysics = ({
                          const hitbox = { x: slideEx + 5, y: slideEy + 5, w: SPRITE_SIZE, h: SPRITE_SIZE };
                          const { tiles: nearbyTiles } = spatialHashRef.current.query(hitbox.x, hitbox.y, hitbox.w, hitbox.h);
                          for (const tile of nearbyTiles) {
-                             if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                             if (SOLID_BLOCK_TYPES.has(tile.type)) {
                                  const tx = tile.x * TILE_SIZE;
                                  const ty = tile.y * TILE_SIZE;
                                  if (hitbox.x < tx + TILE_SIZE && hitbox.x + hitbox.w > tx && hitbox.y < ty + TILE_SIZE && hitbox.y + hitbox.h > ty) {
@@ -333,7 +336,7 @@ export const useGamePhysics = ({
                              const hitbox = { x: slideExY + 5, y: slideEyY + 5, w: SPRITE_SIZE, h: SPRITE_SIZE };
                              const { tiles: nearbyTiles } = spatialHashRef.current.query(hitbox.x, hitbox.y, hitbox.w, hitbox.h);
                              for (const tile of nearbyTiles) {
-                                 if (['brick', 'grass', 'dirt', 'stone', 'crate'].includes(tile.type)) {
+                                 if (SOLID_BLOCK_TYPES.has(tile.type)) {
                                      const tx = tile.x * TILE_SIZE;
                                      const ty = tile.y * TILE_SIZE;
                                      if (hitbox.x < tx + TILE_SIZE && hitbox.x + hitbox.w > tx && hitbox.y < ty + TILE_SIZE && hitbox.y + hitbox.h > ty) {

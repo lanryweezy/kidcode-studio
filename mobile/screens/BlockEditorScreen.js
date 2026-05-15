@@ -1,12 +1,9 @@
 import React from 'react';
 import { StyleSheet, SafeAreaView, View, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { WEB_APP_URL } from '../config';
 
 export default function BlockEditorScreen() {
-    // In production, this would point to the deployed Vercel/Netlify URL
-    // For local testing on an emulator or real device, use your machine's IP address instead of localhost
-    // e.g., 'http://192.168.1.xxx:5173'
-    const WEB_APP_URL = 'http://localhost:5173'; // Change to local IP if testing on physical device
 
     const onMessage = (event) => {
         const data = event.nativeEvent.data;

@@ -77,7 +77,6 @@ const getDB = async (): Promise<IDBPDatabase<KidCodeDB>> => {
       }
     });
     
-    console.log('✅ IndexedDB initialized');
     return db;
   } catch (error) {
     console.warn('⚠️ IndexedDB not available, falling back to localStorage:', error);
@@ -111,7 +110,6 @@ export const saveProjectIndexedDB = async (project: SavedProject): Promise<void>
       thumbnail: project.thumbnail
     });
     
-    console.log('💾 Project saved to IndexedDB:', project.name);
   } catch (error) {
     console.error('❌ IndexedDB save failed, using localStorage:', error);
     localStorage.setItem('kidcode_project_' + project.id, JSON.stringify(project));
@@ -216,7 +214,6 @@ export const deleteProjectIndexedDB = async (projectId: string): Promise<void> =
   try {
     const database = await getDB();
     await database.delete('projects', projectId);
-    console.log('🗑️ Project deleted:', projectId);
   } catch (error) {
     console.error('❌ Delete failed:', error);
   }
@@ -253,7 +250,6 @@ export const saveAssetIndexedDB = async (
       timestamp: Date.now()
     });
     
-    console.log('💾 Asset saved:', name);
   } catch (error) {
     console.error('❌ Asset save failed:', error);
   }
@@ -434,7 +430,6 @@ export const clearAllIndexedDB = async (): Promise<void> => {
     const database = await getDB();
     await database.clear('projects');
     await database.clear('assets');
-    console.log('🗑️ All IndexedDB data cleared');
   } catch (error) {
     console.error('❌ Clear failed:', error);
   }

@@ -237,7 +237,7 @@ export const generateCode = (
         code += `${i}lcd.clear();\n`;
         break;
       case CommandType.LOG_DATA:
-        code += `${i}${mode === AppMode.HARDWARE ? 'Serial.println' : 'console.log'}("${cmd.params.text}");\n`;
+        code += `${i}${mode === AppMode.HARDWARE ? 'Serial.println' : 'console.info'}("${cmd.params.text}");\n`;
         break;
       case CommandType.CONNECT_WIFI:
         code += `${i}// Connect to WiFi network\n`;

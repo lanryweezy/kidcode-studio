@@ -537,10 +537,8 @@ export const useCodeInterpreter = ({
                 case CommandType.SET_PHYSICS_TYPE:
                     // In a real implementation, this would update the body in the physics world
                     // For now, we store it in metadata
-                    console.log(`Setting physics type to: ${cmd.params.text}`);
                     break;
                 case CommandType.CREATE_JOINT:
-                    console.log(`Creating joint with: ${cmd.params.text}`);
                     break;
                 case CommandType.APPLY_FORCE:
                     spriteStateRef.current.vx += (cmd.params.x || 0);

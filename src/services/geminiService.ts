@@ -4,6 +4,31 @@ import { AppMode, CommandBlock, CommandType } from "../types";
  * SECURITY NOTE: API keys are handled server-side via /api/gemini proxy
  */
 
+/**
+ * 🤖 Astra: [AI quality improvement]
+ * Validates raw AI JSON output before casting it to CommandBlock array.
+ * Prevents downstream crashes if the model hallucinates an invalid structure.
+ */
+const safeParseCommands = (jsonStr: string): Omit<CommandBlock, 'id'>[] => {
+  try {
+    const parsed = JSON.parse(jsonStr);
+    if (!Array.isArray(parsed)) {
+      throw new Error("AI output is not an array");
+    }
+    // Filter out invalid items
+    const validCommands = parsed.filter(item =>
+      item && typeof item === 'object' && typeof item.type === 'string'
+    );
+    if (validCommands.length === 0 && parsed.length > 0) {
+        throw new Error("AI output array contained no valid CommandBlocks");
+    }
+    return validCommands;
+  } catch (error) {
+    console.error("AI Validation Error:", error);
+    throw error;
+  }
+};
+
 export const generateCodeFromPromptStream = async function* (
   userPrompt: string,
   currentMode: AppMode
@@ -47,9 +72,9 @@ export const generateCodeFromPromptStream = async function* (
 
     if (jsonMatch && jsonMatch[1]) {
       try {
-        commands = JSON.parse(jsonMatch[1]);
+        commands = safeParseCommands(jsonMatch[1]);
       } catch (e) {
-        console.error("Failed to parse generated JSON", e);
+        console.error("Failed to parse or validate generated JSON", e);
       }
     }
 
@@ -112,7 +137,7 @@ export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Pro
         const jsonMatch = text.match(/\[[\s\S]*?\]/);
         
         if (jsonMatch) {
-            return JSON.parse(jsonMatch[0]);
+            return safeParseCommands(jsonMatch[0]);
         }
         return null;
     } catch (e) {

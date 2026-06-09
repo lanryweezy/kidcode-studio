@@ -1,0 +1,3 @@
+## 2025-02-14 - [Silent Crash on AI JSON Parsing]
+**Learning:** [Raw `JSON.parse` on model outputs can cause silent downstream crashes. AI models may return valid JSON that does not conform to the expected schema (e.g. returning an array of strings instead of an array of objects). The UI would attempt to render these invalid blocks causing silent crashes]
+**Action:** [Always wrap AI JSON parsing with a validation step to ensure the parsed structure matches the required schema. Ensure objects contain the expected required keys (like `type` in `CommandBlock`) and fallback gracefully when validation fails.]

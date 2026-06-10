@@ -113,6 +113,9 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
                 payload: { commands, mode }
             })
         });
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
         const data = await response.json();
         return data.text || "I couldn't review your code right now, but keep building! 🚀";
     } catch (e) {
@@ -131,6 +134,9 @@ export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Pro
                 payload: { commands, mode }
             })
         });
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
         const data = await response.json();
         const text = data.text;
         if (!text) return null;
@@ -156,6 +162,9 @@ export const generateSprite = async (description: string): Promise<string | null
                 payload: { description }
             })
         });
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
         const data = await response.json();
         return data.dataUri || null;
     } catch (e) {
@@ -174,6 +183,9 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
                 payload: { text }
             })
         });
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
         const data = await response.json();
         const base64Audio = data.base64Audio;
         if (!base64Audio) return null;

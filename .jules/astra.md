@@ -5,3 +5,8 @@
 ## 2026-06-10 - [Missing Context in Secondary Actions & Uncaught API Errors]
 **Learning:** AI quality degrades when secondary features (like "review" or "fix") omit the domain-specific system prompt (DSL) provided to the primary feature. This leads to hallucinated structures. Additionally, directly extracting `data.text` or similar from a `fetch` response without `!response.ok` validation masks underlying network/API errors (e.g. rate limits), passing `undefined` into the system and creating silent downstream crashes or misleading fallbacks.
 **Action:** Always inject the primary domain `SYSTEM_PROMPT` into all related AI actions using the model. Always wrap AI `fetch` response JSON parsing with an explicit `if (!response.ok) throw new Error(...)` check to trigger intended error handling and graceful UI fallbacks.
+## 2025-05-18 - Missing context in secondary AI tasks & missing response validation
+
+**Learning:** Secondary AI generation tasks (like reviewing or fixing code blocks) can hallucinate invalid outputs if they do not include the same foundational `systemInstruction` context as the primary generation tasks. Also, `fetch` calls without `!response.ok` checks silently crash downstream when `JSON.parse` encounters unexpected network error responses (like 500 or 504 errors).
+
+**Action:** Always inject `systemInstruction: SYSTEM_PROMPT` into the `getGenerativeModel` config for *all* AI operations that need context on domain-specific boundaries (e.g., KidCode blocks). Always wrap `await response.json()` calls in an explicit HTTP response validation block (`if (!response.ok) throw new Error(...)`) to prevent unhandled parse exceptions.

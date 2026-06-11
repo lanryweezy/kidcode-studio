@@ -1,3 +1,9 @@
 ## 2025-02-14 - [Silent Crash on AI JSON Parsing]
 **Learning:** [Raw `JSON.parse` on model outputs can cause silent downstream crashes. AI models may return valid JSON that does not conform to the expected schema (e.g. returning an array of strings instead of an array of objects). The UI would attempt to render these invalid blocks causing silent crashes]
 **Action:** [Always wrap AI JSON parsing with a validation step to ensure the parsed structure matches the required schema. Ensure objects contain the expected required keys (like `type` in `CommandBlock`) and fallback gracefully when validation fails.]
+
+## 2025-05-18 - Missing context in secondary AI tasks & missing response validation
+
+**Learning:** Secondary AI generation tasks (like reviewing or fixing code blocks) can hallucinate invalid outputs if they do not include the same foundational `systemInstruction` context as the primary generation tasks. Also, `fetch` calls without `!response.ok` checks silently crash downstream when `JSON.parse` encounters unexpected network error responses (like 500 or 504 errors).
+
+**Action:** Always inject `systemInstruction: SYSTEM_PROMPT` into the `getGenerativeModel` config for *all* AI operations that need context on domain-specific boundaries (e.g., KidCode blocks). Always wrap `await response.json()` calls in an explicit HTTP response validation block (`if (!response.ok) throw new Error(...)`) to prevent unhandled parse exceptions.

@@ -103,7 +103,10 @@ export default async function handler(req: Request) {
 
     if (action === 'reviewCode') {
       const { commands, mode } = payload;
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        systemInstruction: SYSTEM_PROMPT,
+      });
       const prompt = `
             You are a friendly senior coding mentor for kids.
             Review this ${mode} project which uses these blocks: ${JSON.stringify(commands)}.
@@ -121,7 +124,10 @@ export default async function handler(req: Request) {
 
     if (action === 'getFixedCode') {
       const { commands, mode } = payload;
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        systemInstruction: SYSTEM_PROMPT,
+      });
       const prompt = `
             You are an expert KidCode block fixer.
             Fix the bugs in this ${mode} project: ${JSON.stringify(commands)}.

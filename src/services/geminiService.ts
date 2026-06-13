@@ -29,12 +29,29 @@ const safeParseCommands = (jsonStr: string): Omit<CommandBlock, 'id'>[] => {
   }
 };
 
+
+/**
+ * Utility to add a timeout to fetch requests.
+ */
+async function fetchWithTimeout(resource: RequestInfo | URL, options: RequestInit & { timeout?: number } = {}) {
+    const { timeout = 10000, ...fetchOptions } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    const response = await fetch(resource, {
+        ...fetchOptions,
+        signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+}
+
 export const generateCodeFromPromptStream = async function* (
   userPrompt: string,
   currentMode: AppMode
 ): AsyncGenerator<{ text: string; isDone: boolean; commands?: Omit<CommandBlock, 'id'>[] }, void, unknown> {
   try {
-    const response = await fetch('/api/gemini', {
+    const response = await fetchWithTimeout('/api/gemini', {
+        timeout: 20000,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -105,7 +122,8 @@ export const generateCodeFromPrompt = async (
 
 export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {
     try {
-        const response = await fetch('/api/gemini', {
+        const response = await fetchWithTimeout('/api/gemini', {
+            timeout: 10000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -128,7 +146,8 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
 
 export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Promise<Omit<CommandBlock, 'id'>[] | null> => {
     try {
-        const response = await fetch('/api/gemini', {
+        const response = await fetchWithTimeout('/api/gemini', {
+            timeout: 10000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -158,7 +177,8 @@ export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Pro
 
 export const generateSprite = async (description: string): Promise<string | null> => {
     try {
-        const response = await fetch('/api/gemini', {
+        const response = await fetchWithTimeout('/api/gemini', {
+            timeout: 20000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -181,7 +201,8 @@ export const generateSprite = async (description: string): Promise<string | null
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
     try {
-        const response = await fetch('/api/gemini', {
+        const response = await fetchWithTimeout('/api/gemini', {
+            timeout: 20000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

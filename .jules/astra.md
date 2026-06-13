@@ -10,3 +10,7 @@
 **Learning:** Secondary AI generation tasks (like reviewing or fixing code blocks) can hallucinate invalid outputs if they do not include the same foundational `systemInstruction` context as the primary generation tasks. Also, `fetch` calls without `!response.ok` checks silently crash downstream when `JSON.parse` encounters unexpected network error responses (like 500 or 504 errors).
 
 **Action:** Always inject `systemInstruction: SYSTEM_PROMPT` into the `getGenerativeModel` config for *all* AI operations that need context on domain-specific boundaries (e.g., KidCode blocks). Always wrap `await response.json()` calls in an explicit HTTP response validation block (`if (!response.ok) throw new Error(...)`) to prevent unhandled parse exceptions.
+
+## 2025-06-13 - [Resilience to API Timeouts]
+**Learning:** Unguarded fetch calls to AI endpoints can hang indefinitely if the API or network stalls, leading to a blocked or unresponsive UI. The native `fetch` API doesn't have a built-in timeout mechanism.
+**Action:** Always wrap `fetch` calls with an `AbortController`-based timeout mechanism to ensure the application fails fast and can trigger graceful error states or fallbacks instead of hanging forever.

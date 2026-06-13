@@ -362,6 +362,11 @@ const tripoAPI = {
         while (true) {
           const statusResponse = await proxyFetch('tripo', `task/${taskId}`);
 
+          if (!statusResponse.ok) {
+            const errorData = await statusResponse.json().catch(() => ({}));
+            throw new Error(`Tripo API error: ${errorData.error || statusResponse.statusText}`);
+          }
+
           const statusData = await statusResponse.json();
           
           if (statusData.data.status === 'success') {
@@ -440,6 +445,11 @@ const tripoAPI = {
 
         while (true) {
           const statusResponse = await proxyFetch('tripo', `task/${taskId}`);
+
+          if (!statusResponse.ok) {
+            const errorData = await statusResponse.json().catch(() => ({}));
+            throw new Error(`Tripo API error: ${errorData.error || statusResponse.statusText}`);
+          }
 
           const statusData = await statusResponse.json();
           
@@ -524,6 +534,11 @@ const meshyAPI = {
     while (true) {
       const statusResponse = await executeWithRetry(() => proxyFetch('meshy', `tasks/${taskId}`), RetryPresets.standard, 'meshy');
 
+      if (!statusResponse.ok) {
+        const errorData = await statusResponse.json().catch(() => ({}));
+        throw new Error(`Meshy API error: ${errorData.error || statusResponse.statusText}`);
+      }
+
       const statusData = await statusResponse.json();
       
       if (statusData.status === 'succeeded') {
@@ -586,6 +601,11 @@ const meshyAPI = {
 
     while (true) {
       const statusResponse = await executeWithRetry(() => proxyFetch('meshy', `tasks/${taskId}`), RetryPresets.standard, 'meshy');
+
+      if (!statusResponse.ok) {
+        const errorData = await statusResponse.json().catch(() => ({}));
+        throw new Error(`Meshy API error: ${errorData.error || statusResponse.statusText}`);
+      }
 
       const statusData = await statusResponse.json();
       

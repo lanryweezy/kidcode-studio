@@ -14,3 +14,7 @@
 ## 2025-06-13 - [Resilience to API Timeouts]
 **Learning:** Unguarded fetch calls to AI endpoints can hang indefinitely if the API or network stalls, leading to a blocked or unresponsive UI. The native `fetch` API doesn't have a built-in timeout mechanism.
 **Action:** Always wrap `fetch` calls with an `AbortController`-based timeout mechanism to ensure the application fails fast and can trigger graceful error states or fallbacks instead of hanging forever.
+
+## 2025-06-14 - [Failure Resilience: Validating AI Proxy Status]
+**Learning:** Unguarded response parsing like `await response.json()` inside an AI polling loop will silently crash if the AI proxy returns an unexpected status code (e.g. 500, 502 HTML error pages). The application's fallback and error-handling logic won't trigger.
+**Action:** Always insert a `!response.ok` check before reading `.json()` in fetch-based API calls, throwing a custom `Error` to ensure the application's native retry and fallback mechanisms activate.

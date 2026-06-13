@@ -49,7 +49,7 @@ export default async function handler(req: Request) {
 
   try {
     const headers = new Headers();
-    headers.set('Authorization', `Bearer ${config.key}`);
+    headers.set('Authorization', `Bearer ${providerConfig.key}`);
     headers.set('Content-Type', 'application/json');
 
     const options: RequestInit = {

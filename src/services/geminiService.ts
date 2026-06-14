@@ -45,12 +45,44 @@ async function fetchWithTimeout(resource: RequestInfo | URL, options: RequestIni
     return response;
 }
 
+/**
+ * Utility to fetch with exponential backoff retries.
+ * Handles transient network issues and API rate limits (429/500+).
+ */
+async function fetchWithRetry(resource: RequestInfo | URL, options: RequestInit & { timeout?: number, retries?: number, delay?: number } = {}) {
+    const { retries = 3, delay = 1000, ...fetchOptions } = options;
+
+    let lastError: any;
+    // We execute the loop retries + 1 times. The first attempt, plus 'retries' number of retries.
+    // If retries is 0, we still attempt once.
+    const maxAttempts = Math.max(1, retries + 1);
+
+    for (let i = 0; i < maxAttempts; i++) {
+        try {
+            const response = await fetchWithTimeout(resource, fetchOptions);
+            // Retry on 429 (Too Many Requests) or 5xx (Server Errors)
+            if (!response.ok && (response.status === 429 || response.status >= 500)) {
+                if (i === maxAttempts - 1) return response; // Return the last response if out of retries
+                await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                continue;
+            }
+            return response;
+        } catch (error: any) {
+            lastError = error;
+            // Only retry on network errors or timeouts (AbortError)
+            if (i === maxAttempts - 1) throw error;
+            await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+        }
+    }
+    throw lastError || new Error("Max attempts reached");
+}
+
 export const generateCodeFromPromptStream = async function* (
   userPrompt: string,
   currentMode: AppMode
 ): AsyncGenerator<{ text: string; isDone: boolean; commands?: Omit<CommandBlock, 'id'>[] }, void, unknown> {
   try {
-    const response = await fetchWithTimeout('/api/gemini', {
+    const response = await fetchWithRetry('/api/gemini', {
         timeout: 20000,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,7 +154,7 @@ export const generateCodeFromPrompt = async (
 
 export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {
     try {
-        const response = await fetchWithTimeout('/api/gemini', {
+        const response = await fetchWithRetry('/api/gemini', {
             timeout: 10000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -146,7 +178,7 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
 
 export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Promise<Omit<CommandBlock, 'id'>[] | null> => {
     try {
-        const response = await fetchWithTimeout('/api/gemini', {
+        const response = await fetchWithRetry('/api/gemini', {
             timeout: 10000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -177,7 +209,7 @@ export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Pro
 
 export const generateSprite = async (description: string): Promise<string | null> => {
     try {
-        const response = await fetchWithTimeout('/api/gemini', {
+        const response = await fetchWithRetry('/api/gemini', {
             timeout: 20000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -201,7 +233,7 @@ export const generateSprite = async (description: string): Promise<string | null
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
     try {
-        const response = await fetchWithTimeout('/api/gemini', {
+        const response = await fetchWithRetry('/api/gemini', {
             timeout: 20000,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

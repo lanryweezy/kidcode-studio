@@ -18,3 +18,7 @@
 ## 2025-06-14 - [Failure Resilience: Validating AI Proxy Status]
 **Learning:** Unguarded response parsing like `await response.json()` inside an AI polling loop will silently crash if the AI proxy returns an unexpected status code (e.g. 500, 502 HTML error pages). The application's fallback and error-handling logic won't trigger.
 **Action:** Always insert a `!response.ok` check before reading `.json()` in fetch-based API calls, throwing a custom `Error` to ensure the application's native retry and fallback mechanisms activate.
+
+## 2024-05-24 - [Resilient AI Network Calls]
+**Learning:** Simple timeouts for AI API calls lead to frustrating, silent failures due to frequent transient rate limits (HTTP 429) and server overloads (HTTP 5xx) typical with LLM providers.
+**Action:** Always wrap `fetch` calls to AI APIs (like Gemini) with a `fetchWithRetry` utility using exponential backoff to handle 429 and 5xx errors gracefully, improving perceived reliability.

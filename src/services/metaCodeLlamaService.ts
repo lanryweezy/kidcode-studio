@@ -8,6 +8,8 @@
  * SECURITY NOTE: API keys are handled server-side via /api/hf proxy
  */
 
+import { executeWithRetry, RetryPresets } from './aiServiceWrapper';
+
 // Code Llama models
 const CODE_LLAMA_MODELS = {
   '7b': 'codellama/CodeLlama-7b-Instruct-hf',
@@ -52,9 +54,6 @@ export const getCodeAssistance = async (
   options: CodeAssistanceOptions,
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<CodeAssistanceResponse> => {
-  if (!HF_TOKEN) {
-    throw new Error('Hugging Face token not configured');
-  }
 
   const model = CODE_LLAMA_MODELS[options.model || '13b'];
 
@@ -74,24 +73,36 @@ export const getCodeAssistance = async (
       message: 'Analyzing code...' 
     });
 
-    const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
-      method: 'POST',
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: options.maxTokens || 500,
-          temperature: options.temperature || 0.7,
-          top_p: 0.9,
-          do_sample: true,
-          return_full_text: false
-        }
-      })
-    });
+    const result = await executeWithRetry(async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
-    }
+      try {
+        const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
+          method: 'POST',
+          signal: controller.signal,
+          body: JSON.stringify({
+            inputs: prompt,
+            parameters: {
+              max_new_tokens: options.maxTokens || 500,
+              temperature: options.temperature || 0.7,
+              top_p: 0.9,
+              do_sample: true,
+              return_full_text: false
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
+        }
+
+        return await response.json();
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }, RetryPresets.quick, 'codellama');
 
     onProgress?.({ 
       status: 'processing', 
@@ -99,7 +110,6 @@ export const getCodeAssistance = async (
       message: 'Generating response...' 
     });
 
-    const result = await response.json();
     const answer = result[0]?.generated_text || 'I couldn\'t generate a response. Please try again.';
 
     // Parse response for suggested blocks

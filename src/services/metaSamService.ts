@@ -8,6 +8,8 @@
  * SECURITY NOTE: API keys are handled server-side via /api/hf proxy
  */
 
+import { executeWithRetry, RetryPresets } from './aiServiceWrapper';
+
 // SAM models
 const SAM_MODELS = {
   huge: 'facebook/sam-vit-huge',      // Best quality, slowest
@@ -49,9 +51,6 @@ export const extractSprite = async (
   options: SegmentOptions,
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<SegmentationResult> => {
-  if (!HF_TOKEN) {
-    throw new Error('Hugging Face token not configured');
-  }
 
   const model = SAM_MODELS[options.model || 'base'];
 
@@ -106,23 +105,33 @@ export const extractSprite = async (
       ];
     }
 
-    const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
-      method: 'POST',
-      body: JSON.stringify(requestBody)
-    });
+    const result = await executeWithRetry(async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`SAM API error: ${error.error || response.statusText}`);
-    }
+      try {
+        const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
+          method: 'POST',
+          signal: controller.signal,
+          body: JSON.stringify(requestBody)
+        });
 
-    onProgress?.({ 
-      status: 'processing', 
-      progress: 60, 
-      message: 'Processing mask...' 
-    });
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(`SAM API error: ${error.error || response.statusText}`);
+        }
 
-    const result = await response.json();
+        onProgress?.({
+          status: 'processing',
+          progress: 60,
+          message: 'Processing mask...'
+        });
+
+        return await response.json();
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }, RetryPresets.standard, 'sam');
     
     // Process mask
     const maskData = processMask(result, img.width, img.height);

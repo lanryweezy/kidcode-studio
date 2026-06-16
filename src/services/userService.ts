@@ -20,14 +20,14 @@ export const DEFAULT_USER: UserProfile = {
 };
 
 export const getUserProfile = (): UserProfile => {
-  if (cachedProfile) return cachedProfile;
+  if (cachedProfile) return cachedProfile!;
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
     cachedProfile = raw ? JSON.parse(raw) : DEFAULT_USER;
   } catch {
     cachedProfile = DEFAULT_USER;
   }
-  return cachedProfile;
+  return cachedProfile!;
 };
 
 export const saveUserProfile = (profile: UserProfile) => {

@@ -8,6 +8,8 @@
  * SECURITY NOTE: API keys are handled server-side via /api/hf proxy
  */
 
+import { executeWithRetry, RetryPresets } from './aiServiceWrapper';
+
 // MusicGen models
 const MUSICGEN_MODELS = {
   small: 'facebook/musicgen-small',      // 300M params, fastest
@@ -50,9 +52,6 @@ export const generateMusic = async (
   options: MusicGenerationOptions,
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<GeneratedMusic> => {
-  if (!HF_TOKEN) {
-    throw new Error('Hugging Face token not configured');
-  }
 
   const model = MUSICGEN_MODELS[options.model || 'small'];
   const duration = options.duration || 30;
@@ -64,34 +63,43 @@ export const generateMusic = async (
   });
 
   try {
-    // Query Hugging Face Inference API via proxy
-    const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
-      method: 'POST',
-      body: JSON.stringify({
-        inputs: options.prompt,
-        parameters: {
-          duration: duration / 1000, // Convert to seconds
-          temperature: options.temperature || 1.0,
-          top_p: options.topP || 0.9,
-          guidance_scale: options.guidanceScale || 3.0,
-          do_sample: true
+    const audioBlob = await executeWithRetry(async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
+
+      try {
+        // Query Hugging Face Inference API via proxy
+        const response = await fetch(`/api/hf?model=${encodeURIComponent(model)}`, {
+          method: 'POST',
+          signal: controller.signal,
+          body: JSON.stringify({
+            inputs: options.prompt,
+            parameters: {
+              duration: duration / 1000, // Convert to seconds
+              temperature: options.temperature || 1.0,
+              top_p: options.topP || 0.9,
+              guidance_scale: options.guidanceScale || 3.0,
+              do_sample: true
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(`MusicGen API error: ${error.error || response.statusText}`);
         }
-      })
-    });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`MusicGen API error: ${error.error || response.statusText}`);
-    }
+        onProgress?.({
+          status: 'processing',
+          progress: 50,
+          message: 'Generating music...'
+        });
 
-    onProgress?.({ 
-      status: 'processing', 
-      progress: 50, 
-      message: 'Generating music...' 
-    });
-
-    // Get audio blob
-    const audioBlob = await response.blob();
+        return await response.blob();
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }, RetryPresets.slow, 'musicgen');
     
     onProgress?.({ 
       status: 'processing', 

@@ -13,6 +13,7 @@
     "@google/generative-ai": "^0.21.0",
     "@types/matter-js": "^0.20.2",
     "@types/three": "^0.183.1",
+    "esbuild": "^0.28.1",
     "file-saver": "^2.0.5",
     "idb": "^8.0.3",
     "jszip": "^3.10.1",
@@ -25,7 +26,6 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "vitest": "^3.0.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^25.0.2",
@@ -38,6 +38,7 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5.5.3",
     "vite": "^5.4.1",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^3.0.0"
   }
 }

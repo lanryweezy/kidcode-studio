@@ -41,7 +41,10 @@ export default defineConfig(({ mode }) => {
       })
     ],
     css: {
-      postcss: './postcss.config.js',
+      // postcss: './postcss.config.js',  // Temporarily disabled for Vercel build
+    },
+    build: {
+      target: 'es2020',
     },
 
     resolve: {

@@ -24,7 +24,7 @@ export interface GenerationProgress {
   progress: number; // 0-100
   message: string;
   eta?: number; // seconds
-  result?: any;
+  result?: unknown;
 }
 
 export interface AIErrorOptions {
@@ -55,16 +55,17 @@ export class AIError extends Error {
     this.status = options.status;
   }
 
-  static fromError(error: any, provider: string): AIError {
+  static fromError(error: unknown, provider: string): AIError {
     const isRetryable = classifyError(error);
+    const err = error as Record<string, unknown>;
     
     return new AIError(
-      error?.message || 'Unknown AI error',
+      (typeof err.message === 'string' ? err.message : null) || 'Unknown AI error',
       {
-        code: error?.code || error?.type || 'UNKNOWN',
+        code: (typeof err.code === 'string' ? err.code : null) || (typeof err.type === 'string' ? err.type : null) || 'UNKNOWN',
         provider,
         retryable: isRetryable,
-        status: error?.status
+        status: typeof err.status === 'number' ? err.status : undefined
       }
     );
   }
@@ -73,35 +74,37 @@ export class AIError extends Error {
 /**
  * Classify if an error is retryable
  */
-const classifyError = (error: any): boolean => {
+const classifyError = (error: unknown): boolean => {
   if (!error) return false;
   
+  const err = error as Record<string, unknown>;
+  
   // Network errors are retryable
-  if (error.message?.includes('network') || 
-      error.message?.includes('fetch') ||
-      error.message?.includes('ETIMEDOUT')) {
+  if (typeof err.message === 'string' && (err.message.includes('network') || 
+      err.message.includes('fetch') ||
+      err.message.includes('ETIMEDOUT'))) {
     return true;
   }
   
   // Rate limits are retryable (with longer delay)
-  if (error.status === 429 || 
-      error.code === 'RATE_LIMIT_EXCEEDED' ||
-      error.message?.includes('rate limit')) {
+  if (err.status === 429 || 
+      err.code === 'RATE_LIMIT_EXCEEDED' ||
+      (typeof err.message === 'string' && err.message.includes('rate limit'))) {
     return true;
   }
   
   // Server errors (5xx) are retryable
-  if (error.status >= 500 && error.status < 600) {
+  if (typeof err.status === 'number' && err.status >= 500 && err.status < 600) {
     return true;
   }
   
   // Timeout errors are retryable
-  if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+  if (err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED') {
     return true;
   }
   
   // Client errors (4xx except 429) are NOT retryable
-  if (error.status >= 400 && error.status < 500) {
+  if (typeof err.status === 'number' && err.status >= 400 && err.status < 500) {
     return false;
   }
   
@@ -159,7 +162,7 @@ export const executeWithRetry = async <T>(
 
       const result = await fn();
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const aiError = AIError.fromError(error, provider);
       errors.push(aiError);
 
@@ -195,7 +198,7 @@ export const executeWithFallback = async <T>(
   for (const provider of providers) {
     try {
       return await executeWithRetry(provider.fn, config, provider.name);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const aiError = error instanceof AIError ? error : AIError.fromError(error, provider.name);
       errors.push(aiError);
 
@@ -362,7 +365,7 @@ export const checkAPIKey = (keyName: string): boolean => {
 /**
  * Get user-friendly error message
  */
-export const getUserFriendlyErrorMessage = (error: any): string => {
+export const getUserFriendlyErrorMessage = (error: unknown): string => {
   if (error instanceof AIError) {
     switch (error.code) {
       case 'TIMEOUT':
@@ -380,7 +383,8 @@ export const getUserFriendlyErrorMessage = (error: any): string => {
     }
   }
 
-  if (error?.message?.includes('network')) {
+  const err = error as Record<string, unknown>;
+  if (typeof err.message === 'string' && err.message.includes('network')) {
     return '🌐 Network error. Please check your internet connection.';
   }
 

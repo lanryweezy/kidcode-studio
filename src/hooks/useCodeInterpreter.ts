@@ -27,6 +27,7 @@ interface UseCodeInterpreterProps {
     appState: AppState;
     setAppState: React.Dispatch<React.SetStateAction<AppState>>;
     appStateRef: React.MutableRefObject<AppState>;
+    circuitComponents?: any[];
 }
 
 export const useCodeInterpreter = ({

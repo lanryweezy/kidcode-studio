@@ -21,7 +21,7 @@ const MOCK_COMMUNITY_PROJECTS = [
 ];
 
 const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const { setProject, darkMode } = useStore();
+  const { setProject } = useStore();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<AppMode | 'all'>('all');
   const [likedProjects, setLikedProjects] = useState<Set<string>>(new Set());
@@ -97,12 +97,12 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-800'} transition-colors font-sans p-6`}>
+    <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors font-sans p-6">
         <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
-                    <button onClick={onBack} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <button onClick={onBack} className="p-2 hover:bg-slate-200:bg-slate-800 rounded-full transition-colors">
                         <ArrowLeft size={24} />
                     </button>
                     <div>
@@ -115,11 +115,11 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 
                 {/* Stats */}
                 <div className="flex gap-4">
-                    <div className="bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div className="bg-white px-4 py-2 rounded-xl border border-slate-200">
                         <div className="text-2xl font-black text-violet-500">{MOCK_COMMUNITY_PROJECTS.length}</div>
                         <div className="text-xs text-slate-500 font-bold">Projects</div>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div className="bg-white px-4 py-2 rounded-xl border border-slate-200">
                         <div className="text-2xl font-black text-blue-500">{MOCK_COMMUNITY_PROJECTS.reduce((sum, p) => sum + p.remixes, 0)}</div>
                         <div className="text-xs text-slate-500 font-bold">Remixes</div>
                     </div>
@@ -146,10 +146,10 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search for games, apps, or gadgets..."
-                        className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                     />
                 </div>
-                <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+                <div className="flex gap-2 p-1 bg-white border border-slate-200 rounded-2xl">
                     <button onClick={() => setFilter('all')} className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === 'all' ? 'bg-violet-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>All</button>
                     <button onClick={() => setFilter(AppMode.GAME)} className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === AppMode.GAME ? 'bg-orange-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Games</button>
                     <button onClick={() => setFilter(AppMode.APP)} className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === AppMode.APP ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Apps</button>
@@ -160,7 +160,7 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             {/* Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filtered.map((proj) => (
-                    <div key={proj.id} className="group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                    <div key={proj.id} className="group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
                         {/* Preview Area */}
                         <div className={`h-48 ${proj.color} relative flex items-center justify-center text-white/20`}>
                             {proj.mode === AppMode.GAME ? <Gamepad2 size={80} /> : proj.mode === AppMode.APP ? <Layout size={80} /> : <Cpu size={80} />}
@@ -197,16 +197,16 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     <span className="flex items-center gap-1"><GitFork size={14} /> {proj.remixes}</span>
                                 </div>
                             </div>
-                            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-1">{proj.name}</h3>
+                            <h3 className="text-xl font-black text-slate-800 mb-1">{proj.name}</h3>
                             <p className="text-sm text-slate-500 font-medium mb-3">{proj.description}</p>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                                         {proj.author[0]}
                                     </div>
-                                    <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">by <span className="text-violet-500 font-bold">{proj.author}</span></span>
+                                    <span className="text-sm text-slate-600 font-medium">by <span className="text-violet-500 font-bold">{proj.author}</span></span>
                                 </div>
-                                <button onClick={() => handleRemix(proj)} className="px-4 py-2 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 font-bold rounded-lg hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors text-sm flex items-center gap-1">
+                                <button onClick={() => handleRemix(proj)} className="px-4 py-2 bg-violet-100 text-violet-600 font-bold rounded-lg hover:bg-violet-200:bg-violet-900/50 transition-colors text-sm flex items-center gap-1">
                                     <GitFork size={14} /> Remix
                                 </button>
                             </div>
@@ -217,7 +217,7 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             {filtered.length === 0 && (
                 <div className="text-center py-20">
-                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
                         <Search size={40} />
                     </div>
                     <h3 className="text-xl font-bold">No projects found</h3>

@@ -1,5 +1,5 @@
 
-type EventCallback = (data?: any) => void;
+type EventCallback = (data?: unknown) => void;
 
 class EventBus {
   private listeners: Map<string, EventCallback[]> = new Map();
@@ -18,7 +18,7 @@ class EventBus {
     }
   }
 
-  emit(event: string, data?: any) {
+  emit(event: string, data?: unknown) {
     this.listeners.get(event)?.forEach(cb => cb(data));
   }
 

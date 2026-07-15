@@ -22,7 +22,7 @@ export interface CodeAssistanceOptions {
   question: string;
   context?: {
     mode: 'APP' | 'GAME' | 'HARDWARE';
-    currentBlocks?: any[];
+    currentBlocks?: Array<{ type: string; params?: Record<string, unknown> }>;
     projectType?: string;
   };
   model?: '7b' | '13b' | '34b' | 'python';
@@ -33,7 +33,7 @@ export interface CodeAssistanceOptions {
 export interface CodeAssistanceResponse {
   id: string;
   answer: string;
-  suggestedBlocks?: any[];
+  suggestedBlocks?: Array<{ type: string; params?: Record<string, unknown> }>;
   codeExample?: string;
   explanation?: string;
   confidence: number;
@@ -182,8 +182,8 @@ Answer:`;
 /**
  * Parse suggested blocks from response
  */
-const parseSuggestedBlocks = (response: string, mode?: string): any[] => {
-  const blocks: any[] = [];
+const parseSuggestedBlocks = (response: string, mode?: string): Array<{ type: string; params?: Record<string, unknown> }> => {
+  const blocks: Array<{ type: string; params?: Record<string, unknown> }> = [];
   
   // Look for block suggestions in response
   const blockPatterns = [
@@ -241,7 +241,7 @@ const cleanResponse = (response: string): string => {
  * Debug current project and suggest improvements
  */
 export const debugProject = async (
-  blocks: any[],
+  blocks: Array<{ type: string; params?: Record<string, unknown> }>,
   mode: 'APP' | 'GAME' | 'HARDWARE',
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<CodeAssistanceResponse> => {
@@ -263,7 +263,7 @@ export const debugProject = async (
  */
 export const explainBlock = async (
   blockType: string,
-  blockParams: any,
+  blockParams: Record<string, unknown>,
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<CodeAssistanceResponse> => {
   const question = `What does the ${blockType} block do? How should I use it?`;
@@ -301,7 +301,7 @@ export const suggestBlocksForFeature = async (
  * Convert blocks to text code explanation
  */
 export const explainCodeStructure = async (
-  blocks: any[],
+  blocks: Array<{ type: string; params?: Record<string, unknown> }>,
   targetLanguage: 'python' | 'javascript' | 'arduino',
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<CodeAssistanceResponse> => {
@@ -322,7 +322,7 @@ export const explainCodeStructure = async (
  * Generate tutorial from project
  */
 export const generateTutorial = async (
-  blocks: any[],
+  blocks: Array<{ type: string; params?: Record<string, unknown> }>,
   mode: 'APP' | 'GAME' | 'HARDWARE',
   onProgress?: (progress: GenerationProgress) => void
 ): Promise<CodeAssistanceResponse> => {

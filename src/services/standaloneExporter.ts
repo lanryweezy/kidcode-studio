@@ -56,7 +56,6 @@ export const exportToStandaloneHTML = (project: SavedProject): string => {
 
     <script>
         const PROJECT_DATA = ${projectData};
-        console.log("Project Loaded:", PROJECT_DATA);
     </script>
 </body>
 </html>

@@ -29,8 +29,8 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
   const [participants, setParticipants] = useState<RemoteUser[]>([]);
 
   useEffect(() => {
-      eventBus.on('multiplayer_update', (data: RemoteUser[]) => {
-          setParticipants(data);
+      eventBus.on('multiplayer_update', (data) => {
+          setParticipants(data as RemoteUser[]);
       });
   }, []);
 
@@ -97,7 +97,7 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
   };
 
   return (
-    <div className="flex h-full bg-slate-50 dark:bg-slate-950 relative overflow-hidden" onMouseMove={handleMouseMove}>
+    <div className="flex h-full bg-slate-50 relative overflow-hidden" onMouseMove={handleMouseMove}>
       {/* Ghost Cursors */}
       {participants.map(p => (
           <div 
@@ -111,9 +111,9 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
       ))}
 
       {/* Left Sidebar - Screen Navigation */}
-      <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800">
-          <h3 className="font-black text-slate-800 dark:text-white flex items-center gap-2">
+      <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
+        <div className="p-4 border-b border-slate-200">
+          <h3 className="font-black text-slate-800 flex items-center gap-2">
             <Layout size={18} className="text-blue-500" />
             App Pages
           </h3>
@@ -126,15 +126,15 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
               key={screenId}
               className={`group flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer ${
                 activeScreen === screenId
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-slate-200 hover:border-blue-300'
               }`}
               onClick={() => onScreenChange(screenId)}
             >
               <div className="flex items-center gap-3 flex-1">
                 <Smartphone size={18} className={activeScreen === screenId ? 'text-blue-500' : 'text-slate-400'} />
                 <div className="flex-1">
-                  <div className="font-bold text-sm text-slate-800 dark:text-white">{screenId}</div>
+                  <div className="font-bold text-sm text-slate-800">{screenId}</div>
                   <div className="text-xs text-slate-500">
                     {pagesByScreen[screenId]?.blocks.length || 0} blocks
                   </div>
@@ -147,7 +147,7 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
                     e.stopPropagation();
                     onDeleteScreen(screenId);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-slate-400 hover:text-red-500 transition-all"
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100:bg-red-900/30 rounded text-slate-400 hover:text-red-500 transition-all"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -157,7 +157,7 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
         </div>
 
         {/* Add Screen Button */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800">
+        <div className="p-3 border-t border-slate-200">
           <button
             onClick={() => setShowCreateModal(true)}
             className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all"
@@ -170,11 +170,11 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6">
+        <div className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Smartphone size={20} className="text-blue-500" />
             <div>
-              <h2 className="font-black text-lg text-slate-800 dark:text-white">{activeScreen}</h2>
+              <h2 className="font-black text-lg text-slate-800">{activeScreen}</h2>
               <p className="text-xs text-slate-500">
                 {currentPage?.blocks.length || 0} blocks • Last edited {new Date(currentPage?.lastEdited || Date.now()).toLocaleTimeString()}
               </p>
@@ -182,7 +182,7 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
           </div>
 
           {/* View Tabs */}
-          <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
             <ViewTab active={selectedView === 'blocks'} onClick={() => setSelectedView('blocks')} icon={Layout} label="Blocks" />
             <ViewTab active={selectedView === 'python'} onClick={() => setSelectedView('python')} icon={Code2} label="Python" />
             <ViewTab active={selectedView === 'javascript'} onClick={() => setSelectedView('javascript')} icon={FileCode} label="JavaScript" />
@@ -238,21 +238,21 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
       {/* Create Screen Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-2xl border-2 border-slate-200 dark:border-slate-800">
-            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-4">Create New Page</h3>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border-2 border-slate-200">
+            <h3 className="text-xl font-black text-slate-800 mb-4">Create New Page</h3>
             <input
               type="text"
               value={newScreenName}
               onChange={(e) => setNewScreenName(e.target.value)}
               placeholder="Page name (e.g., settings, profile)"
-              className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-400 mb-4"
+              className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-400 mb-4"
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleCreateScreen()}
             />
             <div className="flex gap-3">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200:bg-slate-700 transition-all"
               >
                 Cancel
               </button>
@@ -277,8 +277,8 @@ const ViewTab: React.FC<{ active: boolean; onClick: () => void; icon: any; label
     onClick={onClick}
     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
       active
-        ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
-        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+        ? 'bg-white text-blue-600 shadow-sm'
+        : 'text-slate-500 hover:text-slate-700:text-slate-300'
     }`}
   >
     <Icon size={16} />
@@ -299,8 +299,8 @@ const BlocksView: React.FC<{ commands: CommandBlock[]; screenId: string }> = ({ 
 
   return (
     <div className="space-y-2">
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-4">
-        <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-sm font-bold">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+        <div className="flex items-center gap-2 text-blue-700 text-sm font-bold">
           <Smartphone size={16} />
           Showing {commands.length} block{commands.length !== 1 ? 's' : ''} for page "{screenId}"
         </div>
@@ -309,13 +309,13 @@ const BlocksView: React.FC<{ commands: CommandBlock[]; screenId: string }> = ({ 
       {commands.map((cmd, index) => (
         <div
           key={cmd.id}
-          className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex items-center gap-4"
+          className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4"
         >
-          <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center text-sm font-bold text-slate-500">
+          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-sm font-bold text-slate-500">
             {index + 1}
           </div>
           <div className="flex-1">
-            <div className="font-bold text-slate-800 dark:text-white">{cmd.type}</div>
+            <div className="font-bold text-slate-800">{cmd.type}</div>
             {cmd.params.text && (
               <div className="text-sm text-slate-500 truncate">{cmd.params.text}</div>
             )}

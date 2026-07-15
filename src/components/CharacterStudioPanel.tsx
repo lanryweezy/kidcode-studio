@@ -52,9 +52,9 @@ const CharacterStudioPanel: React.FC<CharacterStudioPanelProps> = ({
   ];
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
-      <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-        <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+    <div className="flex flex-col h-full bg-slate-50">
+      <div className="p-4 bg-white border-b border-slate-200">
+        <h3 className="font-bold text-slate-800 flex items-center gap-2">
           <Ghost className="text-violet-500" /> Sprite Studio
         </h3>
         <p className="text-xs text-slate-400">Design your hero!</p>
@@ -62,7 +62,7 @@ const CharacterStudioPanel: React.FC<CharacterStudioPanelProps> = ({
       <div className="flex-1 overflow-y-auto p-4 custom-scrollbar" style={{ maxHeight: 'calc(100vh - 150px)', height: 'calc(100vh - 150px)' }}>
 
         {/* Preview Box */}
-        <div className="aspect-square bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 mb-6 flex items-center justify-center relative overflow-hidden shadow-inner group">
+        <div className="aspect-square bg-white rounded-2xl border-2 border-slate-200 mb-6 flex items-center justify-center relative overflow-hidden shadow-inner group">
           <div className="absolute inset-0 bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==')] opacity-10"></div>
           <div
             className="transition-transform duration-200 relative z-10"
@@ -86,14 +86,14 @@ const CharacterStudioPanel: React.FC<CharacterStudioPanelProps> = ({
         <div className="space-y-3 mb-6">
           <button
             onClick={onShowPixelEditor}
-            className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-lg shadow-violet-200 dark:shadow-none transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-lg shadow-violet-200 transition-all flex items-center justify-center gap-2"
           >
             <Paintbrush size={18} /> Draw Pixel Art
           </button>
           <button
             onClick={onGenerateSprite}
             disabled={isGeneratingSprite}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-slate-400 disabled:to-slate-500 text-white font-bold rounded-xl shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-slate-400 disabled:to-slate-500 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
           >
             {isGeneratingSprite ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
             {isGeneratingSprite ? 'Creating...' : 'AI Generate'}
@@ -101,7 +101,7 @@ const CharacterStudioPanel: React.FC<CharacterStudioPanelProps> = ({
         </div>
 
         {/* Visual Tweaks */}
-        <div className="space-y-4 mb-6 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+        <div className="space-y-4 mb-6 bg-white p-4 rounded-xl border border-slate-100">
           <div>
             <label className="text-xs font-bold text-slate-400 mb-1 block uppercase">Size ({Math.round(spriteState.scale * 100)}%)</label>
             <input
@@ -132,15 +132,15 @@ const CharacterStudioPanel: React.FC<CharacterStudioPanelProps> = ({
         </div>
 
         {/* Emoji Picker */}
-        <h4 className="font-bold text-slate-700 dark:text-slate-200 mb-2 text-sm uppercase tracking-wide">Quick Avatar</h4>
+        <h4 className="font-bold text-slate-700 mb-2 text-sm uppercase tracking-wide">Quick Avatar</h4>
         <div className="grid grid-cols-5 gap-2">
           {CHARACTER_PALETTE.map(char => (
             <button
               key={char.emoji}
               onClick={() => updateSpriteState({ emoji: char.emoji, texture: null })}
               className={`
-                w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white dark:bg-slate-800 border-2 transition-all
-                ${spriteState.emoji === char.emoji && !spriteState.texture ? 'border-violet-500 shadow-md scale-110' : 'border-slate-100 dark:border-slate-700 hover:border-violet-200'}
+                w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white border-2 transition-all
+                ${spriteState.emoji === char.emoji && !spriteState.texture ? 'border-violet-500 shadow-md scale-110' : 'border-slate-100 hover:border-violet-200'}
               `}
               title={char.label}
             >

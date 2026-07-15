@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KidCode Studio - Integration Test</title>
+    <style>
+        body { font-family: system-ui; background: #0f172a; color: #e2e8f0; padding: 20px; }
+        h1 { color: #a78bfa; }
+        .test { padding: 8px; margin: 4px 0; border-radius: 8px; background: #1e293b; }
+        .pass { border-left: 4px solid #22c55e; }
+        .fail { border-left: 4px solid #ef4444; }
+        .summary { margin-top: 20px; padding: 16px; background: #1e293b; border-radius: 12px; }
+        canvas { border: 2px solid #334155; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🎮 KidCode Studio - Integration Test</h1>
+    <p>Testing all 30 game systems...</p>
+    
+    <canvas id="testCanvas" width="800" height="600"></canvas>
+    
+    <div id="results"></div>
+    
+    <script type="module">
+        import { runIntegrationTest } from './src/services/integrationTest.ts';
+        
+        const results = runIntegrationTest();
+        const div = document.getElementById('results');
+        
+        let passCount = 0;
+        let failCount = 0;
+        
+        results.forEach(result => {
+            const testDiv = document.createElement('div');
+            testDiv.className = `test ${result.startsWith('✅') ? 'pass' : 'fail'}`;
+            testDiv.textContent = result;
+            div.appendChild(testDiv);
+            
+            if (result.startsWith('✅')) passCount++;
+            else failCount++;
+        });
+        
+        const summary = document.createElement('div');
+        summary.className = 'summary';
+        summary.innerHTML = `
+            <h2>Results: ${passCount}/${passCount + failCount} passed</h2>
+            <p>✅ ${passCount} passed | ❌ ${failCount} failed</p>
+            <p>${failCount === 0 ? '🎉 All systems operational!' : '⚠️ Some systems need attention'}</p>
+        `;
+        div.appendChild(summary);
+    </script>
+</body>
+</html>

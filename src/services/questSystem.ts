@@ -163,7 +163,6 @@ export class QuestManager {
    * Grant reward
    */
   private grantReward(reward: QuestReward) {
-    console.log('Reward granted:', reward);
     // In production, apply to player stats/inventory
   }
 
@@ -272,7 +271,6 @@ export class DialogueSystem {
 
     // Check condition
     if (choice.condition && !choice.condition()) {
-      console.log('Choice condition not met');
       return;
     }
 

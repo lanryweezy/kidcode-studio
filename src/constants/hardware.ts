@@ -8,6 +8,8 @@ export const INITIAL_HARDWARE_STATE: HardwareState = {
     temperature: 25,
     servoAngle: 90,
     lcdLines: ["Ready...", ""],
+    cursorRow: 0,
+    cursorCol: 0,
     potentiometerValue: 0,
     speakerVolume: 50,
     motorLoad: 0,

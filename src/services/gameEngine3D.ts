@@ -41,6 +41,60 @@ export interface PhysicsConfig {
   bounciness: number;
 }
 
+export interface Object3DUpdate {
+  id: string;
+  x: number;
+  y: number;
+  z?: number;
+  rotationX?: number;
+  rotationY?: number;
+  rotationZ?: number;
+  scale?: number;
+  modelUrl?: string;
+  emoji?: string;
+}
+
+export interface SpriteState {
+  scene?: string;
+  x: number;
+  y: number;
+  z?: number;
+  rotation: number;
+  scale?: number;
+  modelUrl?: string;
+  items?: EntityState[];
+  enemies?: EntityState[];
+  camera?: { x: number; y: number; zoom?: number };
+  cameraMode?: 'third_person' | 'top_down' | 'follow' | 'first_person';
+  cameraConstraints?: {
+    minX?: number;
+    maxX?: number;
+    minY?: number;
+    maxY?: number;
+    minZ?: number;
+    maxZ?: number;
+  };
+  lighting?: {
+    ambientColor?: string;
+    ambientIntensity?: number;
+    directionalColor?: string;
+    directionalIntensity?: number;
+    directionalPosition?: { x: number; y: number; z: number };
+  };
+}
+
+export interface EntityState {
+  id: string;
+  emoji?: string;
+  x: number;
+  y: number;
+  z?: number;
+  type?: string;
+  alive?: boolean;
+  collected?: boolean;
+  modelUrl?: string;
+}
+
 export class GameEngine3D {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
@@ -277,7 +331,7 @@ export class GameEngine3D {
         const gltf = await loader.loadAsync(url);
         const model = gltf.scene;
 
-        model.traverse((child: any) => {
+        model.traverse((child: THREE.Object3D) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             mesh.castShadow = true;
@@ -289,7 +343,7 @@ export class GameEngine3D {
         this.models.set(id, model);
 
         if (gltf.animations && gltf.animations.length > 0) {
-          gltf.animations.forEach((clip: any) => {
+          gltf.animations.forEach((clip: THREE.AnimationClip) => {
             this.animations.set(`${id}_${clip.name}`, clip);
           });
         }
@@ -304,7 +358,7 @@ export class GameEngine3D {
     return loadPromise;
   }
 
-  public updateObjects3D(objects: any[]) {
+  public updateObjects3D(objects: Object3DUpdate[]) {
     const currentIds = new Set(objects.map(o => o.id));
 
     // Remove old objects
@@ -447,7 +501,7 @@ export class GameEngine3D {
     this.renderer.setSize(canvas.width, canvas.height);
   }
 
-  public updateFromSpriteState(state: any) {
+  public updateFromSpriteState(state: SpriteState) {
     // Background color
     const sceneColors: Record<string, string> = {
       grid: '#ffffff',
@@ -473,7 +527,7 @@ export class GameEngine3D {
     this.updateLightingFromState(state);
   }
 
-  private updatePlayer(state: any) {
+  private updatePlayer(state: SpriteState) {
     const player = this.models.get('player');
     if (!player) {
       this.addGameObject({
@@ -491,7 +545,7 @@ export class GameEngine3D {
     }
   }
 
-  private updateEntities(entities: any[]) {
+  private updateEntities(entities: EntityState[]) {
     // Simplified entity update for now
     entities.forEach(e => {
       let obj = this.models.get(e.id);
@@ -510,7 +564,7 @@ export class GameEngine3D {
     });
   }
 
-  private updateLightingFromState(state: any) {
+  private updateLightingFromState(state: SpriteState) {
       if (state.lighting) {
           // Ambient
           if (state.lighting.ambientColor !== undefined || state.lighting.ambientIntensity !== undefined) {
@@ -540,7 +594,7 @@ export class GameEngine3D {
       }
   }
 
-  private updateCameraFromState(state: any) {
+  private updateCameraFromState(state: SpriteState) {
     const player = this.models.get('player');
     if (!player) return;
 

@@ -108,7 +108,6 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
 
     // Reactive World Generation (Triggered by code blocks)
     if (state.worldSeed !== lastWorldSeed.current) {
-      console.log('Regenerating 3D world with seed:', state.worldSeed);
       lastWorldSeed.current = state.worldSeed;
 
       // Clean up old environment instances
@@ -209,9 +208,6 @@ const Stage3D = forwardRef<Stage3DHandle, Stage3DProps>(({
         }
 
         if (obj && obj.userData?.entityId) {
-            // Trigger a custom event or state update for the clicked entity
-            // For now, let's log and trigger a generic click input if the entity has an ID
-            console.log('Clicked 3D Entity:', obj.userData.entityId);
             onInput?.(`Click_${obj.userData.entityId}`, true);
         }
       }

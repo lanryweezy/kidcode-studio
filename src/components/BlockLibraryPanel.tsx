@@ -23,8 +23,8 @@ const BlockLibraryPanel: React.FC<BlockLibraryPanelProps> = ({
 }) => {
   return (
     <div className="flex-1 flex flex-col">
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-        <h3 className="font-bold text-slate-700 dark:text-slate-200 mb-2">Block Library</h3>
+      <div className="p-4 border-b border-slate-100">
+        <h3 className="font-bold text-slate-700 mb-2">Block Library</h3>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -32,7 +32,7 @@ const BlockLibraryPanel: React.FC<BlockLibraryPanelProps> = ({
             placeholder="Search blocks..."
             value={blockSearch}
             onChange={(e) => setBlockSearch(e.target.value)}
-            className="w-full bg-slate-100 dark:bg-slate-800 pl-9 pr-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-violet-200"
+            className="w-full bg-slate-100 pl-9 pr-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-violet-200"
           />
         </div>
       </div>
@@ -61,12 +61,12 @@ const BlockLibraryPanel: React.FC<BlockLibraryPanelProps> = ({
                       key={def.type}
                       draggable
                       onDragStart={handleBlockDragStart(def)}
-                      className={`flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-700 cursor-grab active:cursor-grabbing bg-white dark:bg-slate-800 shadow-sm transition-all hover:scale-[1.02]`}
+                      className={`flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-violet-300:border-violet-700 cursor-grab active:cursor-grabbing bg-white shadow-sm transition-all hover:scale-[1.02]`}
                     >
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
-                        {React.createElement(def.icon, { size: 16 })}
+                        {React.createElement(def.icon as React.ComponentType<any>, { size: 16 })}
                       </div>
-                      <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{def.label}</span>
+                      <span className="font-bold text-sm text-slate-700">{def.label}</span>
                     </div>
                   ))}
                 </div>

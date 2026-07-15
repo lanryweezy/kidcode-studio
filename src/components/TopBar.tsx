@@ -84,21 +84,21 @@ const TopBar: React.FC<TopBarProps> = ({
   };
 
   return (
-    <div className="h-14 glass dark:glass-dark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 z-40">
+    <div className="h-14 glass border-b border-slate-200 flex items-center justify-between px-4 shrink-0 z-40">
       <div className="flex items-center gap-4">
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setLeftPanelWidth(leftPanelWidth === 0 ? 280 : 0)}
-          className="p-2 lg:hidden hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-all active:scale-95"
+          className="p-2 lg:hidden hover:bg-slate-200:bg-slate-800 rounded-lg text-slate-500 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           aria-label="Toggle left panel"
         >
           <Menu size={20} />
         </button>
 
-        <button onClick={() => setShowHome(true)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 hover:shadow-sm rounded-lg text-slate-500 dark:text-slate-400 transition-all hover:-translate-y-0.5 active:scale-95" aria-label="Go to Home" role="button">
+        <button onClick={() => setShowHome(true)} className="p-2 hover:bg-slate-200:bg-slate-800 hover:shadow-sm rounded-lg text-slate-500 transition-all hover:-translate-y-0.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2" aria-label="Go to Home" role="button">
           <Home size={20} />
         </button>
-        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+        <div className="h-6 w-px bg-slate-200" />
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${MODE_CONFIG[mode].color} shadow-lg shadow-blue-500/20`}>
             {React.createElement(MODE_CONFIG[mode].icon, { size: 16 })}
@@ -106,7 +106,7 @@ const TopBar: React.FC<TopBarProps> = ({
           <input
             value={currentProject?.name || 'Untitled'}
             onChange={(e) => setProject({ ...currentProject, name: e.target.value })}
-            className="bg-transparent font-bold outline-none hover:bg-white/50 dark:hover:bg-black/20 px-2 py-1 rounded transition-colors truncate max-w-[200px]"
+            className="bg-transparent font-bold outline-none hover:bg-white/50:bg-black/20 px-2 py-1 rounded transition-colors truncate max-w-[200px]"
           />
         </div>
         <div className="text-xs text-slate-400 flex items-center gap-1 font-medium mr-2">
@@ -118,7 +118,8 @@ const TopBar: React.FC<TopBarProps> = ({
           <>
             <button
               onClick={() => downloadArduinoCode(commands, currentProject?.name)}
-              className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              aria-label="Download Arduino code"
             >
               <Download size={12} /> .ino
             </button>
@@ -137,7 +138,8 @@ const TopBar: React.FC<TopBarProps> = ({
                   alert('Failed to send code.');
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              aria-label="Push code to Arduino board"
             >
               <UploadCloud size={12} /> Push
             </button>
@@ -147,8 +149,9 @@ const TopBar: React.FC<TopBarProps> = ({
         {mode === AppMode.APP && onOpenCodePages && (
           <button
             onClick={onOpenCodePages}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
             title="Organize code by page/screen"
+            aria-label="Open code pages organizer"
           >
             <Code2 size={12} /> Code by Page
           </button>
@@ -157,11 +160,12 @@ const TopBar: React.FC<TopBarProps> = ({
         {mode === AppMode.GAME && onToggle3D && (
           <button
             onClick={onToggle3D}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all ${is3DMode
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${is3DMode
               ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
               : 'bg-gradient-to-r from-slate-500 to-slate-600'
               }`}
             title={is3DMode ? "Switch to 2D Mode" : "Switch to 3D Mode"}
+            aria-label={is3DMode ? "Switch to 2D Mode" : "Switch to 3D Mode"}
           >
             {is3DMode ? <Box size={12} /> : <Square size={12} />}
             {is3DMode ? "3D Mode" : "2D Mode"}
@@ -170,7 +174,7 @@ const TopBar: React.FC<TopBarProps> = ({
 
         <button
           onClick={handlePublish}
-          className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
           aria-label="Publish to Web"
         >
           <Globe size={12} /> Publish to Web
@@ -178,9 +182,9 @@ const TopBar: React.FC<TopBarProps> = ({
 
         <button
           onClick={handleToggleLive}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-black text-[10px] uppercase shadow-lg transition-all hover:scale-105 active:scale-95 ${isLive
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-black text-[10px] uppercase shadow-lg transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${isLive
             ? 'bg-red-500 text-white animate-pulse'
-            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+            : 'bg-white text-slate-600'
             }`}
           aria-label={isLive ? 'Stop Live Multiplayer' : 'Go Live Multiplayer'}
         >
@@ -190,26 +194,27 @@ const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <button onClick={undo} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90" title="Undo (Ctrl+Z)" aria-label="Undo"><Undo2 size={18} /></button>
-        <button onClick={redo} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90" title="Redo (Ctrl+Y)" aria-label="Redo"><Redo2 size={18} /></button>
+        <button onClick={undo} className="p-2 text-slate-500 hover:text-slate-800:text-white rounded-lg hover:bg-slate-200:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2" title="Undo (Ctrl+Z)" aria-label="Undo"><Undo2 size={18} /></button>
+        <button onClick={redo} className="p-2 text-slate-500 hover:text-slate-800:text-white rounded-lg hover:bg-slate-200:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2" title="Redo (Ctrl+Y)" aria-label="Redo"><Redo2 size={18} /></button>
 
-        <button onClick={() => setShowHelp(true)} className="p-2 text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Academy / Help" aria-label="Help"><HelpCircle size={18} /></button>
-        <button onClick={() => setShowMarketplace(true)} className="p-2 text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Marketplace" aria-label="Marketplace"><ShoppingBag size={18} /></button>
+        <button onClick={() => setShowHelp(true)} className="p-2 text-slate-500 hover:text-violet-600:text-violet-400 rounded-lg hover:bg-slate-200:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Academy / Help" aria-label="Help"><HelpCircle size={18} /></button>
+        <button onClick={() => setShowMarketplace(true)} className="p-2 text-slate-500 hover:text-amber-600:text-amber-400 rounded-lg hover:bg-slate-200:bg-slate-800 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95" title="Marketplace" aria-label="Marketplace"><ShoppingBag size={18} /></button>
         
         {/* Error Diagnosis Button */}
         {diagnosis.errors.length > 0 && (
           <button
             onClick={() => setShowDiagnosis(!showDiagnosis)}
-            className="p-2 text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95 animate-pulse"
+            className="p-2 text-red-500 bg-red-50 rounded-lg hover:bg-red-100:bg-red-900/30 transition-all hover:-translate-y-0.5 hover:shadow-sm active:scale-95 animate-pulse"
             title={`Check code for ${diagnosis.errors.length} error(s)`}
+            aria-label={`Show ${diagnosis.errors.length} code errors`}
           >
             <AlertCircle size={18} />
           </button>
         )}
 
-        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2" />
+        <div className="h-6 w-px bg-slate-200 mx-2" />
 
-        <button onClick={() => setDebugMode(!debugMode)} className={`p-2 rounded-lg transition-all active:scale-95 ${debugMode ? 'bg-orange-500 text-white shadow-inner' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 hover:shadow-sm hover:-translate-y-0.5'}`} title="Debugger" aria-label="Toggle Debugger"><Bug size={18} /></button>
+        <button onClick={() => setDebugMode(!debugMode)} className={`p-2 rounded-lg transition-all active:scale-95 ${debugMode ? 'bg-orange-500 text-white shadow-inner' : 'text-slate-500 hover:bg-slate-200:bg-slate-800 hover:shadow-sm hover:-translate-y-0.5'}`} title="Debugger" aria-label="Toggle Debugger"><Bug size={18} /></button>
 
         {debugMode && (
           <button
@@ -217,6 +222,7 @@ const TopBar: React.FC<TopBarProps> = ({
             disabled={!isPlaying || !isPaused}
             className="p-2 text-slate-500 hover:text-blue-600 rounded-lg hover:bg-white/50 disabled:opacity-30 disabled:cursor-not-allowed"
             title="Step Over"
+            aria-label="Step over in debugger"
           >
             <StepForward size={18} />
           </button>
@@ -245,4 +251,4 @@ const TopBar: React.FC<TopBarProps> = ({
   );
 };
 
-export default TopBar;
+export default React.memo(TopBar);

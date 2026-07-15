@@ -79,14 +79,14 @@ const AppStage: React.FC<AppStageProps> = React.memo(({ appState, onNavigate, on
                             )}
 
                             {el.type === 'slider' && (
-                                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                                     <div className="flex justify-between mb-2">
-                                        <span className="font-bold text-slate-700 dark:text-slate-200 text-sm">{el.content}</span>
+                                        <span className="font-bold text-slate-700 text-sm">{el.content}</span>
                                         <span className="font-mono text-slate-500 text-xs">{appState.variables[el.variableName] || 0}</span>
                                     </div>
                                     <input 
                                         type="range" 
-                                        className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg accent-blue-500 appearance-none cursor-pointer"
+                                        className="w-full h-2 bg-slate-200 rounded-lg accent-blue-500 appearance-none cursor-pointer"
                                         value={appState.variables[el.variableName] || 0}
                                         onChange={(e) => handleInputChange(el.variableName, Number(e.target.value))}
                                     />
@@ -96,16 +96,16 @@ const AppStage: React.FC<AppStageProps> = React.memo(({ appState, onNavigate, on
                             {el.type === 'news_feed' && (
                                 <div className="space-y-4">
                                     {[1, 2, 3].map(i => (
-                                        <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+                                        <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
                                             <div className="flex items-center gap-3 mb-3">
                                                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold">U{i}</div>
                                                 <div>
-                                                    <div className="font-bold text-sm text-slate-800 dark:text-slate-200">KidCoder_{i}</div>
+                                                    <div className="font-bold text-sm text-slate-800">KidCoder_{i}</div>
                                                     <div className="text-[10px] text-slate-400">2 hours ago</div>
                                                 </div>
                                             </div>
-                                            <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">{el.content} #{i}</p>
-                                            <div className="aspect-video bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center text-slate-400 text-xs">Image Placeholder</div>
+                                            <p className="text-sm text-slate-600 mb-3">{el.content} #{i}</p>
+                                            <div className="aspect-video bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 text-xs">Image Placeholder</div>
                                         </div>
                                     ))}
                                 </div>
@@ -114,7 +114,7 @@ const AppStage: React.FC<AppStageProps> = React.memo(({ appState, onNavigate, on
                             {el.type === 'chat_bubble' && (
                                 <div className={`flex gap-3 ${el.alignment === 'right' ? 'flex-row-reverse' : 'flex-row'}`}>
                                     <div className="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0">AI</div>
-                                    <div className={`p-3 rounded-2xl shadow-sm text-sm max-w-[80%] ${el.alignment === 'right' ? 'bg-blue-500 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-tl-none border border-slate-100 dark:border-slate-700'}`}>
+                                    <div className={`p-3 rounded-2xl shadow-sm text-sm max-w-[80%] ${el.alignment === 'right' ? 'bg-blue-500 text-white rounded-tr-none' : 'bg-white text-slate-700 rounded-tl-none border border-slate-100'}`}>
                                         {el.content}
                                     </div>
                                 </div>

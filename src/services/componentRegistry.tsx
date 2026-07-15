@@ -17,7 +17,7 @@ import { AppElement, AppState } from '../types';
 export interface ComponentProps {
   element: AppElement;
   appState: AppState;
-  onInteraction?: (varName: string, value: any) => void;
+  onInteraction?: (varName: string, value: string | number | boolean) => void;
   onNavigate?: (screen: string) => void;
   className?: string;
   children?: React.ReactNode;
@@ -26,6 +26,7 @@ export interface ComponentProps {
 export type ComponentType = React.FC<ComponentProps>;
 
 const registry: Map<string, ComponentType> = new Map();
+const componentInfo: Map<string, { name: string; icon: string; category: string }> = new Map();
 
 // ============================================
 // BUILT-IN COMPONENTS
@@ -199,8 +200,6 @@ export const registerBuiltInComponents = () => {
   registry.set('badge', BadgeComponent);
   registry.set('avatar', AvatarComponent);
   registry.set('chat_bubble', ChatBubbleComponent);
-  
-  console.log('✅ Built-in components registered:', Array.from(registry.keys()).length);
 };
 
 // ============================================
@@ -214,7 +213,6 @@ export const registerBuiltInComponents = () => {
  */
 export const registerComponent = (type: string, component: ComponentType) => {
   registry.set(type, component);
-  console.log('🎨 Component registered:', type);
 };
 
 /**
@@ -230,8 +228,8 @@ export const getComponent = (type: string): ComponentType | undefined => {
  * Unregister a component
  * @param type - Component type name
  */
-export const unregisterComponent = (type: string) => {
-  registry.delete(type);
+export const unregisterComponent = (type: string): boolean => {
+  return registry.delete(type);
 };
 
 /**
@@ -274,7 +272,8 @@ export const getComponentInfo = (type: string): { name: string; icon: string; ca
     chat_bubble: { name: 'Chat Bubble', icon: '💬', category: 'Content' }
   };
   
-  return componentNames[type] || null;
+  if (componentNames[type]) return componentNames[type];
+  return componentInfo.get(type) || null;
 };
 
 /**
@@ -297,7 +296,81 @@ export const getComponentsByCategory = (): Record<string, Array<{ type: string; 
   return categories;
 };
 
+const builtInTypes = new Set<string>();
+
 // Auto-register built-ins on import
 if (typeof window !== 'undefined') {
   registerBuiltInComponents();
+  registry.forEach((_, type) => { builtInTypes.add(type); });
 }
+
+export const searchComponents = (query: string): string[] => {
+  const results: string[] = [];
+  const lowerQuery = query.toLowerCase();
+  registry.forEach((_, type) => {
+    if (type.toLowerCase().includes(lowerQuery)) {
+      results.push(type);
+    } else {
+      const info = getComponentInfo(type);
+      if (info && info.category.toLowerCase().includes(lowerQuery)) {
+        results.push(type);
+      }
+    }
+  });
+  return results;
+};
+
+export const createCustomComponent = (name: string, icon: string, category: string, component: ComponentType, type?: string): string => {
+  const key = type || name.toLowerCase().replace(/\s+/g, '_');
+  registerComponent(key, component);
+  componentInfo.set(key, { name, icon, category });
+  return key;
+};
+
+export const isUserComponent = (type: string): boolean => {
+  return registry.has(type) && !builtInTypes.has(type);
+};
+
+export const getUserComponents = (): Map<string, ComponentType> => {
+  const userComps = new Map<string, ComponentType>();
+  registry.forEach((comp, type) => {
+    if (!builtInTypes.has(type)) {
+      userComps.set(type, comp);
+    }
+  });
+  return userComps;
+};
+
+export const removeUserComponent = (type: string): boolean => {
+  if (builtInTypes.has(type)) return false;
+  return unregisterComponent(type);
+};
+
+const favorites = new Set<string>();
+export const addFavorite = (type: string) => { favorites.add(type); };
+export const removeFavorite = (type: string) => { favorites.delete(type); };
+export const getFavorites = (): string[] => Array.from(favorites);
+export const isFavorite = (type: string): boolean => favorites.has(type);
+
+const usageCounts = new Map<string, number>();
+export const trackUsage = (type: string) => {
+  usageCounts.set(type, (usageCounts.get(type) || 0) + 1);
+};
+export const getUsageStats = (): Array<{ type: string; count: number }> => {
+  const stats: Array<{ type: string; count: number }> = [];
+  usageCounts.forEach((count, type) => { stats.push({ type, count }); });
+  return stats.sort((a, b) => b.count - a.count);
+};
+
+const dependencies = new Map<string, string[]>();
+export const registerDependencies = (type: string, deps: string[]) => {
+  dependencies.set(type, deps);
+};
+export const getDependencies = (type: string): string[] => dependencies.get(type) || [];
+export const getDependents = (type: string): string[] => {
+  const dependents: string[] = [];
+  dependencies.forEach((deps, key) => {
+    if (deps.includes(type)) dependents.push(key);
+  });
+  return dependents;
+};

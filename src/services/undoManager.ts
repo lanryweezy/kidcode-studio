@@ -203,7 +203,8 @@ export class UndoManager {
    * Notify store of history change (for UI updates)
    */
   private notifyHistoryChange() {
-    const { setHistoryUI } = this.store.getState() as any;
+    const state = this.store.getState();
+    const setHistoryUI = (state as unknown as Record<string, unknown>)['setHistoryUI'] as ((history: { canUndo: boolean; canRedo: boolean; undoCount: number; redoCount: number }) => void) | undefined;
     if (setHistoryUI) {
       setHistoryUI({
         canUndo: this.canUndo(),
@@ -222,8 +223,8 @@ export const UndoActionFactory = {
    */
   addCommand: (
     command: CommandBlock,
-    getState: () => any,
-    setState: (fn: any) => any
+    getState: () => StoreState,
+    setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => ({
     type: 'ADD_COMMAND',
     description: `Add ${command.type} block`,
@@ -242,8 +243,8 @@ export const UndoActionFactory = {
    */
   deleteCommand: (
     commandId: string,
-    getState: () => any,
-    setState: (fn: any) => any
+    getState: () => StoreState,
+    setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => {
     let deletedCommand: CommandBlock | null = null;
 
@@ -270,8 +271,8 @@ export const UndoActionFactory = {
    */
   updateSpriteState: (
     updates: Partial<SpriteState>,
-    getState: () => any,
-    setState: (fn: any) => any
+    getState: () => StoreState,
+    setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => {
     let previousState: Partial<SpriteState> = {};
     
@@ -298,8 +299,8 @@ export const UndoActionFactory = {
    */
   updateHardwareState: (
     updates: Partial<HardwareState>,
-    getState: () => any,
-    setState: (fn: any) => any
+    getState: () => StoreState,
+    setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => {
     let previousState: Partial<HardwareState> = {};
     
@@ -325,8 +326,8 @@ export const UndoActionFactory = {
    */
   updateAppState: (
     updates: Partial<AppState>,
-    getState: () => any,
-    setState: (fn: any) => any
+    getState: () => StoreState,
+    setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => {
     let previousState: Partial<AppState> = {};
     

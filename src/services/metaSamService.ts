@@ -81,7 +81,16 @@ export const extractSprite = async (
     const imageBase64 = canvas.toDataURL('image/png').split(',')[1];
 
     // Query SAM API
-    const requestBody: any = {
+    const requestBody: {
+      inputs: string;
+      parameters: {
+        model_type: string;
+        multimask_output: boolean;
+        point_coords?: number[][];
+        point_labels?: number[];
+        box?: number[];
+      };
+    } = {
       inputs: imageBase64,
       parameters: {
         model_type: 'vit_h', // or vit_l, vit_b
@@ -191,7 +200,7 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
 /**
  * Process SAM API response into ImageData
  */
-const processMask = (result: any, width: number, height: number): { mask: ImageData; url: string } => {
+const processMask = (result: { segmentation?: number[]; confidence?: number }, width: number, height: number): { mask: ImageData; url: string } => {
   // Create canvas for mask
   const canvas = document.createElement('canvas');
   canvas.width = width;

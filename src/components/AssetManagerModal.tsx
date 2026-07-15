@@ -14,7 +14,6 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     assets,
     addAsset,
     updateSpriteState,
-    darkMode
   } = useStore();
 
   const [filter, setFilter] = useState<'all' | 'image' | 'model'>('all');
@@ -58,7 +57,7 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-violet-500 overflow-hidden flex flex-col h-[700px] animate-in zoom-in-95 duration-300">
+      <div className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl border-4 border-violet-500 overflow-hidden flex flex-col h-[700px] animate-in zoom-in-95 duration-300">
 
         {/* Header */}
         <div className="p-6 bg-violet-500 text-white flex items-center justify-between">
@@ -75,18 +74,18 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         </div>
 
         {/* Toolbar */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col md:flex-row gap-4">
+        <div className="p-4 border-b border-slate-100 bg-slate-50 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search your assets..."
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-violet-400"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-violet-400"
             />
           </div>
 
-          <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+          <div className="flex gap-2 p-1 bg-white border border-slate-200 rounded-2xl">
             <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-xl font-bold text-xs uppercase ${filter === 'all' ? 'bg-violet-500 text-white shadow-md' : 'text-slate-500'}`}>All</button>
             <button onClick={() => setFilter('image')} className={`px-4 py-2 rounded-xl font-bold text-xs uppercase ${filter === 'image' ? 'bg-violet-500 text-white shadow-md' : 'text-slate-500'}`}>Images</button>
             <button onClick={() => setFilter('model')} className={`px-4 py-2 rounded-xl font-bold text-xs uppercase ${filter === 'model' ? 'bg-violet-500 text-white shadow-md' : 'text-slate-500'}`}>3D Models</button>
@@ -102,7 +101,7 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         </div>
 
         {/* Asset Grid */}
-        <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-slate-900 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-8 bg-white custom-scrollbar">
           {filteredAssets.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
               <ImageIcon size={80} className="mb-4" />
@@ -114,10 +113,10 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                 <div
                   key={asset.id}
                   onClick={() => selectAsset(asset)}
-                  className="group relative bg-slate-50 dark:bg-slate-800 rounded-3xl border-2 border-slate-100 dark:border-slate-700 overflow-hidden cursor-pointer hover:border-violet-500 hover:shadow-xl transition-all"
+                  className="group relative bg-slate-50 rounded-3xl border-2 border-slate-100 overflow-hidden cursor-pointer hover:border-violet-500 hover:shadow-xl transition-all"
                 >
                   {/* Preview */}
-                  <div className="aspect-square flex items-center justify-center p-4 bg-white dark:bg-slate-900">
+                  <div className="aspect-square flex items-center justify-center p-4 bg-white">
                     {asset.type === 'image' ? (
                       <img src={asset.url} className="max-w-full max-h-full object-contain drop-shadow-md" alt={asset.name} />
                     ) : (
@@ -126,8 +125,8 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                   </div>
 
                   {/* Label */}
-                  <div className="p-3 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{asset.name}</p>
+                  <div className="p-3 border-t border-slate-100 bg-white">
+                    <p className="text-xs font-bold text-slate-700 truncate">{asset.name}</p>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{asset.type}</p>
                   </div>
 
@@ -144,7 +143,7 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center border-t border-slate-100 dark:border-slate-800 px-8">
+        <div className="p-4 bg-slate-50 flex justify-between items-center border-t border-slate-100 px-8">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
             <Box size={14} /> Total Assets: {assets.length}
           </p>

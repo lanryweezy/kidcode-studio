@@ -36,7 +36,7 @@ const AnimationSequencer: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 h-64 flex flex-col">
+    <div className="bg-slate-100 border-t border-slate-200 p-4 h-64 flex flex-col">
       <h4 className="font-bold text-xs uppercase text-slate-400 mb-4 flex items-center gap-2">
         <Film size={16} /> Animation Sequencer
       </h4>
@@ -48,7 +48,7 @@ const AnimationSequencer: React.FC = () => {
             <button 
               key={name}
               onClick={() => setSelectedAnim(name)}
-              className={`w-full p-2 text-left text-sm font-bold rounded-lg transition-all ${selectedAnim === name ? 'bg-violet-500 text-white shadow' : 'bg-white dark:bg-slate-800 hover:bg-slate-200'}`}
+              className={`w-full p-2 text-left text-sm font-bold rounded-lg transition-all ${selectedAnim === name ? 'bg-violet-500 text-white shadow' : 'bg-white hover:bg-slate-200'}`}
             >
               {name}
             </button>
@@ -59,27 +59,27 @@ const AnimationSequencer: React.FC = () => {
                     value={newAnimName}
                     onChange={e => setNewAnimName(e.target.value)}
                     placeholder="walk_cycle"
-                    className="flex-1 w-0 bg-white dark:bg-slate-700 text-sm p-2 rounded-lg outline-none"
+                    className="flex-1 w-0 bg-white text-sm p-2 rounded-lg outline-none"
                   />
                   <button onClick={handleAddAnimation} className="p-2 bg-green-500 text-white rounded-lg"><Check size={16}/></button>
                   <button onClick={() => setIsAdding(false)} className="p-2 bg-red-500 text-white rounded-lg"><X size={16}/></button>
               </div>
           ) : (
-             <button onClick={() => setIsAdding(true)} className="w-full p-2 text-sm font-bold rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-400 hover:bg-white dark:hover:bg-slate-800">
+             <button onClick={() => setIsAdding(true)} className="w-full p-2 text-sm font-bold rounded-lg border-2 border-dashed border-slate-300 text-slate-400 hover:bg-white:bg-slate-800">
                 <Plus size={14} className="inline mr-1" /> New Anim
             </button>
           )}
         </div>
 
         {/* Frame Timeline */}
-        <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl p-2 flex items-center gap-2 overflow-x-auto shadow-inner custom-scrollbar">
+        <div className="flex-1 bg-white rounded-xl p-2 flex items-center gap-2 overflow-x-auto shadow-inner custom-scrollbar">
           {frames && frames.length > 0 ? frames.map((frame, i) => (
             <div 
               key={i}
               onClick={() => handleToggleFrame(i)}
               className={`
                 relative w-16 h-16 rounded-lg overflow-hidden shrink-0 border-2 transition-all cursor-pointer
-                ${selectedAnim && animations[selectedAnim]?.includes(i) ? 'border-violet-500 scale-105' : 'border-slate-200 dark:border-slate-700'}
+                ${selectedAnim && animations[selectedAnim]?.includes(i) ? 'border-violet-500 scale-105' : 'border-slate-200'}
               `}
             >
               <img src={frame} className="w-full h-full object-contain" alt={`Frame ${i}`} />

@@ -1,8 +1,27 @@
+interface SerialPort {
+  open(options: { baudRate: number }): Promise<void>;
+  close(): Promise<void>;
+  readable: ReadableStream<Uint8Array>;
+  writable: WritableStream<Uint8Array>;
+}
+
+interface WritableStreamDefaultWriter {
+  write(data: Uint8Array): Promise<void>;
+  releaseLock(): void;
+}
+
+interface ReadableStreamDefaultReader {
+  read(): Promise<{ value: Uint8Array | undefined; done: boolean }>;
+  cancel(): Promise<void>;
+}
+
+declare const navigator: { serial?: { requestPort(): Promise<SerialPort> } };
+
 export class WebSerialService {
   public onData: ((data: string) => void) | null = null;
-  private port: any | null = null;
-  private writer: any | null = null;
-  private reader: any | null = null;
+  private port: SerialPort | null = null;
+  private writer: WritableStreamDefaultWriter | null = null;
+  private reader: ReadableStreamDefaultReader | null = null;
 
   async connect() {
     try {
@@ -19,7 +38,7 @@ export class WebSerialService {
     }
   }
 
-  async sendCommand(cmd: any) {
+  async sendCommand(cmd: Record<string, unknown>) {
     if (!this.writer) return;
     const encoder = new TextEncoder();
     const data = JSON.stringify(cmd) + "\n";

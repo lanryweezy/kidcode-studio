@@ -6,6 +6,7 @@ import {
     SpriteState,
     AppState,
     CircuitComponent,
+    Wire,
     AppElement
 } from '../../types';
 import {
@@ -21,6 +22,7 @@ export interface ProjectSlice {
     spriteState: SpriteState;
     appState: AppState;
     circuitComponents: CircuitComponent[];
+    wires: Wire[];
     pcbColor: string;
     assets: Array<{ id: string, name: string, type: 'image' | 'model', url: string }>;
     advancedPhysics: boolean;
@@ -36,6 +38,7 @@ export interface ProjectSlice {
     updateSpriteState: (state: Partial<SpriteState>) => void;
     updateAppState: (state: Partial<AppState>) => void;
     setCircuitComponents: (components: CircuitComponent[]) => void;
+    setWires: (wires: Wire[]) => void;
     setPcbColor: (color: string) => void;
     setSaveStatus: (status: 'saved' | 'saving' | 'unsaved') => void;
     addAsset: (asset: { name: string, type: 'image' | 'model', url: string }) => void;
@@ -60,6 +63,7 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
     spriteState: INITIAL_SPRITE_STATE,
     appState: INITIAL_APP_STATE,
     circuitComponents: [],
+    wires: [],
     pcbColor: '#059669',
     assets: [],
     advancedPhysics: false,
@@ -97,6 +101,7 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
     })),
 
     setCircuitComponents: (circuitComponents) => set({ circuitComponents, saveStatus: 'unsaved' }),
+    setWires: (wires) => set({ wires, saveStatus: 'unsaved' }),
     setPcbColor: (pcbColor) => set({ pcbColor, saveStatus: 'unsaved' }),
     setSaveStatus: (saveStatus) => set({ saveStatus }),
     addAsset: (asset) => set((state) => ({

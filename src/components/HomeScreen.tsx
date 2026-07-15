@@ -16,10 +16,10 @@ import {
     FolderOpen,
     Users
 } from 'lucide-react';
+import { SkeletonCard } from './ui/Skeleton';
 
 const HomeScreen: React.FC = () => {
     const {
-        darkMode,
         userProfile,
         setShowPricing,
         setShowProfile,
@@ -28,25 +28,45 @@ const HomeScreen: React.FC = () => {
     } = useStore();
 
     const [recentProjects, setRecentProjects] = React.useState(getProjects());
+    const [isLoading, setIsLoading] = React.useState(true);
 
-    const handleRemix = (e: React.MouseEvent, proj: any) => {
+    React.useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 300);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const handleRemix = React.useCallback((e: React.MouseEvent, proj: any) => {
         e.stopPropagation();
-        remixProject(proj);
-        setRecentProjects(getProjects());
+        const optimisticId = 'temp-remix-' + Date.now();
+        const optimisticProject = { ...proj, id: optimisticId, name: proj.name + ' (Remix)', lastEdited: Date.now() };
+        setRecentProjects(prev => [optimisticProject, ...prev]);
         playSoundEffect('powerup');
-    };
 
-    const handleDelete = (e: React.MouseEvent, id: string) => {
+        try {
+            remixProject(proj);
+            setRecentProjects(getProjects());
+        } catch (error) {
+            setRecentProjects(prev => prev.filter(p => p.id !== optimisticId));
+        }
+    }, []);
+
+    const handleDelete = React.useCallback((e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         if (confirm('Delete this project forever?')) {
-            deleteProject(id);
-            setRecentProjects(getProjects());
+            const previousProjects = recentProjects;
+            setRecentProjects(prev => prev.filter(p => p.id !== id));
             playSoundEffect('hurt');
+
+            try {
+                deleteProject(id);
+            } catch (error) {
+                setRecentProjects(previousProjects);
+            }
         }
-    };
+    }, [recentProjects]);
 
     return (
-        <div className={`min-h-screen ${darkMode ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-800'} transition-colors font-sans pb-20`}>
+        <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors font-sans pb-20">
             <div className="flex items-center justify-between p-6 max-w-7xl mx-auto w-full">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg animate-float">
@@ -73,7 +93,7 @@ const HomeScreen: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setShowProfile(true)}
-                        className="flex items-center gap-2 py-2 px-4 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:border-violet-400 transition-all hover:scale-105"
+                        className="flex items-center gap-2 py-2 px-4 rounded-full bg-white shadow-sm border border-slate-200 hover:border-violet-400 transition-all hover:scale-105"
                     >
                         <span className="text-2xl">{userProfile?.avatar || '👤'}</span>
                         <div className="flex flex-col items-start leading-none hidden sm:flex">
@@ -89,30 +109,30 @@ const HomeScreen: React.FC = () => {
                     <h2 className="text-4xl font-black animate-in slide-in-from-left-10 fade-in duration-500">What do you want to build?</h2>
                     <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">324 Kids Building Live</span>
+                        <span className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-none">324 Kids Building Live</span>
                     </div>
                 </div>
 
                 {/* Social Proof Stats Bar */}
-                <div className="flex flex-wrap items-center justify-center gap-6 mb-10 py-4 px-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                <div className="flex flex-wrap items-center justify-center gap-6 mb-10 py-4 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
                         <span className="text-2xl">🧑‍💻</span>
-                        <span><span className="text-violet-600 dark:text-violet-400 text-lg">200+</span> Blocks</span>
+                        <span><span className="text-violet-600 text-lg">200+</span> Blocks</span>
                     </div>
-                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                    <div className="w-px h-6 bg-slate-200 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
                         <span className="text-2xl">🎮</span>
-                        <span><span className="text-emerald-600 dark:text-emerald-400 text-lg">3D</span> Game Engine</span>
+                        <span><span className="text-emerald-600 text-lg">3D</span> Game Engine</span>
                     </div>
-                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                    <div className="w-px h-6 bg-slate-200 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
                         <span className="text-2xl">⚡</span>
-                        <span><span className="text-amber-600 dark:text-amber-400 text-lg">50+</span> Circuit Parts</span>
+                        <span><span className="text-amber-600 text-lg">50+</span> Circuit Parts</span>
                     </div>
-                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400">
+                    <div className="w-px h-6 bg-slate-200 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
                         <span className="text-2xl">📱</span>
-                        <span>Publish to <span className="text-blue-600 dark:text-blue-400 text-lg">Web</span></span>
+                        <span>Publish to <span className="text-blue-600 text-lg">Web</span></span>
                     </div>
                 </div>
 
@@ -163,12 +183,12 @@ const HomeScreen: React.FC = () => {
                                     }
                                     setProject(newProj);
                                 }}
-                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl hover:border-violet-400 hover:shadow-lg transition-all text-left group"
+                                className="bg-white border border-slate-200 p-4 rounded-2xl hover:border-violet-400 hover:shadow-lg transition-all text-left group"
                             >
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white mb-3 shadow-md ${tpl.color}`}>
                                     {React.createElement(tpl.icon, { size: 24 })}
                                 </div>
-                                <h4 className="font-bold text-lg text-slate-800 dark:text-white group-hover:text-violet-600 transition-colors">{tpl.name}</h4>
+                                <h4 className="font-bold text-lg text-slate-800 group-hover:text-violet-600 transition-colors">{tpl.name}</h4>
                                 <p className="text-sm text-slate-500">{tpl.description}</p>
                             </button>
                         ))}
@@ -203,8 +223,14 @@ const HomeScreen: React.FC = () => {
                     <button className="text-sm font-bold text-violet-500 hover:text-violet-600">View All</button>
                 </div>
 
-                {recentProjects.length === 0 ? (
-                    <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                {isLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <SkeletonCard key={i} />
+                        ))}
+                    </div>
+                ) : recentProjects.length === 0 ? (
+                    <div className="text-center py-12 bg-white rounded-3xl border-2 border-dashed border-slate-200">
                         <p className="text-slate-400 font-medium">No projects yet. Start building!</p>
                     </div>
                 ) : (
@@ -212,7 +238,7 @@ const HomeScreen: React.FC = () => {
                         {recentProjects.map(proj => (
                             <div
                                 key={proj.id}
-                                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl hover:shadow-md transition-all text-left relative group"
+                                className="bg-white border border-slate-200 p-4 rounded-2xl hover:shadow-md transition-all text-left relative group"
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${(MODE_CONFIG as any)[proj.mode]?.color || 'bg-slate-500'}`}>
@@ -221,26 +247,26 @@ const HomeScreen: React.FC = () => {
 
                                     <span className="text-[10px] text-slate-400">{new Date(proj.lastEdited).toLocaleDateString()}</span>
                                 </div>
-                                <h4 className="font-bold text-slate-800 dark:text-white truncate mb-4">{proj.name}</h4>
+                                <h4 className="font-bold text-slate-800 truncate mb-4">{proj.name}</h4>
 
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => setProject(proj)}
-                                        className="p-2 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-lg hover:bg-violet-600 hover:text-white transition-all flex-1 flex justify-center"
+                                        className="p-2 bg-violet-100 text-violet-600 rounded-lg hover:bg-violet-600 hover:text-white transition-all flex-1 flex justify-center"
                                         title="Open"
                                     >
                                         <FolderOpen size={16} />
                                     </button>
                                     <button
                                         onClick={(e) => handleRemix(e, proj)}
-                                        className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-600 hover:text-white transition-all flex-1 flex justify-center"
+                                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all flex-1 flex justify-center"
                                         title="Remix"
                                     >
                                         <GitFork size={16} />
                                     </button>
                                     <button
                                         onClick={(e) => handleDelete(e, proj.id)}
-                                        className="p-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-600 hover:text-white transition-all flex-1 flex justify-center"
+                                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all flex-1 flex justify-center"
                                         title="Delete"
                                     >
                                         <Trash2 size={16} />
@@ -255,4 +281,4 @@ const HomeScreen: React.FC = () => {
     );
 };
 
-export default HomeScreen;
+export default React.memo(HomeScreen);

@@ -82,7 +82,7 @@ const TutorialSystem: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       {/* Tutorial Card */}
       <div className={`
         absolute z-[310] pointer-events-auto
-        w-80 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border-4 border-violet-500 overflow-hidden
+        w-80 bg-white rounded-3xl shadow-2xl border-4 border-violet-500 overflow-hidden
         animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
         ${step.position === 'center' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : ''}
         ${step.position === 'right' ? 'top-1/4 left-80 ml-8' : ''}
@@ -98,8 +98,8 @@ const TutorialSystem: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         <div className="p-6">
-          <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 leading-tight">{step.title}</h3>
-          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm leading-relaxed mb-6">
+          <h3 className="text-xl font-black text-slate-800 mb-2 leading-tight">{step.title}</h3>
+          <p className="text-slate-500 font-medium text-sm leading-relaxed mb-6">
             {step.content}
           </p>
 

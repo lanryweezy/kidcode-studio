@@ -14,7 +14,7 @@ interface SidebarDockProps {
 
 const SidebarDock: React.FC<SidebarDockProps> = ({ mode, activeTab, onTabChange, onHome, onOpenProfile, onShowStats }) => {
   return (
-    <div className="w-16 bg-slate-900 dark:bg-slate-950 flex flex-col items-center py-4 gap-4 shrink-0 z-30">
+    <div className="w-16 bg-slate-900 flex flex-col items-center py-4 gap-4 shrink-0 z-30">
       {/* Home Button */}
       <button 
         onClick={onHome}

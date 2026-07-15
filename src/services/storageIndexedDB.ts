@@ -48,7 +48,7 @@ interface KidCodeDB extends DBSchema {
   };
   metadata: {
     key: string;
-    value: { value: any };
+    value: { value: string | number | boolean };
   };
 }
 
@@ -162,7 +162,7 @@ export const listProjectsIndexedDB = async (): Promise<Array<{
 }>> => {
   if (!useIndexedDB) {
     // Fallback: list from localStorage
-    const projects: any[] = [];
+    const projects: Array<{ id: string; name: string; mode: string; timestamp: number; thumbnail?: string }> = [];
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('kidcode_project_')) {
         try {
@@ -317,7 +317,7 @@ export const listAssetsIndexedDB = async (): Promise<Array<{
   timestamp: number;
 }>> => {
   if (!useIndexedDB) {
-    const assets: any[] = [];
+    const assets: Array<{ id: string; name: string; type: 'image' | 'model' | 'audio'; size: number; timestamp: number }> = [];
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('kidcode_asset_')) {
         try {

@@ -57,11 +57,11 @@ const ParticleEditor: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4">
-      <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-orange-500 overflow-hidden flex flex-col md:flex-row h-[600px]">
+      <div className="w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl border-4 border-orange-500 overflow-hidden flex flex-col md:flex-row h-[600px]">
         
         {/* Preview Side */}
-        <div className="flex-1 bg-slate-100 dark:bg-slate-950 p-8 flex flex-col items-center justify-center relative">
-          <canvas ref={canvasRef} width={300} height={300} className="bg-white dark:bg-slate-900 rounded-3xl shadow-inner border-2 border-slate-200 dark:border-slate-800" />
+        <div className="flex-1 bg-slate-100 p-8 flex flex-col items-center justify-center relative">
+          <canvas ref={canvasRef} width={300} height={300} className="bg-white rounded-3xl shadow-inner border-2 border-slate-200" />
           <button onClick={triggerPreview} className="mt-6 flex items-center gap-2 px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95">
             <Play size={20} fill="currentColor" /> TEST EFFECT
           </button>
@@ -71,12 +71,12 @@ const ParticleEditor: React.FC = () => {
         </div>
 
         {/* Controls Side */}
-        <div className="w-full md:w-80 bg-white dark:bg-slate-900 p-8 border-l border-slate-100 dark:border-slate-800 flex flex-col">
+        <div className="w-full md:w-80 bg-white p-8 border-l border-slate-100 flex flex-col">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+            <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
               <Settings2 size={24} className="text-orange-500" /> FX STUDIO
             </h3>
-            <button onClick={() => setShowParticleEditor(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
+            <button onClick={() => setShowParticleEditor(false)} className="p-2 hover:bg-slate-100:bg-slate-800 rounded-full">
               <X size={24} />
             </button>
           </div>

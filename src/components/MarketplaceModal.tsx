@@ -54,7 +54,7 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-amber-400 overflow-hidden flex flex-col h-[700px]">
+      <div className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl border-4 border-amber-400 overflow-hidden flex flex-col h-[700px]">
 
         {/* Header */}
         <div className="p-6 bg-amber-400 text-slate-900 flex items-center justify-between">
@@ -70,30 +70,31 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <Coins size={20} className="text-yellow-600" />
               <span>{userProfile.coins}</span>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-black/10 rounded-full transition-colors">
+            <button onClick={onClose} className="p-2 hover:bg-black/10 rounded-full transition-colors" aria-label="Close marketplace">
               <X size={24} />
             </button>
           </div>
         </div>
 
         {/* Toolbar */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col md:flex-row gap-4">
+        <div className="p-4 border-b border-slate-100 bg-slate-50 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search for cool stuff..."
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none"
             />
           </div>
 
-          <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+          <div className="flex gap-2 p-1 bg-white border border-slate-200 rounded-2xl">
             {['all', '3d', 'effect', 'code', 'sound'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f as any)}
                 className={`px-4 py-2 rounded-xl font-bold text-xs uppercase ${filter === f ? 'bg-amber-400 text-slate-900 shadow-md' : 'text-slate-500'}`}
+                aria-label={`Filter by ${f}`}
               >
                 {f}
               </button>
@@ -102,15 +103,15 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         {/* Shop Grid */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50 dark:bg-slate-950">
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-100 dark:border-slate-700 p-6 flex flex-col shadow-sm hover:shadow-xl hover:border-amber-400 transition-all group">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div key={item.id} className="bg-white rounded-3xl border-2 border-slate-100 p-6 flex flex-col shadow-sm hover:shadow-xl hover:border-amber-400 transition-all group">
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   {React.createElement(item.icon, { size: 32, className: "text-amber-500" })}
                 </div>
-                <h3 className="text-lg font-black text-slate-800 dark:text-white mb-1">{item.name}</h3>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed mb-6 flex-1">{item.description}</p>
+                <h3 className="text-lg font-black text-slate-800 mb-1">{item.name}</h3>
+                <p className="text-xs font-medium text-slate-500 leading-relaxed mb-6 flex-1">{item.description}</p>
 
                 <div className="flex items-center justify-between mt-auto">
                   <div className="flex items-center gap-1 font-black text-amber-600">
@@ -119,7 +120,8 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </div>
                   <button
                     onClick={() => handleBuy(item)}
-                    className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-xl text-xs hover:bg-amber-400 hover:text-slate-900 transition-all active:scale-95"
+                    className="px-6 py-2.5 bg-slate-900 text-white font-black rounded-xl text-xs hover:bg-amber-400 hover:text-slate-900 transition-all active:scale-95"
+                    aria-label={`Buy ${item.name} for ${item.price} coins`}
                   >
                     BUY NOW
                   </button>
@@ -130,7 +132,7 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 text-center">
+        <div className="p-4 bg-white border-t border-slate-100 text-center">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
             <Star size={12} fill="currentColor" className="text-amber-400" /> New items added every Saturday! <Star size={12} fill="currentColor" className="text-amber-400" />
           </p>

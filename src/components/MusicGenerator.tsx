@@ -125,7 +125,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
 
   return (
     <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-[150] flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 p-6 text-white">
@@ -150,16 +150,16 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
 
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Controls */}
-          <div className="w-96 bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 overflow-y-auto">
+          <div className="w-96 bg-slate-50 border-r border-slate-200 overflow-y-auto">
             <div className="p-6 space-y-6">
               
               {/* Tab Switcher */}
-              <div className="flex gap-2 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
+              <div className="flex gap-2 bg-slate-200 p-1 rounded-xl">
                 <button
                   onClick={() => setActiveTab('preset')}
                   className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
                     activeTab === 'preset'
-                      ? 'bg-white dark:bg-slate-700 text-purple-600'
+                      ? 'bg-white text-purple-600'
                       : 'text-slate-500'
                   }`}
                 >
@@ -169,7 +169,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                   onClick={() => setActiveTab('custom')}
                   className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
                     activeTab === 'custom'
-                      ? 'bg-white dark:bg-slate-700 text-purple-600'
+                      ? 'bg-white text-purple-600'
                       : 'text-slate-500'
                   }`}
                 >
@@ -179,7 +179,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
 
               {activeTab === 'preset' && (
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
+                  <label className="block text-sm font-bold text-slate-700 mb-3">
                     🎼 Quick Presets
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -187,10 +187,10 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                       <button
                         key={preset.id}
                         onClick={() => handlePresetSelect(preset)}
-                        className="p-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-purple-400 transition-all text-left"
+                        className="p-3 bg-white border-2 border-slate-200 rounded-xl hover:border-purple-400 transition-all text-left"
                       >
                         <div className="text-2xl mb-1">{preset.icon}</div>
-                        <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{preset.name}</div>
+                        <div className="text-xs font-bold text-slate-700">{preset.name}</div>
                         <div className="text-[10px] text-slate-500">{preset.duration}s</div>
                       </button>
                     ))}
@@ -201,7 +201,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
               {activeTab === 'custom' && (
                 <>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
                       <Mic2 size={16} className="inline mr-2" />
                       Describe Your Music
                     </label>
@@ -209,20 +209,20 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder="Epic orchestral battle music with heroic brass and pounding drums..."
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+                      className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-purple-400 resize-none"
                       rows={4}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
                       <Headphones size={16} className="inline mr-2" />
                       Music Style
                     </label>
                     <select
                       value={selectedStyle}
                       onChange={(e) => setSelectedStyle(e.target.value)}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-purple-400"
+                      className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-purple-400"
                     >
                       {styles.map((style) => (
                         <option key={style} value={style.toLowerCase()}>{style}</option>
@@ -231,7 +231,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
                       <Volume2 size={16} className="inline mr-2" />
                       Duration
                     </label>
@@ -243,7 +243,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                           className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
                             duration === d
                               ? 'bg-purple-500 text-white'
-                              : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                              : 'bg-slate-200 text-slate-600'
                           }`}
                         >
                           {d}s
@@ -278,8 +278,8 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
               </button>
 
               {/* Info */}
-              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                <div className="text-xs text-purple-700 dark:text-purple-300">
+              <div className="p-4 bg-purple-50 rounded-xl border border-purple-200">
+                <div className="text-xs text-purple-700">
                   <strong>💡 Tip:</strong> Be specific! Include style, mood, and instruments for best results.
                 </div>
               </div>
@@ -287,7 +287,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="flex-1 bg-slate-100 dark:bg-slate-950 p-6 overflow-y-auto">
+          <div className="flex-1 bg-slate-100 p-6 overflow-y-auto">
             {!generatedMusic && !isGenerating && (
               <div className="h-full flex flex-col items-center justify-center text-slate-400">
                 <div className="text-8xl mb-4">🎵</div>
@@ -302,7 +302,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
               <div className="h-full flex flex-col items-center justify-center">
                 <div className="w-64 mb-8">
                   <div className="relative w-32 h-32 mx-auto mb-6">
-                    <div className="absolute inset-0 border-4 border-slate-200 dark:border-slate-700 rounded-full" />
+                    <div className="absolute inset-0 border-4 border-slate-200 rounded-full" />
                     <div 
                       className="absolute inset-0 border-4 border-purple-500 rounded-full border-t-transparent animate-spin"
                     />
@@ -312,14 +312,14 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                   </div>
                   
                   <div className="space-y-2">
-                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
                         style={{ width: `${progress.progress}%` }}
                       />
                     </div>
                     <div className="text-center">
-                      <div className="font-bold text-slate-700 dark:text-slate-300">
+                      <div className="font-bold text-slate-700">
                         {progress.message}
                       </div>
                     </div>
@@ -330,7 +330,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
 
             {generatedMusic && (
               <div className="h-full flex flex-col">
-                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden flex-1">
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex-1">
                   {/* Music Visualizer Placeholder */}
                   <div className="h-64 bg-gradient-to-br from-purple-900 via-pink-900 to-rose-900 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 opacity-30">
@@ -378,7 +378,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                       </button>
                       <button
                         onClick={() => downloadMusic(generatedMusic)}
-                        className="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all flex items-center gap-2"
+                        className="px-6 py-3 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300:bg-slate-600 transition-all flex items-center gap-2"
                       >
                         <Download size={20} />
                         Download

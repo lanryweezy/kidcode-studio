@@ -52,7 +52,7 @@ async function fetchWithTimeout(resource: RequestInfo | URL, options: RequestIni
 async function fetchWithRetry(resource: RequestInfo | URL, options: RequestInit & { timeout?: number, retries?: number, delay?: number } = {}) {
     const { retries = 3, delay = 1000, ...fetchOptions } = options;
 
-    let lastError: any;
+    let lastError: Error | null = null;
     // We execute the loop retries + 1 times. The first attempt, plus 'retries' number of retries.
     // If retries is 0, we still attempt once.
     const maxAttempts = Math.max(1, retries + 1);
@@ -67,8 +67,8 @@ async function fetchWithRetry(resource: RequestInfo | URL, options: RequestInit 
                 continue;
             }
             return response;
-        } catch (error: any) {
-            lastError = error;
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
             // Only retry on network errors or timeouts (AbortError)
             if (i === maxAttempts - 1) throw error;
             await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
@@ -256,7 +256,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
         const audioArrayBuffer = await audioResponse.arrayBuffer();
 
         // Create AudioContext and decode
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
         const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
         return audioBuffer;
     } catch (e) {

@@ -1,0 +1,841 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for services/pcbView3D.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">services</a> pcbView3D.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>0/163</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>1/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>1/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>0/163</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a>
+<a name='L232'></a><a href='#L232'>232</a>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a>
+<a name='L240'></a><a href='#L240'>240</a>
+<a name='L241'></a><a href='#L241'>241</a>
+<a name='L242'></a><a href='#L242'>242</a>
+<a name='L243'></a><a href='#L243'>243</a>
+<a name='L244'></a><a href='#L244'>244</a>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a>
+<a name='L247'></a><a href='#L247'>247</a>
+<a name='L248'></a><a href='#L248'>248</a>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// ============================================================
+// 3D PCB Visualization Engine
+// Rotatable 3D view using CSS transforms and perspective
+// ============================================================
+&nbsp;
+import { CircuitComponent, Wire } from '../types';
+&nbsp;
+// === 3D TRANSFORM TYPES ===
+&nbsp;
+export interface Transform3D {
+  rotateX: number;  // -90 to 90 degrees
+  rotateY: number;  // -90 to 90 degrees
+  rotateZ: number;  // -180 to 180 degrees
+  scale: number;    // 0.5 to 2.0
+  translateZ: number; // depth offset
+}
+&nbsp;
+export interface PCBView3D {
+  transform: Transform3D;
+  perspective: number;
+  showTraces: boolean;
+  showSilkscreen: boolean;
+  show3DComponents: boolean;
+}
+&nbsp;
+// === 3D TRANSFORM CALCULATIONS ===
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export function calculate3DTransform(</span>
+<span class="cstat-no" title="statement not covered" >  rotation: { x: number; y: number; z: number },</span>
+<span class="cstat-no" title="statement not covered" >  zoom: number</span>
+<span class="cstat-no" title="statement not covered" >): string {</span>
+<span class="cstat-no" title="statement not covered" >  return `perspective(800px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg) scale(${zoom})`;</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export function getRotationFromMouse(</span>
+<span class="cstat-no" title="statement not covered" >  startX: number,</span>
+<span class="cstat-no" title="statement not covered" >  startY: number,</span>
+<span class="cstat-no" title="statement not covered" >  currentX: number,</span>
+<span class="cstat-no" title="statement not covered" >  currentY: number,</span>
+<span class="cstat-no" title="statement not covered" >  currentRotation: { x: number; y: number }</span>
+<span class="cstat-no" title="statement not covered" >): { x: number; y: number } {</span>
+<span class="cstat-no" title="statement not covered" >  const deltaX = (currentX - startX) * 0.5;</span>
+<span class="cstat-no" title="statement not covered" >  const deltaY = (currentY - startY) * 0.5;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return {</span>
+<span class="cstat-no" title="statement not covered" >    x: Math.max(-60, Math.min(60, currentRotation.x + deltaY)),</span>
+<span class="cstat-no" title="statement not covered" >    y: currentRotation.y + deltaX,</span>
+<span class="cstat-no" title="statement not covered" >  };</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+// === COMPONENT 3D PROPERTIES ===
+&nbsp;
+export interface Component3D {
+  id: string;
+  type: string;
+  x: number;
+  y: number;
+  z: number;         // Height above PCB
+  width: number;
+  height: number;
+  depth: number;
+  color: string;
+  borderColor: string;
+  label: string;
+}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export const COMPONENT_3D_MODELS: Record&lt;string, Omit&lt;Component3D, 'id' | 'x' | 'y'&gt;&gt; = {</span>
+  // ICs - flat black packages
+<span class="cstat-no" title="statement not covered" >  ARDUINO_UNO: { type: 'ARDUINO_UNO', z: 2, width: 70, height: 50, depth: 8, color: '#0066cc', borderColor: '#004499', label: 'ARDUINO UNO' },</span>
+<span class="cstat-no" title="statement not covered" >  ARDUINO_NANO: { type: 'ARDUINO_NANO', z: 2, width: 18, height: 45, depth: 6, color: '#0071a0', borderColor: '#004499', label: 'NANO' },</span>
+<span class="cstat-no" title="statement not covered" >  ARDUINO_MEGA: { type: 'ARDUINO_MEGA', z: 2, width: 80, height: 60, depth: 8, color: '#0066cc', borderColor: '#004499', label: 'MEGA' },</span>
+<span class="cstat-no" title="statement not covered" >  ESP32_DEVKIT: { type: 'ESP32_DEVKIT', z: 2, width: 30, height: 50, depth: 6, color: '#1e293b', borderColor: '#000', label: 'ESP32' },</span>
+<span class="cstat-no" title="statement not covered" >  ESP32_CAM: { type: 'ESP32_CAM', z: 2, width: 25, height: 40, depth: 8, color: '#1e293b', borderColor: '#000', label: 'ESP32-CAM' },</span>
+<span class="cstat-no" title="statement not covered" >  ESP8266: { type: 'ESP8266', z: 2, width: 24, height: 15, depth: 3, color: '#1e293b', borderColor: '#000', label: 'ESP8266' },</span>
+<span class="cstat-no" title="statement not covered" >  NODEMCU: { type: 'NODEMCU', z: 2, width: 26, height: 48, depth: 4, color: '#1e293b', borderColor: '#000', label: 'NodeMCU' },</span>
+<span class="cstat-no" title="statement not covered" >  RASPBERRY_PI_4: { type: 'RASPBERRY_PI_4', z: 3, width: 65, height: 50, depth: 12, color: '#166534', borderColor: '#064e3b', label: 'RPI 4' },</span>
+<span class="cstat-no" title="statement not covered" >  RASPBERRY_PI_ZERO: { type: 'RASPBERRY_PI_ZERO', z: 2, width: 30, height: 65, depth: 5, color: '#166534', borderColor: '#064e3b', label: 'RPI Zero' },</span>
+<span class="cstat-no" title="statement not covered" >  MICROBIT: { type: 'MICROBIT', z: 2, width: 50, height: 40, depth: 4, color: '#1e293b', borderColor: '#000', label: 'micro:bit' },</span>
+&nbsp;
+  // LEDs - domed
+<span class="cstat-no" title="statement not covered" >  LED_RED: { type: 'LED_RED', z: 8, width: 6, height: 6, depth: 10, color: '#dc2626', borderColor: '#991b1b', label: 'RED' },</span>
+<span class="cstat-no" title="statement not covered" >  LED_BLUE: { type: 'LED_BLUE', z: 8, width: 6, height: 6, depth: 10, color: '#2563eb', borderColor: '#1d4ed8', label: 'BLUE' },</span>
+<span class="cstat-no" title="statement not covered" >  LED_GREEN: { type: 'LED_GREEN', z: 8, width: 6, height: 6, depth: 10, color: '#16a34a', borderColor: '#15803d', label: 'GREEN' },</span>
+<span class="cstat-no" title="statement not covered" >  LED_YELLOW: { type: 'LED_YELLOW', z: 8, width: 6, height: 6, depth: 10, color: '#eab308', borderColor: '#a16207', label: 'YELLOW' },</span>
+<span class="cstat-no" title="statement not covered" >  LED_ORANGE: { type: 'LED_ORANGE', z: 8, width: 6, height: 6, depth: 10, color: '#f97316', borderColor: '#c2410c', label: 'ORANGE' },</span>
+<span class="cstat-no" title="statement not covered" >  LED_WHITE: { type: 'LED_WHITE', z: 8, width: 6, height: 6, depth: 10, color: '#f8fafc', borderColor: '#94a3b8', label: 'WHITE' },</span>
+<span class="cstat-no" title="statement not covered" >  RGB_LED: { type: 'RGB_LED', z: 8, width: 6, height: 6, depth: 10, color: '#a855f7', borderColor: '#7c3aed', label: 'RGB' },</span>
+&nbsp;
+  // Passive components
+<span class="cstat-no" title="statement not covered" >  RESISTOR: { type: 'RESISTOR', z: 4, width: 12, height: 4, depth: 4, color: '#a8a29e', borderColor: '#78716c', label: 'RES' },</span>
+<span class="cstat-no" title="statement not covered" >  CAPACITOR_ELEC: { type: 'CAPACITOR_ELEC', z: 10, width: 8, height: 8, depth: 14, color: '#1e40af', borderColor: '#1e3a8a', label: 'CAP' },</span>
+<span class="cstat-no" title="statement not covered" >  CAPACITOR_CERAMIC: { type: 'CAPACITOR_CERAMIC', z: 4, width: 5, height: 3, depth: 5, color: '#d97706', borderColor: '#b45309', label: 'CER' },</span>
+<span class="cstat-no" title="statement not covered" >  CAPACITOR_TANTALUM: { type: 'CAPACITOR_TANTALUM', z: 4, width: 5, height: 3, depth: 5, color: '#eab308', borderColor: '#ca8a04', label: 'TAN' },</span>
+&nbsp;
+  // Diodes
+<span class="cstat-no" title="statement not covered" >  DIODE: { type: 'DIODE', z: 3, width: 10, height: 4, depth: 4, color: '#1a1a1a', borderColor: '#333', label: '1N4001' },</span>
+<span class="cstat-no" title="statement not covered" >  DIODE_SCHOTTKY: { type: 'DIODE_SCHOTTKY', z: 3, width: 10, height: 4, depth: 4, color: '#1a1a1a', borderColor: '#333', label: '1N5819' },</span>
+<span class="cstat-no" title="statement not covered" >  DIODE_ZENER: { type: 'DIODE_ZENER', z: 3, width: 10, height: 4, depth: 4, color: '#1a1a1a', borderColor: '#333', label: '5.1V Z' },</span>
+&nbsp;
+  // Transistors
+<span class="cstat-no" title="statement not covered" >  TRANSISTOR_NPN: { type: 'TRANSISTOR_NPN', z: 8, width: 6, height: 6, depth: 10, color: '#1a1a1a', borderColor: '#333', label: 'NPN' },</span>
+<span class="cstat-no" title="statement not covered" >  TRANSISTOR_PNP: { type: 'TRANSISTOR_PNP', z: 8, width: 6, height: 6, depth: 10, color: '#1a1a1a', borderColor: '#333', label: 'PNP' },</span>
+<span class="cstat-no" title="statement not covered" >  MOSFET_N: { type: 'MOSFET_N', z: 8, width: 10, height: 10, depth: 12, color: '#1a1a1a', borderColor: '#333', label: 'NMOS' },</span>
+<span class="cstat-no" title="statement not covered" >  MOSFET_P: { type: 'MOSFET_P', z: 8, width: 10, height: 10, depth: 12, color: '#1a1a1a', borderColor: '#333', label: 'PMOS' },</span>
+&nbsp;
+  // Voltage regulators
+<span class="cstat-no" title="statement not covered" >  VREG_7805: { type: 'VREG_7805', z: 8, width: 10, height: 10, depth: 12, color: '#1a1a1a', borderColor: '#333', label: '7805' },</span>
+<span class="cstat-no" title="statement not covered" >  VREG_317: { type: 'VREG_317', z: 8, width: 10, height: 10, depth: 12, color: '#1a1a1a', borderColor: '#333', label: '317' },</span>
+<span class="cstat-no" title="statement not covered" >  VREG_LDO: { type: 'VREG_LDO', z: 5, width: 6, height: 6, depth: 6, color: '#1a1a1a', borderColor: '#333', label: 'LDO' },</span>
+&nbsp;
+  // Op-amps
+<span class="cstat-no" title="statement not covered" >  OPAMP_358: { type: 'OPAMP_358', z: 4, width: 12, height: 6, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'LM358' },</span>
+<span class="cstat-no" title="statement not covered" >  OPAMP_072: { type: 'OPAMP_072', z: 4, width: 12, height: 6, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'TL072' },</span>
+&nbsp;
+  // Logic
+<span class="cstat-no" title="statement not covered" >  LOGIC_AND: { type: 'LOGIC_AND', z: 4, width: 12, height: 6, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'AND' },</span>
+<span class="cstat-no" title="statement not covered" >  LOGIC_OR: { type: 'LOGIC_OR', z: 4, width: 12, height: 6, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'OR' },</span>
+<span class="cstat-no" title="statement not covered" >  '555_TIMER': { type: '555_TIMER', z: 4, width: 12, height: 6, depth: 5, color: '#1a1a1a', borderColor: '#333', label: '555' },</span>
+&nbsp;
+  // Displays
+<span class="cstat-no" title="statement not covered" >  LCD: { type: 'LCD', z: 6, width: 48, height: 24, depth: 8, color: '#065f46', borderColor: '#047857', label: 'LCD 16x2' },</span>
+<span class="cstat-no" title="statement not covered" >  LCD_2004: { type: 'LCD_2004', z: 6, width: 56, height: 30, depth: 8, color: '#065f46', borderColor: '#047857', label: 'LCD 20x4' },</span>
+<span class="cstat-no" title="statement not covered" >  OLED: { type: 'OLED', z: 4, width: 30, height: 20, depth: 4, color: '#000', borderColor: '#333', label: 'OLED' },</span>
+<span class="cstat-no" title="statement not covered" >  SEVEN_SEGMENT: { type: 'SEVEN_SEGMENT', z: 6, width: 14, height: 20, depth: 8, color: '#1a1a1a', borderColor: '#333', label: '7-SEG' },</span>
+<span class="cstat-no" title="statement not covered" >  MATRIX: { type: 'MATRIX', z: 4, width: 24, height: 24, depth: 4, color: '#1a1a1a', borderColor: '#333', label: '8x8' },</span>
+<span class="cstat-no" title="statement not covered" >  NEOPIXEL_RING: { type: 'NEOPIXEL_RING', z: 4, width: 24, height: 24, depth: 4, color: '#a855f7', borderColor: '#7c3aed', label: 'NeoPixel' },</span>
+&nbsp;
+  // Power
+<span class="cstat-no" title="statement not covered" >  BATTERY_9V: { type: 'BATTERY_9V', z: 14, width: 16, height: 22, depth: 20, color: '#1a1a1a', borderColor: '#333', label: '9V' },</span>
+<span class="cstat-no" title="statement not covered" >  BATTERY_AA: { type: 'BATTERY_AA', z: 8, width: 8, height: 20, depth: 12, color: '#1a1a1a', borderColor: '#333', label: 'AA' },</span>
+<span class="cstat-no" title="statement not covered" >  SOLAR: { type: 'SOLAR', z: 3, width: 40, height: 40, depth: 5, color: '#1e3a5f', borderColor: '#1e40af', label: 'SOLAR' },</span>
+&nbsp;
+  // Communication
+<span class="cstat-no" title="statement not covered" >  WIFI: { type: 'WIFI', z: 4, width: 24, height: 15, depth: 4, color: '#1a1a1a', borderColor: '#333', label: 'WiFi' },</span>
+<span class="cstat-no" title="statement not covered" >  BLUETOOTH: { type: 'BLUETOOTH', z: 4, width: 24, height: 15, depth: 4, color: '#1a1a1a', borderColor: '#333', label: 'BT' },</span>
+<span class="cstat-no" title="statement not covered" >  RADIO: { type: 'RADIO', z: 4, width: 24, height: 15, depth: 4, color: '#1a1a1a', borderColor: '#333', label: 'RF' },</span>
+&nbsp;
+  // Sensors
+<span class="cstat-no" title="statement not covered" >  ULTRASONIC: { type: 'ULTRASONIC', z: 6, width: 30, height: 15, depth: 8, color: '#004d99', borderColor: '#003366', label: 'HC-SR04' },</span>
+<span class="cstat-no" title="statement not covered" >  DHT11: { type: 'DHT11', z: 5, width: 12, height: 12, depth: 6, color: '#0ea5e9', borderColor: '#0284c7', label: 'DHT11' },</span>
+<span class="cstat-no" title="statement not covered" >  DHT22: { type: 'DHT22', z: 5, width: 12, height: 12, depth: 6, color: '#f8fafc', borderColor: '#cbd5e1', label: 'DHT22' },</span>
+<span class="cstat-no" title="statement not covered" >  MOTION: { type: 'MOTION', z: 6, width: 20, height: 20, depth: 8, color: '#f8fafc', borderColor: '#cbd5e1', label: 'PIR' },</span>
+<span class="cstat-no" title="statement not covered" >  GAS_SENSOR: { type: 'GAS_SENSOR', z: 5, width: 20, height: 20, depth: 6, color: '#1a1a1a', borderColor: '#333', label: 'MQ-2' },</span>
+<span class="cstat-no" title="statement not covered" >  FLAME_SENSOR: { type: 'FLAME_SENSOR', z: 4, width: 16, height: 12, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'FLAME' },</span>
+<span class="cstat-no" title="statement not covered" >  RAIN_SENSOR: { type: 'RAIN_SENSOR', z: 3, width: 30, height: 20, depth: 4, color: '#1e3a5f', borderColor: '#1e40af', label: 'RAIN' },</span>
+<span class="cstat-no" title="statement not covered" >  SOIL_SENSOR: { type: 'SOIL_SENSOR', z: 4, width: 12, height: 20, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'SOIL' },</span>
+<span class="cstat-no" title="statement not covered" >  PRESSURE_SENSOR: { type: 'PRESSURE_SENSOR', z: 4, width: 16, height: 12, depth: 5, color: '#0891b2', borderColor: '#0e7490', label: 'BMP280' },</span>
+<span class="cstat-no" title="statement not covered" >  GPS: { type: 'GPS', z: 5, width: 20, height: 20, depth: 6, color: '#1a1a1a', borderColor: '#333', label: 'GPS' },</span>
+<span class="cstat-no" title="statement not covered" >  HEARTBEAT: { type: 'HEARTBEAT', z: 3, width: 16, height: 12, depth: 4, color: '#1a1a1a', borderColor: '#333', label: 'PULSE' },</span>
+<span class="cstat-no" title="statement not covered" >  COMPASS: { type: 'COMPASS', z: 4, width: 16, height: 12, depth: 5, color: '#0ea5e9', borderColor: '#0284c7', label: 'HMC5883' },</span>
+<span class="cstat-no" title="statement not covered" >  GYRO: { type: 'GYRO', z: 4, width: 16, height: 16, depth: 5, color: '#0d9488', borderColor: '#0f766e', label: 'MPU6050' },</span>
+<span class="cstat-no" title="statement not covered" >  LIGHT_SENSOR: { type: 'LIGHT_SENSOR', z: 3, width: 8, height: 6, depth: 4, color: '#facc15', borderColor: '#ca8a04', label: 'LDR' },</span>
+<span class="cstat-no" title="statement not covered" >  TEMP_SENSOR: { type: 'TEMP_SENSOR', z: 5, width: 6, height: 6, depth: 6, color: '#1a1a1a', borderColor: '#333', label: 'TMP36' },</span>
+<span class="cstat-no" title="statement not covered" >  THERMISTOR: { type: 'THERMISTOR', z: 4, width: 6, height: 6, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'NTC' },</span>
+<span class="cstat-no" title="statement not covered" >  FLEX_SENSOR: { type: 'FLEX_SENSOR', z: 2, width: 40, height: 8, depth: 3, color: '#7c3aed', borderColor: '#6d28d9', label: 'FLEX' },</span>
+<span class="cstat-no" title="statement not covered" >  TILT_SENSOR: { type: 'TILT_SENSOR', z: 5, width: 6, height: 6, depth: 6, color: '#1a1a1a', borderColor: '#333', label: 'TILT' },</span>
+<span class="cstat-no" title="statement not covered" >  HALL_SENSOR: { type: 'HALL_SENSOR', z: 4, width: 6, height: 5, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'HALL' },</span>
+<span class="cstat-no" title="statement not covered" >  SOUND_SENSOR: { type: 'SOUND_SENSOR', z: 4, width: 16, height: 12, depth: 5, color: '#1a1a1a', borderColor: '#333', label: 'MIC' },</span>
+&nbsp;
+  // Motors &amp; Actuators
+<span class="cstat-no" title="statement not covered" >  SERVO: { type: 'SERVO', z: 8, width: 14, height: 22, depth: 12, color: '#2563eb', borderColor: '#1d4ed8', label: 'SERVO' },</span>
+<span class="cstat-no" title="statement not covered" >  MOTOR_DC: { type: 'MOTOR_DC', z: 8, width: 12, height: 20, depth: 12, color: '#94a3b8', borderColor: '#64748b', label: 'MOTOR' },</span>
+<span class="cstat-no" title="statement not covered" >  FAN: { type: 'FAN', z: 6, width: 24, height: 24, depth: 8, color: '#1a1a1a', borderColor: '#333', label: 'FAN' },</span>
+<span class="cstat-no" title="statement not covered" >  BUZZER: { type: 'BUZZER', z: 8, width: 12, height: 12, depth: 10, color: '#1a1a1a', borderColor: '#333', label: 'BUZZER' },</span>
+<span class="cstat-no" title="statement not covered" >  SPEAKER: { type: 'SPEAKER', z: 6, width: 20, height: 20, depth: 8, color: '#1a1a1a', borderColor: '#333', label: 'SPK' },</span>
+<span class="cstat-no" title="statement not covered" >  RELAY: { type: 'RELAY', z: 10, width: 20, height: 24, depth: 12, color: '#2563eb', borderColor: '#1d4ed8', label: 'RELAY' },</span>
+<span class="cstat-no" title="statement not covered" >  LASER: { type: 'LASER', z: 6, width: 8, height: 16, depth: 8, color: '#b45309', borderColor: '#92400e', label: 'LASER' },</span>
+<span class="cstat-no" title="statement not covered" >  STEPPER: { type: 'STEPPER', z: 10, width: 20, height: 20, depth: 14, color: '#94a3b8', borderColor: '#64748b', label: 'STEPPER' },</span>
+<span class="cstat-no" title="statement not covered" >  PUMP: { type: 'PUMP', z: 8, width: 14, height: 24, depth: 10, color: '#f8fafc', borderColor: '#94a3b8', label: 'PUMP' },</span>
+<span class="cstat-no" title="statement not covered" >  VIBRATION: { type: 'VIBRATION', z: 4, width: 12, height: 12, depth: 5, color: '#94a3b8', borderColor: '#64748b', label: 'VIB' },</span>
+<span class="cstat-no" title="statement not covered" >  WIRE_SPOOL: { type: 'WIRE_SPOOL', z: 3, width: 12, height: 12, depth: 6, color: '#eab308', borderColor: '#ca8a04', label: 'WIRE' },</span>
+<span class="cstat-no" title="statement not covered" >};</span>
+&nbsp;
+// === 3D RENDERING ===
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export function generate3DComponentStyle(</span>
+<span class="cstat-no" title="statement not covered" >  comp3D: Component3D,</span>
+<span class="cstat-no" title="statement not covered" >  isActive: boolean</span>
+<span class="cstat-no" title="statement not covered" >): React.CSSProperties {</span>
+<span class="cstat-no" title="statement not covered" >  return {</span>
+<span class="cstat-no" title="statement not covered" >    position: 'absolute' as const,</span>
+<span class="cstat-no" title="statement not covered" >    left: `${comp3D.x}px`,</span>
+<span class="cstat-no" title="statement not covered" >    top: `${comp3D.y}px`,</span>
+<span class="cstat-no" title="statement not covered" >    width: `${comp3D.width}px`,</span>
+<span class="cstat-no" title="statement not covered" >    height: `${comp3D.height}px`,</span>
+<span class="cstat-no" title="statement not covered" >    transformStyle: 'preserve-3d' as const,</span>
+<span class="cstat-no" title="statement not covered" >    transform: `translateZ(${comp3D.z}px)`,</span>
+<span class="cstat-no" title="statement not covered" >  };</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export function getComponent3D(</span>
+<span class="cstat-no" title="statement not covered" >  comp: CircuitComponent,</span>
+<span class="cstat-no" title="statement not covered" >  isActive: boolean</span>
+<span class="cstat-no" title="statement not covered" >): Component3D {</span>
+<span class="cstat-no" title="statement not covered" >  const model = COMPONENT_3D_MODELS[comp.type] || {</span>
+<span class="cstat-no" title="statement not covered" >    type: comp.type,</span>
+<span class="cstat-no" title="statement not covered" >    z: 4,</span>
+<span class="cstat-no" title="statement not covered" >    width: 16,</span>
+<span class="cstat-no" title="statement not covered" >    height: 16,</span>
+<span class="cstat-no" title="statement not covered" >    depth: 6,</span>
+<span class="cstat-no" title="statement not covered" >    color: '#334155',</span>
+<span class="cstat-no" title="statement not covered" >    borderColor: '#475569',</span>
+<span class="cstat-no" title="statement not covered" >    label: comp.type.slice(0, 4),</span>
+<span class="cstat-no" title="statement not covered" >  };</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return {</span>
+<span class="cstat-no" title="statement not covered" >    ...model,</span>
+<span class="cstat-no" title="statement not covered" >    id: comp.id,</span>
+<span class="cstat-no" title="statement not covered" >    x: comp.x,</span>
+<span class="cstat-no" title="statement not covered" >    y: comp.y,</span>
+<span class="cstat-no" title="statement not covered" >    color: isActive ? getActiveColor(comp.type, model.color) : model.color,</span>
+<span class="cstat-no" title="statement not covered" >  };</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >function getActiveColor(type: string, defaultColor: string): string {</span>
+<span class="cstat-no" title="statement not covered" >  if (type.startsWith('LED')) {</span>
+<span class="cstat-no" title="statement not covered" >    if (type.includes('RED')) return '#ef4444';</span>
+<span class="cstat-no" title="statement not covered" >    if (type.includes('BLUE')) return '#3b82f6';</span>
+<span class="cstat-no" title="statement not covered" >    if (type.includes('GREEN')) return '#22c55e';</span>
+<span class="cstat-no" title="statement not covered" >    if (type.includes('YELLOW')) return '#eab308';</span>
+<span class="cstat-no" title="statement not covered" >    if (type.includes('ORANGE')) return '#f97316';</span>
+<span class="cstat-no" title="statement not covered" >    if (type.includes('WHITE')) return '#f8fafc';</span>
+<span class="cstat-no" title="statement not covered" >    return '#a855f7';</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" >  if (type === 'BULB') return '#fef08a';</span>
+<span class="cstat-no" title="statement not covered" >  if (type === 'BUZZER') return '#facc15';</span>
+<span class="cstat-no" title="statement not covered" >  if (type === 'LCD' || type === 'OLED') return '#22c55e';</span>
+<span class="cstat-no" title="statement not covered" >  return defaultColor;</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+// === PCB 3D GRID ===
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export function generate3DGrid(pcbColor: string): string {</span>
+<span class="cstat-no" title="statement not covered" >  return `</span>
+    &lt;pattern id="pcb-grid-3d" width="20" height="20" patternUnits="userSpaceOnUse"&gt;
+      &lt;circle cx="2" cy="2" r="1" fill="rgba(0,0,0,0.15)"/&gt;
+    &lt;/pattern&gt;
+<span class="cstat-no" title="statement not covered" >    &lt;rect width="100%" height="100%" fill="${pcbColor}" rx="4"/&gt;</span>
+    &lt;rect width="100%" height="100%" fill="url(#pcb-grid-3d)"/&gt;
+    &lt;rect width="100%" height="100%" fill="none" stroke="rgba(255,255,255,0.08)" rx="4"/&gt;
+  `;
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+// === 3D VIEW PRESETS ===
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export const VIEW_PRESETS: Record&lt;string, Transform3D&gt; = {</span>
+<span class="cstat-no" title="statement not covered" >  'top': { rotateX: 0, rotateY: 0, rotateZ: 0, scale: 1, translateZ: 0 },</span>
+<span class="cstat-no" title="statement not covered" >  'front': { rotateX: -45, rotateY: 0, rotateZ: 0, scale: 1, translateZ: 50 },</span>
+<span class="cstat-no" title="statement not covered" >  'side': { rotateX: 0, rotateY: 45, rotateZ: 0, scale: 1, translateZ: 50 },</span>
+<span class="cstat-no" title="statement not covered" >  'iso': { rotateX: -30, rotateY: 30, rotateZ: 0, scale: 1, translateZ: 30 },</span>
+<span class="cstat-no" title="statement not covered" >  'angle': { rotateX: -20, rotateY: 25, rotateZ: 0, scale: 1.1, translateZ: 20 },</span>
+<span class="cstat-no" title="statement not covered" >};</span>
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-07-14T16:37:27.483Z
+            </div>
+        <script src="../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../sorter.js"></script>
+        <script src="../block-navigation.js"></script>
+    </body>
+</html>
+    

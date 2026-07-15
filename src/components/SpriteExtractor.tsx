@@ -59,7 +59,7 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border-4 border-cyan-500 overflow-hidden flex flex-col h-[700px]">
+            <div className="w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl border-4 border-cyan-500 overflow-hidden flex flex-col h-[700px]">
 
                 {/* Header */}
                 <div className="p-6 bg-cyan-500 text-white flex items-center justify-between">
@@ -77,10 +77,10 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
 
                 <div className="flex flex-1 overflow-hidden">
                     {/* Sidebar Controls */}
-                    <div className="w-64 bg-slate-50 dark:bg-slate-950/50 p-6 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-6">
+                    <div className="w-64 bg-slate-50 p-6 border-r border-slate-200 flex flex-col gap-6">
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full py-3 bg-white dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-cyan-500 hover:text-cyan-500 transition-colors group"
+                            className="w-full py-3 bg-white border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-cyan-500 hover:text-cyan-500 transition-colors group"
                         >
                             <Upload size={24} className="group-hover:scale-110 transition-transform" />
                             <span className="text-xs font-bold uppercase">Upload Sheet</span>
@@ -95,7 +95,7 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
                                         type="number"
                                         value={gridSize.w}
                                         onChange={(e) => setGridSize({ ...gridSize, w: Number(e.target.value) })}
-                                        className="w-full p-2 rounded-lg bg-slate-200 dark:bg-slate-800 outline-none font-mono text-center"
+                                        className="w-full p-2 rounded-lg bg-slate-200 outline-none font-mono text-center"
                                     />
                                 </div>
                                 <div>
@@ -104,7 +104,7 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
                                         type="number"
                                         value={gridSize.h}
                                         onChange={(e) => setGridSize({ ...gridSize, h: Number(e.target.value) })}
-                                        className="w-full p-2 rounded-lg bg-slate-200 dark:bg-slate-800 outline-none font-mono text-center"
+                                        className="w-full p-2 rounded-lg bg-slate-200 outline-none font-mono text-center"
                                     />
                                 </div>
                                 <button
@@ -118,14 +118,14 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
                     </div>
 
                     {/* Preview Area */}
-                    <div className="flex-1 bg-slate-100 dark:bg-slate-900 p-8 flex flex-col items-center justify-center overflow-hidden relative">
+                    <div className="flex-1 bg-slate-100 p-8 flex flex-col items-center justify-center overflow-hidden relative">
                         {!image ? (
                             <div className="text-slate-400 flex flex-col items-center gap-4">
                                 <ImageIcon size={64} className="opacity-20" />
                                 <p className="font-bold">Upload a sprite sheet to start</p>
                             </div>
                         ) : (
-                            <div className="relative max-w-full max-h-full overflow-auto border-2 border-slate-300 dark:border-slate-700 rounded-lg shadow-inner bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAjyQc6WCgAsh8AMvpKD7dM19DAAAAAElFTkSuQmCC')]">
+                            <div className="relative max-w-full max-h-full overflow-auto border-2 border-slate-300 rounded-lg shadow-inner bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAjyQc6WCgAsh8AMvpKD7dM19DAAAAAElFTkSuQmCC')]">
                                 <canvas
                                     ref={canvasRef}
                                     width={image.width}
@@ -147,13 +147,13 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
 
                 {/* Frames Output */}
                 {frames.length > 0 && (
-                    <div className="h-32 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 p-4 flex gap-4 overflow-x-auto items-center">
+                    <div className="h-32 bg-slate-50 border-t border-slate-200 p-4 flex gap-4 overflow-x-auto items-center">
                         {frames.map((frame, i) => (
-                            <div key={i} className="w-16 h-16 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0 p-1 flex items-center justify-center">
+                            <div key={i} className="w-16 h-16 bg-white rounded-lg border border-slate-200 shrink-0 p-1 flex items-center justify-center">
                                 <img src={frame} className="max-w-full max-h-full object-contain" />
                             </div>
                         ))}
-                        <div className="w-px h-12 bg-slate-300 dark:bg-slate-700 mx-2" />
+                        <div className="w-px h-12 bg-slate-300 mx-2" />
                         <button
                             onClick={handleSave}
                             className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-black rounded-xl shadow-lg flex items-center gap-2 shrink-0"

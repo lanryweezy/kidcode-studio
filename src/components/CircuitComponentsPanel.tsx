@@ -35,19 +35,19 @@ const CircuitComponentsPanel: React.FC<CircuitComponentsPanelProps> = ({
 
   return (
     <div className="flex-1 flex flex-col relative">
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="p-4 border-b border-slate-100 bg-white">
         <div className="mb-4">
-          <h3 className="font-bold text-slate-700 dark:text-slate-200 text-sm mb-2 uppercase tracking-wide">Board Color</h3>
+          <h3 className="font-bold text-slate-700 text-sm mb-2 uppercase tracking-wide">Board Color</h3>
           <div className="flex gap-2">
             {pcbColorOptions.map(c => (
               <button
                 key={c}
                 onClick={() => setPcbColor(c)}
-                className={`w-6 h-6 rounded-full border-2 shadow-sm transition-all hover:scale-110 ${pcbColor === c ? 'border-slate-900 dark:border-white ring-2 ring-violet-200' : 'border-transparent'}`}
+                className={`w-6 h-6 rounded-full border-2 shadow-sm transition-all hover:scale-110 ${pcbColor === c ? 'border-slate-900 ring-2 ring-violet-200' : 'border-transparent'}`}
                 style={{ backgroundColor: c }}
               />
             ))}
-            <div className="relative w-6 h-6 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700">
+            <div className="relative w-6 h-6 rounded-full overflow-hidden border-2 border-slate-200">
               <input
                 type="color"
                 value={pcbColor}
@@ -64,7 +64,7 @@ const CircuitComponentsPanel: React.FC<CircuitComponentsPanelProps> = ({
             placeholder="Search parts..."
             value={circuitSearch}
             onChange={(e) => setCircuitSearch(e.target.value)}
-            className="w-full bg-slate-100 dark:bg-slate-800 pl-9 pr-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-violet-200"
+            className="w-full bg-slate-100 pl-9 pr-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-violet-200"
           />
         </div>
       </div>
@@ -92,11 +92,11 @@ const CircuitComponentsPanel: React.FC<CircuitComponentsPanelProps> = ({
                       key={comp.type}
                       draggable
                       onDragStart={handleComponentDragStart(comp)}
-                      className={`flex items-center gap-3 p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 cursor-grab active:cursor-grabbing bg-white dark:bg-slate-800 shadow-sm transition-all hover:scale-[1.02]`}
+                      className={`flex items-center gap-3 p-2 rounded-xl border border-slate-200 hover:border-emerald-300:border-emerald-700 cursor-grab active:cursor-grabbing bg-white shadow-sm transition-all hover:scale-[1.02]`}
                     >
                       <ComponentThumbnail type={comp.type} />
                       <div className="flex flex-col flex-1">
-                        <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{comp.label}</span>
+                        <span className="font-bold text-sm text-slate-700">{comp.label}</span>
                         <span className="text-[10px] text-slate-400 line-clamp-1">{comp.description}</span>
                       </div>
                       <button
@@ -104,7 +104,7 @@ const CircuitComponentsPanel: React.FC<CircuitComponentsPanelProps> = ({
                           e.stopPropagation();
                           setSelectedDataSheet(comp);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50:bg-emerald-900/30 rounded-lg transition-colors cursor-pointer"
                         title="View Data Sheet"
                       >
                         <FileText size={16} />
@@ -120,16 +120,16 @@ const CircuitComponentsPanel: React.FC<CircuitComponentsPanelProps> = ({
 
       {selectedDataSheet && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div className="flex items-center gap-3">
                 <ComponentThumbnail type={selectedDataSheet.type} />
                 <div>
-                  <h3 className="font-bold text-slate-800 dark:text-white">{selectedDataSheet.label}</h3>
-                  <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400">{selectedDataSheet.type}</span>
+                  <h3 className="font-bold text-slate-800">{selectedDataSheet.label}</h3>
+                  <span className="text-xs font-mono text-emerald-600">{selectedDataSheet.type}</span>
                 </div>
               </div>
-              <button onClick={() => setSelectedDataSheet(null)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
+              <button onClick={() => setSelectedDataSheet(null)} className="p-2 text-slate-400 hover:bg-slate-200:bg-slate-700 rounded-full">
                 <X size={20} />
               </button>
             </div>
@@ -137,26 +137,26 @@ const CircuitComponentsPanel: React.FC<CircuitComponentsPanelProps> = ({
               <div className="space-y-4">
                 <div>
                   <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-1">What does it do?</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">{selectedDataSheet.description}</p>
+                  <p className="text-sm text-slate-600">{selectedDataSheet.description}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Category</span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{selectedDataSheet.category}</span>
+                    <span className="text-sm font-medium text-slate-700">{selectedDataSheet.category}</span>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                     <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Default Pin</span>
-                    <span className="text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400">PIN {selectedDataSheet.defaultPin}</span>
+                    <span className="text-sm font-mono font-bold text-indigo-600">PIN {selectedDataSheet.defaultPin}</span>
                   </div>
                 </div>
 
-                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-100 dark:border-amber-900/50">
-                  <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 flex items-center gap-2 mb-2">
+                <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                  <h4 className="text-xs font-bold text-amber-800 flex items-center gap-2 mb-2">
                     <span className="text-lg">💡</span> KidCode Tip!
                   </h4>
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
-                    Connect this component to <span className="font-mono bg-white/50 dark:bg-black/20 px-1 rounded">PIN {selectedDataSheet.defaultPin}</span> and use the blocks in the <strong>{selectedDataSheet.category}</strong> drawer to control it!
+                  <p className="text-xs text-amber-700">
+                    Connect this component to <span className="font-mono bg-white/50 px-1 rounded">PIN {selectedDataSheet.defaultPin}</span> and use the blocks in the <strong>{selectedDataSheet.category}</strong> drawer to control it!
                   </p>
                 </div>
               </div>

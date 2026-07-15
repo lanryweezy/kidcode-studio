@@ -137,7 +137,7 @@ const Block: React.FC<BlockProps> = ({
                 ref={blockRef}
                 className={`
                 relative group flex flex-col p-4 rounded-xl mb-4 transition-all duration-200 select-none
-                bg-yellow-200 dark:bg-yellow-600/80 border-b-4 border-r-4 border-yellow-300 dark:border-yellow-800
+                bg-yellow-200 border-b-4 border-r-4 border-yellow-300
                 shadow-sm rotate-1 hover:rotate-0 hover:scale-[1.01] hover:shadow-md
                 ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
             `}
@@ -152,7 +152,7 @@ const Block: React.FC<BlockProps> = ({
                 role="article"
                 aria-label={`Comment block`}
             >
-                <div className="flex items-center gap-2 mb-2 text-yellow-800 dark:text-yellow-100 opacity-60">
+                <div className="flex items-center gap-2 mb-2 text-yellow-800 opacity-60">
                     <StickyNote size={16} />
                     <span className="text-[10px] font-black uppercase tracking-widest font-sans">Note</span>
                     <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
@@ -162,7 +162,7 @@ const Block: React.FC<BlockProps> = ({
                 <textarea
                     value={block.params.text || ''}
                     onChange={(e) => handleParamChange('text', e.target.value)}
-                    className="w-full bg-transparent border-none outline-none font-hand text-xl text-slate-800 dark:text-white placeholder-yellow-600/50 resize-none overflow-hidden leading-snug"
+                    className="w-full bg-transparent border-none outline-none font-hand text-xl text-slate-800 placeholder-yellow-600/50 resize-none overflow-hidden leading-snug"
                     placeholder="Type your notes here..."
                     rows={Math.max(2, (block.params.text || '').split('\n').length)}
                     onClick={(e) => e.stopPropagation()}
@@ -176,38 +176,38 @@ const Block: React.FC<BlockProps> = ({
     const isDataBlock = block.type.startsWith('SET_VAR') || block.type.startsWith('CHANGE_VAR') || block.type.startsWith('LIST_') || block.type.startsWith('CALC_') || block.type.startsWith('STR_');
     const isNavBlock = block.type === CommandType.CREATE_SCREEN || block.type === CommandType.NAVIGATE;
 
-    let borderColor = 'border-slate-200 dark:border-slate-700';
-    let bgColor = 'bg-white dark:bg-slate-800';
-    let labelColor = 'text-slate-700 dark:text-slate-200';
+    let borderColor = 'border-slate-200';
+    let bgColor = 'bg-white';
+    let labelColor = 'text-slate-700';
 
     if (isControlBlock) {
-        borderColor = 'border-violet-200 dark:border-violet-800';
-        bgColor = 'bg-violet-50 dark:bg-violet-900/30';
-        labelColor = 'text-violet-700 dark:text-violet-200';
+        borderColor = 'border-violet-200';
+        bgColor = 'bg-violet-50';
+        labelColor = 'text-violet-700';
     } else if (isLogicBlock) {
-        borderColor = 'border-indigo-200 dark:border-indigo-800';
-        bgColor = 'bg-indigo-50 dark:bg-indigo-900/30';
-        labelColor = 'text-indigo-700 dark:text-indigo-200';
+        borderColor = 'border-indigo-200';
+        bgColor = 'bg-indigo-50';
+        labelColor = 'text-indigo-700';
     } else if (isDataBlock) {
-        borderColor = 'border-orange-200 dark:border-orange-800';
-        bgColor = 'bg-orange-50 dark:bg-orange-900/30';
-        labelColor = 'text-orange-700 dark:text-orange-200';
+        borderColor = 'border-orange-200';
+        bgColor = 'bg-orange-50';
+        labelColor = 'text-orange-700';
     } else if (isNavBlock) {
-        borderColor = 'border-slate-600 dark:border-slate-500';
-        bgColor = 'bg-slate-700 dark:bg-slate-800';
+        borderColor = 'border-slate-600';
+        bgColor = 'bg-slate-700';
         labelColor = 'text-white';
     }
 
     const isElse = block.type === CommandType.ELSE;
     if (isElse) {
-        bgColor = 'bg-indigo-100 dark:bg-indigo-800/50';
-        borderColor = 'border-indigo-300 dark:border-indigo-600';
+        bgColor = 'bg-indigo-100';
+        borderColor = 'border-indigo-300';
     }
 
     // Active Style is now controlled by class toggling for performance, but this remains for fallback
     const activeStyle = isActive
         ? 'ring-4 ring-yellow-400 border-yellow-500 shadow-xl scale-[1.02] z-10'
-        : 'hover:shadow-lg hover:border-slate-400 dark:hover:border-slate-500 shadow-sm';
+        : 'hover:shadow-lg hover:border-slate-400:border-slate-500 shadow-sm';
 
     return (
         <div className="flex gap-2 items-center">
@@ -225,7 +225,7 @@ const Block: React.FC<BlockProps> = ({
                 ref={blockRef}
                 className={`
             relative group flex-1 flex items-center gap-3 p-3 rounded-xl border-2 mb-3
-            transition-all duration-200 select-none touch-none
+            transition-all duration-200 select-none touch-none block-hover
             ${borderColor} ${bgColor} ${activeStyle}
             ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
         `}
@@ -259,12 +259,12 @@ const Block: React.FC<BlockProps> = ({
                 aria-label={`Code block: ${def?.label}`}
             >
                 {isDraggable && (
-                    <div className="text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400 cursor-grab active:cursor-grabbing">
+                    <div className="text-slate-300 hover:text-slate-500:text-slate-400 cursor-grab active:cursor-grabbing">
                         <GripVertical size={16} />
                     </div>
                 )}
 
-                <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-300 shrink-0">
+                <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 shrink-0">
                     {index + 1}
                 </div>
 
@@ -299,12 +299,12 @@ const Block: React.FC<BlockProps> = ({
 
                     {(block.type.startsWith('CALC_') || block.type.startsWith('STR_')) && (
                         <div className="flex items-center gap-2 w-full mt-1">
-                            <div className="flex items-center gap-1 bg-orange-100/50 dark:bg-orange-900/30 rounded-lg px-2 py-1 border border-orange-200 dark:border-orange-800">
+                            <div className="flex items-center gap-1 bg-orange-100/50 rounded-lg px-2 py-1 border border-orange-200">
                                 <span className="text-[10px] font-bold text-orange-400">SET VAR</span>
                                 <DebouncedInput
                                     value={block.params.varName}
                                     onChange={(val) => handleParamChange('varName', val)}
-                                    className="w-16 bg-transparent outline-none text-sm font-bold text-orange-700 dark:text-orange-200 placeholder-orange-300"
+                                    className="w-16 bg-transparent outline-none text-sm font-bold text-orange-700 placeholder-orange-300"
                                     placeholder="res"
                                 />
                             </div>
@@ -315,14 +315,14 @@ const Block: React.FC<BlockProps> = ({
                                     type="number"
                                     value={block.params.value}
                                     onChange={(val) => handleParamChange('value', val)}
-                                    className="w-14 bg-white dark:bg-slate-700 border border-orange-200 dark:border-orange-800 rounded px-1 py-1 text-center font-mono text-sm text-slate-700 dark:text-slate-200"
+                                    className="w-14 bg-white border border-orange-200 rounded px-1 py-1 text-center font-mono text-sm text-slate-700"
                                 />
                             )}
                             {block.type.startsWith('STR_') && (
                                 <DebouncedInput
                                     value={block.params.text}
                                     onChange={(val) => handleParamChange('text', val)}
-                                    className="flex-1 min-w-[60px] bg-white dark:bg-slate-700 border border-orange-200 dark:border-orange-800 rounded px-1 py-1 text-sm text-slate-700 dark:text-slate-200"
+                                    className="flex-1 min-w-[60px] bg-white border border-orange-200 rounded px-1 py-1 text-sm text-slate-700"
                                     placeholder="Text 1"
                                 />
                             )}
@@ -331,12 +331,12 @@ const Block: React.FC<BlockProps> = ({
                                     type="number"
                                     value={block.params.value}
                                     onChange={(val) => handleParamChange('value', val)}
-                                    className="w-14 bg-white dark:bg-slate-700 border border-orange-200 dark:border-orange-800 rounded px-1 py-1 text-center font-mono text-sm text-slate-700 dark:text-slate-200"
+                                    className="w-14 bg-white border border-orange-200 rounded px-1 py-1 text-center font-mono text-sm text-slate-700"
                                     placeholder="min"
                                 />
                             )}
 
-                            <span className="text-orange-500 font-bold bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded text-sm">
+                            <span className="text-orange-500 font-bold bg-orange-50 px-1.5 py-0.5 rounded text-sm">
                                 {block.type === CommandType.CALC_ADD ? '+' :
                                     block.type === CommandType.CALC_SUB ? '-' :
                                         block.type === CommandType.CALC_MUL ? '×' :
@@ -354,7 +354,7 @@ const Block: React.FC<BlockProps> = ({
                                         type="number"
                                         value={block.params.value2}
                                         onChange={(val) => handleParamChange('value2', val)}
-                                        className="w-14 bg-white dark:bg-slate-700 border border-orange-200 dark:border-orange-800 rounded px-1 py-1 text-center font-mono text-sm text-slate-700 dark:text-slate-200"
+                                        className="w-14 bg-white border border-orange-200 rounded px-1 py-1 text-center font-mono text-sm text-slate-700"
                                         placeholder={block.type === CommandType.CALC_RANDOM ? "max" : "0"}
                                     />
                                 )}
@@ -362,7 +362,7 @@ const Block: React.FC<BlockProps> = ({
                                 <DebouncedInput
                                     value={block.params.text2}
                                     onChange={(val) => handleParamChange('text2', val)}
-                                    className="flex-1 min-w-[60px] bg-white dark:bg-slate-700 border border-orange-200 dark:border-orange-800 rounded px-1 py-1 text-sm text-slate-700 dark:text-slate-200"
+                                    className="flex-1 min-w-[60px] bg-white border border-orange-200 rounded px-1 py-1 text-sm text-slate-700"
                                     placeholder="Text 2"
                                 />
                             )}
@@ -372,48 +372,48 @@ const Block: React.FC<BlockProps> = ({
                     {/* --- LIST BLOCKS UI --- */}
                     {block.type.startsWith('LIST_') && block.type !== CommandType.LIST_CLEAR && (
                         <div className="flex items-center gap-2 mt-1 w-full">
-                            <div className="flex items-center gap-1 bg-yellow-100/50 dark:bg-yellow-900/30 rounded-lg px-2 py-1 border border-yellow-200 dark:border-yellow-800">
-                                <span className="text-[10px] font-bold text-yellow-600 dark:text-yellow-400">LIST</span>
+                            <div className="flex items-center gap-1 bg-yellow-100/50 rounded-lg px-2 py-1 border border-yellow-200">
+                                <span className="text-[10px] font-bold text-yellow-600">LIST</span>
                                 <DebouncedInput
                                     value={block.type === CommandType.LIST_GET ? (block.params.listName) : (block.params.varName)}
                                     onChange={(val) => handleParamChange(block.type === CommandType.LIST_GET ? 'listName' : 'varName', val)}
-                                    className="w-16 bg-transparent outline-none text-sm font-bold text-yellow-800 dark:text-yellow-200 placeholder-yellow-400"
+                                    className="w-16 bg-transparent outline-none text-sm font-bold text-yellow-800 placeholder-yellow-400"
                                     placeholder="myList"
                                 />
                             </div>
 
                             {block.type === CommandType.LIST_ADD && (
                                 <>
-                                    <span className="text-xs font-bold text-yellow-600 dark:text-yellow-400">ADD</span>
-                                    <DebouncedInput value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="flex-1 bg-white dark:bg-slate-700 border border-yellow-200 dark:border-yellow-800 rounded px-2 py-1 text-sm dark:text-slate-200" placeholder="Value" />
+                                    <span className="text-xs font-bold text-yellow-600">ADD</span>
+                                    <DebouncedInput value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="flex-1 bg-white border border-yellow-200 rounded px-2 py-1 text-sm" placeholder="Value" />
                                 </>
                             )}
                             {block.type === CommandType.LIST_REMOVE && (
                                 <>
-                                    <span className="text-xs font-bold text-yellow-600 dark:text-yellow-400">DEL INDEX</span>
-                                    <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-12 bg-white dark:bg-slate-700 border border-yellow-200 dark:border-yellow-800 rounded px-2 py-1 text-sm font-mono text-center dark:text-slate-200" />
+                                    <span className="text-xs font-bold text-yellow-600">DEL INDEX</span>
+                                    <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-12 bg-white border border-yellow-200 rounded px-2 py-1 text-sm font-mono text-center" />
                                 </>
                             )}
                             {block.type === CommandType.LIST_GET && (
                                 <>
-                                    <span className="text-xs font-bold text-yellow-600 dark:text-yellow-400">GET INDEX</span>
-                                    <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-12 bg-white dark:bg-slate-700 border border-yellow-200 dark:border-yellow-800 rounded px-2 py-1 text-sm font-mono text-center dark:text-slate-200" />
-                                    <span className="text-xs font-bold text-yellow-600 dark:text-yellow-400">→</span>
-                                    <DebouncedInput value={block.params.varName} onChange={(val) => handleParamChange('varName', val)} className="w-16 bg-yellow-50 dark:bg-slate-700 border border-yellow-200 dark:border-yellow-800 rounded px-2 py-1 text-sm text-yellow-800 dark:text-yellow-200 font-bold" placeholder="saveTo" />
+                                    <span className="text-xs font-bold text-yellow-600">GET INDEX</span>
+                                    <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-12 bg-white border border-yellow-200 rounded px-2 py-1 text-sm font-mono text-center" />
+                                    <span className="text-xs font-bold text-yellow-600">→</span>
+                                    <DebouncedInput value={block.params.varName} onChange={(val) => handleParamChange('varName', val)} className="w-16 bg-yellow-50 border border-yellow-200 rounded px-2 py-1 text-sm text-yellow-800 font-bold" placeholder="saveTo" />
                                 </>
                             )}
                         </div>
                     )}
 
                     {(block.type === CommandType.SET_BACKGROUND || block.type === CommandType.SET_RGB) && (
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded p-1">
+                        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded p-1">
                             <input
                                 type="color"
                                 value={block.params.color || '#ffffff'}
                                 onChange={(e) => handleParamChange('color', e.target.value)}
                                 className="w-12 h-8 rounded cursor-pointer border-0 p-0"
                             />
-                            <span className="text-xs font-mono text-slate-400 dark:text-slate-300">{block.params.color}</span>
+                            <span className="text-xs font-mono text-slate-400">{block.params.color}</span>
                         </div>
                     )}
 
@@ -427,24 +427,24 @@ const Block: React.FC<BlockProps> = ({
                             <>
                                 {block.type === CommandType.SET_LCD && (
                                     <>
-                                        <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-lime-600 rounded px-2 py-1">
+                                        <div className="flex items-center gap-1 bg-white border border-lime-600 rounded px-2 py-1">
                                             <select
                                                 value={block.params.row || 0}
                                                 onChange={(e) => handleParamChange('row', parseInt(e.target.value))}
-                                                className="bg-transparent outline-none text-xs font-bold text-lime-700 dark:text-lime-400 cursor-pointer"
+                                                className="bg-transparent outline-none text-xs font-bold text-lime-700 cursor-pointer"
                                             >
                                                 <option value={0}>Line 1</option>
                                                 <option value={1}>Line 2</option>
                                             </select>
                                         </div>
-                                        <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-lime-600 rounded px-2 py-1">
-                                            <span className="text-[10px] text-lime-600 dark:text-lime-400 font-bold">COL</span>
+                                        <div className="flex items-center gap-1 bg-white border border-lime-600 rounded px-2 py-1">
+                                            <span className="text-[10px] text-lime-600 font-bold">COL</span>
                                             <DebouncedInput
                                                 type="number"
                                                 min="0" max="15"
                                                 value={block.params.col}
                                                 onChange={(val) => handleParamChange('col', val)}
-                                                className="w-8 bg-transparent outline-none text-xs font-bold text-lime-700 dark:text-lime-400"
+                                                className="w-8 bg-transparent outline-none text-xs font-bold text-lime-700"
                                             />
                                         </div>
                                     </>
@@ -456,7 +456,7 @@ const Block: React.FC<BlockProps> = ({
                     flex-1 min-w-[100px] rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200 
                     ${block.type === CommandType.SET_LCD
                                             ? 'bg-[#84cc16] text-slate-900 font-digital border border-lime-600 placeholder-lime-800'
-                                            : 'bg-slate-100 dark:bg-slate-700 dark:text-white font-mono'}
+                                            : 'bg-slate-100 font-mono'}
                     `}
                                     placeholder={block.type === CommandType.SET_LCD ? "LCD Text..." : block.type === CommandType.NAVIGATE ? "Screen Name" : "Text..."}
                                 />
@@ -468,14 +468,14 @@ const Block: React.FC<BlockProps> = ({
                             <DebouncedInput
                                 value={block.params.text}
                                 onChange={(val) => handleParamChange('text', val)}
-                                className="flex-1 min-w-[100px] bg-slate-100 dark:bg-slate-700 dark:text-white rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
+                                className="flex-1 min-w-[100px] bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Placeholder..."
                             />
                             <span className="text-xs text-slate-400 font-bold">SAVE TO:</span>
                             <DebouncedInput
                                 value={block.params.varName}
                                 onChange={(val) => handleParamChange('varName', val)}
-                                className="w-20 bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 font-bold rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-orange-300 placeholder-orange-300"
+                                className="w-20 bg-orange-100 text-orange-800 font-bold rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-orange-300 placeholder-orange-300"
                                 placeholder="myVar"
                             />
                         </>
@@ -486,7 +486,7 @@ const Block: React.FC<BlockProps> = ({
                             <DebouncedInput
                                 value={block.params.text}
                                 onChange={(val) => handleParamChange('text', val)}
-                                className="flex-1 min-w-[100px] bg-slate-100 dark:bg-slate-700 dark:text-white font-mono rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
+                                className="flex-1 min-w-[100px] bg-slate-100 font-mono rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                             />
                             <div className="flex items-center gap-1">
                                 <input
@@ -498,7 +498,7 @@ const Block: React.FC<BlockProps> = ({
                                 <select
                                     value={block.params.textSize || 'md'}
                                     onChange={(e) => handleParamChange('textSize', e.target.value)}
-                                    className="bg-slate-100 dark:bg-slate-700 rounded px-1 py-1 text-xs font-bold text-slate-600 dark:text-slate-200 outline-none cursor-pointer"
+                                    className="bg-slate-100 rounded px-1 py-1 text-xs font-bold text-slate-600 outline-none cursor-pointer"
                                 >
                                     <option value="sm">Small</option>
                                     <option value="md">Normal</option>
@@ -514,14 +514,14 @@ const Block: React.FC<BlockProps> = ({
                             <DebouncedInput
                                 value={block.params.text}
                                 onChange={(val) => handleParamChange('text', val)}
-                                className="w-24 bg-slate-100 dark:bg-slate-700 dark:text-white rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
+                                className="w-24 bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Label"
                             />
                             <span className="text-xs text-slate-400 font-bold">LINK VAR:</span>
                             <DebouncedInput
                                 value={block.params.varName}
                                 onChange={(val) => handleParamChange('varName', val)}
-                                className="w-20 bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 font-bold rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-orange-300"
+                                className="w-20 bg-orange-100 text-orange-800 font-bold rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-orange-300"
                                 placeholder="myVar"
                             />
                             {block.type === CommandType.ADD_PROGRESS && (
@@ -531,7 +531,7 @@ const Block: React.FC<BlockProps> = ({
                                         type="number"
                                         value={block.params.value}
                                         onChange={(val) => handleParamChange('value', val)}
-                                        className="w-12 bg-slate-100 dark:bg-slate-700 dark:text-white rounded px-2 py-1 outline-none text-sm font-mono"
+                                        className="w-12 bg-slate-100 rounded px-2 py-1 outline-none text-sm font-mono"
                                     />
                                 </div>
                             )}
@@ -539,13 +539,13 @@ const Block: React.FC<BlockProps> = ({
                     )}
 
                     {block.type === CommandType.SET_SEGMENT && (
-                        <div className="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded px-2 py-1">
+                        <div className="flex items-center gap-1 bg-red-50 border border-red-200 rounded px-2 py-1">
                             <span className="text-xs text-red-500 font-bold">NUM</span>
                             <DebouncedInput
                                 type="number"
                                 value={block.params.value}
                                 onChange={(val) => handleParamChange('value', val)}
-                                className="w-16 bg-transparent outline-none font-mono text-sm text-red-700 dark:text-red-300 font-bold"
+                                className="w-16 bg-transparent outline-none font-mono text-sm text-red-700 font-bold"
                                 min="0" max="9"
                             />
                         </div>
@@ -555,17 +555,17 @@ const Block: React.FC<BlockProps> = ({
                         <DebouncedInput
                             value={block.params.text}
                             onChange={(val) => handleParamChange('text', val)}
-                            className="flex-1 min-w-[150px] bg-slate-100 dark:bg-slate-700 dark:text-white rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
+                            className="flex-1 min-w-[150px] bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                             placeholder="Image URL"
                         />
                     )}
 
                     {block.type === CommandType.SET_SCENE && (
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-purple-200 dark:border-purple-800 rounded px-2 py-1">
+                        <div className="flex items-center gap-1 bg-white border border-purple-200 rounded px-2 py-1">
                             <select
                                 value={block.params.text}
                                 onChange={(e) => handleParamChange('text', e.target.value)}
-                                className="bg-transparent outline-none text-sm font-bold text-purple-700 dark:text-purple-300 cursor-pointer"
+                                className="bg-transparent outline-none text-sm font-bold text-purple-700 cursor-pointer"
                             >
                                 <option value="grid">⬜ Grid</option>
                                 <option value="space">🚀 Space</option>
@@ -577,11 +577,11 @@ const Block: React.FC<BlockProps> = ({
                     )}
 
                     {block.type === CommandType.SET_WEATHER && (
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-blue-200 dark:border-blue-800 rounded px-2 py-1">
+                        <div className="flex items-center gap-1 bg-white border border-blue-200 rounded px-2 py-1">
                             <select
                                 value={block.params.text}
                                 onChange={(e) => handleParamChange('text', e.target.value)}
-                                className="bg-transparent outline-none text-sm font-bold text-blue-600 dark:text-blue-300 cursor-pointer"
+                                className="bg-transparent outline-none text-sm font-bold text-blue-600 cursor-pointer"
                             >
                                 <option value="none">☀️ Clear</option>
                                 <option value="rain">🌧️ Rain</option>
@@ -591,7 +591,7 @@ const Block: React.FC<BlockProps> = ({
                     )}
 
                     {block.type === CommandType.SET_CAMERA && (
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-slate-600 rounded px-2 py-1">
+                        <div className="flex items-center gap-1 bg-white border border-slate-600 rounded px-2 py-1">
                             <span className="text-xs text-slate-500 font-bold">ACTIVE</span>
                             <input
                                 type="checkbox"
@@ -607,71 +607,71 @@ const Block: React.FC<BlockProps> = ({
                             <DebouncedInput
                                 value={block.params.text}
                                 onChange={(val) => handleParamChange('text', val)}
-                                className="w-24 bg-slate-100 dark:bg-slate-700 dark:text-white rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
+                                className="w-24 bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Label"
                             />
                             <span className="text-xs text-slate-400 font-bold">MSG:</span>
                             <DebouncedInput
                                 value={block.params.message}
                                 onChange={(val) => handleParamChange('message', val)}
-                                className="w-24 bg-slate-100 dark:bg-slate-700 dark:text-white rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
+                                className="w-24 bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Alert Message"
                             />
                             <span className="text-xs text-slate-400 font-bold">GO TO:</span>
                             <DebouncedInput
                                 value={block.params.screenName}
                                 onChange={(val) => handleParamChange('screenName', val)}
-                                className="flex-1 min-w-[80px] bg-blue-50 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-blue-300 placeholder-blue-300 font-bold"
+                                className="flex-1 min-w-[80px] bg-blue-50 text-blue-800 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-blue-300 placeholder-blue-300 font-bold"
                                 placeholder="screen name"
                             />
                         </>
                     )}
 
                     {(block.type === CommandType.MOVE_X || block.type === CommandType.MOVE_Y || block.type === CommandType.SET_VELOCITY_X || block.type === CommandType.SET_VELOCITY_Y) && (
-                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded px-2 py-1">
-                            <span className="text-xs text-slate-500 dark:text-slate-300 font-bold">VAL</span>
+                        <div className="flex items-center gap-1 bg-slate-100 rounded px-2 py-1">
+                            <span className="text-xs text-slate-500 font-bold">VAL</span>
                             <DebouncedInput
                                 type="number"
                                 value={block.params.value}
                                 onChange={(val) => handleParamChange('value', val)}
-                                className="w-16 bg-transparent outline-none font-mono text-sm dark:text-white"
+                                className="w-16 bg-transparent outline-none font-mono text-sm"
                             />
                         </div>
                     )}
 
                     {(block.type === CommandType.CHANGE_SCORE || block.type === CommandType.SET_SCORE) && (
-                        <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 rounded px-2 py-1 border border-yellow-200 dark:border-yellow-800">
-                            <span className="text-xs text-yellow-600 dark:text-yellow-400 font-bold">PTS</span>
+                        <div className="flex items-center gap-1 bg-yellow-50 rounded px-2 py-1 border border-yellow-200">
+                            <span className="text-xs text-yellow-600 font-bold">PTS</span>
                             <DebouncedInput
                                 type="number"
                                 value={block.params.value}
                                 onChange={(val) => handleParamChange('value', val)}
-                                className="w-16 bg-transparent outline-none font-mono text-sm text-yellow-800 dark:text-yellow-200 font-bold"
+                                className="w-16 bg-transparent outline-none font-mono text-sm text-yellow-800 font-bold"
                             />
                         </div>
                     )}
 
                     {(block.type === CommandType.WAIT || block.type === CommandType.SLEEP || block.type === CommandType.SET_VIBRATION) && (
-                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded px-2 py-1">
-                            <span className="text-xs text-slate-500 dark:text-slate-300 font-bold">SEC</span>
+                        <div className="flex items-center gap-1 bg-slate-100 rounded px-2 py-1">
+                            <span className="text-xs text-slate-500 font-bold">SEC</span>
                             <DebouncedInput
                                 type="number"
                                 step="0.1"
                                 value={block.params.value}
                                 onChange={(val) => handleParamChange('value', val)}
-                                className="w-16 bg-transparent outline-none font-mono text-sm dark:text-white"
+                                className="w-16 bg-transparent outline-none font-mono text-sm"
                             />
                         </div>
                     )}
 
                     {block.type === CommandType.REPEAT && (
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-violet-100 dark:border-violet-900 rounded px-2 py-1">
+                        <div className="flex items-center gap-1 bg-white border border-violet-100 rounded px-2 py-1">
                             <span className="text-xs text-violet-500 font-bold">TIMES</span>
                             <DebouncedInput
                                 type="number"
                                 value={block.params.value}
                                 onChange={(val) => handleParamChange('value', val)}
-                                className="w-16 bg-transparent outline-none font-mono text-sm text-violet-700 dark:text-violet-300 font-bold"
+                                className="w-16 bg-transparent outline-none font-mono text-sm text-violet-700 font-bold"
                             />
                         </div>
                     )}
@@ -681,7 +681,7 @@ const Block: React.FC<BlockProps> = ({
                             <DebouncedInput
                                 value={block.params.varName}
                                 onChange={(val) => handleParamChange('varName', val)}
-                                className="w-24 bg-orange-100 dark:bg-orange-900/40 rounded px-2 py-1 outline-none text-sm font-bold text-orange-800 dark:text-orange-200 border border-orange-200 dark:border-orange-800 focus:ring-2 focus:ring-orange-300 placeholder-orange-300"
+                                className="w-24 bg-orange-100 rounded px-2 py-1 outline-none text-sm font-bold text-orange-800 border border-orange-200 focus:ring-2 focus:ring-orange-300 placeholder-orange-300"
                                 placeholder="Var Name"
                             />
                             <span className="text-xs text-orange-400 font-bold">
@@ -691,18 +691,18 @@ const Block: React.FC<BlockProps> = ({
                                 type="number"
                                 value={block.params.value}
                                 onChange={(val) => handleParamChange('value', val)}
-                                className="w-20 bg-white dark:bg-slate-700 border border-orange-200 dark:border-orange-800 rounded px-2 py-1 outline-none font-mono text-sm text-orange-800 dark:text-orange-200 font-bold"
+                                className="w-20 bg-white border border-orange-200 rounded px-2 py-1 outline-none font-mono text-sm text-orange-800 font-bold"
                             />
                         </>
                     )}
 
                     {block.type === CommandType.IF && (
                         <>
-                            <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-indigo-100 dark:border-indigo-800 rounded px-2 py-1 shadow-sm">
+                            <div className="flex items-center gap-1 bg-white border border-indigo-100 rounded px-2 py-1 shadow-sm">
                                 <select
                                     value={block.params.condition}
                                     onChange={(e) => handleParamChange('condition', e.target.value)}
-                                    className="bg-transparent outline-none text-sm font-bold text-indigo-700 dark:text-indigo-300 cursor-pointer pr-2"
+                                    className="bg-transparent outline-none text-sm font-bold text-indigo-700 cursor-pointer pr-2"
                                 >
                                     <option value="IS_PRESSED">Button Pressed</option>
                                     <option value="IS_SWITCH_ON">Switch is ON</option>
@@ -725,7 +725,7 @@ const Block: React.FC<BlockProps> = ({
                             </div>
 
                             {(block.params.condition === 'PIN_HIGH' || block.params.condition === 'IS_PRESSED') && (
-                                <div className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-indigo-100 dark:border-indigo-800 rounded px-2 py-1 animate-in fade-in zoom-in duration-200">
+                                <div className="flex items-center gap-1 bg-white border border-indigo-100 rounded px-2 py-1 animate-in fade-in zoom-in duration-200">
                                     <span className="text-xs text-indigo-400 font-bold">PIN</span>
                                     <DebouncedInput
                                         type="number"
@@ -733,7 +733,7 @@ const Block: React.FC<BlockProps> = ({
                                         max="100"
                                         value={block.params.pin}
                                         onChange={(val) => handleParamChange('pin', val)}
-                                        className="w-12 bg-transparent outline-none font-mono text-sm text-indigo-600 dark:text-indigo-300 font-bold"
+                                        className="w-12 bg-transparent outline-none font-mono text-sm text-indigo-600 font-bold"
                                     />
                                 </div>
                             )}
@@ -743,11 +743,11 @@ const Block: React.FC<BlockProps> = ({
 
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                     {onDuplicate && (
-                        <button onClick={() => onDuplicate(block.id)} className="p-1 text-slate-400 hover:text-blue-500 rounded bg-white dark:bg-slate-800 shadow-sm" title="Duplicate">
+                        <button onClick={() => onDuplicate(block.id)} className="p-1 text-slate-400 hover:text-blue-500 rounded bg-white shadow-sm" title="Duplicate">
                             <Copy size={12} />
                         </button>
                     )}
-                    <button onClick={() => onDelete(block.id)} className="p-1 text-slate-400 hover:text-red-500 rounded bg-white dark:bg-slate-800 shadow-sm" title="Delete">
+                    <button onClick={() => onDelete(block.id)} className="p-1 text-slate-400 hover:text-red-500 rounded bg-white shadow-sm" title="Delete">
                         <Trash2 size={12} />
                     </button>
                 </div>

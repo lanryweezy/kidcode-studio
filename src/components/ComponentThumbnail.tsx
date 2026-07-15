@@ -9,7 +9,7 @@ const ComponentThumbnail: React.FC<ComponentThumbnailProps> = ({ type }) => {
   const isMC = type.includes('ARDUINO') || type.includes('ESP') || type.includes('RASPBERRY') || type.includes('MICROBIT') || type.includes('NODE');
   
   return (
-    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-600 shadow-inner shrink-0">
+    <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden border border-slate-200 shadow-inner shrink-0">
       <svg width="40" height="40" viewBox="0 0 40 40" className="drop-shadow-sm">
         <defs>
           <linearGradient id="thumb-metal" x1="0%" y1="0%" x2="100%" y2="100%">

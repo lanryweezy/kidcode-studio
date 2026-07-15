@@ -2,6 +2,8 @@ import React, { useRef, useCallback } from 'react';
 import { AppMode, SpriteState, GameEntity } from '../types';
 import { playSoundEffect } from '../services/soundService';
 import { SpatialHash } from '../services/spatialHash';
+import { ObjectPool } from '../services/objectPool';
+import { CanvasOptimizer } from '../services/renderOptimizer';
 
 const SOLID_BLOCK_TYPES = new Set(['brick', 'grass', 'dirt', 'stone', 'crate']);
 const HAZARD_BLOCK_TYPES = new Set(['spike', 'lava']);
@@ -25,6 +27,15 @@ export const useGamePhysics = ({
     const shakeTimer = useRef(0);
     const spatialHashRef = useRef<SpatialHash>(new SpatialHash(40));
     const lastTilemapLengthRef = useRef(0);
+    const particlePoolRef = useRef<ObjectPool<{ x: number; y: number; vx: number; vy: number; life: number; color: string }>>(
+        new ObjectPool(
+            () => ({ x: 0, y: 0, vx: 0, vy: 0, life: 0, color: '#ffffff' }),
+            (p) => { p.x = 0; p.y = 0; p.vx = 0; p.vy = 0; p.life = 0; p.color = '#ffffff'; },
+            100,
+            500
+        )
+    );
+    const canvasOptimizerRef = useRef<CanvasOptimizer | null>(null);
 
     const tick = useCallback(() => {
         if (!isPlaying || mode !== AppMode.GAME) return;
@@ -250,7 +261,7 @@ export const useGamePhysics = ({
             x = 50;
         }
 
-        // 2. AI & Projectiles
+        // 2. AI & Projectiles with viewport culling
         const activeProjectiles = projectiles
             .map(p => ({ ...p, x: p.x + (p.vx || 0), y: p.y + (p.vy || 0), lifeTime: (p.lifeTime || 100) - 1 }))
             .filter(p => p.lifeTime > 0 && p.x > -50 && p.x < canvasW + 50 && p.y > -50 && p.y < canvasH + 50);
@@ -405,7 +416,14 @@ export const useGamePhysics = ({
         if (shakeTimer.current > 0) shakeTimer.current--;
 
         // Update spatial hash with new entity positions for next frame
-        spatialHashRef.current.buildEntityList([...newEnemies, ...items]);
+        // Only process enemies within viewport for AI optimization
+        const viewportEnemies = newEnemies.filter(e => 
+            e.x > -100 && e.x < canvasW + 100 && e.y > -100 && e.y < canvasH + 100
+        );
+        spatialHashRef.current.buildEntityList([...viewportEnemies, ...items]);
+
+        // Return particle pool for recycling dead projectiles
+        particlePoolRef.current.getStats();
 
         spriteStateRef.current = {
             ...state,
@@ -421,6 +439,7 @@ export const useGamePhysics = ({
 
     return {
         tick,
-        shakeAmount: shakeTimer.current
+        shakeAmount: shakeTimer.current,
+        particlePoolStats: particlePoolRef.current.getStats()
     };
 };

@@ -7,7 +7,6 @@ export interface UISlice {
     showHome: boolean;
     mode: AppMode;
     activeTab: string;
-    darkMode: boolean;
     leftPanelWidth: number;
     rightPanelWidth: number;
     showConsole: boolean;
@@ -46,13 +45,25 @@ export interface UISlice {
     blockSearch: string;
     expandedCategories: Record<string, boolean>;
     consoleLogs: string[];
+    activeTycoonGame: string | null;
+    showCodePageManager: boolean;
+    is3DMode: boolean;
+    showFirstWinCelebration: boolean;
+    showQuestEditor: boolean;
+    showEquipment: boolean;
+    showCrafting: boolean;
+    showSkillTree: boolean;
+    showShopOverlay: boolean;
+    showNPCDialogue: boolean;
+    showShortcuts: boolean;
+    highContrast: boolean;
+    isGameMode: boolean;
 
     // Actions
     setMode: (mode: AppMode) => void;
     setShowLanding: (show: boolean) => void;
     setShowHome: (show: boolean) => void;
     setActiveTab: (tab: string) => void;
-    setDarkMode: (dark: boolean) => void;
     toggleConsole: () => void;
     setShowProfile: (show: boolean) => void;
     setShowPricing: (show: boolean) => void;
@@ -86,14 +97,26 @@ export interface UISlice {
     clearLogs: () => void;
     setLeftPanelWidth: (width: number | ((prev: number) => number)) => void;
     setRightPanelWidth: (width: number | ((prev: number) => number)) => void;
+    setActiveTycoonGame: (game: string | null) => void;
+    setShowCodePageManager: (show: boolean) => void;
+    setIs3DMode: (mode: boolean) => void;
+    setShowFirstWinCelebration: (show: boolean) => void;
+    setShowQuestEditor: (show: boolean) => void;
+    setShowEquipment: (show: boolean) => void;
+    setShowCrafting: (show: boolean) => void;
+    setShowSkillTree: (show: boolean) => void;
+    setShowShopOverlay: (show: boolean) => void;
+    setShowNPCDialogue: (show: boolean) => void;
+    setShowShortcuts: (show: boolean) => void;
+    setHighContrast: (hc: boolean) => void;
+    setIsGameMode: (isGameMode: boolean) => void;
 }
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
     showLanding: true,
     showHome: false,
-    mode: AppMode.APP,
+    mode: AppMode.GAME,
     activeTab: 'code',
-    darkMode: false,
     leftPanelWidth: 280,
     rightPanelWidth: 400,
     showConsole: false,
@@ -132,12 +155,24 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     blockSearch: '',
     expandedCategories: {},
     consoleLogs: [],
+    activeTycoonGame: null,
+    showCodePageManager: false,
+    is3DMode: false,
+    showFirstWinCelebration: false,
+    showQuestEditor: false,
+    showEquipment: false,
+    showCrafting: false,
+    showSkillTree: false,
+    showShopOverlay: false,
+    showNPCDialogue: false,
+    showShortcuts: false,
+    highContrast: false,
+    isGameMode: false,
 
     setMode: (mode) => set({ mode }),
     setShowLanding: (show) => set({ showLanding: show }),
     setShowHome: (show) => set({ showHome: show }),
     setActiveTab: (tab) => set({ activeTab: tab }),
-    setDarkMode: (dark) => set({ darkMode: dark }),
     toggleConsole: () => set((state) => ({ showConsole: !state.showConsole })),
     setShowProfile: (showProfile) => set({ showProfile }),
     setShowPricing: (showPricing) => set({ showPricing }),
@@ -169,8 +204,21 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     setCircuitSearch: (circuitSearch) => set({ circuitSearch }),
     setBlockSearch: (blockSearch) => set({ blockSearch }),
     setExpandedCategories: (expandedCategories) => set({ expandedCategories }),
-    setConsoleLogs: (consoleLogs) => set({ consoleLogs }),
+    setConsoleLogs: (consoleLogs) => set({ consoleLogs: consoleLogs.slice(-500) }),
     clearLogs: () => set({ consoleLogs: [] }),
     setLeftPanelWidth: (width) => set((state) => ({ leftPanelWidth: typeof width === 'function' ? width(state.leftPanelWidth) : (width as number) })),
     setRightPanelWidth: (width) => set((state) => ({ rightPanelWidth: typeof width === 'function' ? width(state.rightPanelWidth) : (width as number) })),
+    setActiveTycoonGame: (game) => set({ activeTycoonGame: game }),
+    setShowCodePageManager: (show) => set({ showCodePageManager: show }),
+    setIs3DMode: (mode) => set({ is3DMode: mode }),
+    setShowFirstWinCelebration: (show) => set({ showFirstWinCelebration: show }),
+    setShowQuestEditor: (show) => set({ showQuestEditor: show }),
+    setShowEquipment: (show) => set({ showEquipment: show }),
+    setShowCrafting: (show) => set({ showCrafting: show }),
+    setShowSkillTree: (show) => set({ showSkillTree: show }),
+    setShowShopOverlay: (show) => set({ showShopOverlay: show }),
+    setShowNPCDialogue: (show) => set({ showNPCDialogue: show }),
+    setShowShortcuts: (show) => set({ showShortcuts: show }),
+    setHighContrast: (hc) => set({ highContrast: hc }),
+    setIsGameMode: (isGameMode) => set({ isGameMode }),
 });

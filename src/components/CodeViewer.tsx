@@ -34,12 +34,14 @@ const CodeViewer: React.FC<CodeViewerProps> = ({ code, onClose }) => {
               onClick={handleCopy}
               className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
               title="Copy Code"
+              aria-label="Copy code to clipboard"
             >
               {copied ? <Check size={18} className="text-green-400" /> : <Copy size={18} />}
             </button>
             <button 
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+              aria-label="Close code viewer"
             >
               <X size={18} />
             </button>

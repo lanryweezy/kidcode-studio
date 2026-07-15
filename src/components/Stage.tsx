@@ -34,6 +34,8 @@ interface StageProps {
     shakeAmount: number;
     onAppInteraction: (varName: string, value: any) => void;
     onTick?: () => void;
+    wires?: any[];
+    onWiresUpdate?: (wires: any[]) => void;
 }
 
 const Stage = forwardRef(({
@@ -57,7 +59,9 @@ const Stage = forwardRef(({
     onUpdateSpriteState,
     shakeAmount,
     onAppInteraction,
-    onTick
+    onTick,
+    wires,
+    onWiresUpdate
 }: StageProps, ref) => {
     const [gameCanvasSize, setGameCanvasSize] = useState({ w: 400, h: 400 });
 
@@ -71,7 +75,7 @@ const Stage = forwardRef(({
     }));
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50 relative overflow-hidden">
             {/* Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400 rounded-full blur-[120px]" />
@@ -87,6 +91,8 @@ const Stage = forwardRef(({
                     onCircuitUpdate={onCircuitUpdate}
                     isExecuting={isExecuting}
                     onHardwareInput={onHardwareInput}
+                    wires={wires}
+                    onWiresUpdate={onWiresUpdate}
                 />
             )}
 

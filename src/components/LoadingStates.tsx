@@ -5,10 +5,10 @@ import React from 'react';
  */
 export const CardSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div className={`animate-pulse ${className}`}>
-    <div className="bg-slate-200 dark:bg-slate-700 rounded-2xl h-48 w-full" />
+    <div className="bg-slate-200 rounded-2xl h-48 w-full" />
     <div className="mt-4 space-y-3">
-      <div className="bg-slate-200 dark:bg-slate-700 rounded-xl h-4 w-3/4" />
-      <div className="bg-slate-200 dark:bg-slate-700 rounded-xl h-3 w-1/2" />
+      <div className="bg-slate-200 rounded-xl h-4 w-3/4" />
+      <div className="bg-slate-200 rounded-xl h-3 w-1/2" />
     </div>
   </div>
 );
@@ -24,7 +24,7 @@ export const TextSkeleton: React.FC<{ lines?: number; className?: string }> = ({
     {Array.from({ length: lines }).map((_, i) => (
       <div
         key={i}
-        className="bg-slate-200 dark:bg-slate-700 rounded-xl h-4"
+        className="bg-slate-200 rounded-xl h-4"
         style={{ width: `${100 - (i * 10)}%` }}
       />
     ))}
@@ -39,7 +39,7 @@ export const AvatarSkeleton: React.FC<{ size?: number; className?: string }> = (
   className = '' 
 }) => (
   <div
-    className={`animate-pulse bg-slate-200 dark:bg-slate-700 rounded-full ${className}`}
+    className={`animate-pulse bg-slate-200 rounded-full ${className}`}
     style={{ width: size, height: size }}
   />
 );
@@ -49,8 +49,8 @@ export const AvatarSkeleton: React.FC<{ size?: number; className?: string }> = (
  */
 export const ThumbnailSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div className={`animate-pulse ${className}`}>
-    <div className="bg-slate-200 dark:bg-slate-700 rounded-xl aspect-square w-full" />
-    <div className="mt-2 bg-slate-200 dark:bg-slate-700 rounded-lg h-3 w-2/3" />
+    <div className="bg-slate-200 rounded-xl aspect-square w-full" />
+    <div className="mt-2 bg-slate-200 rounded-lg h-3 w-2/3" />
   </div>
 );
 
@@ -67,11 +67,11 @@ export const LoadingSpinner: React.FC<{
       className="relative"
       style={{ width: size, height: size }}
     >
-      <div className="absolute inset-0 border-4 border-slate-200 dark:border-slate-700 rounded-full" />
+      <div className="absolute inset-0 border-4 border-slate-200 rounded-full" />
       <div className="absolute inset-0 border-4 border-violet-500 rounded-full border-t-transparent animate-spin" />
     </div>
     {text && (
-      <div className="mt-4 text-slate-600 dark:text-slate-400 font-bold text-sm">
+      <div className="mt-4 text-slate-600 font-bold text-sm">
         {text}
       </div>
     )}

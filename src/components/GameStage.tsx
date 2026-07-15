@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Grip } from 'lucide-react';
 import { SpriteState, AppState } from '../types';
 import { playSoundEffect } from '../services/soundService';
@@ -461,16 +461,48 @@ const VirtualButton = ({ id, label, color, keys, onInput }: any) => {
 
 const GameStage = React.memo((props: any) => {
     const { isExecuting, onInput, gameCanvasSize, onGameCanvasResize } = props;
+    const [showTouchControls, setShowTouchControls] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setShowTouchControls(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const handleVirtualButton = useCallback((buttonId: string) => {
+        if (!onInput) return;
+        onInput(buttonId, true);
+        setTimeout(() => onInput(buttonId, false), 100);
+    }, [onInput]);
 
     return (
         <div className="relative group w-full h-full flex items-center justify-center flex-col">
-            <GameCanvas
-                {...props}
-                width={gameCanvasSize?.w || 400}
-                height={gameCanvasSize?.h || 400}
-                onResize={onGameCanvasResize}
-            />
-            {isExecuting && (
+            <div className="w-full max-w-[800px] aspect-[4/3] mx-auto">
+                <GameCanvas
+                    {...props}
+                    width={gameCanvasSize?.w || 400}
+                    height={gameCanvasSize?.h || 400}
+                    onResize={onGameCanvasResize}
+                />
+            </div>
+            {isExecuting && showTouchControls && (
+                <div className="absolute bottom-4 left-4 z-20 pointer-events-auto">
+                    <div className="grid grid-cols-3 gap-1">
+                        <div />
+                        <button className="w-12 h-12 bg-white/80 rounded-lg flex items-center justify-center text-xl shadow-md active:scale-90" onTouchStart={() => handleVirtualButton('up')}>↑</button>
+                        <div />
+                        <button className="w-12 h-12 bg-white/80 rounded-lg flex items-center justify-center text-xl shadow-md active:scale-90" onTouchStart={() => handleVirtualButton('left')}>←</button>
+                        <button className="w-12 h-12 bg-white/80 rounded-lg flex items-center justify-center text-xl shadow-md active:scale-90" onTouchStart={() => handleVirtualButton('action')}>A</button>
+                        <button className="w-12 h-12 bg-white/80 rounded-lg flex items-center justify-center text-xl shadow-md active:scale-90" onTouchStart={() => handleVirtualButton('right')}>→</button>
+                        <div />
+                        <button className="w-12 h-12 bg-white/80 rounded-lg flex items-center justify-center text-xl shadow-md active:scale-90" onTouchStart={() => handleVirtualButton('down')}>↓</button>
+                        <div />
+                    </div>
+                </div>
+            )}
+            {isExecuting && !showTouchControls && (
                 <div style={{ width: gameCanvasSize?.w || 400, height: gameCanvasSize?.h || 400 }} className="absolute pointer-events-none mx-auto">
                     <div className="absolute bottom-4 left-4 flex flex-col items-center gap-1 pointer-events-auto opacity-50 hover:opacity-100 transition-opacity">
                         <VirtualButton id="up" label="↑" color="bg-slate-700/80" keys={['ArrowUp', 'KeyW']} onInput={onInput} />

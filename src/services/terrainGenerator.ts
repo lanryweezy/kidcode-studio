@@ -373,8 +373,8 @@ export const generateStructures = (terrain: GeneratedTerrain): GeneratedTerrain 
 /**
  * Convert terrain to game blocks
  */
-export const terrainToGameBlocks = (terrain: GeneratedTerrain): any[] => {
-  const blocks: any[] = [];
+export const terrainToGameBlocks = (terrain: GeneratedTerrain): Array<{ type: string; params: Record<string, unknown> }> => {
+  const blocks: Array<{ type: string; params: Record<string, unknown> }> = [];
 
   terrain.tiles.forEach(row => {
     row.forEach(tile => {

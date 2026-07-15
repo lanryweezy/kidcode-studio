@@ -213,7 +213,6 @@ export const getGenerationStatus = async (generationId: string): Promise<Generat
  */
 export const cancelGeneration = async (generationId: string): Promise<void> => {
   // In production, this would call the API to cancel
-  console.log(`Cancelled generation: ${generationId}`);
 };
 
 /**
@@ -697,5 +696,4 @@ export const getGenerationQuota = (): {
  */
 export const purchaseGenerations = async (count: number): Promise<void> => {
   // In production, this would process payment
-  console.log(`Purchased ${count} additional generations`);
 };

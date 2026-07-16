@@ -1,4 +1,4 @@
-import { ToastProvider } from "./src/components/ToastProvider";
+import { ToastProvider } from "./src/components/ui/Toast";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './src/App';

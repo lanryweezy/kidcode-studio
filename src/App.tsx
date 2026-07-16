@@ -6,7 +6,7 @@ import GalleryPage from './components/GalleryPage';
 import { useStore } from './store/useStore';
 import { useEditorController } from './hooks/useEditorController';
 import { ShortcutsOverlay } from './components/ui/ShortcutsOverlay';
-import { ToastProvider } from './components/ToastProvider';
+import { ToastProvider } from './components/ui/Toast';
 import MatterPhysicsBridge from './components/MatterPhysicsBridge';
 import ContextMenu from './components/ContextMenu';
 import EditorLayout from './components/editor/EditorLayout';

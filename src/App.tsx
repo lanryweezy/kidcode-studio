@@ -6,6 +6,7 @@ import GalleryPage from './components/GalleryPage';
 import { useStore } from './store/useStore';
 import { useEditorController } from './hooks/useEditorController';
 import { ShortcutsOverlay } from './components/ui/ShortcutsOverlay';
+import { ToastProvider } from './components/ui/Toast';
 import MatterPhysicsBridge from './components/MatterPhysicsBridge';
 import ContextMenu from './components/ContextMenu';
 import EditorLayout from './components/editor/EditorLayout';
@@ -64,6 +65,7 @@ export const App: React.FC = () => {
     }, [contextMenu, handleDeleteBlock, setContextMenu]);
 
     return (
+        <ToastProvider>
         <div className={`h-[100dvh] h-screen flex flex-col overflow-hidden bg-slate-50 text-slate-800 ${hackerMode ? 'hacker-mode' : ''} ${highContrast ? 'high-contrast' : ''}`}>
             <a href="#block-workspace" className="skip-nav">
                 Skip to block workspace
@@ -127,6 +129,7 @@ export const App: React.FC = () => {
                 />
             )}
         </div>
+        </ToastProvider>
     );
 };
 export default App;

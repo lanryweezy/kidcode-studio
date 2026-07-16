@@ -31,7 +31,7 @@ const MissionOverlay: React.FC<MissionOverlayProps> = ({ activeMission, mode, on
           </div>
           <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50">
              {missions.length === 0 ? (
-               <div className="col-span-2 text-center py-10 text-slate-400 italic">No missions available for this mode yet. Check back soon!</div>
+               <div className="col-span-2 text-center py-10 text-slate-500 italic">No missions available for this mode yet. Check back soon!</div>
              ) : (
                missions.map(m => (
                  <button 
@@ -82,7 +82,7 @@ const MissionOverlay: React.FC<MissionOverlayProps> = ({ activeMission, mode, on
                   <div className={`mt-0.5 shrink-0 transition-transform duration-300 ${step.isCompleted ? 'scale-110 text-green-500' : 'text-slate-300'}`}>
                      {step.isCompleted ? <CheckCircle2 size={18} /> : <Circle size={18} />}
                   </div>
-                  <span className={`${step.isCompleted ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}`}>
+                   <span className={`${step.isCompleted ? 'line-through text-slate-500' : 'text-slate-700 font-medium'}`}>
                     {step.text}
                   </span>
                </div>

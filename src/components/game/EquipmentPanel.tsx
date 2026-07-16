@@ -113,8 +113,8 @@ export const EquipmentPanel: React.FC<EquipmentPanelProps> = ({
         <div className="flex-1 space-y-4 overflow-y-auto">
           {/* Total Stats */}
           <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Total Stats</div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 section-heading">Total Stats</div>
+            <div className="grid grid-cols-4 gap-4">
               <div className="text-center p-2 bg-red-50 rounded-lg">
                 <Swords size={16} className="text-red-500 mx-auto mb-1" />
                 <div className="text-lg font-black text-red-600">{totalSTR}</div>
@@ -154,21 +154,21 @@ export const EquipmentPanel: React.FC<EquipmentPanelProps> = ({
           {showInventory && selectedSlot && (
             <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
               <div className="flex items-center justify-between mb-3">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest section-heading">
                   Select {SLOT_CONFIG[selectedSlot].label}
-                </div>
-                <button onClick={() => setShowInventory(false)} className="text-slate-400 hover:text-slate-600">
+                </div>                <button onClick={() => setShowInventory(false)} className="text-slate-400 hover:text-slate-600">
                   <X size={14} />
                 </button>
               </div>
 
               {equipableItems.length === 0 ? (
                 <div className="text-center py-8 text-slate-400">
-                  <Info size={24} className="mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No equipable items</p>
+                  <div className="text-4xl mb-2">🎒</div>
+                  <p className="text-sm font-bold text-slate-600">No equipment yet!</p>
+                  <p className="text-xs text-slate-400 mt-1">Find items in the shop or complete quests to get gear.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-4 max-h-48 overflow-y-auto">
                   {equipableItems.map(item => {
                     const slotType = EQUIPABLE_ITEMS[item.type] || 'accessory';
                     const matchesSlot = slotType === selectedSlot || selectedSlot === 'cosmetic';
@@ -203,7 +203,7 @@ export const EquipmentPanel: React.FC<EquipmentPanelProps> = ({
 
           {/* Stat Comparison */}
           <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Equipment Bonus</div>
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 section-heading">Equipment Bonus</div>
             {equipStats.strength === 0 && equipStats.defense === 0 && equipStats.speed === 0 ? (
               <div className="text-sm text-slate-500 text-center py-2">No equipment bonuses</div>
             ) : (

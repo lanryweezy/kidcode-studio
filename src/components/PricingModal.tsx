@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Check, Zap, Cpu, Rocket, Star } from 'lucide-react';
 import { PlanType } from '../types';
 
@@ -11,6 +11,14 @@ interface PricingModalProps {
 
 const PricingModal: React.FC<PricingModalProps> = ({ currentPlan, onClose, onUpgrade }) => {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const plans = [
     {
@@ -58,14 +66,14 @@ const PricingModal: React.FC<PricingModalProps> = ({ currentPlan, onClose, onUpg
            
            {/* Billing Toggle */}
            <div className="flex items-center justify-center gap-4 mt-6">
-               <span className={`font-bold text-sm ${billing === 'monthly' ? 'text-slate-900' : 'text-slate-400'}`}>Monthly</span>
+               <span className={`font-bold text-sm ${billing === 'monthly' ? 'text-slate-900' : 'text-slate-500'}`}>Monthly</span>
                <button 
                  onClick={() => setBilling(b => b === 'monthly' ? 'yearly' : 'monthly')}
                  className="w-14 h-7 bg-slate-200 rounded-full relative transition-colors duration-300"
                >
                    <div className={`absolute top-1 w-5 h-5 bg-white shadow-sm rounded-full transition-all duration-300 ${billing === 'monthly' ? 'left-1' : 'left-8'}`} />
                </button>
-               <span className={`font-bold text-sm ${billing === 'yearly' ? 'text-slate-900' : 'text-slate-400'}`}>Yearly <span className="text-green-500 text-xs">(Save 20%)</span></span>
+               <span className={`font-bold text-sm ${billing === 'yearly' ? 'text-slate-900' : 'text-slate-500'}`}>Yearly <span className="text-green-500 text-xs">(Save 20%)</span></span>
            </div>
         </div>
 
@@ -78,11 +86,16 @@ const PricingModal: React.FC<PricingModalProps> = ({ currentPlan, onClose, onUpg
                     return (
                         <div 
                             key={plan.id}
-                            className={`relative rounded-3xl p-6 border-2 transition-all flex flex-col ${plan.popular ? 'border-blue-500 shadow-xl scale-105 z-10' : 'border-slate-100 hover:border-slate-300 shadow-sm'}`}
+                            className={`relative rounded-3xl p-6 border-2 transition-all flex flex-col ${plan.popular ? 'border-blue-500 shadow-xl scale-105 z-10 bg-gradient-to-b from-blue-50/50 to-white' : 'border-slate-100 hover:border-slate-300 shadow-sm'}`}
                         >
                             {plan.popular && (
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                                    MOST POPULAR
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+                                    <Star size={10} fill="currentColor" /> RECOMMENDED
+                                </div>
+                            )}
+                            {isCurrent && !plan.popular && (
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-700 text-white text-[10px] font-bold px-3 py-1 rounded-full">
+                                    YOUR PLAN
                                 </div>
                             )}
                             
@@ -94,7 +107,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ currentPlan, onClose, onUpg
                                     <h3 className="font-bold text-lg text-slate-900">{plan.name}</h3>
                                     <div className="flex items-baseline gap-1">
                                         <span className="text-2xl font-black text-slate-900">${plan.price}</span>
-                                        <span className="text-sm text-slate-400">/{billing === 'monthly' ? 'mo' : 'yr'}</span>
+                                         <span className="text-sm text-slate-500">/{billing === 'monthly' ? 'mo' : 'yr'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -113,7 +126,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ currentPlan, onClose, onUpg
                             <button 
                                 onClick={() => onUpgrade(plan.id)}
                                 disabled={isCurrent}
-                                className={`w-full py-3 rounded-xl font-bold transition-all ${isCurrent ? 'bg-slate-100 text-slate-400 cursor-default' : `${plan.color} ${plan.textColor} hover:brightness-110 shadow-lg`}`}
+                                className={`touch-feedback w-full py-3 rounded-xl font-bold transition-all ${isCurrent ? 'bg-slate-100 text-slate-500 cursor-default' : `${plan.color} ${plan.textColor} hover:brightness-110 shadow-lg`}`}
                             >
                                 {isCurrent ? 'Current Plan' : 'Upgrade Now'}
                             </button>
@@ -123,7 +136,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ currentPlan, onClose, onUpg
             </div>
         </div>
         
-        <div className="p-4 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-400">
+        <div className="p-4 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-500">
             Secure payment powered by KidCode Secure. Cancel anytime.
         </div>
 

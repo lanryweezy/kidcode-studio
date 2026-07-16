@@ -37,7 +37,7 @@ const AnimationSequencer: React.FC = () => {
 
   return (
     <div className="bg-slate-100 border-t border-slate-200 p-4 h-64 flex flex-col">
-      <h4 className="font-bold text-xs uppercase text-slate-400 mb-4 flex items-center gap-2">
+      <h4 className="font-bold text-xs uppercase text-slate-500 mb-4 flex items-center gap-2">
         <Film size={16} /> Animation Sequencer
       </h4>
 
@@ -65,7 +65,7 @@ const AnimationSequencer: React.FC = () => {
                   <button onClick={() => setIsAdding(false)} className="p-2 bg-red-500 text-white rounded-lg"><X size={16}/></button>
               </div>
           ) : (
-             <button onClick={() => setIsAdding(true)} className="w-full p-2 text-sm font-bold rounded-lg border-2 border-dashed border-slate-300 text-slate-400 hover:bg-white:bg-slate-800">
+             <button onClick={() => setIsAdding(true)} className="w-full p-2 text-sm font-bold rounded-lg border-2 border-dashed border-slate-300 text-slate-500 hover:bg-white:bg-slate-800">
                 <Plus size={14} className="inline mr-1" /> New Anim
             </button>
           )}
@@ -82,7 +82,7 @@ const AnimationSequencer: React.FC = () => {
                 ${selectedAnim && animations[selectedAnim]?.includes(i) ? 'border-violet-500 scale-105' : 'border-slate-200'}
               `}
             >
-              <img src={frame} className="w-full h-full object-contain" alt={`Frame ${i}`} />
+              <img src={frame} className="w-full h-full object-contain" alt={`Frame ${i}`} loading="lazy" />
               {selectedAnim && animations[selectedAnim]?.includes(i) && (
                   <div className="absolute top-1 right-1 w-4 h-4 bg-violet-500 text-white rounded-full flex items-center justify-center border-2 border-white">
                       <Check size={10} />

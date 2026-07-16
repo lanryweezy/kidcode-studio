@@ -59,22 +59,22 @@ export const LevelComplete: React.FC<LevelCompleteProps> = ({
           <div className="bg-white/50 rounded-xl p-3">
             <Star size={16} className="text-yellow-500 mx-auto mb-1" />
             <div className="text-lg font-black text-slate-800">{score}</div>
-            <div className="text-[10px] text-slate-400">Score</div>
+            <div className="text-[10px] text-slate-500">Score</div>
           </div>
           <div className="bg-white/50 rounded-xl p-3">
             <span className="text-lg block mb-1">🪙</span>
             <div className="text-lg font-black text-slate-800">{coins}</div>
-            <div className="text-[10px] text-slate-400">Coins</div>
+            <div className="text-[10px] text-slate-500">Coins</div>
           </div>
           <div className="bg-white/50 rounded-xl p-3">
             <Clock size={16} className="text-blue-500 mx-auto mb-1" />
             <div className="text-lg font-black text-slate-800">{`${minutes}:${seconds.toString().padStart(2, '0')}`}</div>
-            <div className="text-[10px] text-slate-400">Time</div>
+            <div className="text-[10px] text-slate-500">Time</div>
           </div>
           <div className="bg-white/50 rounded-xl p-3">
             <Zap size={16} className="text-orange-500 mx-auto mb-1" />
             <div className="text-lg font-black text-slate-800">{combo}</div>
-            <div className="text-[10px] text-slate-400">Best Combo</div>
+            <div className="text-[10px] text-slate-500">Best Combo</div>
           </div>
         </div>
 

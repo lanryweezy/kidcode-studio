@@ -3,6 +3,7 @@ import { CommandBlock, PageCode, AppElement, AppState } from '../types';
 import { FileCode, Copy, Download, Eye, Code2, Layout, Smartphone, Terminal, ChevronRight, Plus, Trash2, Edit2, MousePointer2 } from 'lucide-react';
 import { exportToPython, exportToJavaScript, exportToArduino, exportToHTML5 } from '../services/codeExporter';
 import { AppMode } from '../types';
+import { useToast } from './ui/Toast';
 import { eventBus } from '../services/eventBus';
 import { multiplayerService, RemoteUser } from '../services/multiplayerService';
 
@@ -23,6 +24,7 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
   onCreateScreen,
   onDeleteScreen
 }) => {
+  const { toast } = useToast();
   const [selectedView, setSelectedView] = useState<'blocks' | 'python' | 'javascript' | 'arduino' | 'html'>('blocks');
   const [newScreenName, setNewScreenName] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -75,7 +77,7 @@ const CodePageManager: React.FC<CodePageManagerProps> = ({
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
-    alert('Code copied to clipboard!');
+    toast('success', 'Code copied to clipboard!');
   };
 
   const handleDownloadCode = (code: string, extension: string) => {

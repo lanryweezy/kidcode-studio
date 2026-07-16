@@ -21,7 +21,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', text: "Hello! I'm your AI Copilot. Describe what you want to build, and I'll write the blocks for you." }
+    { role: 'assistant', text: "👋 Welcome to your AI Copilot! I can help you build games, apps, and circuits. Just describe what you want to create, and I'll write the code blocks for you. Try one of the suggestions below to get started!" }
   ]);
   const [isPlaying, setIsPlaying] = useState<number | null>(null); // Index of message playing
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -166,7 +166,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar" ref={scrollRef}>
         {messages.map((msg, idx) => (
-          <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+          <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''} animate-slide-in`} style={{ animationDelay: `${(idx % 5) * 50}ms` }}>
             {/* Avatar */}
             <div className={`
               w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1
@@ -180,7 +180,9 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
               max-w-[85%] text-sm leading-relaxed p-3 rounded-2xl shadow-sm border
               ${msg.role === 'user' 
                 ? 'bg-slate-800 text-white border-slate-700 rounded-tr-none' 
-                : 'bg-white text-slate-700 border-slate-200 rounded-tl-none'}
+                : idx === 0
+                  ? 'bg-gradient-to-br from-violet-50 to-purple-50 text-slate-700 border-violet-200 rounded-tl-none ring-1 ring-violet-100'
+                  : 'bg-white text-slate-700 border-slate-200 rounded-tl-none'}
             `}>
               {msg.text}
               
@@ -188,7 +190,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
               {msg.role === 'assistant' && (
                   <button 
                     onClick={() => playMessage(msg.text, idx)}
-                    className="absolute -bottom-6 left-0 p-1 text-slate-400 hover:text-violet-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[10px] font-bold uppercase"
+                    className="absolute -bottom-6 left-0 p-1 text-slate-500 hover:text-violet-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[10px] font-bold uppercase"
                   >
                       {isPlaying === idx ? <StopCircle size={12} className="animate-pulse" /> : <Volume2 size={12} />}
                       {isPlaying === idx ? 'Stop' : 'Read'}
@@ -199,13 +201,18 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
         ))}
 
         {isLoading && (
-          <div className="flex gap-3">
+          <div className="flex gap-3 animate-slide-in">
              <div className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center shrink-0 mt-1">
                 <Bot size={14} />
              </div>
-             <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
-                <Loader2 size={14} className="animate-spin text-violet-500" />
-                <span className="text-xs text-slate-400 font-medium">Generating blocks...</span>
+             <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-sm">
+                <div className="flex items-center gap-2 text-violet-500">
+                  <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span className="text-sm font-medium">AI is generating code...</span>
+                </div>
              </div>
           </div>
         )}
@@ -265,9 +272,9 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
                 handleSubmit(e);
               }
             }}
-            placeholder="Ask to create a game, app, or circuit..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-10 py-3 text-sm focus:ring-2 focus:ring-violet-200 focus:border-violet-300 outline-none resize-none custom-scrollbar"
-            rows={2}
+            placeholder="Describe what you want to build..."
+            className="w-full bg-slate-50 border-2 border-slate-200 focus:border-violet-400 rounded-xl pl-4 pr-12 py-4 text-base focus:ring-2 focus:ring-violet-200 outline-none resize-none custom-scrollbar shadow-inner"
+            rows={3}
           />
           <button
             type="submit"

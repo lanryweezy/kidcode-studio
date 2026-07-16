@@ -146,7 +146,7 @@ export const TilePalette: React.FC = React.memo(() => {
 
       <div className="overflow-y-auto max-h-64 scrollbar-thin scrollbar-thumb-slate-300">
       {CATEGORIES.map(category => (
-        <div key={category}>
+        <div key={category} className="bg-slate-50 rounded-lg p-2">
           <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">{category}</div>
           <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 gap-1">
             {TILE_OPTIONS.filter(t => t.category === category).map(tile => (

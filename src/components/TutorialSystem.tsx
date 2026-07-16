@@ -96,6 +96,24 @@ const TutorialSystem: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
           <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full"><X size={18} /></button>
         </div>
+        
+        {/* Progress Bar */}
+        <div className="px-5 pt-3">
+          <div className="flex gap-1.5">
+            {TUTORIAL_STEPS.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                  idx < currentStep
+                    ? 'bg-green-400'
+                    : idx === currentStep
+                    ? 'bg-violet-400'
+                    : 'bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
 
         <div className="p-6">
           <h3 className="text-xl font-black text-slate-800 mb-2 leading-tight">{step.title}</h3>

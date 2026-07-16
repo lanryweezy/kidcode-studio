@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Heart, Coins, Star, Shield, Zap, Fuel, Clock, Trophy, Target, Flame, Snowflake, Wind, Sparkles } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Heart, Coins, Star, Shield, Zap, Fuel, Clock, Trophy, Target, Flame, Snowflake, Wind, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { toggleMute, getMuted } from '../../services/soundService';
 
 interface PowerUpIndicator {
   name: string;
@@ -68,6 +69,12 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
   const [damageFlash, setDamageFlash] = useState(false);
   const [prevScore, setPrevScore] = useState(score);
   const [scorePopup, setScorePopup] = useState<number | null>(null);
+  const [isMuted, setIsMuted] = useState(getMuted());
+
+  const handleToggleMute = useCallback(() => {
+    const newMuted = toggleMute();
+    setIsMuted(newMuted);
+  }, []);
 
   useEffect(() => {
     if (health < prevHealth) { setDamageFlash(true); setTimeout(() => setDamageFlash(false), 300); }
@@ -100,11 +107,11 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
           {/* Player name + Level */}
           {(playerName || level !== undefined) && (
             <div className="flex items-center gap-2 mb-1">
-              {playerName && <span className="text-[10px] font-bold text-white drop-shadow-lg">{playerName}</span>}
+              {playerName && <span className="text-xs font-bold text-white drop-shadow-lg">{playerName}</span>}
               {level !== undefined && (
-                <div className="bg-violet-500/80 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1">
-                  <Trophy size={8} className="text-white" />
-                  <span className="text-[9px] font-black text-white">LVL {level}</span>
+                <div className="bg-violet-500/80 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1">
+                  <Trophy size={10} className="text-white" />
+                  <span className="text-[11px] font-black text-white">LVL {level}</span>
                 </div>
               )}
             </div>
@@ -116,15 +123,15 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
               <div className="w-28 h-1.5 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm">
                 <div className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${xpPercent}%` }} />
               </div>
-              <span className="text-[8px] font-bold text-violet-300">{xp}/{xpToLevel}</span>
+              <span className="text-[10px] font-bold text-violet-300 drop-shadow-sm">{xp}/{xpToLevel}</span>
             </div>
           )}
 
           {/* Health Bar */}
           <div className={`flex items-center gap-2 ${healthGlow}`} aria-live="polite" aria-atomic="true">
-            <Heart size={14} className="text-red-500 fill-red-500" aria-hidden="true" />
+            <Heart size={16} className="text-red-500 fill-red-500" aria-hidden="true" />
             <div 
-              className="w-36 h-3.5 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm border border-white/5"
+              className="w-40 h-4 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm border border-white/5"
               role="progressbar"
               aria-valuenow={health}
               aria-valuemin={0}
@@ -136,39 +143,39 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
                 style={{ width: `${healthPercent}%` }}
               />
             </div>
-            <span className="text-[10px] font-bold text-white drop-shadow-lg min-w-[50px]" aria-hidden="true">{Math.round(health)}/{maxHealth}</span>
+            <span className="text-xs font-bold text-white drop-shadow-lg min-w-[50px]" aria-hidden="true">{Math.round(health)}/{maxHealth}</span>
           </div>
 
           {/* Shield Bar */}
           {shield !== undefined && maxShield !== undefined && maxShield > 0 && (
             <div className="flex items-center gap-2">
-              <Shield size={12} className="text-indigo-400" />
-              <div className="w-36 h-2 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm">
+              <Shield size={14} className="text-indigo-400" />
+              <div className="w-40 h-2.5 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm">
                 <div className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300" style={{ width: `${(shield / maxShield) * 100}%` }} />
               </div>
-              <span className="text-[9px] font-bold text-indigo-300">{Math.round(shield)}</span>
+              <span className="text-[10px] font-bold text-indigo-300 drop-shadow-sm">{Math.round(shield)}</span>
             </div>
           )}
 
           {/* Fuel Bar */}
           {fuel !== undefined && maxFuel !== undefined && maxFuel > 0 && (
             <div className="flex items-center gap-2">
-              <Fuel size={12} className="text-amber-400" />
-              <div className="w-36 h-2 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm">
+              <Fuel size={14} className="text-amber-400" />
+              <div className="w-40 h-2.5 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${fuel > 30 ? 'bg-amber-500' : fuel > 10 ? 'bg-orange-500 animate-pulse' : 'bg-red-500 animate-pulse'}`}
                   style={{ width: `${(fuel / maxFuel) * 100}%` }}
                 />
               </div>
-              <span className={`text-[9px] font-bold ${fuel > 30 ? 'text-amber-300' : 'text-red-400'}`}>{Math.round(fuel)}%</span>
+              <span className={`text-[10px] font-bold drop-shadow-sm ${fuel > 30 ? 'text-amber-300' : 'text-red-400'}`}>{Math.round(fuel)}%</span>
             </div>
           )}
 
           {/* Score + Combo + Kill */}
           <div className="flex items-center gap-3 mt-1" aria-live="polite" aria-atomic="true">
             <div className="flex items-center gap-1.5 relative">
-              <Star size={12} className="text-yellow-400 fill-yellow-400" aria-hidden="true" />
-              <span className="text-sm font-bold text-white drop-shadow-lg" aria-label={`Score: ${score}`}>{score.toLocaleString()}</span>
+              <Star size={14} className="text-yellow-400 fill-yellow-400" aria-hidden="true" />
+              <span className="text-base font-bold text-white drop-shadow-lg" aria-label={`Score: ${score}`}>{score.toLocaleString()}</span>
               {scorePopup && (
                 <span className="absolute -top-3 left-8 text-[10px] font-bold text-emerald-400 animate-bounce">+{scorePopup}</span>
               )}
@@ -191,7 +198,7 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
           {coins > 0 && (
             <div className="flex items-center gap-1.5">
               <span className="text-sm">🪙</span>
-              <span className="text-xs font-bold text-yellow-300 drop-shadow-lg">{coins.toLocaleString()}</span>
+              <span className="text-sm font-bold text-yellow-300 drop-shadow-lg">{coins.toLocaleString()}</span>
             </div>
           )}
 
@@ -248,6 +255,15 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
 
         {/* Right: Boss + Wave + Accuracy */}
         <div className="space-y-2">
+          {/* Sound Toggle */}
+          <button
+            onClick={handleToggleMute}
+            className="flex items-center gap-1 justify-end p-1.5 rounded-lg bg-slate-800/80 backdrop-blur-sm border border-slate-600/50 hover:bg-slate-700/80 transition-colors pointer-events-auto"
+            aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
+          >
+            {isMuted ? <VolumeX size={14} className="text-slate-400" /> : <Volume2 size={14} className="text-emerald-400" />}
+          </button>
+
           {/* Accuracy */}
           {accuracy !== undefined && (
             <div className="flex items-center gap-1 justify-end">
@@ -261,7 +277,7 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
             <div className="flex items-center gap-2 justify-end">
               {wave !== undefined && (
                 <div className="bg-slate-800/80 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 border border-slate-600/50">
-                  <span className="text-[10px] font-bold text-slate-300">Wave {wave}{maxWaves ? `/${maxWaves}` : ''}</span>
+                  <span className="text-[11px] font-bold text-slate-200">Wave {wave}{maxWaves ? `/${maxWaves}` : ''}</span>
                 </div>
               )}
             </div>
@@ -272,12 +288,12 @@ export const GameHUD: React.FC<GameHUDProps> = React.memo(({
             <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl px-4 py-2.5 border border-red-500/30 shadow-lg shadow-red-500/10">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-xs font-bold text-red-400">{bossName || 'Boss'}</span>
+                <span className="text-sm font-bold text-red-400 drop-shadow-sm">{bossName || 'Boss'}</span>
               </div>
               <div className="w-44 h-3 bg-slate-700 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-red-500 to-orange-500 rounded-full transition-all duration-300" style={{ width: `${(bossHp / bossMaxHp) * 100}%` }} />
               </div>
-              <div className="text-[10px] text-slate-300 text-right mt-0.5 font-mono">{Math.round(bossHp)}/{bossMaxHp}</div>
+              <div className="text-xs text-slate-200 text-right mt-0.5 font-mono font-bold">{Math.round(bossHp)}/{bossMaxHp}</div>
             </div>
           )}
         </div>

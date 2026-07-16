@@ -22,7 +22,7 @@ const NPCModal: React.FC = () => {
               <h3 className="text-xl font-black text-indigo-600 uppercase tracking-tighter">{npcChat.name}</h3>
               <button 
                 onClick={() => setNpcChat(null)}
-                className="p-1 hover:bg-slate-100:bg-slate-800 rounded-full text-slate-400"
+                className="p-1 hover:bg-slate-100:bg-slate-800 rounded-full text-slate-500"
               >
                 <X size={20} />
               </button>

@@ -129,8 +129,8 @@ export const ShopOverlay: React.FC<ShopOverlayProps> = ({
         {/* Content */}
         <div className="flex h-[340px]">
           {/* Items Grid */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="flex-1 p-6 overflow-y-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {filteredItems.map(item => (
                 <button
                   key={item.id}
@@ -166,12 +166,12 @@ export const ShopOverlay: React.FC<ShopOverlayProps> = ({
 
           {/* Item Detail */}
           {selected ? (
-            <div className="w-56 border-l border-slate-200 p-4 space-y-3">
+            <div className="w-56 border-l border-slate-200 p-6 space-y-3">
               <div className="text-center">
                 <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-4xl border-2 ${RARITY_COLORS[selected.rarity]} ${RARITY_BG[selected.rarity]}`}>
                   {selected.icon}
                 </div>
-                <h3 className="font-bold text-slate-800 mt-2">{selected.name}</h3>
+                <h3 className="text-lg font-bold text-slate-800 mt-2">{selected.name}</h3>
                 <div className={`text-[10px] font-bold uppercase mt-1 ${
                   selected.rarity === 'common' ? 'text-slate-400' :
                   selected.rarity === 'rare' ? 'text-blue-500' :

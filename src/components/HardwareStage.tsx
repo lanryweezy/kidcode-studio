@@ -4,11 +4,12 @@ import { HardwareState, CircuitComponent } from '../types';
 import { playSoundEffect } from '../services/soundService';
 import { serialService } from '../services/webSerialService';
 import { useStore } from '../store/useStore';
-import { Usb } from 'lucide-react';
+import { Usb, Cpu, Lightbulb, ArrowDown } from 'lucide-react';
 import { ComponentRenderers } from './hardware/ComponentRenderers';
 import { WireRouting } from './hardware/WireRouting';
 import { MonitorOverlays } from './hardware/MonitorOverlays';
 import { isMicrocontroller } from './hardware/PinManager';
+import { useToast } from './ui/Toast';
 
 interface HardwareStageProps {
     hardwareState: HardwareState;
@@ -34,6 +35,7 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
     onWiresUpdate
 }) => {
     const { isBoardConnected, setIsBoardConnected } = useStore();
+    const { toast } = useToast();
     const [localComponents, setLocalComponents] = useState<CircuitComponent[]>(circuitComponents);
 
     const handleConnect = async () => {
@@ -46,7 +48,7 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
                 setIsBoardConnected(true);
                 playSoundEffect('powerup');
             } else {
-                alert("Could not connect to board. Make sure you use a compatible browser (Chrome/Edge) and have a board plugged in!");
+                toast('warning', 'Could not connect to board. Make sure you use a compatible browser (Chrome/Edge) and have a board plugged in!');
             }
         }
     };
@@ -356,6 +358,16 @@ const HardwareStage: React.FC<HardwareStageProps> = React.memo(({
                 <rect width="100%" height="100%" fill="url(#pcb-grid)" />
 
                 <path d="M 10 10 L 290 10 L 290 390 L 10 390 Z" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="10,5" />
+
+                {/* Empty State - No Components */}
+                {localComponents.length === 0 && (
+                    <g transform="translate(150, 200)" className="pointer-events-none">
+                        <Cpu size={32} className="text-white/20 mx-auto mb-3" />
+                        <text x="0" y="45" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.4)" fontWeight="bold">No Components Yet</text>
+                        <text x="0" y="60" textAnchor="middle" fontSize="5" fill="rgba(255,255,255,0.25)">Drag parts from the sidebar</text>
+                        <ArrowDown size={16} className="text-white/20 mx-auto mt-2" />
+                    </g>
+                )}
 
                 <WireRouting localComponents={localComponents} hardwareState={hardwareState} wireRefs={wireRefs} />
 

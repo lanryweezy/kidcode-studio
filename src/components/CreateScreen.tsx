@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, Gamepad2, Film, BookOpen, Bot, Sparkles, ArrowRight, Rocket, Search } from 'lucide-react';
+import { Zap, Gamepad2, Film, BookOpen, Bot, Sparkles, ArrowRight, Rocket, Search, ChevronRight } from 'lucide-react';
 import { Button } from './ui/Button';
 import { GAME_FAMILIES, GAME_TYPES, getGameTypesByFamily, type GameTypeConfig } from '../constants/gameTypes';
 
@@ -65,10 +65,38 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({ onProjectCreate }) =
     ? getGameTypesByFamily(selectedFamily)
     : GAME_TYPES;
 
+  const stepIndex = step === 'choice' ? 0 : step === 'families' ? 1 : step === 'types' ? 2 : 3;
+  const stepLabels = ['Choose', 'Genre', 'Game', 'Describe'];
+
+  const StepIndicator = () => (
+    <div className="flex items-center justify-center gap-2 mb-8">
+      {stepLabels.map((label, i) => (
+        <React.Fragment key={label}>
+          <div className="flex flex-col items-center">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+              i < stepIndex ? 'bg-violet-600 text-white' :
+              i === stepIndex ? 'bg-violet-600 text-white ring-4 ring-violet-300 scale-110' :
+              'bg-white/10 text-white/40'
+            }`}>
+              {i < stepIndex ? '✓' : i + 1}
+            </div>
+            <span className={`text-[10px] mt-1 font-medium ${
+              i <= stepIndex ? 'text-white' : 'text-white/40'
+            }`}>{label}</span>
+          </div>
+          {i < stepLabels.length - 1 && (
+            <ChevronRight size={14} className={i < stepIndex ? 'text-violet-400' : 'text-white/20'} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+
   if (step === 'describe') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 p-4">
         <div className="w-full max-w-2xl animate-fade-in">
+          <StepIndicator />
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-glow">
               <Rocket size={40} className="text-white" />
@@ -116,6 +144,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({ onProjectCreate }) =
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 p-4 overflow-y-auto">
         <div className="max-w-6xl mx-auto animate-fade-in">
+          <StepIndicator />
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-white mb-2">
               {selectedFamily ? GAME_FAMILIES.find(f => f.id === selectedFamily)?.label : '🎮 All Game Types'}
@@ -204,6 +233,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({ onProjectCreate }) =
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 p-4">
         <div className="w-full max-w-5xl animate-fade-in">
+          <StepIndicator />
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-white mb-2">🎮 What Kind of Game?</h2>
             <p className="text-slate-400">Pick a genre family, or browse all {GAME_TYPES.length} games.</p>
@@ -250,6 +280,7 @@ export const CreateScreen: React.FC<CreateScreenProps> = ({ onProjectCreate }) =
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 p-4">
       <div className="w-full max-w-3xl animate-fade-in">
+        <StepIndicator />
         <div className="text-center mb-12">
           <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow animate-float">
             <Zap size={32} className="text-white" fill="currentColor" />

@@ -49,7 +49,10 @@ export const ErrorDiagnosisHelp: React.FC<ErrorDiagnosisHelpProps> = ({
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
             <Lightbulb size={18} className="text-white" />
           </div>
-          <h3 className="font-black text-white">Code Diagnosis</h3>
+          <div>
+            <h3 className="font-black text-white">Code Diagnosis</h3>
+            <p className="text-[10px] text-slate-400">Every bug is a learning opportunity! 💪</p>
+          </div>
         </div>
         {onDismiss && (
           <button
@@ -99,11 +102,18 @@ export const ErrorDiagnosisHelp: React.FC<ErrorDiagnosisHelpProps> = ({
         </div>
       )}
 
+      {/* Encouragement */}
+      <div className="mt-3 p-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-500/30">
+        <p className="text-xs text-purple-300 font-medium text-center">
+          {errors.length === 0 ? "🎉 Great job! Just a few tips to make it even better!" : "🛠️ Don't worry! Let's fix this together!"}
+        </p>
+      </div>
+
       {/* Suggestions */}
       {suggestions.length > 0 && (
-        <div>
+        <div className="mt-4">
           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Tips
+            💡 Pro Tips
           </h4>
           <div className="space-y-1.5">
             {suggestions.map((suggestion, idx) => (

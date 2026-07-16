@@ -366,7 +366,7 @@ export const QuestStoryEditor: React.FC<QuestStoryEditorProps> = ({ onClose, onS
       </div>
 
       <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-200">
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
+        <Button variant="ghost" onClick={onClose}>Never mind</Button>
         <Button variant="primary" onClick={handleSave}>Save Quest</Button>
       </div>
     </Modal>

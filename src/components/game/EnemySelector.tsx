@@ -23,6 +23,7 @@ export const EnemySelector: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(null);
+  const [gameDifficulty, setGameDifficulty] = useState<'casual' | 'normal' | 'hard' | 'nightmare'>('normal');
 
   const filteredEnemies = ENEMY_TYPES.filter(enemy => {
     const matchesSearch = enemy.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -39,6 +40,27 @@ export const EnemySelector: React.FC = () => {
   return (
     <div className="space-y-3">
       <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Enemy Types</div>
+
+      {/* Game Difficulty Dropdown */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold text-slate-500">Game Difficulty</span>
+        <select
+          value={gameDifficulty}
+          onChange={(e) => setGameDifficulty(e.target.value as any)}
+          className={`text-[10px] font-bold px-2 py-1 rounded-lg border outline-none cursor-pointer ${
+            gameDifficulty === 'casual' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+            gameDifficulty === 'normal' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+            gameDifficulty === 'hard' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+            'bg-red-50 text-red-600 border-red-200'
+          }`}
+          aria-label="Select game difficulty"
+        >
+          <option value="casual">Casual</option>
+          <option value="normal">Normal</option>
+          <option value="hard">Hard</option>
+          <option value="nightmare">Nightmare</option>
+        </select>
+      </div>
 
       {/* Search */}
       <div className="relative">

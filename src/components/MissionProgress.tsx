@@ -41,7 +41,7 @@ export const MissionProgress: React.FC<MissionProgressProps> = ({
             className="p-1 hover:bg-white/10 rounded-lg transition-colors"
             title="Dismiss mission"
           >
-            <X size={16} className="text-slate-400" />
+            <X size={16} className="text-slate-300" />
           </button>
         )}
       </div>
@@ -49,7 +49,7 @@ export const MissionProgress: React.FC<MissionProgressProps> = ({
       {/* Progress Bar */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">
             Progress
           </span>
           <span className="text-xs font-black text-yellow-400">
@@ -96,7 +96,7 @@ export const MissionProgress: React.FC<MissionProgressProps> = ({
 
       {/* Reward hint */}
       <div className="mt-3 pt-3 border-t border-purple-500/20">
-        <p className="text-[10px] text-slate-400 text-center">
+        <p className="text-[10px] text-slate-300 text-center">
           🎁 Complete to earn XP + badge
         </p>
       </div>

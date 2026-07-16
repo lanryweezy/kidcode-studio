@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import {
   X, ShoppingBag, Zap, Sparkles, Star,
   Search, Check, Box, Palette, Music, Coins
 } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
+import { useToast } from './ui/Toast';
 
 interface ShopItem {
   id: string;
@@ -27,23 +28,36 @@ const SHOP_ITEMS: ShopItem[] = [
 
 const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { userProfile, spendCoins, addAsset } = useStore();
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | '3d' | 'effect' | 'code' | 'sound'>('all');
+  const [buyingId, setBuyingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleBuy = (item: ShopItem) => {
-    if (spendCoins(item.price)) {
-      playSoundEffect('powerup');
-      // In a real app, we'd add the actual asset. For now, simulate:
-      addAsset({
-        name: item.name,
-        type: item.category === '3d' ? 'model' : 'image',
-        url: item.preview // Mock URL
-      });
-      alert(`Awesome! You unlocked the ${item.name}!`);
-    } else {
-      playSoundEffect('hurt');
-      alert("Oh no! You don't have enough KidCoins. Build more games to earn some!");
-    }
+    setBuyingId(item.id);
+    setTimeout(() => {
+      if (spendCoins(item.price)) {
+        playSoundEffect('powerup');
+        addAsset({
+          name: item.name,
+          type: item.category === '3d' ? 'model' : 'image',
+          url: item.preview
+        });
+        toast('success', `Awesome! You unlocked the ${item.name}!`);
+      } else {
+        playSoundEffect('hurt');
+        toast('warning', "Oh no! You don't have enough KidCoins. Build more games to earn some!");
+      }
+      setBuyingId(null);
+    }, 400);
   };
 
   const filtered = SHOP_ITEMS.filter(i => {
@@ -79,7 +93,7 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         {/* Toolbar */}
         <div className="p-4 border-b border-slate-100 bg-slate-50 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -104,6 +118,23 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         {/* Shop Grid */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50">
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+              <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mb-4">
+                <Search size={32} className="text-slate-400" />
+              </div>
+              <h3 className="text-lg font-black text-slate-600 mb-2">No items found!</h3>
+              <p className="text-sm text-slate-500 max-w-xs">
+                {search ? `Nothing matches "${search}"` : `No items in the ${filter} category yet. Check back soon!`}
+              </p>
+              <button
+                onClick={() => { setSearch(''); setFilter('all'); }}
+                className="mt-4 px-4 py-2 bg-amber-400 text-slate-900 font-bold rounded-xl text-sm hover:bg-amber-500 transition-colors"
+              >
+                Show All Items
+              </button>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((item) => (
               <div key={item.id} className="bg-white rounded-3xl border-2 border-slate-100 p-6 flex flex-col shadow-sm hover:shadow-xl hover:border-amber-400 transition-all group">
@@ -120,20 +151,22 @@ const MarketplaceModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </div>
                   <button
                     onClick={() => handleBuy(item)}
-                    className="px-6 py-2.5 bg-slate-900 text-white font-black rounded-xl text-xs hover:bg-amber-400 hover:text-slate-900 transition-all active:scale-95"
+                    disabled={buyingId === item.id}
+                    className={`touch-feedback px-6 py-2.5 bg-slate-900 text-white font-black rounded-xl text-xs hover:bg-amber-400 hover:text-slate-900 transition-all active:scale-95 ${buyingId === item.id ? 'animate-pulse scale-95 bg-amber-400 text-slate-900' : ''}`}
                     aria-label={`Buy ${item.name} for ${item.price} coins`}
                   >
-                    BUY NOW
+                    {buyingId === item.id ? '...' : 'BUY NOW'}
                   </button>
                 </div>
               </div>
             ))}
           </div>
+          )}
         </div>
 
         {/* Footer */}
         <div className="p-4 bg-white border-t border-slate-100 text-center">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
             <Star size={12} fill="currentColor" className="text-amber-400" /> New items added every Saturday! <Star size={12} fill="currentColor" className="text-amber-400" />
           </p>
         </div>

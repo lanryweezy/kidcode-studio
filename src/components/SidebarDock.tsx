@@ -18,8 +18,9 @@ const SidebarDock: React.FC<SidebarDockProps> = ({ mode, activeTab, onTabChange,
       {/* Home Button */}
       <button 
         onClick={onHome}
-        className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors mb-4"
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 transition-colors mb-4"
         title="Back to Home"
+        aria-label="Back to Home"
       >
         <ArrowLeft size={20} />
       </button>
@@ -86,6 +87,7 @@ const SidebarDock: React.FC<SidebarDockProps> = ({ mode, activeTab, onTabChange,
         onClick={onOpenProfile}
         className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-violet-400 hover:text-white hover:bg-violet-600 transition-all shadow-lg mb-2"
         title="My Profile"
+        aria-label="My Profile"
       >
         <UserCircle2 size={24} />
       </button>
@@ -110,9 +112,11 @@ const SidebarDock: React.FC<SidebarDockProps> = ({ mode, activeTab, onTabChange,
 const DockItem: React.FC<{ icon: any, label: string, isActive: boolean, onClick: () => void }> = ({ icon: Icon, label, isActive, onClick }) => (
   <button 
     onClick={onClick}
+    title={label}
+    aria-label={label}
     className={`
       flex flex-col items-center justify-center w-full gap-1 py-3 px-1 transition-all relative group
-      ${isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'}
+      ${isActive ? 'text-white' : 'text-slate-300 hover:text-slate-200'}
     `}
   >
     {isActive && <div className="absolute left-0 top-2 bottom-2 w-1 bg-violet-500 rounded-r-full" />}

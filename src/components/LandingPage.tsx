@@ -23,12 +23,12 @@ const LandingPage: React.FC = () => {
                             <Sparkles size={14} className="animate-pulse" /> THE FUTURE OF CODING IS HERE
                         </div>
 
-                        <h1 className="text-7xl md:text-8xl font-black leading-[0.85] mb-8 bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent tracking-tighter">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.85] mb-8 bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent tracking-tighter">
                             Build Your Own <br />
                             <span className="text-violet-500">Universe.</span>
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mb-12 font-medium leading-relaxed">
+                        <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mb-12 font-medium leading-relaxed">
                             The all-in-one professional studio where kids build 3D open-world games,
                             real mobile apps, and simulate advanced electronics—all with the power of blocks.
                         </p>
@@ -46,6 +46,39 @@ const LandingPage: React.FC = () => {
                             >
                                 <Play size={24} fill="currentColor" className="text-violet-500" /> SEE THE TOOLS
                             </button>
+                        </div>
+
+                        {/* Phone Mockup with Glass Effect */}
+                        <div className="mt-16 relative">
+                            <div className="w-64 h-[500px] bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2.5rem] border-4 border-slate-700 shadow-2xl shadow-violet-500/20 mx-auto relative overflow-hidden">
+                                {/* Phone notch */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-2xl z-20" />
+                                {/* Screen content */}
+                                <div className="absolute inset-2 rounded-[2rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 overflow-hidden">
+                                    {/* Glass reflection overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
+                                    <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
+                                    {/* Animated content */}
+                                    <div className="p-6 pt-12 space-y-4">
+                                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                            <Zap size={24} className="text-white" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="h-3 bg-white/30 rounded-full w-3/4" />
+                                            <div className="h-3 bg-white/20 rounded-full w-1/2" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 mt-6">
+                                            <div className="h-20 bg-white/10 backdrop-blur-sm rounded-xl" />
+                                            <div className="h-20 bg-white/10 backdrop-blur-sm rounded-xl" />
+                                            <div className="h-20 bg-white/10 backdrop-blur-sm rounded-xl col-span-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Glass reflection shine */}
+                                <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none rounded-[2rem]" />
+                            </div>
+                            {/* Glow effect behind phone */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-600/30 blur-[100px] rounded-full -z-10" />
                         </div>
 
                         {/* Social Proof */}
@@ -83,7 +116,7 @@ const LandingPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-24">
                         <h2 className="text-5xl font-black mb-6">Three Studios. One Tool.</h2>
-                        <p className="text-xl text-slate-400 max-w-2xl mx-auto">Everything you need to go from an idea to a published game, app, or hardware prototype.</p>
+                        <p className="text-xl text-slate-300 max-w-2xl mx-auto">Everything you need to go from an idea to a published game, app, or hardware prototype.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -93,7 +126,7 @@ const LandingPage: React.FC = () => {
                                 <Trophy size={32} />
                             </div>
                             <h3 className="text-3xl font-black mb-4">3D Game Builder</h3>
-                            <p className="text-slate-400 leading-relaxed">
+                            <p className="text-slate-300 leading-relaxed">
                                 Build immersive 3D open worlds with real-time physics, AI NPCs, and cinematic cameras. Export your games directly to a web link.
                             </p>
                         </div>
@@ -103,7 +136,7 @@ const LandingPage: React.FC = () => {
                                 <Rocket size={32} />
                             </div>
                             <h3 className="text-3xl font-black mb-4">App Designer</h3>
-                            <p className="text-slate-400 leading-relaxed">
+                            <p className="text-slate-300 leading-relaxed">
                                 Create real mobile-style apps with multi-screen navigation, buttons, text inputs, and dynamic UI elements. Design the next big thing.
                             </p>
                         </div>
@@ -113,7 +146,7 @@ const LandingPage: React.FC = () => {
                                 <Zap size={32} />
                             </div>
                             <h3 className="text-3xl font-black mb-4">Circuit Lab</h3>
-                            <p className="text-slate-400 leading-relaxed">
+                            <p className="text-slate-300 leading-relaxed">
                                 Experience a complete electronics workbench. Connect sensors, LEDs, and LCDs on a breadboard and code them with blocks.
                             </p>
                         </div>
@@ -147,7 +180,7 @@ const LandingPage: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-1 gap-6">
                             <div className="p-8 bg-slate-900 rounded-3xl border border-slate-800 transform lg:-translate-x-10 translate-y-10">
-                                <p className="text-slate-400 mb-6 font-medium">\"My daughter loves the Circuit Lab. Seeing her understand logic through virtual electronics has been amazing. Highly recommended for any STEM-focused parent.\"</p>
+                                <p className="text-slate-300 mb-6 font-medium">\"My daughter loves the Circuit Lab. Seeing her understand logic through virtual electronics has been amazing. Highly recommended for any STEM-focused parent.\"</p>
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm">👩‍🏫</div>
                                     <div className="font-bold text-sm text-slate-300">Sarah, STEM Educator</div>

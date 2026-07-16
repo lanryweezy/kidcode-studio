@@ -17,7 +17,7 @@ export const SportsScoreboardSettings: React.FC<SportsScoreboardSettingsProps> =
 }) => {
   return (
     <div className="space-y-4">
-      <div className="text-xs font-bold text-slate-400 uppercase">Match Settings</div>
+      <div className="text-xs font-bold text-slate-300 uppercase">Match Settings</div>
       
       <div className="space-y-2">
         <label className="block text-xs text-slate-500">Home Team</label>

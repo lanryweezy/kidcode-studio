@@ -93,7 +93,7 @@ const MusicStudio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                     <div className="flex-1" />
 
-                    <button onClick={() => setGrid(Array(NOTES.length).fill(null).map(() => Array(COLS).fill(false)))} className="text-slate-400 hover:text-red-400 flex items-center gap-2 font-bold text-xs uppercase">
+                    <button onClick={() => setGrid(Array(NOTES.length).fill(null).map(() => Array(COLS).fill(false)))} className="text-slate-300 hover:text-red-400 flex items-center gap-2 font-bold text-xs uppercase">
                         <Trash2 size={16} /> Clear
                     </button>
                 </div>

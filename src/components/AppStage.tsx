@@ -3,6 +3,7 @@ import React from 'react';
 import { Search, ArrowLeft, ToggleLeft, ToggleRight, Globe, MessageSquare } from 'lucide-react';
 import { AppState, AppElement } from '../types';
 import { playSoundEffect } from '../services/soundService';
+import { useToast } from './ui/Toast';
 
 interface AppStageProps {
   appState: AppState;
@@ -11,11 +12,12 @@ interface AppStageProps {
 }
 
 const AppStage: React.FC<AppStageProps> = React.memo(({ appState, onNavigate, onAppInteraction }) => {
+    const { toast } = useToast();
     const currentAppElements = appState.screens?.[appState.activeScreen] || [];
     
     const handleElementClick = (el: any) => {
         if (el.actionMessage) {
-            alert(el.actionMessage);
+            toast('info', el.actionMessage);
         }
         if (el.targetScreen) {
             onNavigate?.(el.targetScreen);
@@ -121,7 +123,7 @@ const AppStage: React.FC<AppStageProps> = React.memo(({ appState, onNavigate, on
                             )}
 
                             {el.type === 'image' && (
-                                <img src={el.content} className="w-full rounded-2xl shadow-sm border border-slate-100 object-cover" alt="App Image" />
+                                <img src={el.content} className="w-full rounded-2xl shadow-sm border border-slate-100 object-cover" alt="App Image" loading="lazy" />
                             )}
 
                             {el.type === 'text' && (

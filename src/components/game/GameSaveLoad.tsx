@@ -72,7 +72,7 @@ export const GameSaveLoad: React.FC<GameSaveLoadProps> = ({
             autoFocus
           />
           <Button variant="primary" size="sm" onClick={handleSave}>Save</Button>
-          <Button variant="ghost" size="sm" onClick={() => setShowSaveInput(false)}>Cancel</Button>
+          <Button variant="ghost" size="sm" onClick={() => setShowSaveInput(false)}>Never mind</Button>
         </div>
       ) : (
         <Button variant="primary" fullWidth icon={<Save size={14} />} onClick={() => setShowSaveInput(true)}>

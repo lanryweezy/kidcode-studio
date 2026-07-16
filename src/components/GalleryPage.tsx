@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { AppMode } from '../types';
 import { MODE_CONFIG, EXAMPLE_TEMPLATES } from '../constants';
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
 import { updateCreatorScore, addXP } from '../services/gamificationService';
+import { Skeleton } from './ui/Skeleton';
 
 const MOCK_COMMUNITY_PROJECTS = [
   { id: 'c1', name: 'Super Mario Clone', author: 'CodyKid', mode: AppMode.GAME, likes: 124, remixes: 45, color: 'bg-orange-500', description: 'A platformer with coins and enemies!' },
@@ -26,6 +27,12 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [filter, setFilter] = useState<AppMode | 'all'>('all');
   const [likedProjects, setLikedProjects] = useState<Set<string>>(new Set());
   const [showRemixSuccess, setShowRemixSuccess] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = MOCK_COMMUNITY_PROJECTS.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -150,17 +157,31 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     />
                 </div>
                 <div className="flex gap-2 p-1 bg-white border border-slate-200 rounded-2xl">
-                    <button onClick={() => setFilter('all')} className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === 'all' ? 'bg-violet-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>All</button>
-                    <button onClick={() => setFilter(AppMode.GAME)} className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === AppMode.GAME ? 'bg-orange-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Games</button>
-                    <button onClick={() => setFilter(AppMode.APP)} className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === AppMode.APP ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Apps</button>
-                    <button onClick={() => setFilter(AppMode.HARDWARE)} className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === AppMode.HARDWARE ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Hardware</button>
+                    <button onClick={() => setFilter('all')} className={`px-6 py-2 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 ${filter === 'all' ? 'bg-violet-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>All</button>
+                    <button onClick={() => setFilter(AppMode.GAME)} className={`px-6 py-2 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 ${filter === AppMode.GAME ? 'bg-orange-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Games</button>
+                    <button onClick={() => setFilter(AppMode.APP)} className={`px-6 py-2 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 ${filter === AppMode.APP ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Apps</button>
+                    <button onClick={() => setFilter(AppMode.HARDWARE)} className={`px-6 py-2 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 ${filter === AppMode.HARDWARE ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-100'}`}>Hardware</button>
                 </div>
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filtered.map((proj) => (
-                    <div key={proj.id} className="group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 overflow-y-auto max-h-[calc(100vh-200px)]">
+                {isLoading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <div key={`skeleton-${i}`} className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
+                            <Skeleton height="192px" className="rounded-none" />
+                            <div className="p-6 space-y-3">
+                                <div className="flex justify-between">
+                                    <Skeleton width="60px" height="24px" rounded="rounded-full" />
+                                    <Skeleton width="80px" height="16px" />
+                                </div>
+                                <Skeleton lines={2} />
+                                <Skeleton width="120px" height="32px" rounded="rounded-lg" />
+                            </div>
+                        </div>
+                    ))
+                ) : filtered.map((proj) => (
+                    <div key={proj.id} className="group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-500">
                         {/* Preview Area */}
                         <div className={`h-48 ${proj.color} relative flex items-center justify-center text-white/20`}>
                             {proj.mode === AppMode.GAME ? <Gamepad2 size={80} /> : proj.mode === AppMode.APP ? <Layout size={80} /> : <Cpu size={80} />}

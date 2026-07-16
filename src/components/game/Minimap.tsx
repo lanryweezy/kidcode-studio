@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 interface MinimapEntity {
   x: number; y: number;
@@ -26,6 +26,7 @@ interface MinimapProps {
   showGrid?: boolean;
   fogOfWar?: boolean;
   className?: string;
+  areaNames?: { x: number; y: number; width: number; height: number; name: string }[];
 }
 
 const SIZE_MAP = { xs: 60, sm: 100, md: 140, lg: 200 };
@@ -54,8 +55,35 @@ export const Minimap: React.FC<MinimapProps> = ({
   showGrid = false,
   fogOfWar = false,
   className = '',
+  areaNames = [],
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; name: string } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current || areaNames.length === 0) {
+      setTooltip(null);
+      return;
+    }
+    const rect = containerRef.current.getBoundingClientRect();
+    const px = SIZE_MAP[size];
+    const py = Math.floor(px * (worldHeight / worldWidth));
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const worldMx = (mx / px) * worldWidth;
+    const worldMy = (my / py) * worldHeight;
+
+    const area = areaNames.find(a =>
+      worldMx >= a.x && worldMx <= a.x + a.width &&
+      worldMy >= a.y && worldMy <= a.y + a.height
+    );
+    if (area) {
+      setTooltip({ x: mx, y: my, name: area.name });
+    } else {
+      setTooltip(null);
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -168,8 +196,21 @@ export const Minimap: React.FC<MinimapProps> = ({
   const py = Math.floor(px * (worldHeight / worldWidth));
 
   return (
-    <div className={`bg-slate-900/80 backdrop-blur-sm rounded-lg border border-slate-700/50 overflow-hidden shadow-lg ${className}`}>
+    <div
+      ref={containerRef}
+      className={`bg-slate-900/80 backdrop-blur-sm rounded-lg border border-slate-700/50 overflow-hidden shadow-lg relative ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setTooltip(null)}
+    >
       <canvas ref={canvasRef} width={px} height={py} style={{ width: px, height: py }} />
+      {tooltip && (
+        <div
+          className="absolute pointer-events-none z-10 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded shadow-lg border border-slate-600 whitespace-nowrap"
+          style={{ left: tooltip.x + 8, top: tooltip.y - 24 }}
+        >
+          {tooltip.name}
+        </div>
+      )}
     </div>
   );
 };

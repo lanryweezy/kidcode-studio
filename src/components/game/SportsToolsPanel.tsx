@@ -28,10 +28,10 @@ export const SportsToolsPanel: React.FC<SportsToolsPanelProps> = React.memo(({ o
 
   return (
     <div className="space-y-4" aria-label="Sports tools">
-      <div className="text-xs font-bold text-slate-600 uppercase">Sports Tools</div>
+      <div className="text-xs font-bold text-slate-600 uppercase section-heading">Sports Tools</div>
       
       {/* Category Tabs */}
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1 p-2 bg-slate-50 rounded-lg">
         {SPORTS_CATEGORIES.map(cat => (
           <button
             key={cat.id}
@@ -48,7 +48,7 @@ export const SportsToolsPanel: React.FC<SportsToolsPanelProps> = React.memo(({ o
       </div>
 
       {/* Tool Items */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 overflow-y-auto max-h-48 scrollbar-thin scrollbar-thumb-slate-300">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 overflow-y-auto max-h-48 scrollbar-thin scrollbar-thumb-slate-300 p-2 bg-slate-50 rounded-lg">
         {SPORTS_CATEGORIES.find(c => c.id === activeCategory)?.items.map(item => (
           <button
             key={item}

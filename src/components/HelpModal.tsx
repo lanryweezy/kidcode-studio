@@ -1,13 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { 
   X, HelpCircle, Globe, MessageSquare, Zap, Cpu, 
-  Gamepad2, Layout, Sparkles, BookOpen, ChevronRight 
+  Gamepad2, Layout, Sparkles, BookOpen, ChevronRight, RefreshCw
 } from 'lucide-react';
 
 const HelpModal: React.FC = () => {
-  const { showHelp, setShowHelp } = useStore();
+  const { showHelp, setShowHelp, setShowTutorial } = useStore();
   const [activeTopic, setActiveTab] = useState<'app' | 'game' | 'hw'>('app');
 
   if (!showHelp) return null;
@@ -119,11 +119,11 @@ const HelpModal: React.FC = () => {
                   </p>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                      <p className="text-[10px] font-black text-slate-400 uppercase">AND GATE</p>
+                      <p className="text-[10px] font-black text-slate-500 uppercase">AND GATE</p>
                       <p className="text-xs italic">Only ON if both inputs are ON.</p>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                      <p className="text-[10px] font-black text-slate-400 uppercase">NOT GATE</p>
+                      <p className="text-[10px] font-black text-slate-500 uppercase">NOT GATE</p>
                       <p className="text-xs italic">Flips ON to OFF and OFF to ON.</p>
                     </div>
                   </div>
@@ -134,8 +134,18 @@ const HelpModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 flex justify-center border-t border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter italic">Keep building, keep coding, keep creating! 🚀</p>
+        <div className="p-4 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+          <button
+            onClick={() => {
+              setShowHelp(false);
+              setShowTutorial(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-violet-100 text-violet-700 rounded-xl font-bold text-xs hover:bg-violet-200 transition-all"
+          >
+            <RefreshCw size={14} />
+            Restart Tutorial
+          </button>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter italic">Keep building, keep coding, keep creating! 🚀</p>
         </div>
       </div>
     </div>

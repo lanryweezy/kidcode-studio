@@ -99,21 +99,36 @@ export const FirstWinCelebration: React.FC<FirstWinCelebrationProps> = ({
         </div>
       </div>
 
-      {/* Confetti effect (simplified CSS version) */}
+      {/* Confetti effect (CSS version) */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
             className="absolute w-3 h-3 rounded-full animate-in slide-in-from-top duration-1000"
             style={{
               left: `${Math.random() * 100}%`,
               top: `-20px`,
-              backgroundColor: ['#fbbf24', '#a855f7', '#3b82f6', '#ef4444', '#22c55e'][Math.floor(Math.random() * 5)],
+              backgroundColor: ['#fbbf24', '#a855f7', '#3b82f6', '#ef4444', '#22c55e', '#ec4899', '#f97316'][Math.floor(Math.random() * 7)],
               animationDelay: `${Math.random() * 2}s`,
               animationDuration: `${3 + Math.random() * 2}s`,
               animationIterationCount: 'infinite'
             }}
           />
+        ))}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={`star-${i}`}
+            className="absolute text-2xl animate-in slide-in-from-top duration-1000"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `-20px`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${4 + Math.random() * 2}s`,
+              animationIterationCount: 'infinite'
+            }}
+          >
+            {['⭐', '✨', '🌟', '💫', '🎆'][Math.floor(Math.random() * 5)]}
+          </div>
         ))}
       </div>
     </div>

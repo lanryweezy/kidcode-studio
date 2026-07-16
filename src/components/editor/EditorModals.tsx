@@ -104,7 +104,7 @@ const EditorModals: React.FC<EditorModalsProps> = React.memo((props) => {
                     />
                 ))}
                 {showCodePageManager && (
-                    <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-[100]">
+                    <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-[100] overflow-y-auto">
                         <CodePageManager
                             commands={commands}
                             appState={appState}
@@ -153,7 +153,7 @@ const EditorModals: React.FC<EditorModalsProps> = React.memo((props) => {
                             autoFocus
                         />
                         <div className="flex gap-2 justify-end">
-                            <Button variant="ghost" size="sm" onClick={() => setShowSpritePrompt(false)}>Cancel</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setShowSpritePrompt(false)}>Never mind</Button>
                             <Button variant="primary" size="sm" onClick={handleConfirmSprite} loading={localIsGeneratingSprite}>Generate</Button>
                         </div>
                     </div>

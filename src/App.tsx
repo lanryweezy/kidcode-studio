@@ -1,5 +1,28 @@
-import React, { Suspense, useCallback } from 'react';
+import React, { Suspense, useCallback, useState, useEffect } from 'react';
 import { Zap } from 'lucide-react';
+
+const FUN_LOADING_MESSAGES = [
+    'Warming up the pixels...',
+    'Teaching blocks to stack...',
+    'Greasing the gears...',
+    'Fetching the fun stuff...',
+    'Loading creativity modules...',
+    'Assembling the magic...',
+    'Waking up the sprites...',
+    'Compiling imagination...',
+    'Charging the battery...',
+    'Polishing the UI...',
+    'Feeding the code hamsters...',
+    'Downloading more RAM... just kidding!',
+    'Calibrating the awesome-meter...',
+    'Assembling pixel rockets...',
+    'Teaching robots to dance...',
+    'Warming up the laser cannons...',
+    'Polishing the pixel stars...',
+    'Loading epic adventure mode...',
+    'Syncing the fun frequencies...',
+    'Revving up the creativity engine...',
+];
 import HomeScreen from './components/HomeScreen';
 import LandingPage from './components/LandingPage';
 import GalleryPage from './components/GalleryPage';
@@ -14,6 +37,27 @@ import EditorModals from './components/editor/EditorModals';
 import TycoonOverlay from './components/editor/TycoonOverlay';
 
 const MatterPhysicsLazy = React.lazy(() => import('./components/MatterPhysicsBridge'));
+
+const LoadingScreen: React.FC = () => {
+    const [msgIdx, setMsgIdx] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => setMsgIdx(i => (i + 1) % FUN_LOADING_MESSAGES.length), 2200);
+        return () => clearInterval(interval);
+    }, []);
+    return (
+        <div className="h-[100dvh] h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 gap-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-glow animate-float">
+                <Zap size={32} fill="currentColor" />
+            </div>
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full progress-fill" style={{ width: '60%', animation: 'shimmer 1.5s infinite' }} />
+                </div>
+                <p className="text-sm text-slate-500 font-bold transition-opacity duration-300">{FUN_LOADING_MESSAGES[msgIdx]}</p>
+            </div>
+        </div>
+    );
+};
 
 // Inner component that runs INSIDE ToastProvider
 const AppInner: React.FC = () => {
@@ -77,19 +121,7 @@ const AppInner: React.FC = () => {
                 Skip to sidebar
             </a>
             {hackerMode && <div className="hacker-scanline" />}
-            <Suspense fallback={
-                <div className="h-[100dvh] h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 gap-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-glow animate-float">
-                        <Zap size={32} fill="currentColor" />
-                    </div>
-                    <div className="flex flex-col items-center gap-3">
-                        <div className="w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full" style={{ width: '60%', animation: 'shimmer 1.5s infinite' }} />
-                        </div>
-                        <p className="text-sm text-slate-500 font-bold">Loading KidCode Studio...</p>
-                    </div>
-                </div>
-            }>
+            <Suspense fallback={<LoadingScreen />}>
                 {advancedPhysics && (
                     <React.Suspense fallback={null}>
                         <MatterPhysicsBridge

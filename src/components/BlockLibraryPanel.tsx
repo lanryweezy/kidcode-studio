@@ -26,7 +26,7 @@ const BlockLibraryPanel: React.FC<BlockLibraryPanelProps> = ({
       <div className="p-4 border-b border-slate-100">
         <h3 className="font-bold text-slate-700 mb-2">Block Library</h3>
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="Search blocks..."
@@ -49,7 +49,7 @@ const BlockLibraryPanel: React.FC<BlockLibraryPanelProps> = ({
             <div key={category} className="mb-2">
               <button
                 onClick={() => setExpandedCategories(prev => ({ ...prev, [category]: !isExpanded }))}
-                className="flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2 hover:text-slate-600 px-1"
+                className="flex items-center justify-between w-full text-xs font-bold uppercase text-slate-500 mb-2 hover:text-slate-600 px-1"
               >
                 {category}
                 {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}

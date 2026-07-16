@@ -149,7 +149,7 @@ export const SkillTreePanel: React.FC<SkillTreePanelProps> = ({
               }`}>
                 {isUnlocked(selected.id) ? '✓' : selected.icon}
               </div>
-              <h3 className="font-bold text-slate-800 mt-3">{selected.name}</h3>
+              <h3 className="text-lg font-bold text-slate-800 mt-3">{selected.name}</h3>
               <p className="text-xs text-slate-500 mt-1">{selected.description}</p>
             </div>
 

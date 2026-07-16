@@ -60,17 +60,17 @@ export const GameEndScreen: React.FC<GameEndScreenProps> = ({
           <div className="bg-white/50 rounded-xl p-3">
             <Star size={20} className="text-yellow-500 mx-auto mb-1" />
             <div className="text-xl font-black text-slate-800">{score}</div>
-            <div className="text-[10px] text-slate-400 uppercase">Score</div>
+            <div className="text-[10px] text-slate-500 uppercase">Score</div>
           </div>
           <div className="bg-white/50 rounded-xl p-3">
             <span className="text-xl block mb-1">🪙</span>
             <div className="text-xl font-black text-slate-800">{coins}</div>
-            <div className="text-[10px] text-slate-400 uppercase">Coins</div>
+            <div className="text-[10px] text-slate-500 uppercase">Coins</div>
           </div>
           <div className="bg-white/50 rounded-xl p-3">
             <span className="text-xl block mb-1">⚔️</span>
             <div className="text-xl font-black text-slate-800">{enemiesDefeated}</div>
-            <div className="text-[10px] text-slate-400 uppercase">Defeated</div>
+            <div className="text-[10px] text-slate-500 uppercase">Defeated</div>
           </div>
         </div>
 

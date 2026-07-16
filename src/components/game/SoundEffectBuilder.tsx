@@ -625,7 +625,10 @@ export const SoundEffectBuilder: React.FC<SoundEffectBuilderProps> = ({ onSave }
                 setCustomName(preset.name);
                 playSound(preset.frequency, preset.type, preset.duration, preset.effects);
               }}
-              className="flex flex-col items-center p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+              onMouseEnter={() => {
+                playSound(preset.frequency, preset.type, Math.min(preset.duration, 0.15), []);
+              }}
+              className="flex flex-col items-center p-2 bg-slate-50 rounded-lg hover:bg-slate-100 hover:scale-105 transition-all"
             >
               <span className="text-lg">{preset.emoji}</span>
               <span className="text-[9px] font-bold text-slate-600">{preset.name}</span>

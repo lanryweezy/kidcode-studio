@@ -4,14 +4,17 @@
 
 /* ─── Smooth Theme Transitions ─── */
 * {
-  transition-property: background-color, color, border-color, border-bottom-color, box-shadow;
+  transition-property: background-color, color, border-color, border-bottom-color, box-shadow, outline-color, fill, stroke, opacity;
   transition-duration: 0.2s;
-  transition-timing-function: ease;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ─── Design Token Standardization ─── */
-/* Border radius tokens: sm (0.25rem), md (0.375rem), lg (0.5rem), xl (0.75rem) */
-/* Use these consistently instead of arbitrary values */
+:root {
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
 
 [style*="animation"], [style*="transform"] {
   transition: none;
@@ -37,6 +40,24 @@
 .btn-3d:active {
   transform: translateY(2px);
   border-bottom-width: 1px;
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.motion-safe-animate {
+  animation: float 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe-animate {
+    animation: none;
+  }
 }
 
 /* ─── Focus Ring Utility ─── */
@@ -380,11 +401,46 @@ textarea,
   border-radius: 0.5rem;
 }
 
+/* ─── Button Ripple Effect ─── */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.35) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.btn-ripple:active::after {
+  opacity: 1;
+}
+
 /* ─── Block Drag State ─── */
 .block-dragging {
   transform: scale(1.05);
   box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
   opacity: 0.9;
+}
+
+/* ─── Drag Drop Visual Feedback ─── */
+.drag-over {
+  border: 2px dashed #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.08);
+}
+
+.drag-ghost {
+  opacity: 0.5;
+  border: 2px dashed #94a3b8;
+}
+
+.drop-target-active {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+  background-color: rgba(139, 92, 246, 0.05);
 }
 
 /* ─── Block Drop Flash ─── */
@@ -408,6 +464,46 @@ textarea,
   animation: deleteFlash 0.3s ease-out forwards;
 }
 
+/* ─── Variable Change Flash ─── */
+@keyframes variableFlash { 0% { background-color: rgba(124, 58, 237, 0.2); } 100% { background-color: transparent; } }
+.variable-flash { animation: variableFlash 0.5s ease-out; }
+
+/* ─── Context Menu Fade Out ─── */
+@keyframes contextMenuFadeOut {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
+
+/* ─── Toast Slide Animations ─── */
+@keyframes toastSlideIn {
+  0% { opacity: 0; transform: translateX(100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastSlideOut {
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+.toast-slide-in { animation: toastSlideIn 0.3s ease-out; }
+.toast-slide-out { animation: toastSlideOut 0.3s ease-in forwards; }
+
+/* ─── Tab Switch Fade In ─── */
+@keyframes tabFadeIn {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.tab-fade-in { animation: tabFadeIn 0.2s ease-out; }
+
+/* ─── Progress Bar Smooth Fill ─── */
+.progress-fill {
+  transition: width 0.3s ease-out;
+}
+
+/* ─── Smooth Scroll ─── */
+html { scroll-behavior: smooth; }
+
 /* ─── View Transitions ─── */
 .view-transition {
   transition: opacity 0.2s ease-out, transform 0.2s ease-out;
@@ -415,7 +511,8 @@ textarea,
 
 .view-exit {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 /* ─── Game Animations ─── */
@@ -581,6 +678,61 @@ a {
 .focus-ring:focus-visible {
   outline: 2px solid #8b5cf6;
   outline-offset: 2px;
+}
+
+/* ─── Section Heading Rhythm ─── */
+.section-heading {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ─── Primary vs Secondary Action Distinction ─── */
+.btn-primary-action {
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+}
+.btn-primary-action:hover {
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
+}
+
+.btn-secondary-action {
+  background: transparent;
+  box-shadow: none;
+}
+.btn-secondary-action:hover {
+  background: #f1f5f9;
+}
+
+/* ─── Touch Feedback for Mobile ─── */
+@media (hover: none) and (pointer: coarse) {
+  .touch-feedback {
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .touch-feedback:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+  }
+  .touch-feedback-ripple {
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .touch-feedback-ripple:active {
+    transform: scale(0.96);
+  }
+  .touch-feedback-ripple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .touch-feedback-ripple:active::after {
+    opacity: 1;
+  }
 }
 
 

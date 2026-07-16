@@ -66,6 +66,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onUpdateUser
   const gameProjects = projects.filter(p => p.mode === AppMode.GAME).length;
   const hardwareProjects = projects.filter(p => p.mode === AppMode.HARDWARE).length;
   
+  // Calculate profile completion
+  const completionChecks = [
+    { label: 'Name set', done: user.name.length > 0 },
+    { label: 'Avatar chosen', done: user.avatar !== '🚀' },
+    { label: 'First project', done: totalProjects > 0 },
+    { label: '3+ projects', done: totalProjects >= 3 },
+    { label: 'Reached Level 2', done: user.level >= 2 },
+    { label: '500+ XP', done: user.xp >= 500 },
+  ];
+  const completionPercent = Math.round((completionChecks.filter(c => c.done).length / completionChecks.length) * 100);
+
   // Calculate Progress to next level
   const xpForCurrentLevel = (user.level - 1) * 100;
   const xpForNextLevel = user.level * 100;
@@ -115,16 +126,37 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onUpdateUser
                   )}
                   <p className="text-slate-400 font-medium">Master Builder</p>
                   
-                  {/* XP Bar */}
-                  <div className="mt-4 max-w-sm mx-auto md:mx-0">
-                      <div className="flex justify-between text-xs font-bold text-slate-400 mb-1">
-                          <span>XP: {user.xp}</span>
-                          <span>Next Level: {xpForNextLevel}</span>
-                      </div>
-                      <div className="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-                          <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
-                      </div>
-                  </div>
+                   {/* XP Bar */}
+                   <div className="mt-4 max-w-sm mx-auto md:mx-0">
+                       <div className="flex justify-between text-xs font-bold text-slate-400 mb-1">
+                           <span>XP: {user.xp}</span>
+                           <span>Next Level: {xpForNextLevel}</span>
+                       </div>
+                       <div className="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                           <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-1000 progress-fill" style={{ width: `${progressPercent}%` }} />
+                       </div>
+                   </div>
+
+                   {/* Profile Completion */}
+                   <div className="mt-3 max-w-sm mx-auto md:mx-0">
+                       <div className="flex justify-between items-center text-xs font-bold text-slate-400 mb-1">
+                           <span>Profile Completion</span>
+                           <span className={completionPercent === 100 ? 'text-emerald-400' : 'text-amber-400'}>{completionPercent}%</span>
+                       </div>
+                       <div className="h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                           <div
+                               className={`h-full rounded-full transition-all duration-1000 ${completionPercent === 100 ? 'bg-gradient-to-r from-emerald-500 to-green-400' : 'bg-gradient-to-r from-amber-500 to-yellow-400'}`}
+                               style={{ width: `${completionPercent}%` }}
+                           />
+                       </div>
+                       <div className="flex flex-wrap gap-1 mt-2">
+                           {completionChecks.map((check, i) => (
+                               <span key={i} className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${check.done ? 'bg-emerald-900/50 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
+                                   {check.done ? '✓' : '○'} {check.label}
+                               </span>
+                           ))}
+                       </div>
+                   </div>
               </div>
 
               {/* Stats Cards */}

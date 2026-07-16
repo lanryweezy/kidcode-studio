@@ -18,6 +18,7 @@ interface BlockProps {
     onMouseLeave?: () => void;
     onContextMenu?: (e: React.MouseEvent, id: string) => void;
     isActive?: boolean;
+    isDragOver?: boolean;
 }
 
 // O(1) Lookup Map
@@ -101,9 +102,35 @@ const Block: React.FC<BlockProps> = ({
     onMouseEnter,
     onMouseLeave,
     onContextMenu,
-    isActive
+    isActive,
+    isDragOver = false
 }) => {
     const blockRef = useRef<HTMLDivElement>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isFlashing, setIsFlashing] = useState(false);
+    const prevParamsRef = useRef(JSON.stringify(block.params));
+
+    useEffect(() => {
+        const prev = prevParamsRef.current;
+        const curr = JSON.stringify(block.params);
+        if (prev !== curr) {
+            prevParamsRef.current = curr;
+            setIsFlashing(true);
+            const timer = setTimeout(() => setIsFlashing(false), 400);
+            return () => clearTimeout(timer);
+        }
+    }, [block.params]);
+
+    const handleDelete = useCallback(() => {
+        setIsDeleting(true);
+    }, []);
+
+    useEffect(() => {
+        if (isDeleting) {
+            const timer = setTimeout(() => onDelete(block.id), 300);
+            return () => clearTimeout(timer);
+        }
+    }, [isDeleting, block.id, onDelete]);
 
     // Scroll logic is now handled via ID lookup in App.tsx for performance, 
     // but kept here for fallback or non-execution highlighting
@@ -123,6 +150,21 @@ const Block: React.FC<BlockProps> = ({
         onUpdate(block.id, { ...block.params, [key]: value });
     }, [block.id, block.params, onUpdate]);
 
+    const handleDragStart = useCallback((e: React.DragEvent) => {
+        if (blockRef.current) {
+            const ghost = blockRef.current.cloneNode(true) as HTMLElement;
+            ghost.style.opacity = '0.6';
+            ghost.style.transform = 'scale(1.05)';
+            ghost.style.position = 'absolute';
+            ghost.style.top = '-1000px';
+            ghost.style.pointerEvents = 'none';
+            document.body.appendChild(ghost);
+            e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
+            requestAnimationFrame(() => document.body.removeChild(ghost));
+        }
+        onDragStart?.(e);
+    }, [onDragStart]);
+
     const toggleBreakpoint = (e: React.MouseEvent) => {
         e.stopPropagation();
         onUpdate(block.id, { hasBreakpoint: !block.hasBreakpoint });
@@ -139,6 +181,7 @@ const Block: React.FC<BlockProps> = ({
                 relative group flex flex-col p-4 rounded-xl mb-4 transition-all duration-200 select-none
                 bg-yellow-200 border-b-4 border-r-4 border-yellow-300
                 shadow-sm rotate-1 hover:rotate-0 hover:scale-[1.01] hover:shadow-md
+                ${isDeleting ? 'animate-delete-flash' : ''}
                 ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
             `}
                 draggable={isDraggable}
@@ -156,7 +199,7 @@ const Block: React.FC<BlockProps> = ({
                     <StickyNote size={16} />
                     <span className="text-[10px] font-black uppercase tracking-widest font-sans">Note</span>
                     <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => onDelete(block.id)} className="hover:text-red-600"><Trash2 size={14} /></button>
+                        <button onClick={handleDelete} className="hover:text-red-600"><Trash2 size={14} /></button>
                     </div>
                 </div>
                 <textarea
@@ -207,7 +250,7 @@ const Block: React.FC<BlockProps> = ({
     // Active Style is now controlled by class toggling for performance, but this remains for fallback
     const activeStyle = isActive
         ? 'ring-4 ring-yellow-400 border-yellow-500 shadow-xl scale-[1.02] z-10'
-        : 'hover:shadow-lg hover:border-slate-400:border-slate-500 shadow-sm';
+        : 'hover:shadow-lg hover:border-slate-400 dark:hover:border-slate-500 shadow-sm';
 
     return (
         <div className="flex gap-2 items-center">
@@ -227,13 +270,15 @@ const Block: React.FC<BlockProps> = ({
             relative group flex-1 flex items-center gap-3 p-3 rounded-xl border-2 mb-3
             transition-all duration-200 select-none touch-none block-hover
             ${borderColor} ${bgColor} ${activeStyle}
+            ${isDeleting ? 'animate-delete-flash' : ''}
+            ${isFlashing ? 'ring-2 ring-emerald-400 border-emerald-400 animate-pulse' : ''}
             ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
+            ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01]' : ''}
         `}
                 draggable={isDraggable}
-                onDragStart={onDragStart}
+                onDragStart={handleDragStart}
                 onTouchStart={(e) => {
                     if (!isDraggable) return;
-                    // Simulate drag start for touch
                     if (onDragStart) {
                         onDragStart({
                             dataTransfer: {
@@ -259,7 +304,7 @@ const Block: React.FC<BlockProps> = ({
                 aria-label={`Code block: ${def?.label}`}
             >
                 {isDraggable && (
-                    <div className="text-slate-300 hover:text-slate-500:text-slate-400 cursor-grab active:cursor-grabbing">
+                    <div className="text-slate-300 hover:text-slate-500 dark:hover:text-slate-600 cursor-grab active:cursor-grabbing">
                         <GripVertical size={16} />
                     </div>
                 )}
@@ -308,7 +353,7 @@ const Block: React.FC<BlockProps> = ({
                                     placeholder="res"
                                 />
                             </div>
-                            <span className="text-slate-400 font-bold">=</span>
+                            <span className="text-slate-600 font-bold">=</span>
 
                             {block.type !== CommandType.CALC_RANDOM && !block.type.startsWith('STR_') && (
                                 <DebouncedInput
@@ -413,7 +458,7 @@ const Block: React.FC<BlockProps> = ({
                                 onChange={(e) => handleParamChange('color', e.target.value)}
                                 className="w-12 h-8 rounded cursor-pointer border-0 p-0"
                             />
-                            <span className="text-xs font-mono text-slate-400">{block.params.color}</span>
+                            <span className="text-xs font-mono text-slate-600">{block.params.color}</span>
                         </div>
                     )}
 
@@ -471,7 +516,7 @@ const Block: React.FC<BlockProps> = ({
                                 className="flex-1 min-w-[100px] bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Placeholder..."
                             />
-                            <span className="text-xs text-slate-400 font-bold">SAVE TO:</span>
+                            <span className="text-xs text-slate-600 font-bold">SAVE TO:</span>
                             <DebouncedInput
                                 value={block.params.varName}
                                 onChange={(val) => handleParamChange('varName', val)}
@@ -517,7 +562,7 @@ const Block: React.FC<BlockProps> = ({
                                 className="w-24 bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Label"
                             />
-                            <span className="text-xs text-slate-400 font-bold">LINK VAR:</span>
+                            <span className="text-xs text-slate-600 font-bold">LINK VAR:</span>
                             <DebouncedInput
                                 value={block.params.varName}
                                 onChange={(val) => handleParamChange('varName', val)}
@@ -526,7 +571,7 @@ const Block: React.FC<BlockProps> = ({
                             />
                             {block.type === CommandType.ADD_PROGRESS && (
                                 <div className="flex items-center gap-1">
-                                    <span className="text-xs text-slate-400 font-bold">MAX:</span>
+                                    <span className="text-xs text-slate-600 font-bold">MAX:</span>
                                     <DebouncedInput
                                         type="number"
                                         value={block.params.value}
@@ -610,14 +655,14 @@ const Block: React.FC<BlockProps> = ({
                                 className="w-24 bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Label"
                             />
-                            <span className="text-xs text-slate-400 font-bold">MSG:</span>
+                            <span className="text-xs text-slate-600 font-bold">MSG:</span>
                             <DebouncedInput
                                 value={block.params.message}
                                 onChange={(val) => handleParamChange('message', val)}
                                 className="w-24 bg-slate-100 rounded px-2 py-1 outline-none text-sm focus:ring-2 focus:ring-violet-200"
                                 placeholder="Alert Message"
                             />
-                            <span className="text-xs text-slate-400 font-bold">GO TO:</span>
+                            <span className="text-xs text-slate-600 font-bold">GO TO:</span>
                             <DebouncedInput
                                 value={block.params.screenName}
                                 onChange={(val) => handleParamChange('screenName', val)}
@@ -743,11 +788,11 @@ const Block: React.FC<BlockProps> = ({
 
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                     {onDuplicate && (
-                        <button onClick={() => onDuplicate(block.id)} className="p-1 text-slate-400 hover:text-blue-500 rounded bg-white shadow-sm" title="Duplicate">
+                        <button onClick={() => onDuplicate(block.id)} className="p-1 text-slate-600 hover:text-blue-500 rounded bg-white shadow-sm" title="Duplicate">
                             <Copy size={12} />
                         </button>
                     )}
-                    <button onClick={() => onDelete(block.id)} className="p-1 text-slate-400 hover:text-red-500 rounded bg-white shadow-sm" title="Delete">
+                    <button onClick={handleDelete} className="p-1 text-slate-600 hover:text-red-500 rounded bg-white shadow-sm" title="Delete">
                         <Trash2 size={12} />
                     </button>
                 </div>

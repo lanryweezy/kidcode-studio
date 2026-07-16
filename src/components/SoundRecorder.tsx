@@ -2,8 +2,10 @@
 import React, { useState, useRef } from 'react';
 import { Mic, Square, Play, Trash2, X, Volume2 } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
+import { useToast } from './ui/Toast';
 
 const SoundRecorder: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -28,7 +30,7 @@ const SoundRecorder: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       mediaRecorderRef.current.start();
       setIsRecording(true);
     } catch (err) {
-      alert("Microphone access denied or not supported.");
+      toast('error', "Microphone access denied or not supported.");
     }
   };
 
@@ -67,7 +69,7 @@ const SoundRecorder: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         ))}
                     </div>
                 ) : (
-                    <Mic size={48} className="text-slate-400" />
+                    <Mic size={48} className="text-slate-500" />
                 )}
             </div>
 
@@ -101,7 +103,7 @@ const SoundRecorder: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         <div className="p-4 bg-slate-50 flex justify-center border-t border-slate-100">
             <button 
-                onClick={() => { alert('Sound saved to your project library!'); onClose(); }}
+                onClick={() => { toast('success', 'Sound saved to your project library!'); onClose(); }}
                 disabled={!audioUrl}
                 className="w-full py-3 bg-rose-500 disabled:opacity-50 text-white font-black rounded-xl shadow-lg hover:bg-rose-600 transition-all"
             >

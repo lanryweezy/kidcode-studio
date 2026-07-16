@@ -90,7 +90,7 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
                         {image && (
                             <div className="space-y-4">
                                 <div>
-                                    <label className="text-xs font-black text-slate-400 uppercase block mb-2">Grid Width</label>
+                                    <label className="text-xs font-black text-slate-500 uppercase block mb-2">Grid Width</label>
                                     <input
                                         type="number"
                                         value={gridSize.w}
@@ -99,7 +99,7 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-black text-slate-400 uppercase block mb-2">Grid Height</label>
+                                    <label className="text-xs font-black text-slate-500 uppercase block mb-2">Grid Height</label>
                                     <input
                                         type="number"
                                         value={gridSize.h}
@@ -120,7 +120,7 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
                     {/* Preview Area */}
                     <div className="flex-1 bg-slate-100 p-8 flex flex-col items-center justify-center overflow-hidden relative">
                         {!image ? (
-                            <div className="text-slate-400 flex flex-col items-center gap-4">
+                            <div className="text-slate-500 flex flex-col items-center gap-4">
                                 <ImageIcon size={64} className="opacity-20" />
                                 <p className="font-bold">Upload a sprite sheet to start</p>
                             </div>
@@ -150,7 +150,7 @@ const SpriteExtractor: React.FC<{ onSpriteExtracted: (frames: string[]) => void,
                     <div className="h-32 bg-slate-50 border-t border-slate-200 p-4 flex gap-4 overflow-x-auto items-center">
                         {frames.map((frame, i) => (
                             <div key={i} className="w-16 h-16 bg-white rounded-lg border border-slate-200 shrink-0 p-1 flex items-center justify-center">
-                                <img src={frame} className="max-w-full max-h-full object-contain" />
+                                <img src={frame} alt={`Sprite frame ${i}`} loading="lazy" className="max-w-full max-h-full object-contain" />
                             </div>
                         ))}
                         <div className="w-px h-12 bg-slate-300 mx-2" />

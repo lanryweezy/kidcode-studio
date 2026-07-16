@@ -13,9 +13,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-violet-600 hover:bg-violet-700 text-white shadow-glow-sm hover:shadow-glow active:bg-violet-800',
-  secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200',
-  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100',
+  primary: 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-glow-sm hover:shadow-glow hover:brightness-110 hover:[box-shadow:0_0_24px_rgba(124,58,237,0.45),0_4px_12px_rgba(99,102,241,0.25)] active:brightness-90',
+  secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 font-bold',
+  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 font-bold',
   danger: 'bg-rose-500 hover:bg-rose-600 text-white shadow-sm active:bg-rose-700',
   success: 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm active:bg-emerald-700',
   warning: 'bg-amber-500 hover:bg-amber-600 text-white shadow-sm active:bg-amber-700',
@@ -45,10 +45,11 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       className={`
-        inline-flex items-center justify-center font-semibold rounded-lg
-        transition-all duration-150 ease-out
-        active:scale-[0.97]
+        inline-flex items-center justify-center font-semibold rounded-xl
+        transition-transform duration-100 ease-out
+        active:scale-95
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
+        btn-ripple
         ${variantStyles[variant]}
         ${sizeStyles[size]}
         focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2

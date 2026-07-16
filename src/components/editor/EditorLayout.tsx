@@ -1,6 +1,6 @@
 import React, { Suspense, useState, useCallback } from 'react';
 import { AppMode, CommandBlock } from '../../types';
-import { Box, Trash, Share2 } from 'lucide-react';
+import { Box, Trash, Share2, ChevronRight } from 'lucide-react';
 import TopBar from '../TopBar';
 import Sidebar from '../Sidebar';
 import Block from '../Block';
@@ -105,6 +105,12 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                             {isCollaborating ? `Live (${collaborators.length})` : 'Share'}
                         </button>
                         <AIAssistButton currentMode={mode} onAppendCode={handleAppendCode} />
+                        {/* Breadcrumb Navigation */}
+                        <nav className="flex items-center gap-1 px-2 py-1 bg-white/80 backdrop-blur rounded-lg text-[10px] text-slate-500 font-medium" aria-label="Breadcrumb">
+                            <span>{mode === AppMode.GAME ? 'Game' : mode === AppMode.APP ? 'App' : 'Hardware'}</span>
+                            <ChevronRight size={10} className="text-slate-400" />
+                            <span className="text-slate-700 font-bold">{currentProject?.name || 'Untitled'}</span>
+                        </nav>
                         {showShareInput && (
                             <div className="absolute top-full left-0 mt-1 p-3 bg-white rounded-xl shadow-xl border border-slate-200 z-40 flex flex-col gap-2 min-w-[250px]">
                                 <input
@@ -117,14 +123,14 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                                 />
                                 <div className="flex gap-2">
                                     <button onClick={handleStartCollab} className="flex-1 px-3 py-1.5 bg-violet-500 text-white rounded-lg text-xs font-bold hover:bg-violet-600">Start</button>
-                                    <button onClick={() => setShowShareInput(false)} className="px-3 py-1.5 bg-slate-200 text-slate-600 rounded-lg text-xs font-bold">Cancel</button>
+                                    <button onClick={() => setShowShareInput(false)} className="px-3 py-1.5 bg-slate-200 text-slate-600 rounded-lg text-xs font-bold">Never mind</button>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {draggedBlockId && (
-                        <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 p-4 rounded-full transition-all z-40 flex items-center gap-2 ${isOverTrash ? 'bg-red-500 text-white scale-110 shadow-xl rotate-6' : 'bg-white text-slate-400 shadow-lg'}`}
+                        <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 p-4 rounded-full transition-all z-40 flex items-center gap-2 ${isOverTrash ? 'bg-red-500 text-white scale-110 shadow-xl rotate-6'                         : 'bg-white text-slate-300 shadow-lg'}`}
                             onDragEnter={() => setIsOverTrash(true)}
                             onDragLeave={() => setIsOverTrash(false)}
                             onDragOver={handleTrashDragOver}
@@ -135,11 +141,13 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         </div>
                     )}
 
-                    <div ref={workspaceRef} className="flex-1 p-3 lg:p-6 custom-scrollbar space-y-1 relative overflow-y-auto" onDragOver={handleWorkspaceDragOver} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
+                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar space-y-1 relative overflow-y-auto transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={handleWorkspaceDragOver} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
                         {commands.length === 0 && (
                             <div className="h-full min-h-[200px] flex flex-col items-center justify-center text-slate-400 opacity-60 pointer-events-none animate-in zoom-in duration-500">
-                                <Box size={64} className="mb-4 text-slate-300 animate-bounce-sm" />
-                                <p className="font-bold text-xl text-center px-4">Drag blocks here to start coding!</p>
+                                <Box size={64} className={`mb-4 text-slate-300 ${draggedBlockId ? 'animate-bounce text-violet-400' : 'animate-bounce-sm'}`} />
+                                <p className={`font-bold text-xl text-center px-4 ${draggedBlockId ? 'text-violet-500' : ''}`}>
+                                    {draggedBlockId ? 'Drop your block here!' : 'Drag blocks here to start coding!'}
+                                </p>
                             </div>
                         )}
                         {draggedBlockId && commands.length > 0 && (

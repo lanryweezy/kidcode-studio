@@ -12,6 +12,7 @@ import {
     ToggleLeft, SlidersHorizontal, PanelTop, Trash2, Ghost, Paintbrush,
     Loader2, Sparkles, MessageSquare, Terminal, Pencil, Image, Code2, Download, FileCode, Music, Mic, Box, Film, Headphones, Scissors
 } from 'lucide-react';
+import { useToast } from './ui/Toast';
 import { exportToPython, exportToJavaScript } from '../services/codeExporter';
 import AnimationSequencer from './AnimationSequencer';
 import MissionProgress from './MissionProgress';
@@ -31,6 +32,7 @@ const Sidebar: React.FC<any> = ({
     handleGenerateSprite,
     isGeneratingSprite,
 }) => {
+    const { toast } = useToast();
     const [designTab, setDesignTab] = useState<'sprite' | 'animations'>('sprite');
     const [isBlockListLoading, setIsBlockListLoading] = useState(true);
     const [localSearch, setLocalSearch] = useState('');
@@ -128,7 +130,7 @@ const Sidebar: React.FC<any> = ({
                 {isCollapsed ? '›' : '‹'}
             </button>
 
-            <div className={`${isCollapsed ? 'w-16' : 'w-72'} glass border-r border-slate-200 flex flex-col h-full transition-all duration-300 relative z-20`}>
+            <div className={`${isCollapsed ? 'w-16' : 'w-72'} glass border-r border-slate-200 flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden relative z-20`}>
                 {isCollapsed ? (
                     <div className="flex flex-col items-center gap-2 p-2">
                         <button onClick={() => { setLocalSearch(''); setIsCollapsed(false); }} className="w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors" title="Blocks">
@@ -147,7 +149,7 @@ const Sidebar: React.FC<any> = ({
                 ) : (
                 <>
                 {activeTab === 'export' && (
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50">
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50 tab-fade-in">
                         <div className="flex items-center gap-2 mb-6">
                             <div className="w-8 h-8 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center">
                                 <Code2 size={18} />
@@ -163,7 +165,7 @@ const Sidebar: React.FC<any> = ({
                                         <FileCode size={12} className="text-blue-500" /> Python
                                     </span>
                                     <button
-                                        onClick={() => { navigator.clipboard.writeText(pythonCode); alert('Python code copied!'); }}
+                                        onClick={() => { navigator.clipboard.writeText(pythonCode); toast('success', 'Python code copied!'); }}
                                         className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200 shadow-sm"
                                     >
                                         COPY
@@ -181,7 +183,7 @@ const Sidebar: React.FC<any> = ({
                                         <FileCode size={12} className="text-yellow-500" /> JavaScript
                                     </span>
                                     <button
-                                        onClick={() => { navigator.clipboard.writeText(jsCode); alert('JavaScript code copied!'); }}
+                                        onClick={() => { navigator.clipboard.writeText(jsCode); toast('success', 'JavaScript code copied!'); }}
                                         className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200 shadow-sm"
                                     >
                                         COPY
@@ -203,9 +205,9 @@ const Sidebar: React.FC<any> = ({
                 )}
 
                 {activeTab === 'ai' ? (
-                    <AIChat currentMode={mode} onAppendCode={handleAppendCode} onReplaceCode={handleReplaceCode} />
+                    <div className="tab-fade-in"><AIChat currentMode={mode} onAppendCode={handleAppendCode} onReplaceCode={handleReplaceCode} /></div>
                 ) : activeTab === 'design' && mode === AppMode.APP ? (
-                    <div className="flex flex-col h-full bg-slate-50">
+                    <div className="flex flex-col h-full bg-slate-50 tab-fade-in">
                         <div className="p-4 bg-white border-b border-slate-200">
                             <h3 className="font-bold text-slate-800 flex items-center gap-2">
                                 <Layout className="text-blue-500" /> App Designer
@@ -231,7 +233,7 @@ const Sidebar: React.FC<any> = ({
                         </div>
                     </div>
                 ) : activeTab === 'design' && mode === AppMode.GAME ? (
-                    <div className="flex flex-col h-full bg-slate-50">
+                    <div className="flex flex-col h-full bg-slate-50 tab-fade-in">
                         <div className="p-4 bg-white border-b border-slate-200">
                             <div className="flex p-1 bg-slate-100 rounded-lg">
                                 <button onClick={() => setDesignTab('sprite')} className={`flex-1 py-1 text-sm font-bold rounded-md flex items-center justify-center gap-2 ${designTab === 'sprite' ? 'bg-white shadow text-violet-500' : 'text-slate-500'}`}><Ghost size={16} /> Sprite</button>
@@ -242,7 +244,7 @@ const Sidebar: React.FC<any> = ({
                             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                                 <div className="aspect-square bg-white rounded-2xl border-2 border-slate-200 mb-6 flex items-center justify-center relative shadow-inner overflow-hidden">
                                     {spriteState.texture ? (
-                                        <img src={spriteState.texture} className="max-w-[80%] max-h-[80%] object-contain drop-shadow-lg" alt="Sprite Texture" />
+                                        <img src={spriteState.texture} className="max-w-[80%] max-h-[80%] object-contain drop-shadow-lg" alt="Sprite Texture" loading="lazy" />
                                     ) : (
                                         <span className="text-6xl">{spriteState.emoji}</span>
                                     )}
@@ -283,7 +285,7 @@ const Sidebar: React.FC<any> = ({
                         )}
                     </div>
                 ) : activeTab === 'components' && mode === AppMode.HARDWARE ? (
-                    <div className="flex-1 flex flex-col">
+                    <div className="flex-1 flex flex-col tab-fade-in">
                         <div className="p-4 border-b border-slate-100 bg-white">
                             <div className="relative">
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -297,19 +299,21 @@ const Sidebar: React.FC<any> = ({
                                 const isExpanded = expandedCategories[category] !== false;
                                 return (
                                     <div key={category} className="mb-2">
-                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2">
+                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="section-heading flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2">
                                             {category}
                                             {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                         </button>
                                         <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0'}`}>
                                             <div className="overflow-hidden">
                                                 <div className="space-y-2 py-1">
-                                                    {filtered.map((comp: any) => (
-                                                        <div key={comp.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className="flex items-center gap-3 p-2 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300:border-violet-600 transition-all">
-                                                            <ComponentThumbnail type={comp.type} />
-                                                            <div className="flex flex-col">
-                                                                <span className="font-bold text-sm text-slate-700">{comp.label}</span>
-                                                                <span className="text-[10px] text-slate-400 line-clamp-1">{comp.description}</span>
+                                                    {filtered.map((comp: any, idx: number) => (
+                                                        <div key={comp.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className={`flex items-center gap-3 p-2 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
+                                                             style={{ animationDelay: `${idx * 30}ms` }}
+                                                        >
+                                                             <ComponentThumbnail type={comp.type} />
+                                                             <div className="flex flex-col min-w-0">
+                                                                 <span className="font-bold text-sm text-slate-700">{comp.label}</span>
+                                                                 <span className="text-[10px] text-slate-400 leading-snug line-clamp-2">{comp.description}</span>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -322,7 +326,7 @@ const Sidebar: React.FC<any> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col">
+                    <div className="flex-1 flex flex-col tab-fade-in">
                         <div className="p-4 border-b border-slate-100">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="font-bold text-slate-700">Block Library</h3>
@@ -402,23 +406,31 @@ const Sidebar: React.FC<any> = ({
                                 if (!blockSearch && isStarterCategory) return null;
                                 
                                 return (
-                                    <div key={category} className="mb-2">
-                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2 hover:text-slate-600:text-slate-300 transition-colors">
+                                    <div key={category} className="mb-2 border-b border-slate-100 pb-2 last:border-b-0">
+                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="section-heading flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group">
                                             <span className="flex items-center gap-2">
+                                                <span className="text-sm">{category === 'Events' ? '⚡' : category === 'Motion' ? '🏃' : category === 'Control' ? '🔄' : category === 'Sensing' ? '👁️' : category === 'Operators' ? '🔢' : category === 'Variables' ? '📦' : category === 'Functions' ? '⚙️' : category === 'Draw' ? '🎨' : category === 'Sound' ? '🔊' : category === 'Math' ? '🧮' : category === 'Text' ? '📝' : category === 'Lists' ? '📋' : category === 'Logic' ? '🧠' : '📂'}</span>
                                                 {category}
                                                 <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full">{filtered.length}</span>
                                             </span>
-                                            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                            <span className={`transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}>
+                                                <ChevronDown size={14} />
+                                            </span>
                                         </button>
                                         <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0'}`}>
                                             <div className="overflow-hidden">
                                                 <div className="space-y-2 py-1">
-                                                    {filtered.map((def) => (
-                                                        <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300:border-violet-600 transition-all">
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
-                                                                {React.createElement(def.icon as React.ComponentType<any>, { size: 16 })}
-                                                            </div>
-                                                            <span className="font-bold text-sm text-slate-700">{def.label}</span>
+                                                    {filtered.map((def, idx: number) => (
+                                                        <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className={`flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
+                                                             style={{ animationDelay: `${idx * 25}ms` }}
+                                                        >
+                                                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
+                                                                 {React.createElement(def.icon as React.ComponentType<any>, { size: 16 })}
+                                                             </div>
+                                                             <div className="flex-1 min-w-0">
+                                                                 <span className="font-bold text-sm text-slate-700 block">{def.label}</span>
+                                                                 {def.description && <span className="text-[10px] text-slate-400 leading-snug line-clamp-2 block">{def.description}</span>}
+                                                             </div>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -431,9 +443,13 @@ const Sidebar: React.FC<any> = ({
                             {blockSearch && Object.entries(groupedBlocks).every(([_, blocks]) => 
                                 blocks.filter(b => b.label.toLowerCase().includes(blockSearch.toLowerCase())).length === 0
                             ) && (
-                                <div className="text-center py-8">
-                                    <Search size={32} className="mx-auto text-slate-300 mb-2" />
-                                    <p className="text-sm text-slate-400 font-medium">No blocks match "{blockSearch}"</p>
+                                <div className="text-center py-8 px-4">
+                                    <Search size={32} className="mx-auto text-slate-300 mb-3" />
+                                    <p className="text-sm text-slate-500 font-bold mb-1">No blocks found for "{blockSearch}"</p>
+                                    <p className="text-xs text-slate-400 mb-3">Try different keywords or check the category filters above.</p>
+                                    <button onClick={() => setLocalSearch('')} className="text-xs font-bold text-violet-500 hover:text-violet-600 underline underline-offset-2">
+                                        Clear search
+                                    </button>
                                 </div>
                             )}
                         </div>

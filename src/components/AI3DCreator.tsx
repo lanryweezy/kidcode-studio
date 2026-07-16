@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { generateVoxelsFromPrompt, Voxel } from '../services/voxelService';
 import { X, Box, Sparkles, Loader2, Check } from 'lucide-react';
+import { useToast } from './ui/Toast';
 
 const AI3DCreator: React.FC<{ onClose: () => void, onAssetGenerated: (voxels: Voxel[]) => void }> = ({ onClose, onAssetGenerated }) => {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [preview, setPreview] = useState<Voxel[] | null>(null);
+  const { toast } = useToast();
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -20,6 +22,7 @@ const AI3DCreator: React.FC<{ onClose: () => void, onAssetGenerated: (voxels: Vo
   const handleImport = () => {
     if (preview) {
         onAssetGenerated(preview);
+        toast('success', `3D model "${prompt}" imported to world!`);
         onClose();
     }
   };

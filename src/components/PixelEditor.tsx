@@ -2,6 +2,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Eraser, Check, PaintBucket, Pencil, RotateCcw, Plus, Trash2, Copy, Play, Pause, Layers } from 'lucide-react';
 
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+}
+
+function relativeLuminance(r: number, g: number, b: number): number {
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    c /= 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function contrastRatio(hex1: string, hex2: string): number {
+  const c1 = hexToRgb(hex1);
+  const c2 = hexToRgb(hex2);
+  if (!c1 || !c2) return 0;
+  const l1 = relativeLuminance(c1.r, c1.g, c1.b);
+  const l2 = relativeLuminance(c2.r, c2.g, c2.b);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 interface PixelEditorProps {
   initialTexture?: string | null;
   onSave: (textureData: string, frames?: string[]) => void;
@@ -195,6 +219,8 @@ const PixelEditor: React.FC<PixelEditorProps> = ({ initialTexture, onSave, onClo
                 {onionSkin && currentFrameIdx > 0 && (
                     <img 
                         src={frames[currentFrameIdx - 1]} 
+                        alt="Onion skin previous frame"
+                        loading="lazy"
                         className="absolute inset-0 w-full h-full opacity-30 pointer-events-none z-0 filter grayscale" 
                     />
                 )}
@@ -203,7 +229,7 @@ const PixelEditor: React.FC<PixelEditorProps> = ({ initialTexture, onSave, onClo
              <div className="flex flex-col gap-4 flex-1">
                  <div className="border border-slate-200 rounded-lg p-2 flex flex-col items-center gap-2 bg-slate-50">
                      <span className="text-[10px] font-bold text-slate-400 uppercase">Preview</span>
-                     <img src={frames[currentFrameIdx]} className="w-16 h-16 object-contain pixelated bg-white border border-slate-200 rounded" />
+                     <img src={frames[currentFrameIdx]} alt="Current frame preview" loading="lazy" className="w-16 h-16 object-contain pixelated bg-white border border-slate-200 rounded" />
                      <button 
                         onClick={() => setIsPlaying(!isPlaying)}
                         className={`p-1 rounded-full ${isPlaying ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}
@@ -213,14 +239,43 @@ const PixelEditor: React.FC<PixelEditorProps> = ({ initialTexture, onSave, onClo
                  </div>
 
                  <div className="grid grid-cols-5 gap-1.5">
-                    {PALETTE.map(c => (
-                      <button 
-                        key={c} 
-                        onClick={() => setSelectedColor(c)}
-                        className={`w-6 h-6 rounded-full border-2 ${selectedColor === c ? 'border-violet-500 scale-110 shadow-md' : 'border-transparent hover:scale-110'}`}
-                        style={{ backgroundColor: c }}
-                      />
-                    ))}
+                     {PALETTE.map(c => (
+                       <button 
+                         key={c} 
+                         onClick={() => setSelectedColor(c)}
+                         className={`w-6 h-6 rounded-full border-2 ${selectedColor === c ? 'border-violet-500 scale-110 shadow-md' : 'border-transparent hover:scale-110'}`}
+                         style={{ backgroundColor: c }}
+                       />
+                     ))}
+                 </div>
+
+                 {/* Contrast Indicator */}
+                 <div className="mt-2 p-2 bg-white border border-slate-200 rounded-lg">
+                     <div className="flex items-center justify-between mb-1">
+                         <span className="text-[9px] font-bold text-slate-400 uppercase">Contrast</span>
+                         <span className="text-[9px] font-bold text-slate-500">{selectedColor}</span>
+                     </div>
+                     <div className="flex gap-2">
+                         {[
+                             { bg: '#ffffff', label: 'on White' },
+                             { bg: '#000000', label: 'on Black' },
+                         ].map(({ bg, label }) => {
+                             const ratio = contrastRatio(selectedColor, bg);
+                             const aaa = ratio >= 7;
+                             const aa = ratio >= 4.5;
+                             return (
+                                 <div key={bg} className="flex-1 text-center">
+                                     <div className="text-[8px] font-bold text-slate-400 mb-0.5">{label}</div>
+                                     <div className="rounded px-1 py-0.5 border" style={{ backgroundColor: bg }}>
+                                         <span className="text-[10px] font-black" style={{ color: selectedColor }}>Aa</span>
+                                     </div>
+                                     <div className={`text-[9px] font-bold mt-0.5 ${aaa ? 'text-emerald-500' : aa ? 'text-amber-500' : 'text-red-500'}`}>
+                                         {ratio.toFixed(1)}:1 {aaa ? 'AAA' : aa ? 'AA' : 'Fail'}
+                                     </div>
+                                 </div>
+                             );
+                         })}
+                     </div>
                  </div>
              </div>
          </div>
@@ -232,7 +287,7 @@ const PixelEditor: React.FC<PixelEditorProps> = ({ initialTexture, onSave, onClo
                     onClick={() => setCurrentFrameIdx(idx)}
                     className={`relative shrink-0 w-12 h-12 border-2 rounded-lg cursor-pointer bg-white overflow-hidden hover:scale-105 transition-all ${idx === currentFrameIdx ? 'border-violet-500 ring-2 ring-violet-200' : 'border-slate-300'}`}
                  >
-                     <img src={frame} className="w-full h-full object-contain pixelated" />
+                     <img src={frame} alt={`Frame thumbnail ${idx + 1}`} loading="lazy" className="w-full h-full object-contain pixelated" />
                      <div className="absolute bottom-0 right-0 bg-slate-800 text-white text-[8px] px-1 rounded-tl">{idx + 1}</div>
                  </div>
              ))}

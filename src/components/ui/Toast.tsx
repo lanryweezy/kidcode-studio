@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -7,6 +7,7 @@ interface Toast {
   id: string;
   type: ToastType;
   message: string;
+  isClosing: boolean;
 }
 
 interface ToastContextValue {
@@ -42,14 +43,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addToast = useCallback((type: ToastType, message: string) => {
     const id = `toast-${++toastCounter}`;
-    setToasts((prev) => [...prev, { id, type, message }]);
+    setToasts((prev) => [...prev, { id, type, message, isClosing: false }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+      setToasts((prev) => prev.map(t => t.id === id ? { ...t, isClosing: true } : t));
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 300);
+    }, 3700);
   }, []);
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts((prev) => prev.map(t => t.id === id ? { ...t, isClosing: true } : t));
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 300);
   }, []);
 
   return (
@@ -66,8 +73,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               bg-white
               border ${bgStyles[t.type]}
               rounded-xl shadow-glass-lg
-              animate-slide-in
               max-w-sm
+              ${t.isClosing ? 'toast-slide-out' : 'toast-slide-in'}
             `}
           >
             {icons[t.type]}

@@ -27,14 +27,14 @@ const GameUIOverlay: React.FC<GameUIOverlayProps> = ({
         <h3 className="text-white font-black flex items-center gap-2">
           <Box size={18} className="text-amber-400" /> INVENTORY
         </h3>
-        <button onClick={() => setShowInventory(false)} className="text-slate-400 hover:text-white">
+        <button onClick={() => setShowInventory(false)} className="text-slate-300 hover:text-white">
           <X size={18} />
         </button>
       </div>
       
       <div className="p-3 max-h-64 overflow-y-auto">
         {inventory.length === 0 ? (
-          <div className="text-slate-400 text-sm text-center py-4">Empty inventory</div>
+          <div className="text-slate-300 text-sm text-center py-4">Empty inventory</div>
         ) : (
           <div className="grid grid-cols-4 gap-2">
             {inventory.map((item, index) => (
@@ -65,7 +65,7 @@ const GameUIOverlay: React.FC<GameUIOverlayProps> = ({
       {inventory.length > 0 && selectedItemIndex >= 0 && inventory[selectedItemIndex] && (
         <div className="p-3 border-t border-slate-700 bg-slate-800/50">
           <div className="text-white font-bold text-sm">{inventory[selectedItemIndex].name}</div>
-          <div className="text-slate-400 text-xs">{inventory[selectedItemIndex].description}</div>
+          <div className="text-slate-300 text-xs">{inventory[selectedItemIndex].description}</div>
           {inventory[selectedItemIndex].effect && (
             <div className="text-green-400 text-[10px] mt-1">
               Effect: {inventory[selectedItemIndex].effect?.type} +{inventory[selectedItemIndex].effect?.value}
@@ -105,7 +105,7 @@ const GameUIOverlay: React.FC<GameUIOverlayProps> = ({
                     className="w-full text-left px-4 py-3 bg-slate-800 hover:bg-indigo-600 rounded-xl border border-slate-700 hover:border-indigo-400 transition-all flex items-center justify-between group"
                   >
                     <span className="text-white font-medium">{choice.text}</span>
-                    <ChevronRight size={20} className="text-slate-400 group-hover:text-white" />
+                    <ChevronRight size={20} className="text-slate-300 group-hover:text-white" />
                   </button>
                 ))}
               </div>
@@ -152,7 +152,7 @@ const GameUIOverlay: React.FC<GameUIOverlayProps> = ({
           </div>
           <div className="h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
             <div 
-              className={`h-full transition-all ${
+              className={`h-full transition-all progress-fill ${
                 healthPercent > 60 ? 'bg-red-500' : healthPercent > 30 ? 'bg-orange-500' : 'bg-red-700 animate-pulse'
               }`}
               style={{ width: `${healthPercent}%` }}

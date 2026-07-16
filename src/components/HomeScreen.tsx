@@ -14,7 +14,9 @@ import {
     GitFork,
     Trash2,
     FolderOpen,
-    Users
+    Users,
+    CheckCircle2,
+    X
 } from 'lucide-react';
 import { SkeletonCard } from './ui/Skeleton';
 
@@ -50,20 +52,45 @@ const HomeScreen: React.FC = () => {
         }
     }, []);
 
-    const handleDelete = React.useCallback((e: React.MouseEvent, id: string) => {
-        e.stopPropagation();
-        if (confirm('Delete this project forever?')) {
-            const previousProjects = recentProjects;
-            setRecentProjects(prev => prev.filter(p => p.id !== id));
-            playSoundEffect('hurt');
+    const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; name: string } | null>(null);
+    const [loadingTemplate, setLoadingTemplate] = React.useState<string | null>(null);
 
-            try {
-                deleteProject(id);
-            } catch (error) {
-                setRecentProjects(previousProjects);
-            }
+    const [onboardingDismissed, setOnboardingDismissed] = React.useState(() => {
+        return localStorage.getItem('kidcode_onboarding_dismissed') === 'true';
+    });
+
+    const isReturningUser = recentProjects.length > 0;
+
+    const handleDismissOnboarding = () => {
+        setOnboardingDismissed(true);
+        localStorage.setItem('kidcode_onboarding_dismissed', 'true');
+    };
+
+    const onboardingSteps = [
+        { label: 'Choose a mode', description: 'Pick App, Game, or Hardware', done: false },
+        { label: 'Drag your first block', description: 'Start coding visually', done: false },
+        { label: 'Run your project', description: 'See it come to life', done: false },
+        { label: 'Try a starter template', description: 'Jump-start your creation', done: false },
+    ];
+
+    const handleDelete = React.useCallback((e: React.MouseEvent, proj: { id: string; name: string }) => {
+        e.stopPropagation();
+        setDeleteTarget({ id: proj.id, name: proj.name });
+    }, []);
+
+    const confirmDelete = React.useCallback(() => {
+        if (!deleteTarget) return;
+        const previousProjects = recentProjects;
+        setRecentProjects(prev => prev.filter(p => p.id !== deleteTarget.id));
+        playSoundEffect('hurt');
+        setDeleteTarget(null);
+
+        try {
+            deleteProject(deleteTarget.id);
+        } catch (error) {
+            setRecentProjects(previousProjects);
         }
-    }, [recentProjects]);
+    }, [deleteTarget, recentProjects]);
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors font-sans pb-20">
@@ -105,6 +132,15 @@ const HomeScreen: React.FC = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8">
+                {/* Returning User Welcome */}
+                {isReturningUser && (
+                    <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 animate-in fade-in slide-in-from-top-2 duration-500">
+                        <p className="text-sm font-bold text-violet-700">
+                            Welcome back, {userProfile?.name || 'Explorer'}! 👋 Ready to keep building?
+                        </p>
+                    </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
                     <h2 className="text-4xl font-black animate-in slide-in-from-left-10 fade-in duration-500">What do you want to build?</h2>
                     <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
@@ -136,6 +172,33 @@ const HomeScreen: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Onboarding Checklist for New Users */}
+                {!onboardingDismissed && !isReturningUser && (
+                    <div className="mb-8 p-6 rounded-2xl bg-white border border-violet-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                                <Sparkles size={18} className="text-violet-500" /> Getting Started
+                            </h3>
+                            <button onClick={handleDismissOnboarding} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {onboardingSteps.map((step, i) => (
+                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${step.done ? 'bg-emerald-500 text-white' : 'bg-violet-100 text-violet-500'}`}>
+                                        {step.done ? <CheckCircle2 size={14} /> : <span className="text-xs font-bold">{i + 1}</span>}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-slate-700">{step.label}</p>
+                                        <p className="text-[10px] text-slate-400">{step.description}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                     {Object.values(AppMode).map((m, i) => {
                         const config = MODE_CONFIG[m];
@@ -148,7 +211,7 @@ const HomeScreen: React.FC = () => {
                                     const newProj = createNewProject(m);
                                     setProject(newProj);
                                 }}
-                                className={`relative group h-64 rounded-3xl p-8 flex flex-col justify-between overflow-hidden transition-all hover:scale-[1.05] hover:rotate-1 hover:shadow-2xl text-white ${config.color}`}
+                                className={`relative group min-h-64 rounded-3xl p-8 flex flex-col justify-between overflow-hidden transition-all hover:scale-[1.05] hover:rotate-1 hover:shadow-2xl text-white ${config.color} touch-feedback`}
                             >
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-125 duration-500">
                                     <Icon size={120} />
@@ -174,18 +237,23 @@ const HomeScreen: React.FC = () => {
                         {EXAMPLE_TEMPLATES.map((tpl) => (
                             <button
                                 key={tpl.id}
+                                disabled={loadingTemplate === tpl.id}
                                 onClick={() => {
-                                    const newProj = createNewProject(tpl.mode);
-                                    newProj.name = tpl.name;
-                                    newProj.data.commands = tpl.commands.map(c => ({ ...c, id: (window.crypto as any).randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11) }));
-                                    if (tpl.circuitComponents && tpl.mode === AppMode.HARDWARE) {
-                                        newProj.data.circuitComponents = tpl.circuitComponents as CircuitComponent[];
-                                    }
-                                    setProject(newProj);
+                                    setLoadingTemplate(tpl.id);
+                                    setTimeout(() => {
+                                        const newProj = createNewProject(tpl.mode);
+                                        newProj.name = tpl.name;
+                                        newProj.data.commands = tpl.commands.map(c => ({ ...c, id: (window.crypto as any).randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11) }));
+                                        if (tpl.circuitComponents && tpl.mode === AppMode.HARDWARE) {
+                                            newProj.data.circuitComponents = tpl.circuitComponents as CircuitComponent[];
+                                        }
+                                        setProject(newProj);
+                                    }, 400);
                                 }}
                                 className="bg-white border border-slate-200 p-4 rounded-2xl hover:border-violet-400 hover:shadow-lg transition-all text-left group"
                             >
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white mb-3 shadow-md ${tpl.color}`}>
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white mb-3 shadow-md ${tpl.color} ${loadingTemplate === tpl.id ? 'animate-pulse' : ''}`}>
+                                    {loadingTemplate === tpl.id ? <Zap size={24} className="animate-spin" /> : React.createElement(tpl.icon, { size: 24 })}
                                     {React.createElement(tpl.icon, { size: 24 })}
                                 </div>
                                 <h4 className="font-bold text-lg text-slate-800 group-hover:text-violet-600 transition-colors">{tpl.name}</h4>
@@ -230,8 +298,31 @@ const HomeScreen: React.FC = () => {
                         ))}
                     </div>
                 ) : recentProjects.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                        <p className="text-slate-400 font-medium">No projects yet. Start building!</p>
+                    <div className="text-center py-16 bg-white rounded-3xl border-2 border-dashed border-slate-200 relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-5">
+                            <div className="absolute top-4 left-8 text-6xl rotate-12">🎮</div>
+                            <div className="absolute top-8 right-12 text-5xl -rotate-6">⚡</div>
+                            <div className="absolute bottom-6 left-16 text-5xl rotate-[-8deg]">📱</div>
+                            <div className="absolute bottom-4 right-8 text-6xl rotate-6">🚀</div>
+                        </div>
+                        <div className="relative z-10">
+                            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-3xl flex items-center justify-center">
+                                <FileCode size={36} className="text-violet-500" />
+                            </div>
+                            <p className="text-lg font-bold text-slate-700 mb-2">No projects yet</p>
+                            <p className="text-sm text-slate-400 mb-6 max-w-xs mx-auto">Start building your first game, app, or circuit project above!</p>
+                            <div className="flex justify-center gap-3">
+                                <button
+                                    onClick={() => {
+                                        const newProj = createNewProject(AppMode.GAME);
+                                        setProject(newProj);
+                                    }}
+                                    className="touch-feedback px-5 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-all text-sm"
+                                >
+                                    Create First Project
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -265,7 +356,7 @@ const HomeScreen: React.FC = () => {
                                         <GitFork size={16} />
                                     </button>
                                     <button
-                                        onClick={(e) => handleDelete(e, proj.id)}
+                                        onClick={(e) => handleDelete(e, proj)}
                                         className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all flex-1 flex justify-center"
                                         title="Delete"
                                     >
@@ -277,6 +368,41 @@ const HomeScreen: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 max-w-sm w-full animate-scale-in">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2.5 rounded-xl bg-red-100 text-red-600">
+                                <Trash2 size={20} />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-slate-800">Delete Project?</h3>
+                                <p className="text-sm text-slate-500">This action cannot be undone.</p>
+                            </div>
+                        </div>
+                        <p className="text-sm text-slate-600 mb-6">
+                            Are you sure you want to delete <span className="font-bold text-slate-800">"{deleteTarget.name}"</span> forever?
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteTarget(null)}
+                                className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="flex-1 px-4 py-2.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors shadow-lg"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

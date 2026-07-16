@@ -65,7 +65,7 @@ const ParticleEditor: React.FC = () => {
           <button onClick={triggerPreview} className="mt-6 flex items-center gap-2 px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95">
             <Play size={20} fill="currentColor" /> TEST EFFECT
           </button>
-          <div className="absolute top-4 left-6 flex items-center gap-2 text-slate-400 font-bold uppercase text-xs tracking-widest">
+          <div className="absolute top-4 left-6 flex items-center gap-2 text-slate-500 font-bold uppercase text-xs tracking-widest">
             <Sparkles size={16} /> Live Preview
           </div>
         </div>
@@ -83,22 +83,22 @@ const ParticleEditor: React.FC = () => {
 
           <div className="space-y-6 flex-1">
             <div>
-              <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Particle Color</label>
+              <label className="text-xs font-black text-slate-500 uppercase mb-2 block">Particle Color</label>
               <input type="color" value={particleSettings.color} onChange={(e) => setParticleSettings({ color: e.target.value })} className="w-full h-12 rounded-xl cursor-pointer bg-transparent" />
             </div>
 
             <div>
-              <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Explosion Speed ({particleSettings.speed})</label>
+              <label className="text-xs font-black text-slate-500 uppercase mb-2 block">Explosion Speed ({particleSettings.speed})</label>
               <input type="range" min="1" max="20" value={particleSettings.speed} onChange={(e) => setParticleSettings({ speed: parseInt(e.target.value) })} className="w-full accent-orange-500" />
             </div>
 
             <div>
-              <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Particle Size ({particleSettings.size})</label>
+              <label className="text-xs font-black text-slate-500 uppercase mb-2 block">Particle Size ({particleSettings.size})</label>
               <input type="range" min="1" max="15" value={particleSettings.size} onChange={(e) => setParticleSettings({ size: parseInt(e.target.value) })} className="w-full accent-orange-500" />
             </div>
 
             <div>
-              <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Quantity ({particleSettings.count})</label>
+              <label className="text-xs font-black text-slate-500 uppercase mb-2 block">Quantity ({particleSettings.count})</label>
               <input type="range" min="5" max="100" value={particleSettings.count} onChange={(e) => setParticleSettings({ count: parseInt(e.target.value) })} className="w-full accent-orange-500" />
             </div>
           </div>

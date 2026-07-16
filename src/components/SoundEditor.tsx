@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Play, Music, Sliders, Save, Volume2 } from 'lucide-react';
+import { useToast } from './ui/Toast';
 
 interface SoundEditorProps {
   onClose: () => void;
 }
 
 const SoundEditor: React.FC<SoundEditorProps> = ({ onClose }) => {
+  const { toast } = useToast();
   const [params, setParams] = useState({
     frequency: 440,
     slide: 0,
@@ -141,10 +143,10 @@ const SoundEditor: React.FC<SoundEditorProps> = ({ onClose }) => {
                 <div className="p-2 bg-pink-100 text-pink-600 rounded-lg"><Music size={24} /></div>
                 <div>
                     <h3 className="text-xl font-black text-slate-800">Sound Studio</h3>
-                    <p className="text-xs text-slate-400">Design retro 8-bit effects</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">Design retro 8-bit effects</p>
                 </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg"><X size={20} /></button>
+             <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg" aria-label="Close sound editor"><X size={20} /></button>
          </div>
 
          {/* Visualizer */}
@@ -169,19 +171,19 @@ const SoundEditor: React.FC<SoundEditorProps> = ({ onClose }) => {
              {/* Sliders */}
              <div className="grid grid-cols-2 gap-4">
                  <div>
-                     <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Frequency (Pitch)</label>
+                     <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1 block">Frequency (Pitch)</label>
                      <input type="range" min="100" max="1000" value={params.frequency} onChange={(e) => setParams(p => ({...p, frequency: Number(e.target.value)}))} className="w-full h-2 bg-slate-200 rounded-lg accent-pink-500" />
                  </div>
                  <div>
-                     <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Duration (Length)</label>
+                     <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1 block">Duration (Length)</label>
                      <input type="range" min="0.1" max="1.0" step="0.1" value={params.duration} onChange={(e) => setParams(p => ({...p, duration: Number(e.target.value)}))} className="w-full h-2 bg-slate-200 rounded-lg accent-pink-500" />
                  </div>
                  <div>
-                     <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Slide (Laser Effect)</label>
+                     <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1 block">Slide (Laser Effect)</label>
                      <input type="range" min="-500" max="500" value={params.slide} onChange={(e) => setParams(p => ({...p, slide: Number(e.target.value)}))} className="w-full h-2 bg-slate-200 rounded-lg accent-pink-500" />
                  </div>
                  <div>
-                     <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Wobble (Modulation)</label>
+                     <label className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1 block">Wobble (Modulation)</label>
                      <input type="range" min="0" max="50" value={params.modulation} onChange={(e) => setParams(p => ({...p, modulation: Number(e.target.value)}))} className="w-full h-2 bg-slate-200 rounded-lg accent-pink-500" />
                  </div>
              </div>
@@ -203,7 +205,7 @@ const SoundEditor: React.FC<SoundEditorProps> = ({ onClose }) => {
                         onClick={() => { setParams(p => ({...p, frequency: k.freq})); playSound(k.freq); }}
                         className="flex-1 bg-white border-l border-slate-300 rounded-b active:bg-slate-200 active:h-[95%] h-full relative z-10"
                     >
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-400 pointer-events-none">{k.note}</span>
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-600 dark:text-slate-300 pointer-events-none">{k.note}</span>
                     </button>
                 )
             })}
@@ -227,10 +229,10 @@ const SoundEditor: React.FC<SoundEditorProps> = ({ onClose }) => {
          </div>
 
          <div className="flex gap-3 pt-2">
-             <button onClick={() => playSound()} className="flex-1 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-pink-200 transition-all flex items-center justify-center gap-2">
+             <button onClick={() => playSound()} className="flex-1 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-pink-200 transition-all flex items-center justify-center gap-2" aria-label="Play sound effect">
                  <Play size={18} fill="currentColor" /> Play Effect
              </button>
-             <button onClick={() => alert("Sound saved! Use 'Play Tone' block with frequency " + params.frequency)} className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all">
+              <button onClick={() => toast('success', `Sound saved! Use 'Play Tone' block with frequency ${params.frequency}`)} className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all" aria-label="Save sound">
                  <Save size={18} />
              </button>
          </div>

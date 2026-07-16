@@ -16,6 +16,7 @@ import {
   getMusicScenarios
 } from '../services/metaMusicService';
 import { playSoundEffect } from '../services/soundService';
+import { useToast } from './ui/Toast';
 
 interface MusicGeneratorProps {
   onMusicGenerated: (music: GeneratedMusic) => void;
@@ -23,6 +24,7 @@ interface MusicGeneratorProps {
 }
 
 const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClose }) => {
+  const { toast } = useToast();
   const [prompt, setPrompt] = useState('');
   const [selectedStyle, setSelectedStyle] = useState('orchestral');
   const [selectedScenario, setSelectedScenario] = useState('gameplay');
@@ -39,7 +41,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
 
   const handleGenerate = async () => {
     if (!prompt && activeTab === 'custom') {
-      alert('Please enter a description for your music!');
+      toast('warning', 'Please enter a description for your music!');
       return;
     }
 
@@ -378,7 +380,7 @@ const MusicGenerator: React.FC<MusicGeneratorProps> = ({ onMusicGenerated, onClo
                       </button>
                       <button
                         onClick={() => downloadMusic(generatedMusic)}
-                        className="px-6 py-3 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300:bg-slate-600 transition-all flex items-center gap-2"
+                        className="px-6 py-3 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all flex items-center gap-2"
                       >
                         <Download size={20} />
                         Download

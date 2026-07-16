@@ -104,8 +104,15 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         <div className="flex-1 overflow-y-auto p-8 bg-white custom-scrollbar">
           {filteredAssets.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
-              <ImageIcon size={80} className="mb-4" />
-              <p className="text-xl font-bold italic text-center px-8">Your asset library is empty. Import some cool PNGs or 3D models to start!</p>
+              <div className="text-7xl mb-4">🎨</div>
+              <p className="text-xl font-bold text-slate-600 text-center px-8">No assets here yet!</p>
+              <p className="text-sm text-slate-400 mt-2 text-center px-8">Import cool PNG images or 3D models to use in your project.</p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-4 px-6 py-2 bg-violet-500 hover:bg-violet-600 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-sm"
+              >
+                <Upload size={16} className="inline mr-2" /> IMPORT YOUR FIRST FILE
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -118,7 +125,7 @@ const AssetManagerModal: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                   {/* Preview */}
                   <div className="aspect-square flex items-center justify-center p-4 bg-white">
                     {asset.type === 'image' ? (
-                      <img src={asset.url} className="max-w-full max-h-full object-contain drop-shadow-md" alt={asset.name} />
+                      <img src={asset.url} className="max-w-full max-h-full object-contain drop-shadow-md" alt={asset.name} loading="lazy" />
                     ) : (
                       <Box size={48} className="text-violet-400" />
                     )}

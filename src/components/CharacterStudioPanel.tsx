@@ -72,7 +72,7 @@ const CharacterStudioPanel: React.FC<CharacterStudioPanelProps> = ({
             }}
           >
             {spriteState.texture ? (
-              <img src={spriteState.texture} className="w-24 h-24 object-contain pixelated" />
+              <img src={spriteState.texture} alt="Character sprite preview" loading="lazy" className="w-24 h-24 object-contain pixelated" />
             ) : (
               <span className="text-6xl filter drop-shadow-lg">{spriteState.emoji}</span>
             )}

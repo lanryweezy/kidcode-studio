@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { TableProperties, X } from 'lucide-react';
 
 interface VariableMonitorProps {
@@ -9,6 +9,30 @@ interface VariableMonitorProps {
 }
 
 const VariableMonitor: React.FC<VariableMonitorProps> = ({ variables, isVisible, onClose }) => {
+  const prevRef = useRef<Record<string, any>>({});
+  const [flashing, setFlashing] = React.useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const prev = prevRef.current;
+    const newFlashing: Record<string, boolean> = {};
+    let changed = false;
+    for (const [key, value] of Object.entries(variables)) {
+      if (prev[key] !== undefined && JSON.stringify(prev[key]) !== JSON.stringify(value)) {
+        newFlashing[key] = true;
+        changed = true;
+      }
+    }
+    if (changed) {
+      setFlashing(newFlashing);
+      const timer = setTimeout(() => setFlashing({}), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [variables]);
+
+  useEffect(() => {
+    prevRef.current = { ...variables };
+  }, [variables]);
+
   if (!isVisible) return null;
 
   const entries = Object.entries(variables);
@@ -32,7 +56,7 @@ const VariableMonitor: React.FC<VariableMonitorProps> = ({ variables, isVisible,
             <table className="w-full text-xs font-mono">
               <tbody>
                 {entries.map(([key, value], idx) => (
-                  <tr key={key} className={idx % 2 === 0 ? 'bg-slate-900/50' : 'bg-slate-800/30'}>
+                  <tr key={key} className={`${idx % 2 === 0 ? 'bg-slate-900/50' : 'bg-slate-800/30'} ${flashing[key] ? 'variable-flash' : ''}`}>
                     <td className="p-2 text-orange-300 font-bold border-r border-slate-800 truncate max-w-[100px]" title={key}>{key}</td>
                     <td className="p-2 text-emerald-300 truncate max-w-[140px]" title={JSON.stringify(value)}>
                       {Array.isArray(value) ? `List[${value.length}]` : typeof value === 'object' ? '{...}' : String(value)}

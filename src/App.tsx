@@ -15,7 +15,8 @@ import TycoonOverlay from './components/editor/TycoonOverlay';
 
 const MatterPhysicsLazy = React.lazy(() => import('./components/MatterPhysicsBridge'));
 
-export const App: React.FC = () => {
+// Inner component that runs INSIDE ToastProvider
+const AppInner: React.FC = () => {
     const {
         showLanding, showHome, showGallery, hackerMode,
         showShortcuts, setShowShortcuts, advancedPhysics,
@@ -65,7 +66,6 @@ export const App: React.FC = () => {
     }, [contextMenu, handleDeleteBlock, setContextMenu]);
 
     return (
-        <ToastProvider>
         <div className={`h-[100dvh] h-screen flex flex-col overflow-hidden bg-slate-50 text-slate-800 ${hackerMode ? 'hacker-mode' : ''} ${highContrast ? 'high-contrast' : ''}`}>
             <a href="#block-workspace" className="skip-nav">
                 Skip to block workspace
@@ -129,7 +129,16 @@ export const App: React.FC = () => {
                 />
             )}
         </div>
+    );
+};
+
+// Outer shell — wraps with ToastProvider
+export const App: React.FC = () => {
+    return (
+        <ToastProvider>
+            <AppInner />
         </ToastProvider>
     );
 };
+
 export default App;

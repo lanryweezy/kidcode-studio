@@ -4,9 +4,10 @@ import { useStore } from '../store/useStore';
 import { MODE_CONFIG } from '../constants';
 import { AppMode } from '../types';
 import {
-  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle, MoreHorizontal, Download, UploadCloud
+  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle, MoreHorizontal, Download, UploadCloud, Camera, FolderPlus
 } from 'lucide-react';
 import { exportToStandaloneHTML } from '../services/standaloneExporter';
+import { exportToDatapack, exportToMCWorld } from '../services/minecraftExporter';
 import { downloadArduinoCode, exportToArduino } from '../services/codeExporter';
 import { serialService } from '../services/webSerialService';
 import { multiplayerService } from '../services/multiplayerService';
@@ -30,6 +31,7 @@ interface TopBarProps {
   onOpenCodePages?: () => void;
   is3DMode?: boolean;
   onToggle3D?: () => void;
+  onCaptureScreenshot?: () => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -46,13 +48,15 @@ const TopBar: React.FC<TopBarProps> = ({
   saveStatus,
   onOpenCodePages,
   is3DMode,
-  onToggle3D
+  onToggle3D,
+  onCaptureScreenshot
 }) => {
   const {
     setShowHome, mode, undo, redo, setShowHelp,
     setLeftPanelWidth, leftPanelWidth,
     circuitComponents, pcbColor, isLive, setIsLive,
-    setShowMarketplace, commands, customAccentColor
+    setShowMarketplace, commands, customAccentColor,
+    setShowAddToStudio,
   } = useStore();
   
   const { toast } = useToast();
@@ -153,6 +157,33 @@ const TopBar: React.FC<TopBarProps> = ({
             </button>
           )}
 
+          {mode === AppMode.MINECRAFT && (
+            <>
+              <button
+                onClick={async () => {
+                  if (!currentProject) return;
+                  const fullProject = { ...currentProject, data: { ...currentProject.data, commands: useStore.getState().commands } };
+                  await exportToDatapack(fullProject);
+                  toast('success', 'Datapack exported!');
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-semibold rounded-xl hover:bg-green-700 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              >
+                <Download size={14} /> .zip Datapack
+              </button>
+              <button
+                onClick={async () => {
+                  if (!currentProject) return;
+                  const fullProject = { ...currentProject, data: { ...currentProject.data, commands: useStore.getState().commands } };
+                  await exportToMCWorld(fullProject);
+                  toast('success', 'MCWorld exported!');
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-xl hover:bg-green-600 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              >
+                <Download size={14} /> .mcworld
+              </button>
+            </>
+          )}
+
           {mode === AppMode.GAME && onToggle3D && (
             <button
               onClick={onToggle3D}
@@ -177,6 +208,16 @@ const TopBar: React.FC<TopBarProps> = ({
             {isLive ? <Radio size={14} /> : <Users size={14} />}
             {isLive ? 'Live' : 'Go Live'}
           </button>
+
+          {onCaptureScreenshot && (
+            <button
+              onClick={onCaptureScreenshot}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl hover:bg-slate-200 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+              title="Capture Screenshot"
+            >
+              <Camera size={14} />
+            </button>
+          )}
         </div>
 
         <div className="relative sm:hidden">
@@ -220,6 +261,16 @@ const TopBar: React.FC<TopBarProps> = ({
                   {isLive ? <Radio size={16} className="text-rose-500" /> : <Users size={16} className="text-slate-500" />}
                   {isLive ? 'Stop Live' : 'Go Live'}
                 </button>
+                {onCaptureScreenshot && (
+                  <button onClick={() => { onCaptureScreenshot(); setShowOverflow(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    <Camera size={16} className="text-slate-500" /> Capture Screenshot
+                  </button>
+                )}
+                {currentProject && (
+                  <button onClick={() => { setShowAddToStudio(currentProject.id); setShowOverflow(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    <FolderPlus size={16} className="text-violet-500" /> Add to Studio
+                  </button>
+                )}
                 <div className="border-t border-slate-100 my-1" />
                 <button onClick={() => { undo(); setShowOverflow(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                   <Undo2 size={16} className="text-slate-500" /> Undo

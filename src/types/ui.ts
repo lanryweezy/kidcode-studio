@@ -62,6 +62,19 @@ export interface CommandBlock {
     ssid?: string; // For WiFi
     password?: string; // For WiFi
     method?: string; // For HTTP requests
+
+    // Minecraft params
+    x2?: number;
+    y2?: number;
+    z2?: number;
+    blockType?: string;
+    entityType?: string;
+    item?: string;
+    amount?: number;
+    weather?: string;
+    time?: string;
+    sound?: string;
+    structure?: string;
   };
 }
 

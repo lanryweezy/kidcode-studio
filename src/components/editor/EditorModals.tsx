@@ -40,6 +40,9 @@ const SkillTreePanel = React.lazy(() => import('../game/SkillTreePanel').then(m 
 const ShopOverlay = React.lazy(() => import('../game/ShopOverlay').then(m => ({ default: m.default || m.ShopOverlay })));
 const AdminPanel = React.lazy(() => import('../AdminPanel'));
 const TeacherDashboard = React.lazy(() => import('../TeacherDashboard'));
+const StudioManager = React.lazy(() => import('../StudioManager'));
+const StudioDetail = React.lazy(() => import('../StudioDetail'));
+const AddToStudio = React.lazy(() => import('../AddToStudio'));
 
 type ControllerProps = ReturnType<typeof useEditorController>;
 
@@ -88,6 +91,9 @@ const EditorModals: React.FC<EditorModalsProps> = React.memo((props) => {
         showCrafting, setShowCrafting,
         showSkillTree, setShowSkillTree,
         showShopOverlay, setShowShopOverlay,
+        showStudioManager, setShowStudioManager,
+        showStudioDetail, setShowStudioDetail,
+        showAddToStudio, setShowAddToStudio,
     } = props;
 
     return (
@@ -299,6 +305,30 @@ const EditorModals: React.FC<EditorModalsProps> = React.memo((props) => {
                 <ErrorBoundary>
                     <Suspense fallback={<SkeletonCard />}>
                         <TeacherDashboard open={showTeacherDashboard} onClose={() => setShowTeacherDashboard(false)} />
+                    </Suspense>
+                </ErrorBoundary>
+            )}
+            {showStudioManager && (
+                <ErrorBoundary>
+                    <Suspense fallback={<SkeletonCard />}>
+                        <StudioManager
+                            onClose={() => setShowStudioManager(false)}
+                            onSelectStudio={(s) => { setShowStudioManager(false); setShowStudioDetail(s.id); }}
+                        />
+                    </Suspense>
+                </ErrorBoundary>
+            )}
+            {showStudioDetail && (
+                <ErrorBoundary>
+                    <Suspense fallback={<SkeletonCard />}>
+                        <StudioDetail studioId={showStudioDetail} onClose={() => setShowStudioDetail(null)} />
+                    </Suspense>
+                </ErrorBoundary>
+            )}
+            {showAddToStudio && (
+                <ErrorBoundary>
+                    <Suspense fallback={null}>
+                        <AddToStudio projectId={showAddToStudio} onClose={() => setShowAddToStudio(null)} />
                     </Suspense>
                 </ErrorBoundary>
             )}

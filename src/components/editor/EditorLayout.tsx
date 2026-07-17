@@ -88,6 +88,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
         handleGenerateSprite, localIsGeneratingSprite,
         setShowCodePageManager, is3DMode, setIs3DMode,
         setShowQuestEditor,
+        captureScreenshot,
     } = props;
 
     return (
@@ -107,6 +108,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 onOpenCodePages={() => setShowCodePageManager(true)}
                 is3DMode={is3DMode}
                 onToggle3D={() => setIs3DMode(!is3DMode)}
+                onCaptureScreenshot={captureScreenshot}
             />
 
             <div className="flex-1 flex flex-col lg:flex-row min-h-0 md:min-h-0">

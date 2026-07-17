@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { AppMode, CircuitComponent } from '../types';
 import { MODE_CONFIG, EXAMPLE_TEMPLATES } from '../constants';
 import { createNewProject, getProjects, remixProject, deleteProject, SavedProject } from '../services/storageService';
+import { generateModePlaceholder } from '../services/thumbnailGenerator';
 import { playSoundEffect } from '../services/soundService';
 import {
     Zap,
@@ -16,10 +17,12 @@ import {
     FolderOpen,
     Users,
     CheckCircle2,
-    X
+    X,
+    FolderPlus
 } from 'lucide-react';
 import { SkeletonCard } from './ui/Skeleton';
 import { STORAGE_KEYS } from '../constants/actions';
+import { getStudios, Studio } from '../services/studioService';
 
 const HomeScreen: React.FC = () => {
     const {
@@ -27,15 +30,22 @@ const HomeScreen: React.FC = () => {
         setShowPricing,
         setShowProfile,
         setProject,
-        setShowGallery
+        setShowGallery,
+        setShowStudioManager,
+        setShowStudioDetail,
     } = useStore();
 
     const [recentProjects, setRecentProjects] = React.useState(getProjects());
+    const [userStudios, setUserStudios] = React.useState<Studio[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
     React.useEffect(() => {
         const timer = setTimeout(() => setIsLoading(false), 300);
         return () => clearTimeout(timer);
+    }, []);
+
+    React.useEffect(() => {
+        getStudios().then(setUserStudios);
     }, []);
 
     const handleRemix = React.useCallback((e: React.MouseEvent, proj: SavedProject) => {
@@ -222,7 +232,7 @@ const HomeScreen: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-black mb-2">{config.label}</h3>
-                                    <p className="opacity-90 font-medium">{m === AppMode.APP ? 'Design real mobile apps with buttons, inputs & screens.' : m === AppMode.GAME ? 'Build 2D platformers & 3D open-world adventures.' : 'Simulate Arduino circuits with 50+ parts.'}</p>
+                                    <p className="opacity-90 font-medium">{m === AppMode.APP ? 'Design real mobile apps with buttons, inputs & screens.' : m === AppMode.GAME ? 'Build 2D platformers & 3D open-world adventures.' : m === AppMode.HARDWARE ? 'Simulate Arduino circuits with 50+ parts.' : 'Create Minecraft mods and datapacks with blocks!'}</p>
                                 </div>
                                 <div className="absolute bottom-6 right-6 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 group-hover:rotate-90 duration-300">
                                     <Plus size={24} />
@@ -287,6 +297,52 @@ const HomeScreen: React.FC = () => {
                     </button>
                 </div>
 
+                {/* Studios Section */}
+                <div className="mb-12">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold flex items-center gap-2"><FolderPlus size={20} className="text-violet-500" /> My Studios</h3>
+                        <button
+                            onClick={() => setShowStudioManager(true)}
+                            className="text-sm font-bold text-violet-500 hover:text-violet-600"
+                        >
+                            Manage
+                        </button>
+                    </div>
+                    {userStudios.length === 0 ? (
+                        <button
+                            onClick={() => setShowStudioManager(true)}
+                            className="w-full p-6 rounded-2xl border-2 border-dashed border-slate-200 hover:border-violet-300 hover:bg-violet-50 transition-all text-center group"
+                        >
+                            <FolderPlus size={28} className="mx-auto text-slate-300 group-hover:text-violet-400 mb-2" />
+                            <p className="font-bold text-slate-500 group-hover:text-violet-600 text-sm">Create your first studio</p>
+                            <p className="text-xs text-slate-400">Organize projects into collections</p>
+                        </button>
+                    ) : (
+                        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+                            {userStudios.slice(0, 6).map(studio => (
+                                <button
+                                    key={studio.id}
+                                    onClick={() => setShowStudioDetail(studio.id)}
+                                    className="min-w-[200px] max-w-[220px] bg-white border border-slate-200 p-4 rounded-2xl hover:shadow-lg hover:border-violet-300 transition-all text-left shrink-0 group"
+                                >
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center mb-3 group-hover:from-violet-200 group-hover:to-indigo-200 transition-colors">
+                                        <FolderPlus size={22} className="text-violet-500" />
+                                    </div>
+                                    <h4 className="font-bold text-sm text-slate-800 truncate group-hover:text-violet-600 transition-colors">{studio.name}</h4>
+                                    <p className="text-xs text-slate-400 mt-0.5">{studio.projects.length} project{studio.projects.length !== 1 ? 's' : ''}</p>
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => setShowStudioManager(true)}
+                                className="min-w-[160px] bg-slate-50 border border-dashed border-slate-300 p-4 rounded-2xl hover:bg-violet-50 hover:border-violet-300 transition-all text-center shrink-0 flex flex-col items-center justify-center"
+                            >
+                                <Plus size={20} className="text-slate-400 mb-1" />
+                                <span className="text-xs font-bold text-slate-500">New Studio</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
+
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold flex items-center gap-2"><FileCode size={20} /> Recent Projects</h3>
                     <button className="text-sm font-bold text-violet-500 hover:text-violet-600">View All</button>
@@ -330,39 +386,52 @@ const HomeScreen: React.FC = () => {
                         {recentProjects.map(proj => (
                             <div
                                 key={proj.id}
-                                className="bg-white border border-slate-200 p-4 rounded-2xl hover:shadow-md transition-all text-left relative group"
+                                className="bg-white border border-slate-200 rounded-2xl hover:shadow-md transition-all text-left relative group overflow-hidden"
                             >
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${MODE_CONFIG[proj.mode]?.color || 'bg-slate-500'}`}>
-                                        {MODE_CONFIG[proj.mode]?.label || proj.mode}
-                                    </span>
-
-                                    <span className="text-[10px] text-slate-400">{new Date(proj.lastEdited).toLocaleDateString()}</span>
+                                <div
+                                    className="relative h-32 bg-cover bg-center flex items-end"
+                                    style={{
+                                        backgroundImage: proj.thumbnail
+                                            ? `url(${proj.thumbnail})`
+                                            : `url(${generateModePlaceholder(proj.mode)})`,
+                                    }}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                    <div className="relative z-10 p-3 w-full">
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${MODE_CONFIG[proj.mode]?.color || 'bg-slate-500'}`}>
+                                            {MODE_CONFIG[proj.mode]?.label || proj.mode}
+                                        </span>
+                                    </div>
                                 </div>
-                                <h4 className="font-bold text-slate-800 truncate mb-4">{proj.name}</h4>
+                                <div className="p-3">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className="font-bold text-slate-800 truncate text-sm">{proj.name}</h4>
+                                        <span className="text-[10px] text-slate-400 shrink-0 ml-2">{new Date(proj.lastEdited).toLocaleDateString()}</span>
+                                    </div>
 
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                        onClick={() => setProject(proj)}
-                                        className="p-2 bg-violet-100 text-violet-600 rounded-lg hover:bg-violet-600 hover:text-white transition-all flex-1 flex justify-center"
-                                        title="Open"
-                                    >
-                                        <FolderOpen size={16} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => handleRemix(e, proj)}
-                                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all flex-1 flex justify-center"
-                                        title="Remix"
-                                    >
-                                        <GitFork size={16} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => handleDelete(e, proj)}
-                                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all flex-1 flex justify-center"
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                                        <button
+                                            onClick={() => setProject(proj)}
+                                            className="p-2 bg-violet-100 text-violet-600 rounded-lg hover:bg-violet-600 hover:text-white transition-all flex-1 flex justify-center"
+                                            title="Open"
+                                        >
+                                            <FolderOpen size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleRemix(e, proj)}
+                                            className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all flex-1 flex justify-center"
+                                            title="Remix"
+                                        >
+                                            <GitFork size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDelete(e, proj)}
+                                            className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all flex-1 flex justify-center"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}

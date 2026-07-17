@@ -5,6 +5,7 @@ import GameStage from './GameStage';
 import ErrorBoundary from './ErrorBoundary';
 import Stage3D from './Stage3D';
 import AppStage from './AppStage';
+import MinecraftPreview from './game/MinecraftPreview';
 import { captureThumbnail } from '../services/storageService';
 
 export interface StageHandle {
@@ -154,6 +155,10 @@ const Stage = forwardRef(({
                     onNavigate={onNavigate}
                     onAppInteraction={onAppInteraction}
                 />
+            )}
+
+            {mode === AppMode.MINECRAFT && (
+                <MinecraftPreview commands={spriteStateRef.current?.commands || []} />
             )}
         </div>
     );

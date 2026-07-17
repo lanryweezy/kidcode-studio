@@ -6,6 +6,7 @@ import { useCodeInterpreter } from './useCodeInterpreter';
 import { useGamePhysics } from './useGamePhysics';
 import { playSoundEffect } from '../services/soundService';
 import { getProjects, saveProject, SavedProject, captureThumbnail } from '../services/storageService';
+import { generateThumbnail, generateThumbnailFromStage } from '../services/thumbnailGenerator';
 import { generateSprite } from '../services/geminiService';
 import { addXp as originalAddXp, upgradeUserPlan, updateStreak, checkAndUnlockBadge } from '../services/userService';
 import { getUndoManager } from '../services/undoManager';
@@ -73,6 +74,9 @@ export function useEditorController() {
         showSkillTree, setShowSkillTree,
         showShopOverlay, setShowShopOverlay,
         showShortcuts, setShowShortcuts,
+        showStudioManager, setShowStudioManager,
+        showStudioDetail, setShowStudioDetail,
+        showAddToStudio, setShowAddToStudio,
     } = useStore();
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -405,6 +409,21 @@ export function useEditorController() {
         toast('success', `Welcome to ${plan.toUpperCase()}! All features unlocked.`);
     }, []);
 
+    const captureScreenshot = useCallback(() => {
+        const thumbnail = generateThumbnailFromStage(stageRef);
+        if (!thumbnail) {
+            toast('warning', 'Could not capture screenshot.');
+            return;
+        }
+        if (currentProject) {
+            const updatedProject = { ...currentProject, thumbnail, lastEdited: Date.now() };
+            setProject(updatedProject);
+            saveProjectIndexedDB(updatedProject);
+            toast('success', 'Screenshot captured!');
+        }
+        return thumbnail;
+    }, [currentProject, setProject, toast]);
+
     useEffect(() => {
         const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
         const handleKonami = (e: KeyboardEvent) => {
@@ -610,6 +629,10 @@ export function useEditorController() {
         showShopOverlay, setShowShopOverlay,
         showShortcuts, setShowShortcuts,
         hackerMode, activeTycoonGame, setActiveTycoonGame,
+        showStudioManager, setShowStudioManager,
+        showStudioDetail, setShowStudioDetail,
+        showAddToStudio, setShowAddToStudio,
         setLeftPanelWidth,
+        captureScreenshot,
     };
 }

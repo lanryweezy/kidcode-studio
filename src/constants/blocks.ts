@@ -1,6 +1,7 @@
 import { AppMode, BlockDefinition, CommandType } from '../types';
 import {
-    PanelTop, ArrowRight, Type, PaintBucket, Minus, ArrowUp, MessageSquare, MousePointer2, TextCursorInput, Image, ToggleRight, SlidersHorizontal, CheckSquare, BarChart3, List, Pencil, MapPin, Video, Camera, Calendar, Palette, Box, AlertTriangle, Megaphone, Waves, Link, Eraser, Cloud, Download, Variable, Calculator, Hash, GitBranch, Split, XCircle, Repeat, Clock, StickyNote, ArrowUpCircle, ArrowBigUp, RefreshCw, Compass, Activity, Film, Crosshair, Ghost, Coins, Sparkles, Copy, Trash, Play, Square, Music, Wind, Sun, Moon, Timer, Heart, RotateCcw, RotateCw, Anchor, Trophy, Lightbulb, Fan, Settings, Zap, Volume2, Maximize, Terminal, Wifi, Globe, Scan, User, ZoomIn, Eye, Layers, Flag, Hand, CloudRain, Save, Move, Grid, ToggleLeft, Gauge, Thermometer, Droplets, Flame, Target, Magnet, Cpu
+    PanelTop, ArrowRight, Type, PaintBucket, Minus, ArrowUp, MessageSquare, MousePointer2, TextCursorInput, Image, ToggleRight, SlidersHorizontal, CheckSquare, BarChart3, List, Pencil, MapPin, Video, Camera, Calendar, Palette, Box, AlertTriangle, Megaphone, Waves, Link, Eraser, Cloud, Download, Variable, Calculator, Hash, GitBranch, Split, XCircle, Repeat, Clock, StickyNote, ArrowUpCircle, ArrowBigUp, RefreshCw, Compass, Activity, Film, Crosshair, Ghost, Coins, Sparkles, Copy, Trash, Play, Square, Music, Wind, Sun, Moon, Timer, Heart, RotateCcw, RotateCw, Anchor, Trophy, Lightbulb, Fan, Settings, Zap, Volume2, Maximize, Terminal, Wifi, Globe, Scan, User, ZoomIn, Eye, Layers, Flag, Hand, CloudRain, Save, Move, Grid, ToggleLeft, Gauge, Thermometer, Droplets, Flame, Target, Magnet, Cpu,
+    Landmark as LandmarkIcon
 } from 'lucide-react';
 
 export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
@@ -251,5 +252,26 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
         { type: CommandType.WRITE_I2C, label: 'Write I2C', icon: Cpu, defaultParams: { address: '0x68', value: 1 }, color: 'bg-cyan-800', category: 'Protocols', description: 'Write data to I2C device.' },
         { type: CommandType.READ_SPI, label: 'Read SPI', icon: Cpu, defaultParams: { pin: 10, varName: 'data' }, color: 'bg-blue-700', category: 'Protocols', description: 'Read data from SPI device.' },
         { type: CommandType.WRITE_SPI, label: 'Write SPI', icon: Cpu, defaultParams: { pin: 10, value: 1 }, color: 'bg-blue-800', category: 'Protocols', description: 'Write data to SPI device.' },
+    ],
+    [AppMode.MINECRAFT]: [
+        { type: CommandType.MC_SET_BLOCK, label: 'Place Block', icon: Box, defaultParams: { x: 0, y: 64, z: 0, blockType: 'stone' }, color: 'bg-green-600', category: 'World', description: 'Place a block at x, y, z.' },
+        { type: CommandType.MC_REMOVE_BLOCK, label: 'Remove Block', icon: Trash, defaultParams: { x: 0, y: 64, z: 0 }, color: 'bg-green-700', category: 'World', description: 'Remove a block at coordinates.' },
+        { type: CommandType.MC_FILL_AREA, label: 'Fill Area', icon: PaintBucket, defaultParams: { x: 0, y: 64, z: 0, x2: 5, y2: 66, z2: 5, blockType: 'stone' }, color: 'bg-green-500', category: 'World', description: 'Fill a rectangular area with blocks.' },
+        { type: CommandType.MC_TELEPORT, label: 'Teleport', icon: Move, defaultParams: { x: 0, y: 64, z: 0 }, color: 'bg-purple-500', category: 'World', description: 'Move player to coordinates.' },
+        { type: CommandType.MC_CREATE_STRUCTURE, label: 'Create Structure', icon: LandmarkIcon, defaultParams: { x: 0, y: 64, z: 0, structure: 'house' }, color: 'bg-amber-600', category: 'World', description: 'Generate a predefined structure.' },
+        { type: CommandType.MC_SPAWN_ENTITY, label: 'Spawn Entity', icon: Ghost, defaultParams: { x: 0, y: 64, z: 0, entityType: 'creeper' }, color: 'bg-red-500', category: 'Entities', description: 'Spawn a mob at coordinates.' },
+        { type: CommandType.MC_GIVE_ITEM, label: 'Give Item', icon: Coins, defaultParams: { item: 'diamond_sword', amount: 1 }, color: 'bg-yellow-500', category: 'Items', description: 'Give the player an item.' },
+        { type: CommandType.MC_SET_WEATHER, label: 'Set Weather', icon: CloudRain, defaultParams: { weather: 'clear' }, color: 'bg-blue-500', category: 'Effects', description: 'Change the weather.' },
+        { type: CommandType.MC_SET_TIME, label: 'Set Time', icon: Sun, defaultParams: { time: 'day' }, color: 'bg-blue-600', category: 'Effects', description: 'Set time of day.' },
+        { type: CommandType.MC_PLAY_SOUND, label: 'Play Sound', icon: Volume2, defaultParams: { sound: 'note.pling' }, color: 'bg-pink-500', category: 'Effects', description: 'Play a Minecraft sound.' },
+        { type: CommandType.MC_SHOW_MESSAGE, label: 'Show Message', icon: MessageSquare, defaultParams: { text: 'Hello World!' }, color: 'bg-indigo-500', category: 'Effects', description: 'Display a chat message.' },
+        { type: CommandType.REPEAT, label: 'Repeat', icon: Repeat, defaultParams: { value: 10 }, color: 'bg-violet-500', category: 'Control', description: 'Repeat actions multiple times.' },
+        { type: CommandType.END_REPEAT, label: 'End Repeat', icon: XCircle, defaultParams: {}, color: 'bg-violet-500', category: 'Control', description: 'End of repeat loop.' },
+        { type: CommandType.IF, label: 'If', icon: GitBranch, defaultParams: { condition: 'true' }, color: 'bg-yellow-500', category: 'Control', description: 'Check a condition.' },
+        { type: CommandType.ELSE, label: 'Else', icon: Split, defaultParams: {}, color: 'bg-yellow-500', category: 'Control', description: 'Run if condition is false.' },
+        { type: CommandType.END_IF, label: 'End If', icon: XCircle, defaultParams: {}, color: 'bg-yellow-500', category: 'Control', description: 'End of check.' },
+        { type: CommandType.WAIT, label: 'Wait', icon: Clock, defaultParams: { value: 1 }, color: 'bg-slate-400', category: 'Control', description: 'Pause for a moment.' },
+        { type: CommandType.SET_VAR, label: 'Set Variable', icon: Variable, defaultParams: { varName: 'x', value: 0 }, color: 'bg-orange-500', category: 'Data', description: 'Save a value.' },
+        { type: CommandType.CHANGE_VAR, label: 'Change Var', icon: Variable, defaultParams: { varName: 'x', value: 1 }, color: 'bg-orange-600', category: 'Data', description: 'Change a variable value.' },
     ],
 };

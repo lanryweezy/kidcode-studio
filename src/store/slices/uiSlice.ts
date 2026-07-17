@@ -58,6 +58,9 @@ export interface UISlice {
     showShortcuts: boolean;
     highContrast: boolean;
     isGameMode: boolean;
+    showStudioManager: boolean;
+    showStudioDetail: string | null;
+    showAddToStudio: string | null;
 
     // UI/UX Enhancements for Kids
     customAccentColor: string;
@@ -116,6 +119,9 @@ export interface UISlice {
     setShowShortcuts: (show: boolean) => void;
     setHighContrast: (hc: boolean) => void;
     setIsGameMode: (isGameMode: boolean) => void;
+    setShowStudioManager: (show: boolean) => void;
+    setShowStudioDetail: (studioId: string | null) => void;
+    setShowAddToStudio: (projectId: string | null) => void;
 
     // UI/UX Actions
     setCustomAccentColor: (color: string) => void;
@@ -180,6 +186,9 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     showShortcuts: false,
     highContrast: false,
     isGameMode: false,
+    showStudioManager: false,
+    showStudioDetail: null,
+    showAddToStudio: null,
     customAccentColor: '#8b5cf6', // Default violet-500
     showJoyride: false,
     workspaceZoom: 1,
@@ -237,6 +246,9 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     setShowShortcuts: (show) => set({ showShortcuts: show }),
     setHighContrast: (hc) => set({ highContrast: hc }),
     setIsGameMode: (isGameMode) => set({ isGameMode }),
+    setShowStudioManager: (showStudioManager) => set({ showStudioManager }),
+    setShowStudioDetail: (showStudioDetail) => set({ showStudioDetail }),
+    setShowAddToStudio: (showAddToStudio) => set({ showAddToStudio }),
     setCustomAccentColor: (customAccentColor) => set({ customAccentColor }),
     setShowJoyride: (showJoyride) => set({ showJoyride }),
     setWorkspaceZoom: (workspaceZoom) => set({ workspaceZoom }),

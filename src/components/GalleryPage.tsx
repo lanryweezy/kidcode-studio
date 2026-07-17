@@ -4,9 +4,10 @@ import { useStore } from '../store/useStore';
 import { AppMode } from '../types';
 import { MODE_CONFIG, EXAMPLE_TEMPLATES } from '../constants';
 import { remixProject, getProjects } from '../services/storageService';
+import { generateModePlaceholder } from '../services/thumbnailGenerator';
 import {
-  Search, ArrowLeft, Heart, MessageCircle, GitFork,
-  Sparkles, Layout, Gamepad2, Cpu, Filter, ThumbsUp, CheckCircle
+  Search, ArrowLeft, Heart, GitFork,
+  Sparkles, ThumbsUp, CheckCircle
 } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
 import { updateCreatorScore, addXP } from '../services/gamificationService';
@@ -183,11 +184,17 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ) : filtered.map((proj) => (
                     <div key={proj.id} className="group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-500">
                         {/* Preview Area */}
-                        <div className={`h-48 ${proj.color} relative flex items-center justify-center text-white/20`}>
-                            {proj.mode === AppMode.GAME ? <Gamepad2 size={80} /> : proj.mode === AppMode.APP ? <Layout size={80} /> : <Cpu size={80} />}
+                        <div className={`h-48 ${proj.color} relative flex items-center justify-center text-white/20 overflow-hidden`}>
+                            <div
+                                className="absolute inset-0 bg-cover bg-center"
+                                style={{
+                                    backgroundImage: `url(${generateModePlaceholder(proj.mode)})`,
+                                }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                             
                             {/* Hover Overlay */}
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm p-6">
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm p-6 z-10">
                                 <div className="text-white text-center">
                                     <div className="font-bold text-lg">{proj.name}</div>
                                     <div className="text-sm opacity-80">{proj.description}</div>
@@ -198,7 +205,7 @@ const GalleryPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             </div>
                             
                             {/* Mode Badge */}
-                            <div className="absolute top-4 left-4">
+                            <div className="absolute top-4 left-4 z-10">
                                 <span className={`text-[10px] font-black px-3 py-1.5 rounded-full text-white uppercase tracking-widest bg-black/30 backdrop-blur-sm`}>
                                     {proj.mode}
                                 </span>

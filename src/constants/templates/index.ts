@@ -13,6 +13,7 @@ import { battleTemplates } from './battle';
 import { arcadeTemplates } from './arcade';
 import { cycle9Templates } from './cycle9';
 import { phase3Templates } from './phase3';
+import { minecraftTemplates } from './minecraft';
 import { validateAllTemplates } from '../../services/templateValidator';
 import { generateQualityReport } from '../../services/templateQualityReport';
 
@@ -32,6 +33,7 @@ export const ALL_TEMPLATES = [
     ...arcadeTemplates,
     ...cycle9Templates,
     ...phase3Templates,
+    ...minecraftTemplates,
 ];
 
 const validationResults = validateAllTemplates(ALL_TEMPLATES);

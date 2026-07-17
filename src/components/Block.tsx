@@ -151,7 +151,7 @@ const Block: React.FC<BlockProps> = ({
     }, [block.id, block.params, onUpdate]);
 
     const handleDragStart = useCallback((e: React.DragEvent) => {
-        if (blockRef.current) {
+        if (blockRef.current && e.dataTransfer && typeof e.dataTransfer.setDragImage === 'function') {
             const ghost = blockRef.current.cloneNode(true) as HTMLElement;
             ghost.style.opacity = '0.6';
             ghost.style.transform = 'scale(1.05)';
@@ -268,12 +268,12 @@ const Block: React.FC<BlockProps> = ({
                 ref={blockRef}
                 className={`
             relative group flex-1 flex items-center gap-3 p-3 rounded-xl border-2 mb-3
-            transition-all duration-200 select-none touch-none block-hover
+            transition-all duration-200 select-none touch-none block-hover hover:-translate-y-1 hover:shadow-lg
             ${borderColor} ${bgColor} ${activeStyle}
             ${isDeleting ? 'animate-delete-flash' : ''}
             ${isFlashing ? 'ring-2 ring-emerald-400 border-emerald-400 animate-pulse' : ''}
             ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
-            ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01]' : ''}
+            ${isDragOver ? 'ring-4 ring-violet-400 border-violet-400 scale-[1.02] bg-violet-50/30 rotate-1' : ''}
         `}
                 draggable={isDraggable}
                 onDragStart={handleDragStart}

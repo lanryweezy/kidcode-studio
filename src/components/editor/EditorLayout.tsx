@@ -16,7 +16,7 @@ type ControllerProps = ReturnType<typeof useEditorController>;
 interface EditorLayoutProps extends ControllerProps {}
 
 const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
-    const { initCollaboration, destroyCollaboration, collaborators } = useStore();
+    const { initCollaboration, destroyCollaboration, collaborators, workspaceZoom, setWorkspaceZoom, customAccentColor } = useStore();
     const [showShareInput, setShowShareInput] = useState(false);
     const [transportUrl, setTransportUrl] = useState('');
     const [isCollaborating, setIsCollaborating] = useState(false);
@@ -141,23 +141,29 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         </div>
                     )}
 
-                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar space-y-1 relative overflow-y-auto transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={handleWorkspaceDragOver} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
-                        {commands.length === 0 && (
-                            <div className="h-full min-h-[200px] flex flex-col items-center justify-center text-slate-400 opacity-60 pointer-events-none animate-in zoom-in duration-500">
-                                <Box size={64} className={`mb-4 text-slate-300 ${draggedBlockId ? 'animate-bounce text-violet-400' : 'animate-bounce-sm'}`} />
-                                <p className={`font-bold text-xl text-center px-4 ${draggedBlockId ? 'text-violet-500' : ''}`}>
-                                    {draggedBlockId ? 'Drop your block here!' : 'Drag blocks here to start coding!'}
-                                </p>
-                            </div>
-                        )}
-                        {draggedBlockId && commands.length > 0 && (
-                            <div className="absolute inset-0 border-2 border-dashed border-violet-400 bg-violet-500/10 rounded-xl flex items-center justify-center pointer-events-none z-10">
-                                <div className="text-violet-600 font-bold text-lg">
-                                    Drop block here
+                    <div className="absolute top-2 right-2 z-10 flex gap-2">
+                        <button onClick={() => setWorkspaceZoom(Math.max(0.5, workspaceZoom - 0.1))} className="bg-white/80 backdrop-blur text-slate-600 hover:text-slate-900 shadow-md p-2 rounded-full active:scale-95 transition-transform" aria-label="Zoom Out">-</button>
+                        <button onClick={() => setWorkspaceZoom(1)} className="bg-white/80 backdrop-blur text-slate-600 hover:text-slate-900 shadow-md px-3 py-2 rounded-full font-bold text-sm active:scale-95 transition-transform">{(workspaceZoom * 100).toFixed(0)}%</button>
+                        <button onClick={() => setWorkspaceZoom(Math.min(2, workspaceZoom + 0.1))} className="bg-white/80 backdrop-blur text-slate-600 hover:text-slate-900 shadow-md p-2 rounded-full active:scale-95 transition-transform" aria-label="Zoom In">+</button>
+                    </div>
+                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar relative overflow-y-auto overflow-x-hidden transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={handleWorkspaceDragOver} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
+                        <div style={{ transform: `scale(${workspaceZoom})`, transformOrigin: 'top left', minHeight: '100%' }} className="space-y-1">
+                            {commands.length === 0 && (
+                                <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-400 opacity-60 pointer-events-none animate-in zoom-in duration-500">
+                                    <Box size={64} className={`mb-4 text-slate-300 ${draggedBlockId ? 'animate-bounce text-violet-400' : 'animate-bounce-sm'}`} />
+                                    <p className={`font-bold text-xl text-center px-4 ${draggedBlockId ? 'text-violet-500' : ''}`}>
+                                        {draggedBlockId ? 'Drop your block here!' : 'Drag blocks here to start coding!'}
+                                    </p>
                                 </div>
-                            </div>
-                        )}
-                        {commands.map((cmd, idx) => (
+                            )}
+                            {draggedBlockId && commands.length > 0 && (
+                                <div className="absolute inset-0 border-2 border-dashed border-violet-400 bg-violet-500/10 rounded-xl flex items-center justify-center pointer-events-none z-10">
+                                    <div className="text-violet-600 font-bold text-lg animate-pulse">
+                                        Drop block here
+                                    </div>
+                                </div>
+                            )}
+                            {commands.map((cmd, idx) => (
                             <div key={cmd.id} className="block-wrapper">
                                 {dropIndex === idx && (
                                     <div className="border-2 border-dashed border-blue-400 bg-blue-50 rounded-xl h-14 mb-2 flex items-center justify-center animate-pulse transition-all shadow-inner">
@@ -166,13 +172,14 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                                 )}
                                 <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} onDragStart={(e) => { props.setDraggedBlockId(cmd.id); e.dataTransfer.effectAllowed = 'move'; const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; e.dataTransfer.setDragImage(img, 0, 0); }} isActive={false} onContextMenu={(e, id) => setContextMenu({ x: e.clientX, y: e.clientY, blockId: id })} />
                             </div>
-                        ))}
-                        {dropIndex === commands.length && (
-                            <div className="border-2 border-dashed border-blue-400 bg-blue-50 rounded-xl h-14 mb-2 flex items-center justify-center animate-pulse transition-all shadow-inner">
-                                <span className="text-blue-500 font-bold text-sm tracking-widest">+ SNAP HERE</span>
-                            </div>
-                        )}
-                        <div className="h-40" />
+                            ))}
+                            {dropIndex === commands.length && (
+                                <div className="border-2 border-dashed border-blue-400 bg-blue-50 rounded-xl h-14 mb-2 flex items-center justify-center animate-pulse transition-all shadow-inner">
+                                    <span className="text-blue-500 font-bold text-sm tracking-widest">+ SNAP HERE</span>
+                                </div>
+                            )}
+                            <div className="h-40" />
+                        </div>
                     </div>
                 </div>
 

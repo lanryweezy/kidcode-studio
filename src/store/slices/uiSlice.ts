@@ -59,6 +59,12 @@ export interface UISlice {
     highContrast: boolean;
     isGameMode: boolean;
 
+    // UI/UX Enhancements for Kids
+    customAccentColor: string;
+    showJoyride: boolean;
+    workspaceZoom: number;
+    workspacePan: { x: number, y: number };
+
     // Actions
     setMode: (mode: AppMode) => void;
     setShowLanding: (show: boolean) => void;
@@ -110,6 +116,12 @@ export interface UISlice {
     setShowShortcuts: (show: boolean) => void;
     setHighContrast: (hc: boolean) => void;
     setIsGameMode: (isGameMode: boolean) => void;
+
+    // UI/UX Actions
+    setCustomAccentColor: (color: string) => void;
+    setShowJoyride: (show: boolean) => void;
+    setWorkspaceZoom: (zoom: number) => void;
+    setWorkspacePan: (pan: { x: number, y: number }) => void;
 }
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
@@ -168,6 +180,10 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     showShortcuts: false,
     highContrast: false,
     isGameMode: false,
+    customAccentColor: '#8b5cf6', // Default violet-500
+    showJoyride: false,
+    workspaceZoom: 1,
+    workspacePan: { x: 0, y: 0 },
 
     setMode: (mode) => set({ mode }),
     setShowLanding: (show) => set({ showLanding: show }),
@@ -221,4 +237,8 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     setShowShortcuts: (show) => set({ showShortcuts: show }),
     setHighContrast: (hc) => set({ highContrast: hc }),
     setIsGameMode: (isGameMode) => set({ isGameMode }),
+    setCustomAccentColor: (customAccentColor) => set({ customAccentColor }),
+    setShowJoyride: (showJoyride) => set({ showJoyride }),
+    setWorkspaceZoom: (workspaceZoom) => set({ workspaceZoom }),
+    setWorkspacePan: (workspacePan) => set({ workspacePan }),
 });

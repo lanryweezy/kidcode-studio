@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, Info, AlertTriangle, PartyPopper } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -23,17 +24,17 @@ export const useToast = () => {
 };
 
 const icons: Record<ToastType, React.ReactNode> = {
-  success: <CheckCircle size={18} className="text-emerald-500" />,
-  error: <AlertCircle size={18} className="text-rose-500" />,
-  info: <Info size={18} className="text-sky-500" />,
-  warning: <AlertTriangle size={18} className="text-amber-500" />,
+  success: <PartyPopper size={24} className="text-emerald-500 animate-bounce" />,
+  error: <AlertCircle size={24} className="text-rose-500 animate-pulse" />,
+  info: <Info size={24} className="text-sky-500" />,
+  warning: <AlertTriangle size={24} className="text-amber-500 animate-pulse" />,
 };
 
 const bgStyles: Record<ToastType, string> = {
-  success: 'border-emerald-200',
-  error: 'border-rose-200',
-  info: 'border-sky-200',
-  warning: 'border-amber-200',
+  success: 'border-emerald-400 bg-emerald-50 shadow-emerald-500/20',
+  error: 'border-rose-400 bg-rose-50 shadow-rose-500/20',
+  info: 'border-sky-400 bg-sky-50 shadow-sky-500/20',
+  warning: 'border-amber-400 bg-amber-50 shadow-amber-500/20',
 };
 
 let toastCounter = 0;
@@ -43,6 +44,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addToast = useCallback((type: ToastType, message: string) => {
     const id = `toast-${++toastCounter}`;
+    if (type === 'success') {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.2, x: 0.9 },
+        colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6']
+      });
+    }
     setToasts((prev) => [...prev, { id, type, message, isClosing: false }]);
     setTimeout(() => {
       setToasts((prev) => prev.map(t => t.id === id ? { ...t, isClosing: true } : t));
@@ -69,16 +78,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             role="alert"
             className={`
               pointer-events-auto
-              flex items-center gap-3 px-4 py-3
-              bg-white
-              border ${bgStyles[t.type]}
-              rounded-xl shadow-glass-lg
-              max-w-sm
-              ${t.isClosing ? 'toast-slide-out' : 'toast-slide-in'}
+              flex items-center gap-4 px-5 py-4
+              border-2 ${bgStyles[t.type]}
+              rounded-2xl shadow-xl transform-gpu
+              max-w-sm w-full
+              ${t.isClosing ? 'toast-slide-out opacity-0 translate-x-full' : 'toast-slide-in animate-in slide-in-from-right-full bounce-in'}
             `}
           >
-            {icons[t.type]}
-            <span className="text-sm font-medium text-slate-700 flex-1">
+            <div className="shrink-0 drop-shadow-md">
+              {icons[t.type]}
+            </div>
+            <span className="text-base font-bold text-slate-800 flex-1 leading-snug">
               {t.message}
             </span>
             <button

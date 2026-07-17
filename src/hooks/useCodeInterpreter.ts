@@ -75,6 +75,7 @@ export const useCodeInterpreter = ({
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
+        setActiveBlockId(id);
     };
 
     const executeSingleCommand = async (cmd: CommandBlock, wait: (ms: number) => Promise<unknown>) => {
@@ -812,6 +813,12 @@ export const useCodeInterpreter = ({
         resumeRef.current();
     };
 
+    const forceRestart = useCallback(async () => {
+        stopCode();
+        await new Promise(r => setTimeout(r, 50));
+        await runCode();
+    }, [stopCode, runCode]);
+
     const clearLogs = useCallback(() => {
         setConsoleLogs([]);
     }, []);
@@ -832,6 +839,7 @@ export const useCodeInterpreter = ({
         runCode,
         stopCode,
         stepCode,
-        resumeCode
+        resumeCode,
+        forceRestart
     };
 };

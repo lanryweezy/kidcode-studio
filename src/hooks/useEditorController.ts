@@ -137,7 +137,7 @@ export function useEditorController() {
     const {
         isPlaying, activeBlockId, executionSpeed, setExecutionSpeed,
         debugMode, setDebugMode, isPaused, highlightedPin,
-        runCode: originalRunCode, stopCode, resumeCode
+        runCode: originalRunCode, stopCode, resumeCode, forceRestart
     } = useCodeInterpreter({
         mode, commands, hardwareState, setHardwareState: adaptedSetHardwareState,
         hardwareStateRef, spriteState, setSpriteState: adaptedSetSpriteState,
@@ -154,6 +154,39 @@ export function useEditorController() {
         }
         originalRunCode();
     }, [hasRunCode, commands.length, originalRunCode]);
+
+    const restartCode = useCallback(() => {
+        forceRestart();
+    }, [forceRestart]);
+
+    const autoExecuteTimeoutRef = useRef<number | undefined>(undefined);
+    const isPlayingRef = useRef(isPlaying);
+
+    useEffect(() => {
+        isPlayingRef.current = isPlaying;
+    }, [isPlaying]);
+
+    useEffect(() => {
+        if (commands.length === 0) return;
+
+        if (autoExecuteTimeoutRef.current) clearTimeout(autoExecuteTimeoutRef.current);
+
+        autoExecuteTimeoutRef.current = window.setTimeout(() => {
+            const doRun = () => {
+                if (isPlayingRef.current) {
+                    stopCode();
+                    setTimeout(doRun, 50);
+                } else {
+                    originalRunCode();
+                }
+            };
+            doRun();
+        }, 500);
+
+        return () => {
+            if (autoExecuteTimeoutRef.current) clearTimeout(autoExecuteTimeoutRef.current);
+        };
+    }, [commands]);
 
     const addXp = useCallback((amount: number, reason: string, icon?: 'star' | 'trophy' | 'trend') => {
         const id = crypto.randomUUID();
@@ -525,7 +558,7 @@ export function useEditorController() {
 
     return {
         isMobile, viewVisible,
-        isPlaying, debugMode, setDebugMode, isPaused, runCode, stopCode, resumeCode,
+        isPlaying, activeBlockId, debugMode, setDebugMode, isPaused, runCode, stopCode, resumeCode, restartCode,
         currentProject, setProject, saveStatus,
         mode, commands,
         dropIndex, setDropIndex, draggedBlockId, setDraggedBlockId,

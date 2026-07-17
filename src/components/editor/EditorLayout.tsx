@@ -1,11 +1,13 @@
-import React, { Suspense, useState, useCallback } from 'react';
+import React, { Suspense, useState, useCallback, useRef, useEffect } from 'react';
 import { AppMode, CommandBlock } from '../../types';
 import { Box, Trash, Share2, ChevronRight } from 'lucide-react';
 import TopBar from '../TopBar';
 import Sidebar from '../Sidebar';
 import Block from '../Block';
 import Stage from '../Stage';
+import MobileBottomNav from '../MobileBottomNav';
 const Stage3D = React.lazy(() => import('../Stage3D'));
+const VariableMonitor = React.lazy(() => import('../VariableMonitor'));
 import type { Stage3DHandle } from '../Stage3D';
 import type { useEditorController } from '../../hooks/useEditorController';
 import { useStore } from '../../store/useStore';
@@ -21,6 +23,10 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const [showShareInput, setShowShareInput] = useState(false);
     const [transportUrl, setTransportUrl] = useState('');
     const [isCollaborating, setIsCollaborating] = useState(false);
+    const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+    const [mobileView, setMobileView] = useState<'blocks' | 'preview'>('blocks');
+    const touchStartX = useRef(0);
+    const touchStartY = useRef(0);
 
     const handleShareClick = useCallback(() => {
         if (isCollaborating) {
@@ -37,9 +43,29 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
         setIsCollaborating(true);
         setShowShareInput(false);
     }, [props.currentProject, initCollaboration, transportUrl]);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+    }, []);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+        const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+        const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 60) {
+            if (deltaX < 0 && mobileView === 'blocks') {
+                setMobileView('preview');
+            } else if (deltaX > 0 && mobileView === 'preview') {
+                setMobileView('blocks');
+            }
+        }
+    }, [mobileView]);
+
+    const openMobileDrawer = useCallback(() => setIsMobileDrawerOpen(true), []);
+    const closeMobileDrawer = useCallback(() => setIsMobileDrawerOpen(false), []);
     const {
         isMobile, viewVisible,
-        isPlaying, debugMode, setDebugMode, isPaused, runCode, stopCode, resumeCode,
+        isPlaying, debugMode, setDebugMode, isPaused, runCode, stopCode, resumeCode, restartCode, activeBlockId,
         currentProject, setProject, saveStatus,
         mode, commands,
         dropIndex, draggedBlockId, isOverTrash, setIsOverTrash,
@@ -74,6 +100,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 runCode={runCode}
                 stopCode={stopCode}
                 resumeCode={resumeCode}
+                restartCode={restartCode}
                 currentProject={currentProject}
                 setProject={setProject}
                 saveStatus={saveStatus}
@@ -82,7 +109,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 onToggle3D={() => setIs3DMode(!is3DMode)}
             />
 
-            <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+            <div className="flex-1 flex flex-col lg:flex-row min-h-0 md:min-h-0">
                 <ErrorBoundary>
                     <Sidebar
                         handleAppendCode={(cmds: CommandBlock[]) => handleAppendCode(cmds.map((c: CommandBlock) => ({ ...c, id: crypto.randomUUID() })))}
@@ -90,10 +117,20 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         handleGenerateSprite={handleGenerateSprite}
                         isGeneratingSprite={localIsGeneratingSprite}
                         setShowQuestEditor={() => setShowQuestEditor(true)}
+                        isMobileDrawerOpen={isMobileDrawerOpen}
+                        onCloseMobileDrawer={closeMobileDrawer}
                     />
                 </ErrorBoundary>
 
-                <div key={`workspace-${mode}`} id="block-workspace" className="flex-1 bg-slate-100 relative flex flex-col min-h-0 animate-in fade-in zoom-in-95 duration-300">
+                <div
+                    key={`workspace-${mode}`}
+                    id="block-workspace"
+                    className={`flex-1 bg-slate-100 relative flex flex-col min-h-0 animate-in fade-in zoom-in-95 duration-300 ${
+                        mobileView === 'preview' && isMobile ? 'hidden md:flex' : 'flex'
+                    }`}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                >
                     <ErrorBoundary>
                     <div className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-violet-500 bg-slate-300 transition-colors z-50 hidden lg:flex items-center justify-center opacity-40 hover:opacity-100" onMouseDown={handleMouseDownLeft}>
                         <div className="w-0.5 h-8 bg-current rounded-full" />
@@ -173,7 +210,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                                         <span className="text-blue-500 font-bold text-xs tracking-widest">+ SNAP HERE</span>
                                     </div>
                                 )}
-                                <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} onDragStart={(e) => { props.setDraggedBlockId(cmd.id); e.dataTransfer.effectAllowed = 'move'; const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; e.dataTransfer.setDragImage(img, 0, 0); }} isActive={false} onContextMenu={(e, id) => setContextMenu({ x: e.clientX, y: e.clientY, blockId: id })} />
+                                <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} onDragStart={(e) => { props.setDraggedBlockId(cmd.id); e.dataTransfer.effectAllowed = 'move'; const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; e.dataTransfer.setDragImage(img, 0, 0); }} isActive={cmd.id === activeBlockId} onContextMenu={(e, id) => setContextMenu({ x: e.clientX, y: e.clientY, blockId: id })} />
                             </div>
                             ))}
                             {dropIndex === commands.length && (
@@ -185,9 +222,24 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         </div>
                     </div>
                 </ErrorBoundary>
+                <React.Suspense fallback={null}>
+                    <VariableMonitor
+                        variables={mode === AppMode.APP ? appState.variables : spriteState.variables}
+                        isVisible={true}
+                        onClose={() => {}}
+                    />
+                </React.Suspense>
                 </div>
 
-                <div key={`stage-${mode}`} className="bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col relative z-20 shrink-0 min-h-0 animate-in fade-in slide-in-from-right-4 duration-500" style={{ width: isMobile ? '100%' : rightPanelWidth }}>
+                <div
+                    key={`stage-${mode}`}
+                    className={`bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col relative z-20 shrink-0 min-h-0 animate-in fade-in slide-in-from-right-4 duration-500 ${
+                        mobileView === 'blocks' && isMobile ? 'hidden md:flex' : 'flex'
+                    }`}
+                    style={{ width: isMobile ? '100%' : rightPanelWidth }}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                >
                     <div className="absolute top-0 left-0 w-1.5 h-full cursor-col-resize hover:bg-violet-500 bg-slate-300 transition-colors z-50 hidden lg:flex items-center justify-center opacity-40 hover:opacity-100" onMouseDown={handleMouseDownRight}>
                         <div className="w-0.5 h-8 bg-current rounded-full" />
                     </div>
@@ -249,6 +301,22 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                     </div>
                 </ErrorBoundary>
             )}
+
+            <div className="md:hidden flex justify-center items-center gap-2 py-2 bg-slate-100 border-t border-slate-200 shrink-0">
+                <div className={`view-indicator-dot w-2 h-2 rounded-full ${mobileView === 'blocks' ? 'bg-violet-500 active' : 'bg-slate-300'}`} />
+                <div className={`view-indicator-dot w-2 h-2 rounded-full ${mobileView === 'preview' ? 'bg-violet-500 active' : 'bg-slate-300'}`} />
+                <span className="text-[10px] text-slate-400 font-semibold ml-1">Swipe to switch</span>
+            </div>
+
+            <MobileBottomNav
+                isPlaying={isPlaying}
+                runCode={runCode}
+                stopCode={stopCode}
+                onBlocks={() => setMobileView('blocks')}
+                onPreview={() => setMobileView('preview')}
+                onMenu={openMobileDrawer}
+                activeView={mobileView}
+            />
         </>
     );
 });

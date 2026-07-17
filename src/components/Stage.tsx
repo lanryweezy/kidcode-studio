@@ -77,6 +77,16 @@ const Stage = forwardRef(({
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50 relative overflow-hidden">
+            <div className="absolute top-3 left-3 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm border transition-all duration-300"
+                style={{
+                    backgroundColor: isExecuting ? 'rgb(234 179 8 / 0.1)' : 'rgb(241 245 249 / 0.8)',
+                    borderColor: isExecuting ? 'rgb(234 179 8 / 0.3)' : 'rgb(226 232 240 / 0.8)',
+                    color: isExecuting ? '#a16207' : '#64748b'
+                }}
+            >
+                <span className={`w-2 h-2 rounded-full ${isExecuting ? 'bg-amber-500 animate-pulse' : 'bg-slate-400'}`} />
+                {isExecuting ? 'Running' : 'Ready'}
+            </div>
             {/* Background Decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400 rounded-full blur-[120px]" />

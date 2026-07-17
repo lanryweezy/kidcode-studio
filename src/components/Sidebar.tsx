@@ -138,7 +138,7 @@ const SidebarTabContent: React.FC<any> = ({
                 <div className="p-3 border-b border-slate-200 bg-white">
                     <div className="relative">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input type="text" placeholder="Search parts..." value={circuitSearch} onChange={(e) => setCircuitSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400" />
+                        <input type="text" placeholder="Search parts..." value={circuitSearch} onChange={(e) => setCircuitSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400 sculpted-inset" />
                     </div>
                 </div>
                 <div className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -181,7 +181,7 @@ const SidebarTabContent: React.FC<any> = ({
                 <h3 className="font-bold text-slate-700 text-sm mb-2">Block Library</h3>
                 <div className="relative">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="text" placeholder="Search blocks..." value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400" />
+                    <input type="text" placeholder="Search blocks..." value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400 sculpted-inset" />
                     {isSearchDebouncing && (
                         <div className="absolute right-2 top-2">
                             <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
@@ -377,7 +377,7 @@ const Sidebar: React.FC<any> = ({
                     />
                     <div
                         ref={drawerRef}
-                        className={`fixed top-14 left-0 bottom-0 z-50 flex bg-white shadow-2xl ${isMobileDrawerOpen ? 'drawer-enter' : 'hidden'}`}
+                        className={`fixed top-14 left-0 bottom-0 z-50 flex sculpted ${isMobileDrawerOpen ? 'drawer-enter' : 'hidden'}`}
                         onTouchStart={handleDrawerTouchStart}
                         onTouchEnd={handleDrawerTouchEnd}
                     >
@@ -445,7 +445,7 @@ const Sidebar: React.FC<any> = ({
                         {isCollapsed ? '›' : '‹'}
                     </button>
 
-                    <div className={`${isCollapsed ? 'w-16' : 'w-72'} glass border-r border-slate-200 flex flex-col h-full transition-all duration-300 ease-in-out relative z-20 min-h-0`}>
+                    <div className={`${isCollapsed ? 'w-16' : 'w-72'} glass border-r border-slate-200 flex flex-col h-full transition-all duration-300 ease-in-out relative z-20 min-h-0 sculpted`}>
                         {isCollapsed ? (
                             <div className="flex flex-col items-center gap-2 p-2">
                                 <button onClick={() => { setLocalSearch(''); setIsCollapsed(false); }} className="w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors" title="Blocks">

@@ -104,7 +104,7 @@ export const Modal: React.FC<ModalProps> = ({
         className={`
           relative w-full ${sizeStyles[size]}
           bg-white
-          rounded-2xl shadow-md
+          rounded-2xl sculpted-lg
           border border-slate-200
           animate-scale-in
           outline-none

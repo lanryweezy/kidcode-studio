@@ -4,8 +4,35 @@ import { useStore } from '../store/useStore';
 import { Zap, Sparkles, Trophy, Users, Star, ArrowRight, Play, Rocket } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
 
+const FloatingDecor: React.FC = () => (
+    <>
+        <div className="absolute top-16 left-[8%] text-5xl bob-float opacity-40 select-none" aria-hidden="true">🎮</div>
+        <div className="absolute top-40 right-[12%] text-4xl bob-float bob-float-delay-1 opacity-30 select-none" aria-hidden="true">⚡</div>
+        <div className="absolute top-[60%] left-[5%] text-3xl bob-float bob-float-delay-2 opacity-25 select-none" aria-hidden="true">🚀</div>
+        <div className="absolute top-[30%] right-[6%] text-6xl bob-float bob-float-delay-3 opacity-20 select-none rotate-12" aria-hidden="true">✨</div>
+        <div className="absolute bottom-40 left-[15%] text-4xl bob-float bob-float-delay-2 opacity-20 select-none -rotate-6" aria-hidden="true">🤖</div>
+        <div className="absolute bottom-20 right-[20%] text-3xl bob-float bob-float-delay-1 opacity-25 select-none rotate-[-10deg]" aria-hidden="true">🎨</div>
+    </>
+);
+
+const DoodleLine: React.FC<{ className?: string; color?: string }> = ({ className = '', color = '#7c3aed' }) => (
+    <svg className={`absolute pointer-events-none ${className}`} width="120" height="20" viewBox="0 0 120 20" aria-hidden="true">
+        <path d="M0 15 Q30 2 60 12 T120 10" stroke={color} fill="none" strokeWidth="2.5" strokeLinecap="round" className="doodle-line" />
+    </svg>
+);
+
 const LandingPage: React.FC = () => {
     const { setShowLanding, setShowHome } = useStore();
+    const [scrollProgress, setScrollProgress] = React.useState(0);
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            const total = document.documentElement.scrollHeight - window.innerHeight;
+            setScrollProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleStartBuilding = () => {
         playSoundEffect('powerup');
@@ -13,52 +40,62 @@ const LandingPage: React.FC = () => {
         setShowHome(true);
     };
 
+    const featureCards = [
+        { icon: Trophy, label: '3D Game Builder', desc: 'Build immersive 3D open worlds with real-time physics, AI NPCs, and cinematic cameras. Export your games directly to a web link.', color: 'violet', rotate: '-1.5deg', offsetX: '-12px', offsetY: '6px' },
+        { icon: Rocket, label: 'App Designer', desc: 'Create real mobile-style apps with multi-screen navigation, buttons, text inputs, and dynamic UI elements.', color: 'emerald', rotate: '1deg', offsetX: '8px', offsetY: '-4px' },
+        { icon: Zap, label: 'Circuit Lab', desc: 'Experience a complete electronics workbench. Connect sensors, LEDs, and LCDs on a breadboard and code them with blocks.', color: 'amber', rotate: '-0.5deg', offsetX: '-4px', offsetY: '10px' },
+    ];
+
     return (
         <div className="min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden">
+            <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }} />
+            <FloatingDecor />
+
             {/* HERO SECTION */}
             <section className="relative pt-20 pb-32 px-6 overflow-hidden">
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="flex flex-col items-center text-center">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-600/10 border border-violet-500/30 text-violet-400 font-black text-xs uppercase tracking-widest mb-8 animate-bounce-sm">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-600/10 border border-violet-500/30 text-violet-400 font-black text-xs uppercase tracking-widest mb-8 animate-bounce-sm skew-1">
                             <Sparkles size={14} className="animate-pulse" /> THE FUTURE OF CODING IS HERE
                         </div>
 
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.85] mb-8 bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent tracking-tighter">
-                            Build Your Own <br />
-                            <span className="text-violet-500">Universe.</span>
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.85] mb-8 tracking-tighter">
+                            <span className="bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent">Build </span>
+                            <span className="font-extralight text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-slate-300 italic">your</span>
+                            <span className="bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent"> Own </span>
+                            <br />
+                            <span className="text-violet-500 skew-2 inline-block">Universe.</span>
+                            <DoodleLine className="-bottom-4 left-1/2 -translate-x-1/2 w-48" />
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mb-12 font-medium leading-relaxed">
-                            The all-in-one professional studio where kids build 3D open-world games,
+                        <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mb-12 font-medium leading-relaxed drift-left">
+                            The <span className="font-extralight text-slate-400">all-in-one</span> professional studio where kids build{' '}
+                            <span className="font-black text-violet-400">3D open-world games</span>,
                             real mobile apps, and simulate advanced electronics—all with the power of blocks.
                         </p>
 
                         <div className="flex flex-wrap items-center justify-center gap-6">
                             <button
                                 onClick={handleStartBuilding}
-                                className="group px-10 py-5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-xl rounded-2xl shadow-[0_0_40px_rgba(124,58,237,0.3)] hover:shadow-[0_0_60px_rgba(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
+                                className="group px-10 py-5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-xl rounded-2xl shadow-[0_0_40px_rgba(124,58,237,0.3)] hover:shadow-[0_0_60px_rgba(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 skew-1"
                             >
                                 <Zap size={24} fill="currentColor" /> GET STARTED FREE <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
                                 onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-                                className="px-10 py-5 bg-slate-900/50 border border-slate-800 text-white font-black text-xl rounded-2xl transition-all hover:border-violet-500/50 flex items-center gap-3"
+                                className="px-10 py-5 bg-slate-900/50 border border-slate-800 text-white font-black text-xl rounded-2xl transition-all hover:border-violet-500/50 flex items-center gap-3 skew-2"
                             >
                                 <Play size={24} fill="currentColor" className="text-violet-500" /> SEE THE TOOLS
                             </button>
                         </div>
 
-                        {/* Phone Mockup with Glass Effect */}
-                        <div className="mt-16 relative">
-                            <div className="w-64 h-[500px] bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2.5rem] border-4 border-slate-700 shadow-2xl shadow-violet-500/20 mx-auto relative overflow-hidden">
-                                {/* Phone notch */}
+                        {/* Phone Mockup with Glass Effect — offset asymmetrically */}
+                        <div className="mt-16 relative drift-right">
+                            <div className="w-64 h-[500px] bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2.5rem] border-4 border-slate-700 shadow-2xl shadow-violet-500/20 mx-auto relative overflow-hidden skew-3">
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-2xl z-20" />
-                                {/* Screen content */}
                                 <div className="absolute inset-2 rounded-[2rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 overflow-hidden">
-                                    {/* Glass reflection overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
                                     <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
-                                    {/* Animated content */}
                                     <div className="p-6 pt-12 space-y-4">
                                         <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                                             <Zap size={24} className="text-white" />
@@ -74,31 +111,29 @@ const LandingPage: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* Glass reflection shine */}
                                 <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none rounded-[2rem]" />
                             </div>
-                            {/* Glow effect behind phone */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-600/30 blur-[100px] rounded-full -z-10" />
                         </div>
 
-                        {/* Social Proof */}
-                        <div className="mt-20 flex flex-wrap items-center justify-center gap-12 py-8 px-12 bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/5">
-                            <div className="text-center">
+                        {/* Social Proof — asymmetric, slightly rotated cards */}
+                        <div className="mt-20 flex flex-wrap items-center justify-center gap-12 py-8 px-12 bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/5 skew-1">
+                            <div className="text-center skew-2">
                                 <div className="text-4xl font-black text-violet-400 mb-1">200+</div>
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Logic Blocks</div>
                             </div>
                             <div className="h-10 w-px bg-white/10 hidden md:block" />
-                            <div className="text-center">
+                            <div className="text-center skew-1">
                                 <div className="text-4xl font-black text-emerald-400 mb-1">3D</div>
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Physics engine</div>
                             </div>
                             <div className="h-10 w-px bg-white/10 hidden md:block" />
-                            <div className="text-center">
+                            <div className="text-center skew-3">
                                 <div className="text-4xl font-black text-amber-400 mb-1">50+</div>
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Circuit Parts</div>
                             </div>
                             <div className="h-10 w-px bg-white/10 hidden md:block" />
-                            <div className="text-center">
+                            <div className="text-center skew-2">
                                 <div className="text-4xl font-black text-blue-400 mb-1">Web</div>
                                 <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">Instant Publish</div>
                             </div>
@@ -106,72 +141,78 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Animated background elements */}
                 <div className="absolute top-1/4 -left-32 w-96 h-96 bg-violet-600/20 blur-[120px] rounded-full animate-blob" />
                 <div className="absolute top-1/2 -right-32 w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full animate-blob animation-delay-2000" />
             </section>
 
-            {/* FEATURES SECTION */}
-            <section className="py-32 px-6 bg-slate-900/30">
+            {/* Scroll Arrow */}
+            <div className="flex flex-col items-center -mt-16 mb-8 relative z-10">
+                <div className="w-10 h-10 border-b-2 border-r-2 border-violet-500 scroll-arrow opacity-60" />
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2 fade-pulse">scroll down</span>
+            </div>
+
+            {/* FEATURES SECTION — horizontal scroll */}
+            <section className="py-32 px-6 bg-slate-900/30 overflow-hidden">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-24">
-                        <h2 className="text-5xl font-black mb-6">Three Studios. One Tool.</h2>
-                        <p className="text-xl text-slate-300 max-w-2xl mx-auto">Everything you need to go from an idea to a published game, app, or hardware prototype.</p>
+                        <h2 className="text-5xl font-black mb-6">
+                            <span className="skew-1 inline-block">Three </span>
+                            <span className="font-extralight text-3xl text-slate-400 italic">magical</span>
+                            <span className="skew-2 inline-block"> Studios.</span>
+                        </h2>
+                        <p className="text-xl text-slate-300 max-w-2xl mx-auto drift-right">
+                            Everything you need to go from an <span className="font-black text-violet-400 hand-drawn-underline">idea</span> to a published <span className="font-extralight text-slate-400">game, app,</span> or hardware prototype.
+                        </p>
                     </div>
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Feature 1 */}
-                        <div className="p-10 bg-slate-950 rounded-[3rem] border border-slate-800 hover:border-violet-500/50 transition-all group">
-                            <div className="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-violet-500/20 group-hover:scale-110 transition-transform">
-                                <Trophy size={32} />
+                <div className="horizontal-scroll-section max-w-7xl mx-auto pl-6 pr-6">
+                    {featureCards.map((card, idx) => {
+                        const Icon = card.icon;
+                        const borderHover = card.color === 'violet' ? 'hover:border-violet-500/50' : card.color === 'emerald' ? 'hover:border-emerald-500/50' : 'hover:border-amber-500/50';
+                        const bgIcon = card.color === 'violet' ? 'bg-violet-600 shadow-violet-500/20' : card.color === 'emerald' ? 'bg-emerald-600 shadow-emerald-500/20' : 'bg-amber-600 shadow-amber-500/20';
+                        const underlineClass = card.color === 'violet' ? 'hand-drawn-underline' : card.color === 'emerald' ? 'hand-drawn-underline hand-drawn-underline-green' : 'hand-drawn-underline hand-drawn-underline-amber';
+                        return (
+                            <div
+                                key={idx}
+                                className={`p-10 bg-slate-950 rounded-[3rem] border border-slate-800 ${borderHover} transition-all group scattered-card min-w-[320px] w-[340px]`}
+                                style={{ transform: `rotate(${card.rotate}) translate(${card.offsetX}, ${card.offsetY})` }}
+                            >
+                                <div className={`w-16 h-16 ${bgIcon} rounded-2xl flex items-center justify-center mb-8 shadow-xl group-hover:scale-110 transition-transform`}>
+                                    <Icon size={32} />
+                                </div>
+                                <h3 className={`text-3xl font-black mb-4 ${underlineClass}`}>{card.label}</h3>
+                                <p className="text-slate-300 leading-relaxed">
+                                    {card.desc}
+                                </p>
                             </div>
-                            <h3 className="text-3xl font-black mb-4">3D Game Builder</h3>
-                            <p className="text-slate-300 leading-relaxed">
-                                Build immersive 3D open worlds with real-time physics, AI NPCs, and cinematic cameras. Export your games directly to a web link.
-                            </p>
-                        </div>
-                        {/* Feature 2 */}
-                        <div className="p-10 bg-slate-950 rounded-[3rem] border border-slate-800 hover:border-emerald-500/50 transition-all group">
-                            <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-                                <Rocket size={32} />
-                            </div>
-                            <h3 className="text-3xl font-black mb-4">App Designer</h3>
-                            <p className="text-slate-300 leading-relaxed">
-                                Create real mobile-style apps with multi-screen navigation, buttons, text inputs, and dynamic UI elements. Design the next big thing.
-                            </p>
-                        </div>
-                        {/* Feature 3 */}
-                        <div className="p-10 bg-slate-950 rounded-[3rem] border border-slate-800 hover:border-amber-500/50 transition-all group">
-                            <div className="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-amber-500/20 group-hover:scale-110 transition-transform">
-                                <Zap size={32} />
-                            </div>
-                            <h3 className="text-3xl font-black mb-4">Circuit Lab</h3>
-                            <p className="text-slate-300 leading-relaxed">
-                                Experience a complete electronics workbench. Connect sensors, LEDs, and LCDs on a breadboard and code them with blocks.
-                            </p>
-                        </div>
-                    </div>
+                        );
+                    })}
                 </div>
             </section>
 
-            {/* TESTIMONIALS */}
+            {/* TESTIMONIALS — asymmetric grid */}
             <section className="py-32 px-6">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                        <div>
-                            <h2 className="text-6xl font-black mb-8 leading-tight">Trusted by young <br /> creators worldwide.</h2>
-                            <div className="flex gap-1 mb-8">
+                        <div className="drift-left">
+                            <h2 className="text-6xl font-black mb-8 leading-tight">
+                                Trusted by young <br />
+                                <span className="font-extralight text-4xl text-slate-400 italic">creators</span>{' '}
+                                <span className="hand-drawn-underline skew-1 inline-block">worldwide.</span>
+                            </h2>
+                            <div className="flex gap-1 mb-8 skew-1">
                                 <Star fill="#f59e0b" className="text-amber-500" />
                                 <Star fill="#f59e0b" className="text-amber-500" />
                                 <Star fill="#f59e0b" className="text-amber-500" />
                                 <Star fill="#f59e0b" className="text-amber-500" />
                                 <Star fill="#f59e0b" className="text-amber-500" />
                             </div>
-                            <blockquote className="text-2xl font-medium text-slate-300 italic mb-8">
-                                \"I built a 3D parkour game in less than 10 minutes. I usually use Scratch but this feels like I’m a professional game developer!\"
+                            <blockquote className="text-2xl font-medium text-slate-300 italic mb-8 skew-2">
+                                "I built a 3D parkour game in less than 10 minutes. I usually use Scratch but this feels like I'm a <span className="font-black text-violet-400 not-italic">professional</span> game developer!"
                             </blockquote>
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-violet-600 flex items-center justify-center text-xl">🧑‍💻</div>
+                            <div className="flex items-center gap-4 drift-right">
+                                <div className="w-12 h-12 rounded-full bg-violet-600 flex items-center justify-center text-xl skew-1">🧑‍💻</div>
                                 <div>
                                     <div className="font-bold">Leo, 11</div>
                                     <div className="text-xs text-slate-500">Master Level Explorer</div>
@@ -179,10 +220,10 @@ const LandingPage: React.FC = () => {
                             </div>
                         </div>
                         <div className="grid grid-cols-1 gap-6">
-                            <div className="p-8 bg-slate-900 rounded-3xl border border-slate-800 transform lg:-translate-x-10 translate-y-10">
-                                <p className="text-slate-300 mb-6 font-medium">\"My daughter loves the Circuit Lab. Seeing her understand logic through virtual electronics has been amazing. Highly recommended for any STEM-focused parent.\"</p>
+                            <div className="p-8 bg-slate-900 rounded-3xl border border-slate-800 transform lg:-translate-x-10 translate-y-10 skew-2 scattered-card">
+                                <p className="text-slate-300 mb-6 font-medium">"My daughter loves the <span className="font-black text-emerald-400 hand-drawn-underline hand-drawn-underline-green">Circuit Lab</span>. Seeing her understand logic through virtual electronics has been amazing. Highly recommended for any STEM-focused parent."</p>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm">👩‍🏫</div>
+                                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm skew-3">👩‍🏫</div>
                                     <div className="font-bold text-sm text-slate-300">Sarah, STEM Educator</div>
                                 </div>
                             </div>
@@ -191,17 +232,23 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* CTA FOOTER */}
-            <section className="py-40 px-6 text-center">
+            {/* CTA FOOTER — asymmetric */}
+            <section className="py-40 px-6 text-center relative">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-6xl font-black mb-12">The journey to 1 million users starts with your first block.</h2>
+                    <h2 className="text-6xl font-black mb-12">
+                        <span className="skew-1 inline-block">The journey to</span>{' '}
+                        <span className="text-violet-500 font-extralight text-5xl italic">1 million</span>{' '}
+                        <span className="skew-2 inline-block">users starts with</span>
+                        <br />
+                        <span className="hand-drawn-underline skew-3 inline-block">your first block.</span>
+                    </h2>
                     <button
                         onClick={handleStartBuilding}
-                        className="px-12 py-6 bg-white text-black font-black text-2xl rounded-[2rem] hover:scale-110 active:scale-95 transition-all shadow-2xl flex items-center gap-4 mx-auto"
+                        className="px-12 py-6 bg-white text-black font-black text-2xl rounded-[2rem] hover:scale-110 active:scale-95 transition-all shadow-2xl flex items-center gap-4 mx-auto skew-1"
                     >
                         START CREATING NOW <ArrowRight size={28} />
                     </button>
-                    <p className="mt-8 text-slate-600 font-bold uppercase tracking-widest text-sm">No credit card required · Free forever for students</p>
+                    <p className="mt-8 text-slate-600 font-bold uppercase tracking-widest text-sm drift-left">No credit card required · Free forever for students</p>
                 </div>
             </section>
         </div>

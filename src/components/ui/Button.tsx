@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'icon';
@@ -37,12 +37,35 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   disabled,
   children,
+  onClick,
   ...props
 }) => {
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || loading) return;
+
+    const btn = btnRef.current;
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const size = Math.max(rect.width, rect.height);
+      ripple.className = 'ripple-circle';
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${e.clientX - rect.left}px`;
+      ripple.style.top = `${e.clientY - rect.top}px`;
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+
+    onClick?.(e);
+  }, [disabled, loading, onClick]);
+
   return (
     <button
+      ref={btnRef}
       className={`
-        inline-flex items-center justify-center font-semibold rounded-xl
+        btn-ripple inline-flex items-center justify-center font-semibold rounded-xl
         transition-all duration-150 ease-out
         active:scale-95
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
@@ -53,6 +76,7 @@ export const Button: React.FC<ButtonProps> = ({
         ${className}
       `}
       disabled={disabled || loading}
+      onClick={handleClick}
       {...props}
     >
       {loading ? (

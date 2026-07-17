@@ -6,6 +6,7 @@ import { AVAILABLE_BLOCKS } from '../constants';
 import { useBlockStyling } from '../hooks/useBlockStyling';
 import { useBlockDrag } from '../hooks/useBlockDrag';
 import { useBlockAnimation } from '../hooks/useBlockAnimation';
+import { playSoundEffect } from '../services/soundService';
 
 interface BlockProps {
     block: CommandBlock;
@@ -115,6 +116,19 @@ const Block: React.FC<BlockProps> = ({
         isActive,
     });
 
+    const [isSnapping, setIsSnapping] = useState(false);
+    const prevIndexRef = useRef(index);
+
+    useEffect(() => {
+        if (prevIndexRef.current !== index) {
+            setIsSnapping(true);
+            playSoundEffect('click', 0);
+            const timer = setTimeout(() => setIsSnapping(false), 250);
+            prevIndexRef.current = index;
+            return () => clearTimeout(timer);
+        }
+    }, [index]);
+
     const { handleDragStart, handleTouchStart } = useBlockDrag({
         onDragStart,
         isDraggable,
@@ -146,6 +160,7 @@ const Block: React.FC<BlockProps> = ({
                 bg-yellow-200 border-b-4 border-r-4 border-yellow-300
                 shadow-sm rotate-1 hover:rotate-0 hover:scale-[1.01] hover:shadow-md
                 ${isDeleting ? 'animate-delete-flash' : ''}
+                ${isSnapping ? 'animate-snap-bounce animate-glow-pulse' : ''}
                 ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
             `}
                 draggable={isDraggable}
@@ -205,8 +220,9 @@ const Block: React.FC<BlockProps> = ({
             ${borderColor} ${bgColor} ${activeStyle}
             ${isDeleting ? 'animate-delete-flash' : ''}
             ${isFlashing ? 'ring-2 ring-emerald-400 border-emerald-400 animate-pulse' : ''}
+            ${isSnapping ? 'animate-snap-bounce animate-glow-pulse' : ''}
             ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
-            ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01]' : ''}
+            ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01] animate-drop-zone-glow' : ''}
         `}
                 draggable={isDraggable}
                 onDragStart={handleDragStart}

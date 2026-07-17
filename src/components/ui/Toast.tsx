@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -22,34 +23,13 @@ export const useToast = () => {
   return ctx;
 };
 
-const CONFETTI_COLORS = ['#f472b6', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#fb923c', '#f87171'];
-
-const spawnConfetti = () => {
-  const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;';
-  document.body.appendChild(container);
-
-  for (let i = 0; i < 30; i++) {
-    const piece = document.createElement('div');
-    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-    const left = Math.random() * 100;
-    const delay = Math.random() * 0.5;
-    const size = 6 + Math.random() * 8;
-    const rotation = Math.random() * 360;
-
-    piece.className = 'confetti-piece';
-    piece.style.cssText = `
-      left: ${left}%;
-      background: ${color};
-      width: ${size}px;
-      height: ${size}px;
-      animation-delay: ${delay}s;
-      transform: rotate(${rotation}deg);
-    `;
-    container.appendChild(piece);
-  }
-
-  setTimeout(() => container.remove(), 2500);
+const triggerConfetti = () => {
+  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+  confetti({ ...defaults, particleCount: 40, origin: { x: 0.3, y: 0.6 } });
+  confetti({ ...defaults, particleCount: 40, origin: { x: 0.7, y: 0.6 } });
+  setTimeout(() => {
+    confetti({ ...defaults, particleCount: 30, origin: { x: 0.5, y: 0.5 } });
+  }, 150);
 };
 
 const icons: Record<ToastType, React.ReactNode> = {
@@ -76,7 +56,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts((prev) => [...prev, { id, type, message, isClosing: false }]);
 
     if (type === 'success') {
-      spawnConfetti();
+      triggerConfetti();
     }
 
     setTimeout(() => {
@@ -108,7 +88,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               border ${bgStyles[t.type]}
               rounded-xl shadow-lg
               max-w-sm backdrop-blur-sm
-              ${t.isClosing ? 'toast-slide-out' : 'toast-slide-in'}
+              ${t.isClosing ? 'toast-slide-out' : 'animate-slide-up-bounce'}
             `}
           >
             <div className="shrink-0">{icons[t.type]}</div>

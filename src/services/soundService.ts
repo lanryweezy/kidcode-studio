@@ -8,7 +8,7 @@ const getContext = () => {
   return audioCtx;
 };
 
-export type SoundEffectType = 'move' | 'turn' | 'ui' | 'click' | 'coin' | 'camera' | 'powerup' | 'laser' | 'explosion' | 'hurt' | 'jump' | 'dash' | 'attack' | 'hit' | 'swish' | 'death' | 'victory' | 'wind' | 'gameOver' | 'notification' | 'achievement' | 'coinCollect' | 'levelComplete' | 'menuSelect' | 'menuBack' | 'typing' | 'bossIntro' | 'healing' | 'damageTaken' | 'shieldBlock' | 'thunder' | 'kick' | 'shoot' | 'pass' | 'whistle' | 'punch' | 'splash' | 'crack' | 'magicSpell' | 'swordSlash' | 'arrowShoot' | 'explosionSmall' | 'explosionLarge';
+export type SoundEffectType = 'move' | 'turn' | 'ui' | 'click' | 'coin' | 'camera' | 'powerup' | 'laser' | 'explosion' | 'hurt' | 'jump' | 'dash' | 'attack' | 'hit' | 'swish' | 'death' | 'victory' | 'wind' | 'gameOver' | 'notification' | 'achievement' | 'coinCollect' | 'levelComplete' | 'menuSelect' | 'menuBack' | 'typing' | 'bossIntro' | 'healing' | 'damageTaken' | 'shieldBlock' | 'thunder' | 'kick' | 'shoot' | 'pass' | 'whistle' | 'punch' | 'splash' | 'crack' | 'magicSpell' | 'swordSlash' | 'arrowShoot' | 'explosionSmall' | 'explosionLarge' | 'snap' | 'success' | 'error' | 'drop';
 
 /** Plays a procedural sound effect using the Web Audio API.
  * @param type - The sound effect to play.
@@ -162,6 +162,47 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.start(now);
         osc.stop(now + 0.15);
+        break;
+
+      case 'snap':
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+        break;
+
+      case 'success':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523, now);
+        osc.frequency.setValueAtTime(659, now + 0.1);
+        osc.frequency.setValueAtTime(784, now + 0.2);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+        break;
+
+      case 'error':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.setValueAtTime(150, now + 0.1);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+        break;
+
+      case 'drop':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
         break;
     }
   } catch (e) {

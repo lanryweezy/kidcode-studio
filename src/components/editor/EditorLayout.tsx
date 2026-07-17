@@ -27,6 +27,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const [mobileView, setMobileView] = useState<'blocks' | 'preview'>('blocks');
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
+    const trailContainerRef = useRef<HTMLDivElement>(null);
 
     const handleShareClick = useCallback(() => {
         if (isCollaborating) {
@@ -63,6 +64,16 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
 
     const openMobileDrawer = useCallback(() => setIsMobileDrawerOpen(true), []);
     const closeMobileDrawer = useCallback(() => setIsMobileDrawerOpen(false), []);
+
+    const handleDragTrail = useCallback((e: React.DragEvent) => {
+        if (!draggedBlockId || !trailContainerRef.current) return;
+        const trail = document.createElement('div');
+        trail.className = 'drag-trail';
+        trail.style.left = `${e.clientX}px`;
+        trail.style.top = `${e.clientY}px`;
+        document.body.appendChild(trail);
+        setTimeout(() => trail.remove(), 400);
+    }, [draggedBlockId]);
     const {
         isMobile, viewVisible,
         isPlaying, debugMode, setDebugMode, isPaused, runCode, stopCode, resumeCode, restartCode, activeBlockId,
@@ -127,7 +138,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 <div
                     key={`workspace-${mode}`}
                     id="block-workspace"
-                    className={`flex-1 bg-slate-100 relative flex flex-col min-h-0 animate-in fade-in zoom-in-95 duration-300 ${
+                    className={`flex-1 bg-slate-100 relative flex flex-col min-h-0 animate-in fade-in zoom-in-95 duration-300 sculpted ${
                         mobileView === 'preview' && isMobile ? 'hidden md:flex' : 'flex'
                     }`}
                     onTouchStart={handleTouchStart}
@@ -188,7 +199,8 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         <button onClick={() => setWorkspaceZoom(1)} className="bg-white text-slate-500 hover:text-slate-700 shadow-sm px-2.5 py-1.5 rounded-lg font-bold text-xs active:scale-95 transition-colors border border-slate-200">{(workspaceZoom * 100).toFixed(0)}%</button>
                         <button onClick={() => setWorkspaceZoom(Math.min(2, workspaceZoom + 0.1))} className="bg-white text-slate-500 hover:text-slate-700 shadow-sm p-1.5 rounded-lg text-sm font-bold active:scale-95 transition-colors border border-slate-200" aria-label="Zoom In">+</button>
                     </div>
-                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar relative overflow-y-auto overflow-x-hidden transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={handleWorkspaceDragOver} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
+                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar relative overflow-y-auto overflow-x-hidden transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={(e) => { handleWorkspaceDragOver(e); handleDragTrail(e); }} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
+                        <div ref={trailContainerRef} className="pointer-events-none" />
                         <div style={{ transform: `scale(${workspaceZoom})`, transformOrigin: 'top left', minHeight: '100%' }} className="space-y-1">
                             {commands.length === 0 && (
                                 <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-400 opacity-60 pointer-events-none animate-in zoom-in duration-500">
@@ -235,7 +247,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
 
                 <div
                     key={`stage-${mode}`}
-                    className={`bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col relative z-20 shrink-0 min-h-0 animate-in fade-in slide-in-from-right-4 duration-500 ${
+                    className={`bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col relative z-20 shrink-0 min-h-0 animate-in fade-in slide-in-from-right-4 duration-500 sculpted ${
                         mobileView === 'blocks' && isMobile ? 'hidden md:flex' : 'flex'
                     }`}
                     style={{ width: isMobile ? '100%' : rightPanelWidth }}
@@ -294,7 +306,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
 
             {showConsole && (
                 <ErrorBoundary>
-                    <div className="h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 shrink-0">
+                    <div className="h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 shrink-0 sculpted-inset">
                         <div className="flex justify-between items-center mb-1 text-slate-500 text-[10px] uppercase font-bold sticky top-0 bg-slate-900">
                             <span>Console Output</span>
                             <button onClick={clearLogs} className="hover:text-white" aria-label="Clear console logs">Clear</button>

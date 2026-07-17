@@ -24,6 +24,15 @@ import { SkeletonCard } from './ui/Skeleton';
 import { STORAGE_KEYS } from '../constants/actions';
 import { getStudios, Studio } from '../services/studioService';
 
+const SCATTERED_ROTATIONS = [-2, 1.5, -0.8, 2, -1.2];
+const SCATTERED_OFFSETS = [
+    { x: -6, y: 4 },
+    { x: 8, y: -3 },
+    { x: -3, y: 7 },
+    { x: 5, y: -5 },
+    { x: -8, y: 2 },
+];
+
 const HomeScreen: React.FC = () => {
     const {
         userProfile,
@@ -104,7 +113,11 @@ const HomeScreen: React.FC = () => {
     }, [deleteTarget, recentProjects]);
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors font-sans pb-20">
+        <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors font-sans pb-20 relative">
+            <div className="absolute top-20 right-[5%] text-4xl bob-float opacity-15 select-none pointer-events-none" aria-hidden="true">🎮</div>
+            <div className="absolute top-[40%] left-[3%] text-3xl bob-float bob-float-delay-1 opacity-10 select-none pointer-events-none rotate-12" aria-hidden="true">⚡</div>
+            <div className="absolute bottom-[20%] right-[8%] text-3xl bob-float bob-float-delay-2 opacity-10 select-none pointer-events-none -rotate-6" aria-hidden="true">🚀</div>
+            <div className="absolute top-[60%] left-[8%] text-2xl bob-float bob-float-delay-3 opacity-10 select-none pointer-events-none" aria-hidden="true">✨</div>
             <div className="flex items-center justify-between p-6 max-w-7xl mx-auto w-full">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg animate-float">
@@ -143,43 +156,46 @@ const HomeScreen: React.FC = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8">
-                {/* Returning User Welcome */}
-                {isReturningUser && (
-                    <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 animate-in fade-in slide-in-from-top-2 duration-500">
-                        <p className="text-sm font-bold text-violet-700">
-                            Welcome back, {userProfile?.name || 'Explorer'}! 👋 Ready to keep building?
-                        </p>
-                    </div>
-                )}
+                <div className="volume-hero -mx-6 -mt-8 px-6 py-10 mb-8 rounded-b-3xl">
+                    {isReturningUser && (
+                        <div className="mb-6 p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-violet-200 animate-in fade-in slide-in-from-top-2 duration-500">
+                            <p className="text-sm font-bold text-violet-700">
+                                Welcome back, {userProfile?.name || 'Explorer'}! Ready to keep building?
+                            </p>
+                        </div>
+                    )}
 
-                <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-                    <h2 className="text-4xl font-black animate-in slide-in-from-left-10 fade-in duration-500">What do you want to build?</h2>
-                    <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-none">324 Kids Building Live</span>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <h2 className="text-4xl font-black animate-in slide-in-from-left-10 fade-in duration-500">
+                            What do you want to <span className="font-extralight text-3xl italic text-slate-400">build</span><span className="text-violet-500 skew-2 inline-block">?</span>
+                        </h2>
+                        <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2 skew-1">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-none">324 Kids Building Live</span>
+                        </div>
                     </div>
                 </div>
 
                 {/* Social Proof Stats Bar */}
-                <div className="flex flex-wrap items-center justify-center gap-6 mb-10 py-4 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                <div className="flex flex-wrap items-center justify-center gap-6 mb-10 py-4 px-6 bg-white rounded-2xl border border-slate-200 sculpted-inset animate-in fade-in slide-in-from-bottom-4 duration-700 skew-1 overflow-accent">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 skew-1">
                         <span className="text-2xl">🧑‍💻</span>
                         <span><span className="text-violet-600 text-lg">200+</span> Blocks</span>
                     </div>
                     <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 skew-2">
                         <span className="text-2xl">🎮</span>
                         <span><span className="text-emerald-600 text-lg">3D</span> Game Engine</span>
                     </div>
                     <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 skew-3">
                         <span className="text-2xl">⚡</span>
                         <span><span className="text-amber-600 text-lg">50+</span> Circuit Parts</span>
                     </div>
                     <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-600 skew-1">
                         <span className="text-2xl">📱</span>
-                        <span>Publish to <span className="text-blue-600 text-lg">Web</span></span>
+                        <span>Publish to <span className="text-blue-600 text-lg hand-drawn-underline">Web</span></span>
                     </div>
                 </div>
 
@@ -187,8 +203,8 @@ const HomeScreen: React.FC = () => {
                 {!onboardingDismissed && !isReturningUser && (
                     <div className="mb-8 p-6 rounded-2xl bg-white border border-violet-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                <Sparkles size={18} className="text-violet-500" /> Getting Started
+                            <h3 className="font-bold text-slate-800 flex items-center gap-2 skew-1">
+                                <Sparkles size={18} className="text-violet-500" /> <span className="font-extralight italic">Getting</span> Started
                             </h3>
                             <button onClick={handleDismissOnboarding} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
                                 <X size={16} />
@@ -210,29 +226,35 @@ const HomeScreen: React.FC = () => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12" style={{ gap: '1.5rem' }}>
                     {Object.values(AppMode).map((m, i) => {
                         const config = MODE_CONFIG[m];
                         const Icon = config.icon;
+                        const rot = SCATTERED_ROTATIONS[i % SCATTERED_ROTATIONS.length];
+                        const offset = SCATTERED_OFFSETS[i % SCATTERED_OFFSETS.length];
+                        const sizeVar = i % 3 === 0 ? 'min-h-[280px]' : i % 3 === 1 ? 'min-h-[260px]' : 'min-h-[300px]';
                         return (
                             <button
                                 key={m}
-                                style={{ animationDelay: `${i * 100}ms` }}
+                                style={{
+                                    animationDelay: `${i * 100}ms`,
+                                    transform: `rotate(${rot}deg) translate(${offset.x}px, ${offset.y}px)`,
+                                }}
                                 onClick={() => {
                                     const newProj = createNewProject(m);
                                     setProject(newProj);
                                 }}
-                                className={`relative group min-h-64 rounded-3xl p-8 flex flex-col justify-between overflow-hidden transition-all hover:scale-[1.05] hover:rotate-1 hover:shadow-2xl text-white ${config.color} touch-feedback`}
+                                className={`relative group ${sizeVar} rounded-3xl p-8 flex flex-col justify-between overflow-hidden transition-all hover:scale-[1.05] hover:shadow-2xl text-white ${config.color} touch-feedback scattered-card`}
                             >
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-125 duration-500">
                                     <Icon size={120} />
                                 </div>
-                                <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-inner animate-float">
+                                <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-inner animate-float skew-2">
                                     <Icon size={32} />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-black mb-2">{config.label}</h3>
-                                    <p className="opacity-90 font-medium">{m === AppMode.APP ? 'Design real mobile apps with buttons, inputs & screens.' : m === AppMode.GAME ? 'Build 2D platformers & 3D open-world adventures.' : m === AppMode.HARDWARE ? 'Simulate Arduino circuits with 50+ parts.' : 'Create Minecraft mods and datapacks with blocks!'}</p>
+                                    <h3 className="text-2xl font-black mb-2 skew-1">{config.label}</h3>
+                                    <p className="opacity-90 font-medium text-sm leading-relaxed">{m === AppMode.APP ? 'Design real mobile apps with buttons, inputs & screens.' : m === AppMode.GAME ? 'Build 2D platformers & 3D open-world adventures.' : m === AppMode.HARDWARE ? 'Simulate Arduino circuits with 50+ parts.' : 'Create Minecraft mods and datapacks with blocks!'}</p>
                                 </div>
                                 <div className="absolute bottom-6 right-6 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 group-hover:rotate-90 duration-300">
                                     <Plus size={24} />
@@ -243,7 +265,7 @@ const HomeScreen: React.FC = () => {
                 </div>
 
                 <div className="mb-12">
-                    <h3 className="text-xl font-bold flex items-center gap-2 mb-4"><Sparkles size={20} className="text-yellow-500" /> Instant Starters</h3>
+                    <h3 className="text-xl font-bold flex items-center gap-2 mb-4 skew-1"><Sparkles size={20} className="text-yellow-500" /> Instant <span className="font-extralight italic text-slate-400">Starters</span></h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {EXAMPLE_TEMPLATES.map((tpl) => (
                             <button
@@ -261,7 +283,7 @@ const HomeScreen: React.FC = () => {
                                         setProject(newProj);
                                     }, 400);
                                 }}
-                                className="bg-white border border-slate-200 p-4 rounded-2xl hover:border-violet-400 hover:shadow-lg transition-all text-left group"
+                                className="bg-white border border-slate-200 p-4 rounded-2xl sculpted depth-hover text-left group"
                             >
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white mb-3 shadow-md ${tpl.color} ${loadingTemplate === tpl.id ? 'animate-pulse' : ''}`}>
                                     {loadingTemplate === tpl.id ? <Zap size={24} className="animate-spin" /> : React.createElement(tpl.icon, { size: 24 })}
@@ -277,7 +299,7 @@ const HomeScreen: React.FC = () => {
                 <div className="mb-12">
                     <button
                         onClick={() => setShowGallery(true)}
-                        className="w-full p-8 rounded-[2.5rem] bg-gradient-to-r from-violet-600 to-blue-600 text-white flex items-center justify-between group overflow-hidden relative shadow-xl hover:scale-[1.01] transition-transform"
+                        className="w-full p-8 rounded-[2.5rem] bg-gradient-to-r from-violet-600 to-blue-600 text-white flex items-center justify-between group overflow-hidden relative shadow-xl hover:scale-[1.01] transition-transform skew-1 scattered-card"
                     >
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-125 duration-500">
                             <Users size={160} />
@@ -287,8 +309,8 @@ const HomeScreen: React.FC = () => {
                                 <Users size={40} />
                             </div>
                             <div className="text-left">
-                                <h3 className="text-3xl font-black mb-1">Community Gallery</h3>
-                                <p className="text-lg opacity-90 font-medium">See what other kids are building and remix their code!</p>
+                                <h3 className="text-3xl font-black mb-1 skew-2">Community <span className="font-extralight italic text-xl text-white/70">Gallery</span></h3>
+                                <p className="text-lg opacity-90 font-medium drift-left">See what other kids are building and <span className="font-black hand-drawn-underline">remix</span> their code!</p>
                             </div>
                         </div>
                         <div className="bg-white text-violet-600 px-6 py-3 rounded-2xl font-black shadow-lg group-hover:bg-violet-50 transition-colors flex items-center gap-2">
@@ -300,7 +322,7 @@ const HomeScreen: React.FC = () => {
                 {/* Studios Section */}
                 <div className="mb-12">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold flex items-center gap-2"><FolderPlus size={20} className="text-violet-500" /> My Studios</h3>
+                        <h3 className="text-xl font-bold flex items-center gap-2 skew-2"><FolderPlus size={20} className="text-violet-500" /> My <span className="font-extralight italic text-slate-400">Studios</span></h3>
                         <button
                             onClick={() => setShowStudioManager(true)}
                             className="text-sm font-bold text-violet-500 hover:text-violet-600"
@@ -323,7 +345,7 @@ const HomeScreen: React.FC = () => {
                                 <button
                                     key={studio.id}
                                     onClick={() => setShowStudioDetail(studio.id)}
-                                    className="min-w-[200px] max-w-[220px] bg-white border border-slate-200 p-4 rounded-2xl hover:shadow-lg hover:border-violet-300 transition-all text-left shrink-0 group"
+                                    className="min-w-[200px] max-w-[220px] bg-white border border-slate-200 p-4 rounded-2xl hover:shadow-xl hover:border-violet-300 transition-all duration-300 text-left shrink-0 group card-hover-tilt"
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center mb-3 group-hover:from-violet-200 group-hover:to-indigo-200 transition-colors">
                                         <FolderPlus size={22} className="text-violet-500" />
@@ -344,7 +366,7 @@ const HomeScreen: React.FC = () => {
                 </div>
 
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold flex items-center gap-2"><FileCode size={20} /> Recent Projects</h3>
+                    <h3 className="text-xl font-bold flex items-center gap-2 skew-1"><FileCode size={20} /> Recent <span className="font-extralight italic text-slate-400">Projects</span></h3>
                     <button className="text-sm font-bold text-violet-500 hover:text-violet-600">View All</button>
                 </div>
 
@@ -355,7 +377,7 @@ const HomeScreen: React.FC = () => {
                         ))}
                     </div>
                 ) : recentProjects.length === 0 ? (
-                    <div className="text-center py-16 bg-white rounded-3xl border-2 border-dashed border-slate-200 relative overflow-hidden">
+                    <div className="text-center py-16 bg-white rounded-3xl border-2 border-dashed border-slate-200 relative overflow-hidden sculpted-inset">
                         <div className="absolute inset-0 opacity-5">
                             <div className="absolute top-4 left-8 text-6xl rotate-12">🎮</div>
                             <div className="absolute top-8 right-12 text-5xl -rotate-6">⚡</div>
@@ -386,10 +408,10 @@ const HomeScreen: React.FC = () => {
                         {recentProjects.map(proj => (
                             <div
                                 key={proj.id}
-                                className="bg-white border border-slate-200 rounded-2xl hover:shadow-md transition-all text-left relative group overflow-hidden"
+                                className="bg-white border border-slate-200 rounded-2xl hover:shadow-xl transition-all duration-300 text-left relative group overflow-hidden card-hover-tilt hover:border-violet-300"
                             >
                                 <div
-                                    className="relative h-32 bg-cover bg-center flex items-end"
+                                    className="relative h-32 bg-cover bg-center flex items-end card-image"
                                     style={{
                                         backgroundImage: proj.thumbnail
                                             ? `url(${proj.thumbnail})`
@@ -443,7 +465,7 @@ const HomeScreen: React.FC = () => {
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 max-w-sm w-full animate-scale-in">
+                    <div className="relative bg-white rounded-2xl sculpted-lg border border-slate-200 p-6 max-w-sm w-full animate-modal-open">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2.5 rounded-xl bg-red-100 text-red-600">
                                 <Trash2 size={20} />

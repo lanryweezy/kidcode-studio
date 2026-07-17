@@ -10,11 +10,11 @@ interface SkeletonProps {
 
 export const Skeleton: React.FC<SkeletonProps> = ({ className = '', width, height, rounded = 'rounded-lg', lines = 1 }) => {
   return (
-    <div className={`animate-pulse ${className}`}>
+    <div className={`skeleton-shimmer ${className}`}>
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}
-          className={`bg-slate-200 ${rounded} mb-2`}
+          className={`bg-slate-200/50 ${rounded} mb-2`}
           style={{ width: width || '100%', height: height || '16px' }}
         />
       ))}

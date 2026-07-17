@@ -40,10 +40,16 @@ export const MonitorOverlays: React.FC<MonitorOverlaysProps> = ({ hardwareState,
             )}
 
             {hardwareState.isShortCircuit && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-50 bg-red-900/40 backdrop-blur-sm transition-all">
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 bg-slate-400 rounded-full blur-2xl opacity-60 animate-ping"></div>
+                        <div className="absolute inset-0 bg-slate-300 rounded-full blur-xl opacity-80 animate-pulse delay-75"></div>
+                        <div className="absolute inset-0 bg-slate-500 rounded-full blur-lg opacity-90 animate-bounce delay-150"></div>
+                        <div className="relative text-[60px]">💨</div>
+                    </div>
                     <div className="animate-bounce bg-red-600 text-white font-black text-2xl px-8 py-4 rounded-xl shadow-[0_0_50px_rgba(220,38,38,0.8)] border-4 border-red-300">
                         ⚡ SHORT CIRCUIT ⚡
-                        <div className="text-sm text-center mt-2 font-normal text-red-200">System Halted.</div>
+                        <div className="text-sm text-center mt-2 font-normal text-red-200">Oh no! A puff of smoke! System Halted.</div>
                     </div>
                 </div>
             )}

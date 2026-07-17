@@ -784,6 +784,74 @@ const Block: React.FC<BlockProps> = ({
                             )}
                         </>
                     )}
+
+                    {(block.type === CommandType.READ_I2C || block.type === CommandType.WRITE_I2C) && (
+                        <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1 bg-white border border-cyan-200 rounded px-2 py-1">
+                                <span className="text-xs text-cyan-600 font-bold">ADDR</span>
+                                <DebouncedInput
+                                    value={block.params.address}
+                                    onChange={(val) => handleParamChange('address', val)}
+                                    className="w-16 bg-transparent outline-none font-mono text-sm text-cyan-800 font-bold"
+                                    placeholder="0x68"
+                                />
+                            </div>
+                            {block.type === CommandType.WRITE_I2C ? (
+                                <div className="flex items-center gap-1 bg-white border border-cyan-200 rounded px-2 py-1">
+                                    <span className="text-xs text-cyan-600 font-bold">VAL</span>
+                                    <DebouncedInput
+                                        type="number"
+                                        value={block.params.value}
+                                        onChange={(val) => handleParamChange('value', val)}
+                                        className="w-16 bg-transparent outline-none font-mono text-sm text-cyan-800 font-bold"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1 bg-white border border-cyan-200 rounded px-2 py-1">
+                                    <span className="text-xs text-cyan-600 font-bold">SAVE TO</span>
+                                    <DebouncedInput
+                                        value={block.params.varName}
+                                        onChange={(val) => handleParamChange('varName', val)}
+                                        className="w-16 bg-transparent outline-none font-mono text-sm text-cyan-800 font-bold"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {(block.type === CommandType.READ_SPI || block.type === CommandType.WRITE_SPI) && (
+                        <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1 bg-white border border-blue-200 rounded px-2 py-1">
+                                <span className="text-xs text-blue-600 font-bold">CS PIN</span>
+                                <DebouncedInput
+                                    type="number"
+                                    value={block.params.pin}
+                                    onChange={(val) => handleParamChange('pin', val)}
+                                    className="w-12 bg-transparent outline-none font-mono text-sm text-blue-800 font-bold"
+                                />
+                            </div>
+                            {block.type === CommandType.WRITE_SPI ? (
+                                <div className="flex items-center gap-1 bg-white border border-blue-200 rounded px-2 py-1">
+                                    <span className="text-xs text-blue-600 font-bold">VAL</span>
+                                    <DebouncedInput
+                                        type="number"
+                                        value={block.params.value}
+                                        onChange={(val) => handleParamChange('value', val)}
+                                        className="w-16 bg-transparent outline-none font-mono text-sm text-blue-800 font-bold"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1 bg-white border border-blue-200 rounded px-2 py-1">
+                                    <span className="text-xs text-blue-600 font-bold">SAVE TO</span>
+                                    <DebouncedInput
+                                        value={block.params.varName}
+                                        onChange={(val) => handleParamChange('varName', val)}
+                                        className="w-16 bg-transparent outline-none font-mono text-sm text-blue-800 font-bold"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">

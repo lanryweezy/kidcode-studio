@@ -307,14 +307,25 @@ const Sidebar: React.FC<any> = ({
                                             <div className="overflow-hidden">
                                                 <div className="space-y-2 py-1">
                                                     {filtered.map((comp: any, idx: number) => (
-                                                        <div key={comp.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className={`flex items-center gap-3 p-2 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
-                                                             style={{ animationDelay: `${idx * 30}ms` }}
-                                                        >
-                                                             <ComponentThumbnail type={comp.type} />
-                                                             <div className="flex flex-col min-w-0">
-                                                                 <span className="font-bold text-sm text-slate-700">{comp.label}</span>
-                                                                 <span className="text-[10px] text-slate-400 leading-snug line-clamp-2">{comp.description}</span>
+                                                        <div key={comp.type} className="relative group">
+                                                            <div draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className={`flex items-center gap-3 p-2 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
+                                                                style={{ animationDelay: `${idx * 30}ms` }}
+                                                            >
+                                                                <ComponentThumbnail type={comp.type} />
+                                                                <div className="flex flex-col min-w-0 flex-1">
+                                                                    <span className="font-bold text-sm text-slate-700">{comp.label}</span>
+                                                                    <span className="text-[10px] text-slate-400 leading-snug line-clamp-2">{comp.description}</span>
+                                                                </div>
                                                             </div>
+                                                            <button
+                                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-slate-100 hover:bg-violet-100 text-slate-400 hover:text-violet-600 rounded-lg opacity-0 group-hover:opacity-100 transition-all active:scale-95"
+                                                                title="View Data Sheet"
+                                                                onClick={() => {
+                                                                    alert(`DATA SHEET: ${comp.label}\n\nType: ${comp.type}\nCategory: ${comp.category}\n\nDescription:\n${comp.description}\n\nOperating Voltage: 3.3V - 5V\nDefault Pin: ${comp.defaultPin}\n\n(Kid-friendly data sheets simulate real electronic component specifications to help learn safe wiring!)`);
+                                                                }}
+                                                            >
+                                                                <FileCode size={14} />
+                                                            </button>
                                                         </div>
                                                     ))}
                                                 </div>

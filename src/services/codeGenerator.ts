@@ -261,6 +261,27 @@ export const generateCode = (
         code += `${i}  http.end();\n`;
         code += `${i}}\n`;
         break;
+      case CommandType.READ_I2C:
+        code += `${i}Wire.requestFrom(${cmd.params.address}, 1);\n`;
+        code += `${i}if (Wire.available()) {\n`;
+        code += `${i}  ${cmd.params.varName} = Wire.read();\n`;
+        code += `${i}}\n`;
+        break;
+      case CommandType.WRITE_I2C:
+        code += `${i}Wire.beginTransmission(${cmd.params.address});\n`;
+        code += `${i}Wire.write(${cmd.params.value});\n`;
+        code += `${i}Wire.endTransmission();\n`;
+        break;
+      case CommandType.READ_SPI:
+        code += `${i}digitalWrite(${cmd.params.pin}, LOW);\n`;
+        code += `${i}${cmd.params.varName} = SPI.transfer(0x00);\n`;
+        code += `${i}digitalWrite(${cmd.params.pin}, HIGH);\n`;
+        break;
+      case CommandType.WRITE_SPI:
+        code += `${i}digitalWrite(${cmd.params.pin}, LOW);\n`;
+        code += `${i}SPI.transfer(${cmd.params.value});\n`;
+        code += `${i}digitalWrite(${cmd.params.pin}, HIGH);\n`;
+        break;
 
       // --- DATA & MATH ---
       case CommandType.SET_VAR:

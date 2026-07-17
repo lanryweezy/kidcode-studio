@@ -62,10 +62,6 @@ export default {
       boxShadow: {
         'glass': '0 8px 32px rgba(0, 0, 0, 0.08)',
         'glass-lg': '0 16px 48px rgba(0, 0, 0, 0.12)',
-        'glow': '0 0 20px rgba(124, 58, 237, 0.3)',
-        'glow-sm': '0 0 10px rgba(124, 58, 237, 0.2)',
-        '3d': '0 4px 0 rgba(0, 0, 0, 0.2)',
-        '3d-sm': '0 2px 0 rgba(0, 0, 0, 0.15)',
       },
       animation: {
         'bounce-sm': 'bounceSmall 2s infinite ease-in-out',

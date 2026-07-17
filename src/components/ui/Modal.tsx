@@ -104,7 +104,7 @@ export const Modal: React.FC<ModalProps> = ({
         className={`
           relative w-full ${sizeStyles[size]}
           bg-white
-          rounded-2xl shadow-glass-lg
+          rounded-2xl shadow-md
           border border-slate-200
           animate-scale-in
           outline-none
@@ -113,24 +113,24 @@ export const Modal: React.FC<ModalProps> = ({
         `}
       >
         {title && (
-          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200">
             <h2 className="text-xl font-bold text-slate-900">{title}</h2>
             <button
               onClick={onClose}
-              className="p-2.5 rounded-xl text-slate-500 hover:text-white hover:bg-red-500 transition-all shadow-md hover:shadow-lg hover:scale-110 active:scale-95"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all active:scale-95"
               aria-label="Close dialog"
             >
-              <X size={20} strokeWidth={2.5} />
+              <X size={18} strokeWidth={2} />
             </button>
           </div>
         )}
         {!title && (
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 p-2.5 rounded-xl text-slate-500 hover:text-white hover:bg-red-500 transition-all shadow-md hover:shadow-lg hover:scale-110 active:scale-95 z-10"
+            className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all active:scale-95 z-10"
             aria-label="Close dialog"
           >
-            <X size={20} strokeWidth={2.5} />
+            <X size={18} strokeWidth={2} />
           </button>
         )}
         <div className="overflow-y-auto max-h-[80vh] p-6">

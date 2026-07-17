@@ -106,12 +106,11 @@ const Sidebar: React.FC<any> = ({
                 onShowStats={() => setShowStats(true)}
             />
 
-            {/* Mission Progress Tracker */}
             {activeMission && (
-                <div className="p-4 border-b border-slate-200">
+                <div className="p-3 border-b border-slate-200">
                     <MissionProgress
                         mission={activeMission}
-                        progress={50} // Placeholder - would be calculated from actual progress
+                        progress={50}
                         tasks={[
                             { description: 'Add 5 blocks', completed: true },
                             { description: 'Run your code', completed: false },
@@ -124,7 +123,7 @@ const Sidebar: React.FC<any> = ({
 
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center text-white text-xs z-10 hover:bg-violet-600 transition-colors shadow-md"
+                className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center text-white text-xs z-10 hover:bg-violet-600 transition-colors shadow-sm"
                 aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
                 {isCollapsed ? '›' : '‹'}
@@ -151,51 +150,49 @@ const Sidebar: React.FC<any> = ({
                 {activeTab === 'export' && (
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50 min-h-0 tab-fade-in">
                         <div className="flex items-center gap-2 mb-6">
-                            <div className="w-8 h-8 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center">
-                                <Code2 size={18} />
+                            <div className="w-7 h-7 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center">
+                                <Code2 size={16} />
                             </div>
-                            <h3 className="font-black text-slate-800 uppercase tracking-tight">Code Export</h3>
+                            <h3 className="font-bold text-slate-800 text-sm">Code Export</h3>
                         </div>
 
                         <div className="space-y-6">
-                            {/* Python Block */}
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                    <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                                         <FileCode size={12} className="text-blue-500" /> Python
                                     </span>
                                     <button
                                         onClick={() => { navigator.clipboard.writeText(pythonCode); toast('success', 'Python code copied!'); }}
-                                        className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200 shadow-sm"
+                                        className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200"
                                     >
                                         COPY
                                     </button>
                                 </div>
-                                <pre className="p-4 bg-slate-950 text-emerald-400 rounded-2xl text-xs font-mono overflow-x-auto border border-slate-800 shadow-xl leading-relaxed">
+                                <pre className="p-4 bg-slate-950 text-emerald-400 rounded-xl text-xs font-mono overflow-x-auto border border-slate-800 leading-relaxed">
                                     {pythonCode}
                                 </pre>
                             </div>
 
-                            {/* JavaScript Block */}
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                    <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                                         <FileCode size={12} className="text-yellow-500" /> JavaScript
                                     </span>
                                     <button
                                         onClick={() => { navigator.clipboard.writeText(jsCode); toast('success', 'JavaScript code copied!'); }}
-                                        className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200 shadow-sm"
+                                        className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200"
                                     >
                                         COPY
                                     </button>
                                 </div>
-                                <pre className="p-4 bg-slate-950 text-blue-400 rounded-2xl text-xs font-mono overflow-x-auto border border-slate-800 shadow-xl leading-relaxed">
+                                <pre className="p-4 bg-slate-950 text-blue-400 rounded-xl text-xs font-mono overflow-x-auto border border-slate-800 leading-relaxed">
                                     {jsCode}
                                 </pre>
                             </div>
                         </div>
 
-                        <div className="mt-8 p-4 bg-violet-50 rounded-2xl border border-violet-100">
+                        <div className="mt-8 p-4 bg-violet-50 rounded-xl border border-violet-100">
                             <p className="text-xs text-violet-600 font-bold mb-1 italic">Pro Tip!</p>
                             <p className="text-[10px] text-slate-500 leading-normal">
                                 Learning these languages will help you build real-world software and games! Python is great for AI, and JavaScript is used for every website on Earth.
@@ -210,22 +207,20 @@ const Sidebar: React.FC<any> = ({
                     <div className="flex flex-col h-full bg-slate-50 tab-fade-in">
                         <div className="p-4 bg-white border-b border-slate-200">
                             <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                <Layout className="text-blue-500" /> App Designer
+                                <Layout className="text-blue-500" size={16} /> App Designer
                             </h3>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                            <div className="space-y-3 mb-6">
-                                <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                                    <Plus size={18} /> Add New Screen
-                                </button>
-                            </div>
-                            <div className="space-y-4 mb-6 bg-white p-4 rounded-xl border border-slate-100">
-                                <h4 className="font-bold text-slate-700 text-sm uppercase">UI Components</h4>
-                                <div className="grid grid-cols-2 gap-3">
+                            <button className="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 mb-4">
+                                <Plus size={16} /> Add New Screen
+                            </button>
+                            <div className="bg-white p-3 rounded-xl border border-slate-200 mb-4">
+                                <h4 className="font-semibold text-slate-600 text-xs uppercase mb-3">UI Components</h4>
+                                <div className="grid grid-cols-2 gap-2">
                                     {['Text', 'Button', 'Input', 'Image'].map(name => (
-                                        <button key={name} className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
-                                            <Square className="text-slate-600 mb-1" size={20} />
-                                            <span className="text-xs">{name}</span>
+                                        <button key={name} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                                            <Square className="text-slate-500" size={16} />
+                                            <span className="text-xs font-medium">{name}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -236,46 +231,46 @@ const Sidebar: React.FC<any> = ({
                     <div className="flex flex-col h-full bg-slate-50 tab-fade-in">
                         <div className="p-4 bg-white border-b border-slate-200">
                             <div className="flex p-1 bg-slate-100 rounded-lg">
-                                <button onClick={() => setDesignTab('sprite')} className={`flex-1 py-1 text-sm font-bold rounded-md flex items-center justify-center gap-2 ${designTab === 'sprite' ? 'bg-white shadow text-violet-500' : 'text-slate-500'}`}><Ghost size={16} /> Sprite</button>
-                                <button onClick={() => setDesignTab('animations')} className={`flex-1 py-1 text-sm font-bold rounded-md flex items-center justify-center gap-2 ${designTab === 'animations' ? 'bg-white shadow text-violet-500' : 'text-slate-500'}`}><Film size={16} /> Anims</button>
+                                <button onClick={() => setDesignTab('sprite')} className={`flex-1 py-1.5 text-sm font-semibold rounded-md flex items-center justify-center gap-2 transition-colors ${designTab === 'sprite' ? 'bg-white shadow-sm text-violet-600' : 'text-slate-500'}`}><Ghost size={16} /> Sprite</button>
+                                <button onClick={() => setDesignTab('animations')} className={`flex-1 py-1.5 text-sm font-semibold rounded-md flex items-center justify-center gap-2 transition-colors ${designTab === 'animations' ? 'bg-white shadow-sm text-violet-600' : 'text-slate-500'}`}><Film size={16} /> Anims</button>
                             </div>
                         </div>
                         {designTab === 'sprite' ? (
                             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                                <div className="aspect-square bg-white rounded-2xl border-2 border-slate-200 mb-6 flex items-center justify-center relative shadow-inner overflow-hidden">
+                                <div className="aspect-square bg-white rounded-xl border border-slate-200 mb-4 flex items-center justify-center relative overflow-hidden">
                                     {spriteState.texture ? (
-                                        <img src={spriteState.texture} className="max-w-[80%] max-h-[80%] object-contain drop-shadow-lg" alt="Sprite Texture" loading="lazy" />
+                                        <img src={spriteState.texture} className="max-w-[80%] max-h-[80%] object-contain" alt="Sprite Texture" loading="lazy" />
                                     ) : (
-                                        <span className="text-6xl">{spriteState.emoji}</span>
+                                        <span className="text-5xl">{spriteState.emoji}</span>
                                     )}
                                 </div>
-                                <div className="space-y-3 mb-6">
-                                    <button onClick={() => setShowAssetManager(true)} className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Box size={18} /> Asset Manager
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button onClick={() => setShowAssetManager(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Box size={16} /> Assets
                                     </button>
-                                    <button onClick={() => setShowPixelEditor(true)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Paintbrush size={18} /> Draw Pixel Art
+                                    <button onClick={() => setShowPixelEditor(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Paintbrush size={16} /> Draw
                                     </button>
-                                    <button onClick={() => setShowParticleEditor(true)} className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Sparkles size={18} /> FX Studio
+                                    <button onClick={() => setShowParticleEditor(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Sparkles size={16} /> FX
                                     </button>
-                                    <button onClick={() => setShowAI3DCreator(true)} className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Box size={18} /> AI 3D Creator
+                                    <button onClick={() => setShowAI3DCreator(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Box size={16} /> 3D
                                     </button>
-                                    <button onClick={() => setShowMusicStudio(true)} className="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Music size={18} /> Music Studio
+                                    <button onClick={() => setShowMusicStudio(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Music size={16} /> Music
                                     </button>
-                                    <button onClick={() => setShowSoundRecorder(true)} className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Mic size={18} /> Sound Lab
+                                    <button onClick={() => setShowSoundRecorder(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Mic size={16} /> Sound
                                     </button>
-                                    <button onClick={() => setShowMusicGenerator(true)} className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Headphones size={18} /> AI Music Gen
+                                    <button onClick={() => setShowMusicGenerator(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Headphones size={16} /> AI Music
                                     </button>
-                                    <button onClick={() => setShowSpriteExtractor(true)} className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        <Scissors size={18} /> Sprite Extractor
+                                    <button onClick={() => setShowSpriteExtractor(true)} className="flex items-center justify-center gap-1.5 p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors">
+                                        <Scissors size={16} /> Extract
                                     </button>
-                                    <button onClick={handleGenerateSprite} disabled={isGeneratingSprite} className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
-                                        {isGeneratingSprite ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
+                                    <button onClick={handleGenerateSprite} disabled={isGeneratingSprite} className="col-span-2 flex items-center justify-center gap-1.5 p-2.5 bg-violet-600 text-white font-semibold text-xs rounded-xl hover:bg-violet-700 transition-colors">
+                                        {isGeneratingSprite ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
                                         AI Generate
                                     </button>
                                 </div>
@@ -286,13 +281,13 @@ const Sidebar: React.FC<any> = ({
                     </div>
                 ) : activeTab === 'components' && mode === AppMode.HARDWARE ? (
                     <div className="flex-1 flex flex-col min-h-0 tab-fade-in">
-                        <div className="p-4 border-b border-slate-100 bg-white">
+                        <div className="p-3 border-b border-slate-200 bg-white">
                             <div className="relative">
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input type="text" placeholder="Search parts..." value={circuitSearch} onChange={(e) => setCircuitSearch(e.target.value)} className="w-full bg-slate-100 pl-9 pr-3 py-2 rounded-lg text-sm outline-none" />
+                                <input type="text" placeholder="Search parts..." value={circuitSearch} onChange={(e) => setCircuitSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400" />
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-1">
+                        <div className="flex-1 overflow-y-auto p-3 space-y-1">
                             {(Object.entries(groupedComponents) as [string, any[]][]).map(([category, components]) => {
                                 const filtered = components.filter((c: any) => c.label.toLowerCase().includes(circuitSearch.toLowerCase()));
                                 if (filtered.length === 0) return null;
@@ -305,14 +300,14 @@ const Sidebar: React.FC<any> = ({
                                         </button>
                                         <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0'}`}>
                                             <div className="overflow-hidden">
-                                                <div className="space-y-2 py-1">
+                                                <div className="space-y-1.5 py-1">
                                                     {filtered.map((comp: any, idx: number) => (
-                                                        <div key={comp.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className={`flex items-center gap-3 p-2 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
+                                                        <div key={comp.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(comp)); }} className={`flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
                                                              style={{ animationDelay: `${idx * 30}ms` }}
                                                         >
                                                              <ComponentThumbnail type={comp.type} />
                                                              <div className="flex flex-col min-w-0">
-                                                                 <span className="font-bold text-sm text-slate-700">{comp.label}</span>
+                                                                 <span className="font-semibold text-sm text-slate-700">{comp.label}</span>
                                                                  <span className="text-[10px] text-slate-400 leading-snug line-clamp-2">{comp.description}</span>
                                                             </div>
                                                         </div>
@@ -327,16 +322,11 @@ const Sidebar: React.FC<any> = ({
                     </div>
                 ) : (
                     <div className="flex-1 flex flex-col min-h-0 tab-fade-in">
-                        <div className="p-4 border-b border-slate-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <h3 className="font-bold text-slate-700">Block Library</h3>
-                                <span className="text-[10px] bg-violet-100 text-violet-600 px-2 py-1 rounded-full font-bold">
-                                    🌟 Beginner Friendly
-                                </span>
-                            </div>
+                        <div className="p-4 border-b border-slate-200">
+                            <h3 className="font-bold text-slate-700 text-sm mb-2">Block Library</h3>
                             <div className="relative">
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input type="text" placeholder="Search blocks..." value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} className="w-full bg-slate-100 pl-9 pr-3 py-2 rounded-lg text-sm outline-none" />
+                                <input type="text" placeholder="Search blocks..." value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400" />
                                 {isSearchDebouncing && (
                                     <div className="absolute right-2 top-2">
                                         <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
@@ -348,70 +338,55 @@ const Sidebar: React.FC<any> = ({
                             {isBlockListLoading ? (
                                 <div className="space-y-2">
                                     {Array.from({ length: 6 }).map((_, i) => (
-                                        <Skeleton key={i} height="64px" rounded="rounded-xl" />
+                                        <Skeleton key={i} height="48px" rounded="rounded-xl" />
                                     ))}
                                 </div>
-                            ) : /* Starter Blocks - Always Visible */
-                            !blockSearch && (
+                            ) : !blockSearch && (
                                 <div className="mb-6">
                                     <div className="flex items-center gap-2 mb-3">
-                                        <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                                            <Sparkles size={12} className="text-white" />
-                                        </div>
-                                        <h4 className="font-black text-slate-700 text-sm">
+                                        <h4 className="font-bold text-slate-700 text-xs">
                                             Starter Blocks
                                         </h4>
                                     </div>
-                                    <div className="grid grid-cols-1 gap-2">
+                                    <div className="grid grid-cols-1 gap-1.5">
                                         {groupedBlocks['Events']?.slice(0, 2).map((def) => (
-                                            <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-3 p-3 rounded-xl border-2 border-yellow-300 bg-gradient-to-r from-yellow-50 to-orange-50 shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-all">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
-                                                    {React.createElement(def.icon as React.ComponentType<any>, { size: 16 })}
+                                            <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all">
+                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
+                                                    {React.createElement(def.icon as React.ComponentType<any>, { size: 14 })}
                                                 </div>
-                                                <div className="flex-1">
-                                                    <span className="font-bold text-sm text-slate-700">{def.label}</span>
-                                                    <p className="text-[10px] text-slate-500 mt-0.5">{def.description || 'Start your program'}</p>
+                                                <div className="flex-1 min-w-0">
+                                                    <span className="font-semibold text-xs text-slate-700 block">{def.label}</span>
                                                 </div>
-                                                <span className="text-[10px] bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full font-bold">START</span>
                                             </div>
                                         ))}
                                         {groupedBlocks['Motion']?.slice(0, 2).map((def) => (
-                                            <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] transition-all">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
-                                                    {React.createElement(def.icon as React.ComponentType<any>, { size: 16 })}
+                                            <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all">
+                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
+                                                    {React.createElement(def.icon as React.ComponentType<any>, { size: 14 })}
                                                 </div>
-                                                <div className="flex-1">
-                                                    <span className="font-bold text-sm text-slate-700">{def.label}</span>
-                                                    <p className="text-[10px] text-slate-500 mt-0.5">{def.description || 'Move your sprite'}</p>
+                                                <div className="flex-1 min-w-0">
+                                                    <span className="font-semibold text-xs text-slate-700 block">{def.label}</span>
                                                 </div>
                                             </div>
                                         ))}
-                                    </div>
-                                    <div className="mt-3 text-center">
-                                        <p className="text-[10px] text-slate-400">
-                                            ↓ Scroll for more blocks ↓
-                                        </p>
                                     </div>
                                 </div>
                             )}
 
-                            {/* All Block Categories */}
                             {Object.entries(groupedBlocks).map(([category, blocks]) => {
                                 const filtered = blocks.filter(b => b.label.toLowerCase().includes(blockSearch.toLowerCase()));
                                 if (filtered.length === 0) return null;
                                 const isExpanded = expandedCategories[category] !== false;
                                 const isStarterCategory = category === 'Events' || category === 'Motion';
                                 
-                                // Skip starter categories in the main list if not searching
                                 if (!blockSearch && isStarterCategory) return null;
                                 
                                 return (
                                     <div key={category} className="mb-2 border-b border-slate-100 pb-2 last:border-b-0">
-                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="section-heading flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group">
+                                        <button onClick={() => setExpandedCategories({ ...expandedCategories, [category]: !isExpanded })} className="section-heading flex items-center justify-between w-full text-xs font-bold uppercase text-slate-400 mb-2 hover:text-slate-600 transition-colors group">
                                             <span className="flex items-center gap-2">
-                                                <span className="text-sm">{category === 'Events' ? '⚡' : category === 'Motion' ? '🏃' : category === 'Control' ? '🔄' : category === 'Sensing' ? '👁️' : category === 'Operators' ? '🔢' : category === 'Variables' ? '📦' : category === 'Functions' ? '⚙️' : category === 'Draw' ? '🎨' : category === 'Sound' ? '🔊' : category === 'Math' ? '🧮' : category === 'Text' ? '📝' : category === 'Lists' ? '📋' : category === 'Logic' ? '🧠' : '📂'}</span>
                                                 {category}
-                                                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full">{filtered.length}</span>
+                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">{filtered.length}</span>
                                             </span>
                                             <span className={`transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}>
                                                 <ChevronDown size={14} />
@@ -419,16 +394,16 @@ const Sidebar: React.FC<any> = ({
                                         </button>
                                         <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0'}`}>
                                             <div className="overflow-hidden">
-                                                <div className="space-y-2 py-1">
+                                                <div className="space-y-1.5 py-1">
                                                     {filtered.map((def, idx: number) => (
-                                                        <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className={`flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:scale-[1.02] hover:shadow-md hover:border-violet-300 dark:hover:border-violet-600 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
+                                                        <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className={`flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
                                                              style={{ animationDelay: `${idx * 25}ms` }}
                                                         >
-                                                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
-                                                                 {React.createElement(def.icon as React.ComponentType<any>, { size: 16 })}
+                                                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>
+                                                                 {React.createElement(def.icon as React.ComponentType<any>, { size: 14 })}
                                                              </div>
                                                              <div className="flex-1 min-w-0">
-                                                                 <span className="font-bold text-sm text-slate-700 block">{def.label}</span>
+                                                                 <span className="font-semibold text-xs text-slate-700 block">{def.label}</span>
                                                                  {def.description && <span className="text-[10px] text-slate-400 leading-snug line-clamp-2 block">{def.description}</span>}
                                                              </div>
                                                         </div>
@@ -444,9 +419,9 @@ const Sidebar: React.FC<any> = ({
                                 blocks.filter(b => b.label.toLowerCase().includes(blockSearch.toLowerCase())).length === 0
                             ) && (
                                 <div className="text-center py-8 px-4">
-                                    <Search size={32} className="mx-auto text-slate-300 mb-3" />
-                                    <p className="text-sm text-slate-500 font-bold mb-1">No blocks found for "{blockSearch}"</p>
-                                    <p className="text-xs text-slate-400 mb-3">Try different keywords or check the category filters above.</p>
+                                    <Search size={28} className="mx-auto text-slate-300 mb-3" />
+                                    <p className="text-sm text-slate-500 font-semibold mb-1">No blocks found for "{blockSearch}"</p>
+                                    <p className="text-xs text-slate-400 mb-3">Try different keywords.</p>
                                     <button onClick={() => setLocalSearch('')} className="text-xs font-bold text-violet-500 hover:text-violet-600 underline underline-offset-2">
                                         Clear search
                                     </button>

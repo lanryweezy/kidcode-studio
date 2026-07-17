@@ -1,11 +1,14 @@
 
 import React from 'react';
 import { useStore } from '../store/useStore';
+import { useState } from 'react';
 import { Zap, Sparkles, Trophy, Users, Star, ArrowRight, Play, Rocket } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
+import { VideoModal } from './VideoModal';
 
 const LandingPage: React.FC = () => {
     const { setShowLanding, setShowHome } = useStore();
+    const [showVideo, setShowVideo] = useState(false);
 
     const handleStartBuilding = () => {
         playSoundEffect('powerup');
@@ -41,12 +44,14 @@ const LandingPage: React.FC = () => {
                                 <Zap size={24} fill="currentColor" /> GET STARTED FREE <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
-                                onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                                onClick={() => setShowVideo(true)}
                                 className="px-10 py-5 bg-slate-900/50 border border-slate-800 text-white font-black text-xl rounded-2xl transition-all hover:border-violet-500/50 flex items-center gap-3"
                             >
-                                <Play size={24} fill="currentColor" className="text-violet-500" /> SEE THE TOOLS
+                                <Play size={24} fill="currentColor" className="text-violet-500" /> WATCH VIDEO
                             </button>
                         </div>
+
+                        <VideoModal isOpen={showVideo} onClose={() => setShowVideo(false)} />
 
                         {/* Phone Mockup with Glass Effect */}
                         <div className="mt-16 relative">

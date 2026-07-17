@@ -54,12 +54,31 @@ const ENTITY_COLORS: Record<string, string> = {
     slime: '#69F0AE',
 };
 
+interface EffectOverlay {
+    type: 'time' | 'weather' | 'teleport' | 'item' | 'message' | 'structure';
+    x: number;
+    y: number;
+    z: number;
+    data: string;
+}
+
+const TIME_SKY_COLORS: Record<string, string> = {
+    day: '#87CEEB',
+    night: '#0D1B2A',
+    dawn: '#FFB347',
+    dusk: '#FF6B6B',
+    noon: '#4ECDC4',
+    midnight: '#1A1A2E',
+};
+
 const MinecraftPreview: React.FC<{ commands: CommandBlock[] }> = ({ commands }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const { blocks, entities } = useMemo(() => {
+    const { blocks, entities, effects, skyColor } = useMemo(() => {
         const b: Block[] = [];
         const e: EntitySprite[] = [];
+        const ef: EffectOverlay[] = [];
+        let sc = '#87CEEB';
 
         for (const cmd of commands) {
             const p = cmd.params;
@@ -87,10 +106,44 @@ const MinecraftPreview: React.FC<{ commands: CommandBlock[] }> = ({ commands }) 
                 case CommandType.MC_SPAWN_ENTITY:
                     e.push({ x: p.x ?? 0, y: p.y ?? 64, z: p.z ?? 0, type: p.entityType as string || 'creeper' });
                     break;
+                case CommandType.MC_SET_TIME:
+                    sc = TIME_SKY_COLORS[p.time as string] || '#87CEEB';
+                    ef.push({ type: 'time', x: 0, y: 100, z: 0, data: p.time as string || 'day' });
+                    break;
+                case CommandType.MC_SET_WEATHER:
+                    ef.push({ type: 'weather', x: 0, y: 100, z: 0, data: p.weather as string || 'clear' });
+                    break;
+                case CommandType.MC_TELEPORT:
+                    ef.push({ type: 'teleport', x: p.x ?? 0, y: p.y ?? 64, z: p.z ?? 0, data: 'portal' });
+                    break;
+                case CommandType.MC_GIVE_ITEM:
+                    ef.push({ type: 'item', x: 0, y: 80, z: 0, data: p.item as string || 'diamond_sword' });
+                    break;
+                case CommandType.MC_SHOW_MESSAGE:
+                    ef.push({ type: 'message', x: 0, y: 90, z: 0, data: p.text as string || 'Hello!' });
+                    break;
+                case CommandType.MC_CREATE_STRUCTURE: {
+                    const sx = p.x ?? 0;
+                    const sy = p.y ?? 64;
+                    const sz = p.z ?? 0;
+                    const structName = (p.structure as string) || 'house';
+                    const sizes: Record<string, [number, number, number]> = {
+                        house: [7, 4, 7], tower: [5, 12, 5], farm: [9, 1, 9], castle: [15, 8, 15],
+                    };
+                    const [sw, sh, sz2] = sizes[structName] || [5, 3, 5];
+                    for (let x = sx; x <= sx + sw; x++) {
+                        for (let z = sz; z <= sz + sz2; z++) {
+                            b.push({ x, y: sy, z, color: '#88888866' });
+                            b.push({ x, y: sy + sh, z, color: '#88888866' });
+                        }
+                    }
+                    ef.push({ type: 'structure', x: sx + sw / 2, y: sy + sh + 2, z: sz + sz2 / 2, data: structName });
+                    break;
+                }
             }
         }
 
-        return { blocks: b, entities: e };
+        return { blocks: b, entities: e, effects: ef, skyColor: sc };
     }, [commands]);
 
     useEffect(() => {
@@ -105,7 +158,7 @@ const MinecraftPreview: React.FC<{ commands: CommandBlock[] }> = ({ commands }) 
         const cw = w / 2;
         const ch = h / 2;
 
-        ctx.fillStyle = '#87CEEB';
+        ctx.fillStyle = skyColor;
         ctx.fillRect(0, 0, cw, ch);
 
         const gridW = 20;
@@ -181,6 +234,99 @@ const MinecraftPreview: React.FC<{ commands: CommandBlock[] }> = ({ commands }) 
             ctx.fillText(type.charAt(0).toUpperCase(), sx, sy - cellH * 0.45);
         };
 
+        const drawEffect = (effect: EffectOverlay) => {
+            const { sx, sy } = isoX(effect.x, effect.y, effect.z);
+
+            switch (effect.type) {
+                case 'time': {
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillStyle = skyColor;
+                    ctx.fillRect(0, 0, cw, ch);
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = `bold ${cellW * 0.3}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`Time: ${effect.data}`, cw / 2, ch * 0.1);
+                    break;
+                }
+                case 'weather': {
+                    const weather = effect.data;
+                    if (weather === 'rain' || weather === 'thunder') {
+                        ctx.strokeStyle = '#4FC3F7';
+                        ctx.lineWidth = 1;
+                        for (let i = 0; i < 30; i++) {
+                            const rx = Math.random() * cw;
+                            const ry = Math.random() * ch;
+                            ctx.beginPath();
+                            ctx.moveTo(rx, ry);
+                            ctx.lineTo(rx - 2, ry + 8);
+                            ctx.stroke();
+                        }
+                    }
+                    if (weather === 'thunder') {
+                        ctx.fillStyle = '#FFD600';
+                        ctx.font = `bold ${cellW * 0.4}px sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.fillText('⚡', cw / 2 + (Math.random() - 0.5) * 40, ch * 0.3);
+                    }
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = `bold ${cellW * 0.25}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`Weather: ${weather}`, cw / 2, ch * 0.1);
+                    break;
+                }
+                case 'teleport': {
+                    ctx.strokeStyle = '#9C27B0';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.arc(sx, sy - cellH * 0.3, cellW * 0.4, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = '#CE93D8';
+                    ctx.globalAlpha = 0.4;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = `${cellW * 0.15}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('TP', sx, sy - cellH * 0.25);
+                    break;
+                }
+                case 'item': {
+                    ctx.fillStyle = '#FFD600';
+                    ctx.beginPath();
+                    ctx.arc(cw * 0.85, ch * 0.15, cellW * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#F57F17';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.fillStyle = '#000';
+                    ctx.font = `${cellW * 0.15}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(effect.data.replace('_', ' '), cw * 0.85, ch * 0.17);
+                    break;
+                }
+                case 'message': {
+                    const msgW = Math.min(cw * 0.6, ctx.measureText(effect.data).width + 20);
+                    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                    ctx.fillRect(cw / 2 - msgW / 2, ch * 0.05, msgW, 20);
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = `${cellW * 0.2}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(effect.data, cw / 2, ch * 0.05 + 14);
+                    break;
+                }
+                case 'structure': {
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = `bold ${cellW * 0.2}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`Structure: ${effect.data}`, sx, sy);
+                    break;
+                }
+            }
+        };
+
         const sortedBlocks = [...blocks].sort((a, b) => (a.x + a.z) - (b.x + b.z) || a.y - b.y);
         for (const block of sortedBlocks) {
             drawBlock(block.x, block.y, block.z, block.color);
@@ -190,13 +336,17 @@ const MinecraftPreview: React.FC<{ commands: CommandBlock[] }> = ({ commands }) 
             drawEntity(entity.x, entity.y, entity.z, entity.type);
         }
 
+        for (const effect of effects) {
+            drawEffect(effect);
+        }
+
         if (blocks.length === 0 && entities.length === 0) {
             ctx.fillStyle = '#333';
             ctx.font = '14px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('Add Minecraft blocks to see a preview', cw / 2, ch / 2);
         }
-    }, [blocks, entities]);
+    }, [blocks, entities, effects, skyColor]);
 
     return (
         <div className="w-full h-full bg-gradient-to-b from-sky-300 to-sky-500 rounded-xl overflow-hidden relative">
@@ -206,7 +356,7 @@ const MinecraftPreview: React.FC<{ commands: CommandBlock[] }> = ({ commands }) 
                 style={{ imageRendering: 'pixelated' }}
             />
             <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] font-bold px-2 py-1 rounded">
-                {blocks.length} blocks · {entities.length} entities
+                {blocks.length} blocks · {entities.length} entities · {effects.length} effects
             </div>
         </div>
     );

@@ -11,6 +11,7 @@ import {
   AnalyticsReport,
 } from './kidcodeAnalytics';
 import { getEducationState } from './educationSystem';
+import { getStudios } from './studioService';
 
 const EDUCATION_STORAGE_KEY = 'kidcode_education';
 const INPUT_MAPPER_KEY = 'kidcode_input_bindings';
@@ -33,6 +34,7 @@ interface UserDataExport {
     timestamp: number;
     data: string | null;
   }>;
+  studios: unknown[];
   analytics: AnalyticsReport;
   education: unknown;
   inputBindings: unknown;
@@ -77,11 +79,19 @@ export const exportAllData = async (): Promise<void> => {
     k.startsWith('kidcode_')
   );
 
+  let studios: unknown[] = [];
+  try {
+    studios = await getStudios();
+  } catch {
+    // ignore
+  }
+
   const exportData: UserDataExport = {
     exportDate: new Date().toISOString(),
     version: '1.0.0',
     projects: projectData,
     assets: assetData,
+    studios,
     analytics: generateAnalyticsReport(),
     education,
     inputBindings,

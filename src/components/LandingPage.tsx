@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useStore } from '../store/useStore';
+import { useTranslation } from 'react-i18next';
 import { Zap, Sparkles, Trophy, Users, Star, ArrowRight, Play, Rocket } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
 
@@ -22,6 +23,7 @@ const DoodleLine: React.FC<{ className?: string; color?: string }> = ({ classNam
 );
 
 const LandingPage: React.FC = () => {
+    const { t } = useTranslation();
     const { setShowLanding, setShowHome } = useStore();
     const [scrollProgress, setScrollProgress] = React.useState(0);
 
@@ -56,22 +58,20 @@ const LandingPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="flex flex-col items-center text-center">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-600/10 border border-violet-500/30 text-violet-400 font-black text-xs uppercase tracking-widest mb-8 animate-bounce-sm skew-1">
-                            <Sparkles size={14} className="animate-pulse" /> THE FUTURE OF CODING IS HERE
+                            <Sparkles size={14} className="animate-pulse" /> {t('landing.futureOfCoding')}
                         </div>
 
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.85] mb-8 tracking-tighter">
-                            <span className="bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent">Build </span>
-                            <span className="font-extralight text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-slate-300 italic">your</span>
-                            <span className="bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent"> Own </span>
+                            <span className="bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent">{t('landing.heroTitleLine1')} </span>
+                            <span className="font-extralight text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-slate-300 italic">{t('landing.heroTitleItal')}</span>
+                            <span className="bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent"> {t('landing.heroTitleLine2')} </span>
                             <br />
-                            <span className="text-violet-500 skew-2 inline-block">Universe.</span>
+                            <span className="text-violet-500 skew-2 inline-block">{t('landing.heroTitleLine3')}</span>
                             <DoodleLine className="-bottom-4 left-1/2 -translate-x-1/2 w-48" />
                         </h1>
 
                         <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mb-12 font-medium leading-relaxed drift-left">
-                            The <span className="font-extralight text-slate-400">all-in-one</span> professional studio where kids build{' '}
-                            <span className="font-black text-violet-400">3D open-world games</span>,
-                            real mobile apps, and simulate advanced electronics—all with the power of blocks.
+                            {t('landing.heroDesc')}
                         </p>
 
                         <div className="flex flex-wrap items-center justify-center gap-6">
@@ -79,13 +79,13 @@ const LandingPage: React.FC = () => {
                                 onClick={handleStartBuilding}
                                 className="group px-10 py-5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-xl rounded-2xl shadow-[0_0_40px_rgba(124,58,237,0.3)] hover:shadow-[0_0_60px_rgba(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 skew-1"
                             >
-                                <Zap size={24} fill="currentColor" /> GET STARTED FREE <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                <Zap size={24} fill="currentColor" /> {t('landing.getStartedFree')} <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <button
                                 onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
                                 className="px-10 py-5 bg-slate-900/50 border border-slate-800 text-white font-black text-xl rounded-2xl transition-all hover:border-violet-500/50 flex items-center gap-3 skew-2"
                             >
-                                <Play size={24} fill="currentColor" className="text-violet-500" /> SEE THE TOOLS
+                                <Play size={24} fill="currentColor" className="text-violet-500" /> {t('landing.seeTheTools')}
                             </button>
                         </div>
 
@@ -148,7 +148,7 @@ const LandingPage: React.FC = () => {
             {/* Scroll Arrow */}
             <div className="flex flex-col items-center -mt-16 mb-8 relative z-10">
                 <div className="w-10 h-10 border-b-2 border-r-2 border-violet-500 scroll-arrow opacity-60" />
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2 fade-pulse">scroll down</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2 fade-pulse">{t('landing.scrollDown')}</span>
             </div>
 
             {/* FEATURES SECTION — horizontal scroll */}
@@ -156,12 +156,10 @@ const LandingPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-24">
                         <h2 className="text-5xl font-black mb-6">
-                            <span className="skew-1 inline-block">Three </span>
-                            <span className="font-extralight text-3xl text-slate-400 italic">magical</span>
-                            <span className="skew-2 inline-block"> Studios.</span>
+                            {t('landing.threeStudios')}
                         </h2>
                         <p className="text-xl text-slate-300 max-w-2xl mx-auto drift-right">
-                            Everything you need to go from an <span className="font-black text-violet-400 hand-drawn-underline">idea</span> to a published <span className="font-extralight text-slate-400">game, app,</span> or hardware prototype.
+                            {t('landing.threeDesc')}
                         </p>
                     </div>
                 </div>
@@ -197,9 +195,7 @@ const LandingPage: React.FC = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                         <div className="drift-left">
                             <h2 className="text-6xl font-black mb-8 leading-tight">
-                                Trusted by young <br />
-                                <span className="font-extralight text-4xl text-slate-400 italic">creators</span>{' '}
-                                <span className="hand-drawn-underline skew-1 inline-block">worldwide.</span>
+                                {t('landing.trustedBy')}
                             </h2>
                             <div className="flex gap-1 mb-8 skew-1">
                                 <Star fill="#f59e0b" className="text-amber-500" />
@@ -236,19 +232,19 @@ const LandingPage: React.FC = () => {
             <section className="py-40 px-6 text-center relative">
                 <div className="max-w-4xl mx-auto">
                     <h2 className="text-6xl font-black mb-12">
-                        <span className="skew-1 inline-block">The journey to</span>{' '}
-                        <span className="text-violet-500 font-extralight text-5xl italic">1 million</span>{' '}
-                        <span className="skew-2 inline-block">users starts with</span>
+                        <span className="skew-1 inline-block">{t('landing.journeyTo')}</span>{' '}
+                        <span className="text-violet-500 font-extralight text-5xl italic">{t('landing.journeyUsers')}</span>{' '}
+                        <span className="skew-2 inline-block">{t('landing.journeyMid')}</span>
                         <br />
-                        <span className="hand-drawn-underline skew-3 inline-block">your first block.</span>
+                        <span className="hand-drawn-underline skew-3 inline-block">{t('landing.journeyEnd')}</span>
                     </h2>
                     <button
                         onClick={handleStartBuilding}
                         className="px-12 py-6 bg-white text-black font-black text-2xl rounded-[2rem] hover:scale-110 active:scale-95 transition-all shadow-2xl flex items-center gap-4 mx-auto skew-1"
                     >
-                        START CREATING NOW <ArrowRight size={28} />
+                        {t('landing.startCreating')} <ArrowRight size={28} />
                     </button>
-                    <p className="mt-8 text-slate-600 font-bold uppercase tracking-widest text-sm drift-left">No credit card required · Free forever for students</p>
+                    <p className="mt-8 text-slate-600 font-bold uppercase tracking-widest text-sm drift-left">{t('landing.noCreditCard')}</p>
                 </div>
             </section>
         </div>

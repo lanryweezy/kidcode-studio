@@ -864,6 +864,10 @@ export function simulateCircuit(
     }
   });
 
+  // Generate sensor readings
+  const { sensorReadings } = generateSensorReadings(components, hardwareState);
+  hardwareState.sensorReadings = sensorReadings;
+
   // Update hardware state based on simulation
   if (hardwareState.pins) {
     // Set pin states based on component states
@@ -923,7 +927,98 @@ export function simulateCircuit(
   };
 }
 
-// === HELPER FUNCTIONS ===
+export interface SensorReadingsResult {
+  sensorReadings: Map<string, number>;
+}
+
+const SENSOR_COMPONENT_TYPES = new Set([
+  'LIGHT_SENSOR', 'TEMP_SENSOR', 'THERMISTOR', 'DHT11', 'DHT22',
+  'ULTRASONIC', 'MOTION', 'SOUND_SENSOR', 'GAS_SENSOR', 'FLAME_SENSOR',
+  'RAIN_SENSOR', 'SOIL_SENSOR', 'PRESSURE_SENSOR', 'FLEX_SENSOR', 'TILT_SENSOR',
+  'HALL_SENSOR', 'COMPASS', 'GYRO', 'GPS', 'HEARTBEAT', 'COLOR_SENSOR',
+  'RFID', 'FINGERPRINT', 'POTENTIOMETER', 'SLIDE_POT',
+]);
+
+export function generateSensorReadings(
+  components: CircuitComponent[],
+  hardwareState: HardwareState
+): SensorReadingsResult {
+  const sensorReadings = new Map<string, number>();
+  const t = Date.now() / 1000;
+
+  components.forEach(comp => {
+    if (!SENSOR_COMPONENT_TYPES.has(comp.type)) return;
+
+    let value = 0;
+    switch (comp.type) {
+      case 'LIGHT_SENSOR':
+        value = Math.round((0.5 + 0.5 * Math.sin(t * 0.1)) * 1023);
+        break;
+      case 'TEMP_SENSOR':
+        value = Math.round((22 + 2 * Math.sin(t * 0.02) + (Math.random() - 0.5)) * 10) / 10;
+        break;
+      case 'ULTRASONIC':
+        value = Math.round((200 + 150 * Math.sin(t * 0.05)) * 10) / 10;
+        break;
+      case 'POTENTIOMETER':
+      case 'SLIDE_POT':
+        value = hardwareState.potentiometerValue;
+        break;
+      case 'DHT11':
+        value = Math.round(22 + Math.sin(t * 0.01) * 3);
+        break;
+      case 'DHT22':
+        value = Math.round((22.5 + Math.sin(t * 0.01) * 3.5) * 10) / 10;
+        break;
+      case 'MOTION':
+        value = Math.random() > 0.8 ? 1 : 0;
+        break;
+      case 'SOUND_SENSOR':
+        value = Math.round(50 + 200 * Math.abs(Math.sin(t * 0.3)) + (Math.random() - 0.5) * 20);
+        break;
+      case 'GAS_SENSOR':
+        value = Math.round(100 + 300 * Math.sin(t * 0.005) + (Math.random() - 0.5) * 10);
+        break;
+      case 'FLAME_SENSOR':
+        value = Math.random() > 0.95 ? 1 : 0;
+        break;
+      case 'RAIN_SENSOR':
+        value = Math.round(50 + 200 * Math.abs(Math.sin(t * 0.01)));
+        break;
+      case 'SOIL_SENSOR':
+        value = Math.round(400 + 100 * Math.sin(t * 0.003));
+        break;
+      case 'PRESSURE_SENSOR':
+        value = Math.round((1013.25 + Math.sin(t * 0.001) * 2) * 10) / 10;
+        break;
+      case 'FLEX_SENSOR':
+        value = Math.round(200 + 300 * Math.abs(Math.sin(t * 0.1)));
+        break;
+      case 'TILT_SENSOR':
+        value = Math.sin(t * 0.05) > 0 ? 1 : 0;
+        break;
+      case 'HALL_SENSOR':
+        value = Math.round(Math.abs(Math.sin(t * 0.2)) * 5 * 100) / 100;
+        break;
+      case 'COMPASS':
+        value = Math.round(((t * 10) % 360) * 10) / 10;
+        break;
+      case 'HEARTBEAT':
+        value = Math.round(72 + Math.sin(t * 0.1) * 8);
+        break;
+      case 'COLOR_SENSOR':
+        value = Math.round(Math.random() * 0xFFFFFF);
+        break;
+      default:
+        value = Math.round(Math.random() * 1023);
+        break;
+    }
+
+    sensorReadings.set(comp.id, value);
+  });
+
+  return { sensorReadings };
+}
 
 /** Returns the default electrical properties for a given component type. */
 export function getComponentProperties(type: ComponentType): ComponentElectricalProps {

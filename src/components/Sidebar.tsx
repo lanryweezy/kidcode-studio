@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useStore } from '../store/useStore';
+import { useTranslation } from 'react-i18next';
 import { AppMode, BlockDefinition, CommandType, ComponentType } from '../types';
 import { AVAILABLE_BLOCKS, CIRCUIT_PALETTE, CHARACTER_PALETTE, MODE_CONFIG } from '../constants';
 import SidebarDock from './SidebarDock';
@@ -38,6 +39,7 @@ const SidebarTabContent: React.FC<any> = ({
     setShowSoundRecorder, setShowAssetManager, setShowAI3DCreator,
     setShowMusicGenerator, setShowSpriteExtractor,
 }) => {
+    const { t } = useTranslation();
     if (activeTab === 'export') {
         return (
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar scroll-touch bg-slate-50 min-h-0 tab-fade-in">
@@ -45,7 +47,7 @@ const SidebarTabContent: React.FC<any> = ({
                     <div className="w-7 h-7 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center">
                         <Code2 size={16} />
                     </div>
-                    <h3 className="font-bold text-slate-800 text-sm">Code Export</h3>
+                    <h3 className="font-bold text-slate-800 text-sm">{t('sidebar.codeExport')}</h3>
                 </div>
                 <div className="space-y-6">
                     <div>
@@ -53,7 +55,7 @@ const SidebarTabContent: React.FC<any> = ({
                             <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                                 <FileCode size={12} className="text-blue-500" /> Python
                             </span>
-                            <button onClick={() => { navigator.clipboard.writeText(pythonCode); toast('success', 'Python code copied!'); }} className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200">COPY</button>
+                            <button onClick={() => { navigator.clipboard.writeText(pythonCode); toast('success', t('sidebar.pythonCopied')); }} className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200">COPY</button>
                         </div>
                         <pre className="p-4 bg-slate-950 text-emerald-400 rounded-xl text-xs font-mono overflow-x-auto border border-slate-800 leading-relaxed">{pythonCode}</pre>
                     </div>
@@ -62,7 +64,7 @@ const SidebarTabContent: React.FC<any> = ({
                             <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                                 <FileCode size={12} className="text-yellow-500" /> JavaScript
                             </span>
-                            <button onClick={() => { navigator.clipboard.writeText(jsCode); toast('success', 'JavaScript code copied!'); }} className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200">COPY</button>
+                            <button onClick={() => { navigator.clipboard.writeText(jsCode); toast('success', t('sidebar.jsCopied')); }} className="text-[10px] font-bold text-violet-500 hover:text-violet-600 px-2 py-1 rounded-md bg-white border border-slate-200">COPY</button>
                         </div>
                         <pre className="p-4 bg-slate-950 text-blue-400 rounded-xl text-xs font-mono overflow-x-auto border border-slate-800 leading-relaxed">{jsCode}</pre>
                     </div>
@@ -77,14 +79,14 @@ const SidebarTabContent: React.FC<any> = ({
         return (
             <div className="flex flex-col h-full bg-slate-50 tab-fade-in">
                 <div className="p-4 bg-white border-b border-slate-200">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2"><Layout className="text-blue-500" size={16} /> App Designer</h3>
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2"><Layout className="text-blue-500" size={16} /> {t('sidebar.appDesigner')}</h3>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar scroll-touch">
                     <button className="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 mb-4">
-                        <Plus size={16} /> Add New Screen
+                        <Plus size={16} /> {t('sidebar.addNewScreen')}
                     </button>
                     <div className="bg-white p-3 rounded-xl border border-slate-200 mb-4">
-                        <h4 className="font-semibold text-slate-600 text-xs uppercase mb-3">UI Components</h4>
+                        <h4 className="font-semibold text-slate-600 text-xs uppercase mb-3">{t('sidebar.uiComponents')}</h4>
                         <div className="grid grid-cols-2 gap-2">
                             {['Text', 'Button', 'Input', 'Image'].map(name => (
                                 <button key={name} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
@@ -138,7 +140,7 @@ const SidebarTabContent: React.FC<any> = ({
                 <div className="p-3 border-b border-slate-200 bg-white">
                     <div className="relative">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input type="text" placeholder="Search parts..." value={circuitSearch} onChange={(e) => setCircuitSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400 sculpted-inset" />
+                        <input type="text" placeholder={t('sidebar.searchParts')} value={circuitSearch} onChange={(e) => setCircuitSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400 sculpted-inset" />
                     </div>
                 </div>
                         <div className="flex-1 overflow-y-auto p-3 space-y-1 scroll-touch">
@@ -178,10 +180,10 @@ const SidebarTabContent: React.FC<any> = ({
     return (
         <div className="flex-1 flex flex-col min-h-0 tab-fade-in">
             <div className="p-4 border-b border-slate-200">
-                <h3 className="font-bold text-slate-700 text-sm mb-2">Block Library</h3>
+                <h3 className="font-bold text-slate-700 text-sm mb-2">{t('sidebar.blockLibrary')}</h3>
                 <div className="relative">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="text" placeholder="Search blocks..." value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400 sculpted-inset" />
+                    <input type="text" placeholder={t('sidebar.searchBlocks')} value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400 sculpted-inset" />
                     {isSearchDebouncing && (
                         <div className="absolute right-2 top-2">
                             <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
@@ -198,7 +200,7 @@ const SidebarTabContent: React.FC<any> = ({
                     </div>
                 ) : !blockSearch && (
                     <div className="mb-6">
-                        <h4 className="font-bold text-slate-700 text-xs mb-3">Starter Blocks</h4>
+                        <h4 className="font-bold text-slate-700 text-xs mb-3">{t('home.starterBlocks')}</h4>
                         <div className="grid grid-cols-1 gap-1.5">
                             {groupedBlocks['Events']?.slice(0, 2).map((def: any) => (
                                 <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all">
@@ -254,8 +256,8 @@ const SidebarTabContent: React.FC<any> = ({
                 ) && (
                     <div className="text-center py-8 px-4">
                         <Search size={28} className="mx-auto text-slate-300 mb-3" />
-                        <p className="text-sm text-slate-500 font-semibold mb-1">No blocks found for "{blockSearch}"</p>
-                        <button onClick={() => setLocalSearch('')} className="text-xs font-bold text-violet-500 hover:text-violet-600 underline underline-offset-2">Clear search</button>
+                        <p className="text-sm text-slate-500 font-semibold mb-1">{t('sidebar.noBlocksFound', { query: blockSearch })}</p>
+                        <button onClick={() => setLocalSearch('')} className="text-xs font-bold text-violet-500 hover:text-violet-600 underline underline-offset-2">{t('sidebar.clearSearch')}</button>
                     </div>
                 )}
             </div>

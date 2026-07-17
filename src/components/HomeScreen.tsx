@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useStore } from '../store/useStore';
+import { useTranslation } from 'react-i18next';
 import { AppMode, CircuitComponent } from '../types';
 import { MODE_CONFIG, EXAMPLE_TEMPLATES } from '../constants';
 import { createNewProject, getProjects, remixProject, deleteProject, SavedProject } from '../services/storageService';
@@ -34,6 +35,7 @@ const SCATTERED_OFFSETS = [
 ];
 
 const HomeScreen: React.FC = () => {
+    const { t } = useTranslation();
     const {
         userProfile,
         setShowPricing,
@@ -125,7 +127,7 @@ const HomeScreen: React.FC = () => {
                     </div>
                     <div className="flex flex-col">
                         <h1 className="text-xl font-black tracking-tight leading-none">KidCode Studio</h1>
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-black text-violet-500 mt-1">DASHBOARD</span>
+                        <span className="text-[10px] uppercase tracking-[0.2em] font-black text-violet-500 mt-1">{t('home.dashboard')}</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -133,7 +135,7 @@ const HomeScreen: React.FC = () => {
                         onClick={() => useStore.getState().setShowLanding(true)}
                         className="text-xs font-bold text-slate-400 hover:text-violet-500 transition-colors mr-4"
                     >
-                        View Public Page
+                        {t('home.viewPublicPage')}
                     </button>
                     <button
                         onClick={() => setShowPricing(true)}
@@ -160,18 +162,18 @@ const HomeScreen: React.FC = () => {
                     {isReturningUser && (
                         <div className="mb-6 p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-violet-200 animate-in fade-in slide-in-from-top-2 duration-500">
                             <p className="text-sm font-bold text-violet-700">
-                                Welcome back, {userProfile?.name || 'Explorer'}! Ready to keep building?
+                                {t('home.welcomeBack', { name: userProfile?.name || 'Explorer' })}
                             </p>
                         </div>
                     )}
 
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <h2 className="text-4xl font-black animate-in slide-in-from-left-10 fade-in duration-500">
-                            What do you want to <span className="font-extralight text-3xl italic text-slate-400">build</span><span className="text-violet-500 skew-2 inline-block">?</span>
+                            <h2 className="text-4xl font-black animate-in slide-in-from-left-10 fade-in duration-500">
+                                {t('home.whatToBuild')}?
                         </h2>
                         <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2 skew-1">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-none">324 Kids Building Live</span>
+                            <span className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-none">{t('home.liveKids')}</span>
                         </div>
                     </div>
                 </div>
@@ -204,7 +206,7 @@ const HomeScreen: React.FC = () => {
                     <div className="mb-8 p-6 rounded-2xl bg-white border border-violet-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-bold text-slate-800 flex items-center gap-2 skew-1">
-                                <Sparkles size={18} className="text-violet-500" /> <span className="font-extralight italic">Getting</span> Started
+                                <Sparkles size={18} className="text-violet-500" /> <span className="font-extralight italic">{t('home.gettingStarted').split(' ')[0]}</span> {t('home.gettingStarted').split(' ').slice(1).join(' ')}
                             </h3>
                             <button onClick={handleDismissOnboarding} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
                                 <X size={16} />
@@ -265,7 +267,7 @@ const HomeScreen: React.FC = () => {
                 </div>
 
                 <div className="mb-12">
-                    <h3 className="text-xl font-bold flex items-center gap-2 mb-4 skew-1"><Sparkles size={20} className="text-yellow-500" /> Instant <span className="font-extralight italic text-slate-400">Starters</span></h3>
+                    <h3 className="text-xl font-bold flex items-center gap-2 mb-4 skew-1"><Sparkles size={20} className="text-yellow-500" /> {t('home.instantStarters').split(' ')[0]} <span className="font-extralight italic text-slate-400">{t('home.instantStarters').split(' ').slice(1).join(' ')}</span></h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {EXAMPLE_TEMPLATES.map((tpl) => (
                             <button
@@ -322,12 +324,12 @@ const HomeScreen: React.FC = () => {
                 {/* Studios Section */}
                 <div className="mb-12">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold flex items-center gap-2 skew-2"><FolderPlus size={20} className="text-violet-500" /> My <span className="font-extralight italic text-slate-400">Studios</span></h3>
+                        <h3 className="text-xl font-bold flex items-center gap-2 skew-2"><FolderPlus size={20} className="text-violet-500" /> {t('home.myStudios').split(' ')[0]} <span className="font-extralight italic text-slate-400">{t('home.myStudios').split(' ').slice(1).join(' ')}</span></h3>
                         <button
                             onClick={() => setShowStudioManager(true)}
                             className="text-sm font-bold text-violet-500 hover:text-violet-600"
                         >
-                            Manage
+                            {t('home.manage')}
                         </button>
                     </div>
                     {userStudios.length === 0 ? (
@@ -336,7 +338,7 @@ const HomeScreen: React.FC = () => {
                             className="w-full p-6 rounded-2xl border-2 border-dashed border-slate-200 hover:border-violet-300 hover:bg-violet-50 transition-all text-center group"
                         >
                             <FolderPlus size={28} className="mx-auto text-slate-300 group-hover:text-violet-400 mb-2" />
-                            <p className="font-bold text-slate-500 group-hover:text-violet-600 text-sm">Create your first studio</p>
+                            <p className="font-bold text-slate-500 group-hover:text-violet-600 text-sm">{t('home.createFirstStudio')}</p>
                             <p className="text-xs text-slate-400">Organize projects into collections</p>
                         </button>
                     ) : (
@@ -359,15 +361,15 @@ const HomeScreen: React.FC = () => {
                                 className="min-w-[160px] bg-slate-50 border border-dashed border-slate-300 p-4 rounded-2xl hover:bg-violet-50 hover:border-violet-300 transition-all text-center shrink-0 flex flex-col items-center justify-center"
                             >
                                 <Plus size={20} className="text-slate-400 mb-1" />
-                                <span className="text-xs font-bold text-slate-500">New Studio</span>
+                                <span className="text-xs font-bold text-slate-500">{t('home.newStudio')}</span>
                             </button>
                         </div>
                     )}
                 </div>
 
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold flex items-center gap-2 skew-1"><FileCode size={20} /> Recent <span className="font-extralight italic text-slate-400">Projects</span></h3>
-                    <button className="text-sm font-bold text-violet-500 hover:text-violet-600">View All</button>
+                    <h3 className="text-xl font-bold flex items-center gap-2 skew-1"><FileCode size={20} /> {t('home.recentProjects').split(' ')[0]} <span className="font-extralight italic text-slate-400">{t('home.recentProjects').split(' ').slice(1).join(' ')}</span></h3>
+                    <button className="text-sm font-bold text-violet-500 hover:text-violet-600">{t('home.viewAll')}</button>
                 </div>
 
                 {isLoading ? (
@@ -388,8 +390,8 @@ const HomeScreen: React.FC = () => {
                             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-3xl flex items-center justify-center">
                                 <FileCode size={36} className="text-violet-500" />
                             </div>
-                            <p className="text-lg font-bold text-slate-700 mb-2">No projects yet</p>
-                            <p className="text-sm text-slate-400 mb-6 max-w-xs mx-auto">Start building your first game, app, or circuit project above!</p>
+                            <p className="text-lg font-bold text-slate-700 mb-2">{t('home.noProjectsYet')}</p>
+                            <p className="text-sm text-slate-400 mb-6 max-w-xs mx-auto">{t('home.noProjectsHint')}</p>
                             <div className="flex justify-center gap-3">
                                 <button
                                     onClick={() => {
@@ -398,7 +400,7 @@ const HomeScreen: React.FC = () => {
                                     }}
                                     className="touch-feedback px-5 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-500 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-all text-sm"
                                 >
-                                    Create First Project
+                                    {t('home.createFirstProject')}
                                 </button>
                             </div>
                         </div>
@@ -471,25 +473,25 @@ const HomeScreen: React.FC = () => {
                                 <Trash2 size={20} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-slate-800">Delete Project?</h3>
-                                <p className="text-sm text-slate-500">This action cannot be undone.</p>
+                                <h3 className="font-bold text-slate-800">{t('home.deleteProject')}</h3>
+                                <p className="text-sm text-slate-500">{t('home.actionUndone')}</p>
                             </div>
                         </div>
                         <p className="text-sm text-slate-600 mb-6">
-                            Are you sure you want to delete <span className="font-bold text-slate-800">"{deleteTarget.name}"</span> forever?
+                            {t('home.deleteConfirm', { name: deleteTarget.name })}
                         </p>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setDeleteTarget(null)}
                                 className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 onClick={confirmDelete}
                                 className="flex-1 px-4 py-2.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors shadow-lg"
                             >
-                                Delete
+                                {t('common.delete')}
                             </button>
                         </div>
                     </div>

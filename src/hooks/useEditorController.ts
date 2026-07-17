@@ -280,7 +280,12 @@ export function useEditorController() {
             }
         } catch (error) {
             console.error('IndexedDB save failed, using localStorage:', error);
-            saveProject(updatedProject);
+            const saveResult = saveProject(updatedProject);
+            if (saveResult === 'limit-reached') {
+                toast('error', 'Project limit reached. Delete old projects to save new ones.');
+            } else if (saveResult === 'limit-warning') {
+                toast('warning', 'Approaching project limit! You can save up to 10 projects.');
+            }
         }
         setProject(updatedProject);
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);

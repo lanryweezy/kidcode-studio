@@ -1,6 +1,7 @@
 
 import { AppMode, CommandBlock, HardwareState, SpriteState, AppState, CircuitComponent } from '../types';
 import { INITIAL_HARDWARE_STATE, INITIAL_SPRITE_STATE, INITIAL_APP_STATE } from '../constants';
+import { saveProjectIndexedDB, deleteProjectIndexedDB, listProjectsIndexedDB, loadProjectIndexedDB } from './storageIndexedDB';
 
 export interface SavedProject {
   id: string;
@@ -20,13 +21,36 @@ export interface SavedProject {
 
 const STORAGE_KEY = 'kidcode_projects';
 
-export const getProjects = (): SavedProject[] => {
+export type SaveProjectResult = 'saved' | 'limit-warning' | 'limit-reached';
+
+export const getProjectsSync = (): SavedProject[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     console.error("Failed to load projects", e);
     return [];
+  }
+};
+
+export const getProjects = (): SavedProject[] => getProjectsSync();
+
+export const getProjectsAsync = async (): Promise<SavedProject[]> => {
+  try {
+    const idbProjects = await listProjectsIndexedDB();
+    if (idbProjects.length > 0) {
+      const projects = await Promise.all(
+        idbProjects.map(async (p) => {
+          const full = await loadProjectIndexedDB(p.id);
+          return full || ({ id: p.id, name: p.name, mode: p.mode as AppMode, lastEdited: p.timestamp, data: { commands: [], hardwareState: { ...INITIAL_HARDWARE_STATE }, spriteState: { ...INITIAL_SPRITE_STATE }, appState: { ...INITIAL_APP_STATE }, circuitComponents: [], pcbColor: '#059669' } } as SavedProject);
+        })
+      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      return projects;
+    }
+    return getProjectsSync();
+  } catch {
+    return getProjectsSync();
   }
 };
 
@@ -39,7 +63,7 @@ export const captureThumbnail = (canvas: HTMLCanvasElement): string => {
     }
 };
 
-export const saveProject = (project: SavedProject, thumbnail?: string) => {
+export const saveProject = (project: SavedProject, thumbnail?: string): SaveProjectResult => {
   try {
     const projects = getProjects();
     const index = projects.findIndex(p => p.id === project.id);
@@ -49,7 +73,6 @@ export const saveProject = (project: SavedProject, thumbnail?: string) => {
     }
     
     if (index >= 0) {
-        // Preserve existing thumbnail if not provided
         if (!thumbnail && projects[index].thumbnail) {
             project.thumbnail = projects[index].thumbnail;
         }
@@ -57,14 +80,25 @@ export const saveProject = (project: SavedProject, thumbnail?: string) => {
     } else {
       projects.unshift(project);
     }
+
+    let result: SaveProjectResult = 'saved';
+
+    if (projects.length >= 10 && index < 0) {
+      result = 'limit-reached';
+    } else if (projects.length >= 8 && index < 0) {
+      result = 'limit-warning';
+    }
     
-    // Keep only last 10 projects to save space
-    if (projects.length > 10) projects.pop();
+    if (result === 'limit-reached') {
+      return result;
+    }
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    saveProjectIndexedDB(project).catch(() => {});
   } catch (e) {
     console.error("Failed to save project", e);
   }
+  return 'saved';
 };
 
 export const remixProject = (project: SavedProject): SavedProject => {
@@ -82,6 +116,7 @@ export const deleteProject = (id: string) => {
   try {
     const projects = getProjects().filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    deleteProjectIndexedDB(id).catch(() => {});
   } catch (e) {
     console.error("Failed to delete project", e);
   }

@@ -61,7 +61,8 @@ export const INITIAL_HARDWARE_STATE: HardwareState = {
 
     variables: {}, // Variables for hardware state
 
-    sensorHistory: []
+    sensorHistory: [],
+    sensorReadings: new Map(),
 };
 
 export const CIRCUIT_PALETTE: any[] = [

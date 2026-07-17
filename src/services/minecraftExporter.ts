@@ -170,31 +170,87 @@ const commandToMCFunction = (cmd: CommandBlock): string[] => {
             }
             return [`# Unknown structure: ${p.structure}`];
         }
-        case CommandType.REPEAT: {
-            const count = p.value ?? 10;
-            return [`# repeat ${count} times (unrolled)`];
-        }
         case CommandType.COMMENT:
             return p.text ? [`# ${p.text}`] : [];
         case CommandType.WAIT:
             return [`scoreboard players add #delay mcTimer ${p.value ?? 1}`];
-        case CommandType.IF:
-            return [`# if ${p.condition || 'condition'}`];
-        case CommandType.ELSE:
-            return [`# else`];
-        case CommandType.END_IF:
-        case CommandType.END_REPEAT:
-            return [];
         default:
             return [];
     }
 };
 
+function findMatchingEnd(commands: CommandBlock[], startIndex: number, openType: CommandType, closeType: CommandType): number {
+    let depth = 0;
+    for (let i = startIndex; i < commands.length; i++) {
+        if (commands[i].type === openType) depth++;
+        if (commands[i].type === closeType) {
+            depth--;
+            if (depth === 0) return i;
+        }
+    }
+    return commands.length - 1;
+}
+
 export const generateDatapackFunctions = (commands: CommandBlock[]): string[] => {
     const lines: string[] = [];
-    for (const cmd of commands) {
+    let i = 0;
+    while (i < commands.length) {
+        const cmd = commands[i];
+
+        if (cmd.type === CommandType.REPEAT) {
+            const count = cmd.params.value ?? 10;
+            const endIndex = findMatchingEnd(commands, i, CommandType.REPEAT, CommandType.END_REPEAT);
+            const childCommands = commands.slice(i + 1, endIndex);
+            for (let rep = 0; rep < count; rep++) {
+                for (const child of childCommands) {
+                    const mcLines = commandToMCFunction(child);
+                    lines.push(...mcLines);
+                }
+            }
+            i = endIndex + 1;
+            continue;
+        }
+
+        if (cmd.type === CommandType.IF) {
+            const condition = cmd.params.condition || 'condition';
+            const elseIndex = commands.findIndex((c, idx) => idx > i && c.type === CommandType.ELSE);
+            const endifIndex = findMatchingEnd(commands, i, CommandType.IF, CommandType.END_IF);
+            const thenCommands = elseIndex > i ? commands.slice(i + 1, elseIndex) : commands.slice(i + 1, endifIndex);
+            const elseCommands = elseIndex > i ? commands.slice(elseIndex + 1, endifIndex) : [];
+
+            const safeCondition = condition.replace(/[^a-zA-Z0-9_ ]/g, '').trim() || 'condition';
+            for (const child of thenCommands) {
+                const mcLines = commandToMCFunction(child);
+                for (const line of mcLines) {
+                    lines.push(`execute if score #${safeCondition} mcCondition matches 1 run ${line}`);
+                }
+            }
+            if (elseCommands.length > 0) {
+                for (const child of elseCommands) {
+                    const mcLines = commandToMCFunction(child);
+                    for (const line of mcLines) {
+                        lines.push(`execute unless score #${safeCondition} mcCondition matches 1 run ${line}`);
+                    }
+                }
+            }
+            i = endifIndex + 1;
+            continue;
+        }
+
+        if (cmd.type === CommandType.FOREVER) {
+            const endIndex = findMatchingEnd(commands, i, CommandType.FOREVER, CommandType.END_FOREVER);
+            const childCommands = commands.slice(i + 1, endIndex);
+            for (const child of childCommands) {
+                const mcLines = commandToMCFunction(child);
+                lines.push(...mcLines);
+            }
+            i = endIndex + 1;
+            continue;
+        }
+
         const mcLines = commandToMCFunction(cmd);
         lines.push(...mcLines);
+        i++;
     }
     return lines;
 };

@@ -343,16 +343,26 @@ export const useCodeInterpreter = ({
                     break;
                 case CommandType.READ_DIGITAL:
                     if (cmd.params.varName) {
-                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
-                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
-                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.pins[cmd.params.pin!];
+                        let digitalValue = hardwareStateRef.current.pins[cmd.params.pin!];
+                        const sensorReading = hardwareStateRef.current.sensorReadings?.get(cmd.params.componentId || '');
+                        if (sensorReading !== undefined) {
+                            digitalValue = sensorReading > 0;
+                        }
+                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = digitalValue;
+                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = digitalValue;
+                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = digitalValue;
                     }
                     break;
                 case CommandType.READ_ANALOG:
                     if (cmd.params.varName) {
-                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
-                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
-                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = hardwareStateRef.current.potentiometerValue;
+                        let analogValue = hardwareStateRef.current.potentiometerValue;
+                        const sensorReading = hardwareStateRef.current.sensorReadings?.get(cmd.params.componentId || '');
+                        if (sensorReading !== undefined) {
+                            analogValue = sensorReading;
+                        }
+                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName!] = analogValue;
+                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName!] = analogValue;
+                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName!] = analogValue;
                     }
                     break;
 

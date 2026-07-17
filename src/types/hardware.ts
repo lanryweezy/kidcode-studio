@@ -90,6 +90,9 @@ export interface HardwareState {
 
   // Data Logging
   sensorHistory: SensorDataPoint[];
+
+  // Simulated sensor readings (componentId -> value)
+  sensorReadings?: Map<string, number>;
 }
 
 export type ComponentType =

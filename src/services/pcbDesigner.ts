@@ -389,7 +389,7 @@ export class PCBDesigner {
     }
 
     // Simulated annealing placement optimization
-    let bestArrangement = [...components];
+    const bestArrangement = [...components];
     let bestCost = this.calculatePlacementCost(bestArrangement);
 
     let temperature = 100;

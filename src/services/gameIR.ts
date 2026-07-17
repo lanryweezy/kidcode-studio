@@ -167,9 +167,9 @@ function proc(p: GameProject, b: BlockInput) {
     case 'DASH': p.entities[0].props.dash = num(P.value, 10); break;
     case 'DOUBLE_JUMP': p.entities[0].props.doubleJump = P.condition === 'true'; break;
     case 'SET_BOUNCINESS': p.entities[0].physics.bounce = num(P.value, 0); break;
-    case 'SPAWN_ENEMY': { const e = makeEntity('e'+Math.random().toString(36).slice(2,8), 'Enemy', 'enemy', 400+Math.random()*300, 450, str(P.text, '👾'), 20, 10, 1, ['enemy']); p.entities.push(e); break; }
-    case 'SPAWN_ITEM': { const e = makeEntity('i'+Math.random().toString(36).slice(2,8), 'Item', 'item', 300+Math.random()*400, 450, str(P.text, '💎'), 1, 0, 0, ['item','collectible']); e.collider.isTrigger = true; e.score = 10; p.entities.push(e); break; }
-    case 'SPAWN_BOSS': { const e = makeEntity('b'+Math.random().toString(36).slice(2,8), 'Boss', 'enemy', 600, 400, str(P.text, '🐲'), num(P.value, 200), 25, 1.5, ['enemy','boss']); e.w=60;e.h=60;e.isBoss=true;e.props.phases=3; p.entities.push(e); break; }
+    case 'SPAWN_ENEMY': { const e = makeEntity(`e${Math.random().toString(36).slice(2,8)}`, 'Enemy', 'enemy', 400+Math.random()*300, 450, str(P.text, '👾'), 20, 10, 1, ['enemy']); p.entities.push(e); break; }
+    case 'SPAWN_ITEM': { const e = makeEntity(`i${Math.random().toString(36).slice(2,8)}`, 'Item', 'item', 300+Math.random()*400, 450, str(P.text, '💎'), 1, 0, 0, ['item','collectible']); e.collider.isTrigger = true; e.score = 10; p.entities.push(e); break; }
+    case 'SPAWN_BOSS': { const e = makeEntity(`b${Math.random().toString(36).slice(2,8)}`, 'Boss', 'enemy', 600, 400, str(P.text, '🐲'), num(P.value, 200), 25, 1.5, ['enemy','boss']); e.w=60;e.h=60;e.isBoss=true;e.props.phases=3; p.entities.push(e); break; }
     case 'SPAWN_PARTICLES': p.properties.particles = { count: num(P.value, 10), type: 'burst' }; break;
     case 'SHOOT': p.entities[0].props.shoot = { emoji: str(P.text, '⚡'), speed: 8 }; break;
     case 'ATTACK_ENEMY': p.entities[0].props.attack = { range: 50, dmg: num(P.value, 10) }; break;
@@ -186,8 +186,8 @@ function proc(p: GameProject, b: BlockInput) {
     case 'SET_MUSIC_VOLUME': p.config.audio.music = (num(P.value, 50))/100; break;
     case 'ADD_XP': W.vars.xp = (num(W.vars.xp, 0)) + (num(P.value, 50)); break;
     case 'LEVEL_UP': W.vars.level = num(W.vars.level, 1)+1; break;
-    case 'SET_STAT': W.vars['stat_'+str(P.text, 'str')] = num(P.value, 10); break;
-    case 'APPLY_STATUS': W.vars['status_'+str(P.text, 'poison')] = 3; break;
+    case 'SET_STAT': W.vars[`stat_${str(P.text, 'str')}`] = num(P.value, 10); break;
+    case 'APPLY_STATUS': W.vars[`status_${str(P.text, 'poison')}`] = 3; break;
     case 'SET_DIFFICULTY': p.config.gameplay.difficulty = str(P.text, 'normal'); break;
     case 'ADD_TO_INVENTORY': p.entities[0].props.inv = [...((p.entities[0].props.inv as unknown[]||[])), { name: str(P.text, 'Item'), qty: num(P.value, 1) }]; break;
     case 'USE_ITEM': p.entities[0].props.useItem = str(P.text); break;

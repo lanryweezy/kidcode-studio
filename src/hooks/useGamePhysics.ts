@@ -95,7 +95,7 @@ export const useGamePhysics = ({
         }
 
         // --- PHYSICS STEP 1: X AXIS ---
-        let nextX = x + vx;
+        const nextX = x + vx;
         let collisionX = false;
 
         // Check Tile Collisions (X) using spatial hash for O(1) lookup
@@ -285,8 +285,8 @@ export const useGamePhysics = ({
 
                 // Speed
                 const speed = 1.5;
-                let nextEx = ex + dx * speed;
-                let nextEy = ey + dy * speed;
+                const nextEx = ex + dx * speed;
+                const nextEy = ey + dy * speed;
 
                 // --- Simple Greedy Pathfinding (Obstacle Avoidance) ---
                 let hitObstacle = false;
@@ -316,8 +316,8 @@ export const useGamePhysics = ({
                     ey = nextEy;
                 } else {
                     // Try sliding along X axis if we hit something directly
-                    let slideEx = ex + dx * speed;
-                    let slideEy = ey;
+                    const slideEx = ex + dx * speed;
+                    const slideEy = ey;
                     let slideHitX = false;
 
                     if (tilemap) {
@@ -339,8 +339,8 @@ export const useGamePhysics = ({
                         ex = slideEx;
                     } else {
                         // Try sliding along Y axis
-                        let slideExY = ex;
-                        let slideEyY = ey + dy * speed;
+                        const slideExY = ex;
+                        const slideEyY = ey + dy * speed;
                         let slideHitY = false;
 
                         if (tilemap) {

@@ -83,7 +83,7 @@ const PixelEditor: React.FC<PixelEditorProps> = ({ initialTexture, onSave, onClo
                   const p = ctx.getImageData(x*10 + 5, y*10 + 5, 1, 1).data;
                   if (p[3] === 0) newPixels.push('transparent');
                   else {
-                      const hex = "#" + ((1 << 24) + (p[0] << 16) + (p[1] << 8) + p[2]).toString(16).slice(1);
+                      const hex = `#${  ((1 << 24) + (p[0] << 16) + (p[1] << 8) + p[2]).toString(16).slice(1)}`;
                       newPixels.push(hex);
                   }
               }

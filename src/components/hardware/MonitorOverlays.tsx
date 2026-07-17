@@ -40,11 +40,44 @@ export const MonitorOverlays: React.FC<MonitorOverlaysProps> = ({ hardwareState,
             )}
 
             {hardwareState.isShortCircuit && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
-                    <div className="animate-bounce bg-red-600 text-white font-black text-2xl px-8 py-4 rounded-xl shadow-[0_0_50px_rgba(220,38,38,0.8)] border-4 border-red-300">
-                        ⚡ SHORT CIRCUIT ⚡
-                        <div className="text-sm text-center mt-2 font-normal text-red-200">System Halted.</div>
-                    </div>
+                <div className="absolute inset-0 pointer-events-none z-50">
+                    <svg width="100%" height="100%" viewBox="0 0 300 400" className="absolute inset-0">
+                        <defs>
+                            <radialGradient id="smoke-grad" cx="50%" cy="60%" r="50%">
+                                <stop offset="0%" stopColor="#6b7280" stopOpacity="0.6" />
+                                <stop offset="50%" stopColor="#374151" stopOpacity="0.4" />
+                                <stop offset="100%" stopColor="#111827" stopOpacity="0" />
+                            </radialGradient>
+                            <filter id="smoke-blur">
+                                <feGaussianBlur stdDeviation="8" />
+                            </filter>
+                        </defs>
+                        <circle cx="150" cy="200" r="60" fill="url(#smoke-grad)" filter="url(#smoke-blur)" className="animate-pulse" />
+                        <circle cx="140" cy="180" r="30" fill="#6b7280" opacity="0.5" filter="url(#smoke-blur)">
+                            <animate attributeName="cy" values="180;120;80" dur="2s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.5;0.3;0" dur="2s" repeatCount="indefinite" />
+                            <animate attributeName="r" values="30;50;70" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="160" cy="190" r="20" fill="#9ca3af" opacity="0.4" filter="url(#smoke-blur)">
+                            <animate attributeName="cy" values="190;130;90" dur="2.5s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.4;0.2;0" dur="2.5s" repeatCount="indefinite" />
+                            <animate attributeName="r" values="20;40;60" dur="2.5s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="150" cy="200" r="15" fill="#ef4444" opacity="0.7">
+                            <animate attributeName="r" values="15;25;15" dur="0.5s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.7;0.4;0.7" dur="0.5s" repeatCount="indefinite" />
+                        </circle>
+                        <path d="M 145 195 L 150 175 L 155 195 L 160 180 L 155 195" fill="#f97316" opacity="0.8">
+                            <animate attributeName="opacity" values="0.8;0.5;0.8" dur="0.3s" repeatCount="indefinite" />
+                        </path>
+                        <text x="150" y="260" textAnchor="middle" fontSize="14" fill="#ef4444" fontWeight="black" className="animate-bounce">
+                            ⚡ SHORT CIRCUIT ⚡
+                        </text>
+                        <text x="150" y="275" textAnchor="middle" fontSize="8" fill="#fca5a5">
+                            System Halted — Check wiring!
+                        </text>
+                    </svg>
+                    <div className="absolute inset-0 bg-red-900/20 animate-pulse" />
                 </div>
             )}
         </>

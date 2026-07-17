@@ -119,7 +119,7 @@ export const MallTycoonGame: React.FC<{ onExit: () => void }> = ({ onExit }) => 
     if (isPaused || gameState.gameOver) return;
 
     setGameState(prev => {
-      let newMonth = prev.month + 0.1 * speed;
+      const newMonth = prev.month + 0.1 * speed;
 
       // Monthly processing
       if (Math.floor(newMonth) > Math.floor(prev.month)) {

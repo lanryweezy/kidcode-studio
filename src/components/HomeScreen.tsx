@@ -19,6 +19,7 @@ import {
     X
 } from 'lucide-react';
 import { SkeletonCard } from './ui/Skeleton';
+import { STORAGE_KEYS } from '../constants/actions';
 
 const HomeScreen: React.FC = () => {
     const {
@@ -39,8 +40,8 @@ const HomeScreen: React.FC = () => {
 
     const handleRemix = React.useCallback((e: React.MouseEvent, proj: any) => {
         e.stopPropagation();
-        const optimisticId = 'temp-remix-' + Date.now();
-        const optimisticProject = { ...proj, id: optimisticId, name: proj.name + ' (Remix)', lastEdited: Date.now() };
+        const optimisticId = `temp-remix-${  Date.now()}`;
+        const optimisticProject = { ...proj, id: optimisticId, name: `${proj.name  } (Remix)`, lastEdited: Date.now() };
         setRecentProjects(prev => [optimisticProject, ...prev]);
         playSoundEffect('powerup');
 
@@ -56,14 +57,14 @@ const HomeScreen: React.FC = () => {
     const [loadingTemplate, setLoadingTemplate] = React.useState<string | null>(null);
 
     const [onboardingDismissed, setOnboardingDismissed] = React.useState(() => {
-        return localStorage.getItem('kidcode_onboarding_dismissed') === 'true';
+        return localStorage.getItem(STORAGE_KEYS.ONBOARDING_DISMISSED) === 'true';
     });
 
     const isReturningUser = recentProjects.length > 0;
 
     const handleDismissOnboarding = () => {
         setOnboardingDismissed(true);
-        localStorage.setItem('kidcode_onboarding_dismissed', 'true');
+        localStorage.setItem(STORAGE_KEYS.ONBOARDING_DISMISSED, 'true');
     };
 
     const onboardingSteps = [

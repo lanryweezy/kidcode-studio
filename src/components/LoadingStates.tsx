@@ -1,102 +1,162 @@
 import React from 'react';
 
-/**
- * Loading Skeleton for cards
- */
+const KID_MESSAGES = [
+  "Wiggling the pixels...",
+  "Teaching robots to dance...",
+  "Sprinkling some magic dust...",
+  "Waking up the code...",
+  "Flipping some bits...",
+  "Making things sparkle...",
+  "Loading awesomeness...",
+  "Almost there, champion!",
+];
+
+const FUN_FACTS = [
+  "Did you know? Computers were once as big as a room!",
+  "Fun fact: The first computer bug was a real bug!",
+  "Cool tip: Code is like a recipe for computers!",
+];
+
+const ShimmerBlock: React.FC<{ width?: string; height?: string; rounded?: string }> = ({
+  width = '100%',
+  height = '1rem',
+  rounded = '0.75rem',
+}) => (
+  <div
+    className="relative overflow-hidden"
+    style={{ width, height, borderRadius: rounded }}
+  >
+    <div className="absolute inset-0 bg-gradient-to-r from-pink-200/60 via-purple-200/60 to-pink-200/60" />
+    <div
+      className="absolute inset-0"
+      style={{
+        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
+        backgroundSize: '200% 100%',
+        animation: 'shimmer 1.5s infinite',
+      }}
+    />
+  </div>
+);
+
 export const CardSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div className={`animate-pulse ${className}`}>
-    <div className="bg-slate-200 rounded-2xl h-48 w-full" />
+  <div className={`p-4 rounded-2xl bg-white/70 backdrop-blur-sm border border-pink-200/50 ${className}`}>
+    <ShimmerBlock height="12rem" rounded="1rem" />
     <div className="mt-4 space-y-3">
-      <div className="bg-slate-200 rounded-xl h-4 w-3/4" />
-      <div className="bg-slate-200 rounded-xl h-3 w-1/2" />
+      <ShimmerBlock width="75%" height="1rem" />
+      <ShimmerBlock width="50%" height="0.75rem" />
     </div>
   </div>
 );
 
-/**
- * Loading Skeleton for text lines
- */
-export const TextSkeleton: React.FC<{ lines?: number; className?: string }> = ({ 
-  lines = 3, 
-  className = '' 
+export const TextSkeleton: React.FC<{ lines?: number; className?: string }> = ({
+  lines = 3,
+  className = ''
 }) => (
-  <div className={`animate-pulse space-y-2 ${className}`}>
+  <div className={`space-y-3 ${className}`}>
     {Array.from({ length: lines }).map((_, i) => (
-      <div
+      <ShimmerBlock
         key={i}
-        className="bg-slate-200 rounded-xl h-4"
-        style={{ width: `${100 - (i * 10)}%` }}
+        width={`${100 - (i * 12)}%`}
+        height="1rem"
       />
     ))}
   </div>
 );
 
-/**
- * Loading Skeleton for circular avatars
- */
-export const AvatarSkeleton: React.FC<{ size?: number; className?: string }> = ({ 
-  size = 48, 
-  className = '' 
+export const AvatarSkeleton: React.FC<{ size?: number; className?: string }> = ({
+  size = 48,
+  className = ''
 }) => (
-  <div
-    className={`animate-pulse bg-slate-200 rounded-full ${className}`}
-    style={{ width: size, height: size }}
-  />
-);
-
-/**
- * Loading Skeleton for image thumbnails
- */
-export const ThumbnailSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <div className={`animate-pulse ${className}`}>
-    <div className="bg-slate-200 rounded-xl aspect-square w-full" />
-    <div className="mt-2 bg-slate-200 rounded-lg h-3 w-2/3" />
+  <div className={`relative overflow-hidden rounded-full ${className}`} style={{ width: size, height: size }}>
+    <div className="absolute inset-0 bg-gradient-to-br from-pink-300 to-purple-300" />
+    <div
+      className="absolute inset-0"
+      style={{
+        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
+        backgroundSize: '200% 100%',
+        animation: 'shimmer 1.5s infinite',
+      }}
+    />
   </div>
 );
 
-import { Zap } from 'lucide-react';
+export const ThumbnailSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <div className={`p-2 ${className}`}>
+    <ShimmerBlock height="8rem" rounded="0.75rem" />
+    <div className="mt-2">
+      <ShimmerBlock width="66%" height="0.75rem" />
+    </div>
+  </div>
+);
 
-/**
- * Loading Spinner
- */
-export const LoadingSpinner: React.FC<{ 
-  size?: number; 
+export const LoadingSpinner: React.FC<{
+  size?: number;
   className?: string;
   text?: string;
 }> = ({ size = 40, className = '', text }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <div className="absolute inset-0 border-4 border-violet-200 rounded-full" />
-      <div className="absolute inset-0 border-4 border-violet-600 rounded-full border-t-transparent animate-spin" />
-      <Zap className="text-violet-500 animate-pulse" size={size / 2} />
+    <div className="relative" style={{ width: size, height: size }}>
+      <div className="absolute inset-0 border-4 border-pink-200 rounded-full" />
+      <div
+        className="absolute inset-0 border-4 rounded-full border-t-transparent animate-spin"
+        style={{
+          borderImage: 'linear-gradient(135deg, #f472b6, #a78bfa, #60a5fa) 1',
+          borderStyle: 'solid',
+          borderWidth: '4px',
+          borderTopColor: 'transparent',
+        }}
+      />
+      <div
+        className="absolute inset-2 rounded-full animate-pulse"
+        style={{
+          background: 'linear-gradient(135deg, #f472b6, #a78bfa)',
+          opacity: 0.2,
+        }}
+      />
     </div>
     {text && (
-      <div className="mt-4 text-violet-600 font-bold text-sm bg-violet-100 px-4 py-1.5 rounded-full shadow-sm animate-pulse">
+      <div className="mt-4 text-purple-600 font-black text-sm animate-pulse">
         {text}
       </div>
     )}
   </div>
 );
 
-/**
- * Full Page Loading State
- */
-export const PageLoader: React.FC<{ message?: string }> = ({ message }) => (
-  <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[300] flex items-center justify-center">
-    <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
-      <LoadingSpinner size={80} />
-      {message && (
-        <div className="mt-6 text-slate-800 font-black text-xl bg-violet-100 px-6 py-2 rounded-xl text-center">
-          {message}
-        </div>
-      )}
-    </div>
-  </div>
-);
+export const PageLoader: React.FC<{ message?: string }> = ({ message }) => {
+  const randomMessage = KID_MESSAGES[Math.floor(Math.random() * KID_MESSAGES.length)];
+  const randomFact = FUN_FACTS[Math.floor(Math.random() * FUN_FACTS.length)];
 
-/**
- * Button Loading State
- */
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center"
+      style={{
+        background: 'linear-gradient(135deg, #fdf2f8 0%, #fae8ff 30%, #f3e8ff 60%, #ede9fe 100%)',
+      }}
+    >
+      <div className="text-center max-w-md px-6">
+        <div className="text-6xl mb-6 animate-bounce">✨</div>
+        <LoadingSpinner size={72} />
+        <div className="mt-6 text-purple-700 font-black text-xl">
+          {message || randomMessage}
+        </div>
+        <div className="mt-3 text-pink-500 font-bold text-sm">
+          {randomFact}
+        </div>
+        <div className="mt-6 flex justify-center gap-2">
+          {['🎮', '🚀', '🎨', '⭐', '🤖'].map((emoji, i) => (
+            <span
+              key={i}
+              className="text-2xl animate-bounce"
+              style={{ animationDelay: `${i * 0.1}s` }}
+            >
+              {emoji}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ButtonLoader: React.FC<{ text: string }> = ({ text }) => (
   <div className="flex items-center justify-center gap-2">
     <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin" />
@@ -104,21 +164,14 @@ export const ButtonLoader: React.FC<{ text: string }> = ({ text }) => (
   </div>
 );
 
-/**
- * Shimmer Effect for Loading Cards
- */
 export const ShimmerCard: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div className={`relative overflow-hidden ${className}`}>
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
     <CardSkeleton />
   </div>
 );
 
-/**
- * Grid of Loading Cards
- */
-export const GridSkeleton: React.FC<{ 
-  columns?: number; 
+export const GridSkeleton: React.FC<{
+  columns?: number;
   count?: number;
   className?: string;
 }> = ({ columns = 3, count = 6, className = '' }) => (
@@ -129,11 +182,8 @@ export const GridSkeleton: React.FC<{
   </div>
 );
 
-/**
- * Pulse Dot for Status Indicators
- */
-export const PulseDot: React.FC<{ 
-  color?: string; 
+export const PulseDot: React.FC<{
+  color?: string;
   size?: number;
   className?: string;
 }> = ({ color = 'green', size = 8, className = '' }) => (
@@ -142,22 +192,18 @@ export const PulseDot: React.FC<{
       className={`absolute inset-0 bg-${color}-500 rounded-full animate-ping`}
       style={{ animationDuration: '2s' }}
     />
-    <div
-      className={`absolute inset-0 bg-${color}-500 rounded-full`}
-    />
+    <div className={`absolute inset-0 bg-${color}-500 rounded-full`} />
   </div>
 );
 
-// Add custom animations to index.css
 export const LoadingAnimations = () => (
   <style>{`
     @keyframes shimmer {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
-    
     .animate-shimmer {
-      animation: shimmer 2s infinite linear;
+      animation: shimmer 1.5s infinite linear;
     }
   `}</style>
 );

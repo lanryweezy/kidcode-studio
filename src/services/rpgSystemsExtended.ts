@@ -84,7 +84,7 @@ export function canCraft(state: SpriteState, recipe: CraftingRecipe): boolean {
 export function craftItem(state: SpriteState, recipe: CraftingRecipe): { state: SpriteState; success: boolean } {
   if (!canCraft(state, recipe)) return { state, success: false };
 
-  let newInventory = [...state.inventory];
+  const newInventory = [...state.inventory];
   // Remove ingredients
   for (const ingredient of recipe.ingredients) {
     const idx = newInventory.findIndex(i => i.id === ingredient.itemId);
@@ -599,7 +599,7 @@ export function craftItemExtended(
     return { state, success: false, message: 'Cannot craft: missing materials or level' };
   }
 
-  let newInventory = [...state.inventory];
+  const newInventory = [...state.inventory];
   
   // Remove ingredients
   for (const ingredient of recipe.ingredients) {

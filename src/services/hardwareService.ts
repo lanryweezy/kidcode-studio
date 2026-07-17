@@ -265,7 +265,7 @@ export class HardwareService {
       return true;
     } catch (e) {
       console.error('Connection failed:', e);
-      this.onStatusCallback?.('Connection failed: ' + (e as Error).message);
+      this.onStatusCallback?.(`Connection failed: ${  (e as Error).message}`);
       return false;
     }
   }
@@ -354,7 +354,7 @@ export class HardwareService {
       }
     } catch (e) {
       console.error('Reconnect failed:', e);
-      this.onStatusCallback?.('Reconnect failed: ' + (e as Error).message);
+      this.onStatusCallback?.(`Reconnect failed: ${  (e as Error).message}`);
     }
     
     this.isReconnecting = false;
@@ -488,7 +488,7 @@ export class HardwareService {
       // In production, this would use avrdude protocol via WebSerial
       const lines = code.split('\n');
       for (let i = 0; i < lines.length; i++) {
-        await this.sendRaw(lines[i] + '\n');
+        await this.sendRaw(`${lines[i]  }\n`);
         this.uploadProgress = Math.floor((i / lines.length) * 100);
         this.onStatusCallback?.(`Uploading: ${this.uploadProgress}%`);
         await this.delay(10);
@@ -501,7 +501,7 @@ export class HardwareService {
       return { success: true };
     } catch (e) {
       this.isUploading = false;
-      this.onStatusCallback?.('Upload failed: ' + (e as Error).message);
+      this.onStatusCallback?.(`Upload failed: ${  (e as Error).message}`);
       return { success: false, error: (e as Error).message };
     }
   }
@@ -543,7 +543,7 @@ export class HardwareService {
       try {
         const startTime = Date.now();
         const encoder = new TextEncoder();
-        const data = JSON.stringify(item.command) + "\n";
+        const data = `${JSON.stringify(item.command)  }\n`;
         await this.writer!.write(encoder.encode(data));
         const duration = Date.now() - startTime;
         this.addToHistory(item.command, true, duration);

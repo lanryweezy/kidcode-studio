@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Download, Upload, Keyboard, Eye, Loader2, Check } from 'lucide-react';
+import { Download, Upload, Keyboard, Eye, Loader2, Check, FileJson, Trash2 } from 'lucide-react';
+import { exportAllData, deleteAllData } from '../services/gdprService';
 
 interface SettingsModalProps {
   highContrast: boolean;
@@ -15,6 +16,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ highContrast, setHighCont
   const [exportSuccess, setExportSuccess] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState(false);
+  const [isExportingAll, setIsExportingAll] = useState(false);
+  const [exportAllSuccess, setExportAllSuccess] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -34,6 +40,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ highContrast, setHighCont
     setIsImporting(false);
     setImportSuccess(true);
     setTimeout(() => setImportSuccess(false), 2000);
+  };
+
+  const handleExportAll = async () => {
+    setIsExportingAll(true);
+    setExportAllSuccess(false);
+    try {
+      await exportAllData();
+      setExportAllSuccess(true);
+      setTimeout(() => setExportAllSuccess(false), 2000);
+    } finally {
+      setIsExportingAll(false);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    setIsDeleting(true);
+    setDeleteSuccess(false);
+    try {
+      await deleteAllData();
+      setDeleteSuccess(true);
+      setShowDeleteConfirm(false);
+      setTimeout(() => setDeleteSuccess(false), 2000);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const shortcuts = [
@@ -138,6 +169,106 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ highContrast, setHighCont
                 }
               }}
             />
+          </div>
+        </section>
+
+        {/* Privacy & Data Rights */}
+        <section className="bg-slate-50 rounded-2xl border border-slate-100 p-5">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Privacy & Data Rights</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <button 
+              onClick={handleExportAll}
+              disabled={isExportingAll}
+              className="flex flex-col items-center justify-center gap-2 p-4 bg-white border-2 border-slate-100 hover:border-blue-200 rounded-xl transition-all group hover:shadow-md disabled:opacity-50"
+            >
+              {isExportingAll ? (
+                <Loader2 size={24} className="text-blue-500 animate-spin" />
+              ) : exportAllSuccess ? (
+                <Check size={24} className="text-green-500" />
+              ) : (
+                <FileJson size={24} className="text-slate-400 group-hover:text-blue-500 group-hover:scale-110 transition-transform" />
+              )}
+              <span className="text-sm font-bold text-slate-600 group-hover:text-blue-600">
+                {isExportingAll ? 'Exporting...' : exportAllSuccess ? 'Downloaded!' : 'Export All Data'}
+              </span>
+            </button>
+            <button 
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isDeleting}
+              className="flex flex-col items-center justify-center gap-2 p-4 bg-white border-2 border-slate-100 hover:border-red-200 rounded-xl transition-all group hover:shadow-md disabled:opacity-50"
+            >
+              {isDeleting ? (
+                <Loader2 size={24} className="text-red-500 animate-spin" />
+              ) : deleteSuccess ? (
+                <Check size={24} className="text-green-500" />
+              ) : (
+                <Trash2 size={24} className="text-slate-400 group-hover:text-red-500 group-hover:scale-110 transition-transform" />
+              )}
+              <span className="text-sm font-bold text-slate-600 group-hover:text-red-600">
+                {isDeleting ? 'Deleting...' : deleteSuccess ? 'Deleted!' : 'Delete All Data'}
+              </span>
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-3 text-center">
+            Your data is stored locally on this device only.
+          </p>
+        </section>
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-xl">
+              <h4 className="font-bold text-slate-700 text-lg mb-2">Delete All Data?</h4>
+              <p className="text-slate-500 text-sm mb-4">
+                This will permanently remove all projects, settings, and analytics from this device. This cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAll}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Everything'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Visual Grouping Header */}
+        <div className="flex items-center gap-3 mb-2">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Legal</span>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+        </div>
+
+        {/* Legal Links */}
+        <section className="bg-slate-50 rounded-2xl border border-slate-100 p-5">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Legal Documents</h4>
+          <div className="space-y-2">
+            <a
+              href="/privacy.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 hover:border-violet-200 transition-colors group"
+            >
+              <span className="text-sm font-bold text-slate-600 group-hover:text-violet-600">Privacy Policy</span>
+              <span className="text-xs text-slate-400">↗</span>
+            </a>
+            <a
+              href="/terms.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 hover:border-violet-200 transition-colors group"
+            >
+              <span className="text-sm font-bold text-slate-600 group-hover:text-violet-600">Terms of Service</span>
+              <span className="text-xs text-slate-400">↗</span>
+            </a>
           </div>
         </section>
 

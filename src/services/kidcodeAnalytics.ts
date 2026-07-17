@@ -179,4 +179,64 @@ export function clearAnalytics(): void {
   errorStore.length = 0;
   sessionStore.length = 0;
   featureStore.clear();
+  try {
+    localStorage.removeItem('kidcode_analytics');
+  } catch {
+    // ignore
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PERSISTENCE — Privacy-respecting local storage
+// ═══════════════════════════════════════════════════════════
+
+const ANALYTICS_STORAGE_KEY = 'kidcode_analytics';
+
+interface PersistedAnalytics {
+  blockUsage: BlockUsageEvent[];
+  completions: CompletionEvent[];
+  errors: ErrorPattern[];
+  sessions: SessionDuration[];
+  features: FeatureAdoption[];
+  lastSaved: number;
+}
+
+export function persistAnalytics(): void {
+  try {
+    const data: PersistedAnalytics = {
+      blockUsage: blockUsageStore.slice(-1000),
+      completions: completionStore.slice(-500),
+      errors: [...errorStore],
+      sessions: sessionStore.slice(-100),
+      features: Array.from(featureStore.values()),
+      lastSaved: Date.now(),
+    };
+    localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function loadAnalytics(): void {
+  try {
+    const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
+    if (!raw) return;
+    const data: PersistedAnalytics = JSON.parse(raw);
+    if (data.blockUsage) blockUsageStore.push(...data.blockUsage);
+    if (data.completions) completionStore.push(...data.completions);
+    if (data.errors) errorStore.push(...data.errors);
+    if (data.sessions) sessionStore.push(...data.sessions);
+    if (data.features) {
+      for (const f of data.features) {
+        featureStore.set(f.featureId, f);
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+}
+
+export function exportAnalyticsAsJSON(): string {
+  const report = generateAnalyticsReport();
+  return JSON.stringify(report, null, 2);
 }

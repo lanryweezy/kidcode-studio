@@ -325,6 +325,114 @@ textarea,
   white-space: normal;
 }
 
+/* ─── Kid-Friendly Light Theme ─── */
+.kid-theme-light {
+  --kid-bg-primary: linear-gradient(135deg, #fef3c7 0%, #fbcfe8 50%, #ddd6fe 100%);
+  --kid-bg-surface: rgba(255, 255, 255, 0.85);
+  --kid-bg-card: #ffffff;
+  --kid-accent-pink: #f472b6;
+  --kid-accent-purple: #a78bfa;
+  --kid-accent-blue: #60a5fa;
+  --kid-accent-green: #34d399;
+  --kid-accent-yellow: #fbbf24;
+  --kid-accent-orange: #fb923c;
+  --kid-text-primary: #1e293b;
+  --kid-text-secondary: #64748b;
+  --kid-border: rgba(167, 139, 250, 0.3);
+  --kid-shadow: 0 4px 20px rgba(244, 114, 182, 0.15);
+}
+
+.kid-theme-light body,
+.kid-theme-light {
+  background: var(--kid-bg-primary) !important;
+  background-attachment: fixed !important;
+  color: var(--kid-text-primary) !important;
+}
+
+.kid-theme-light .glass,
+.kid-theme-light .glass-dark {
+  background: var(--kid-bg-surface) !important;
+  border-color: var(--kid-border) !important;
+}
+
+.kid-theme-light button {
+  background: linear-gradient(135deg, var(--kid-accent-pink), var(--kid-accent-purple)) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+}
+
+.kid-theme-light button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 114, 182, 0.4) !important;
+}
+
+.kid-theme-light .block-hover:hover {
+  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.25) !important;
+}
+
+/* ─── Kid-Friendly Dark Theme ─── */
+.kid-theme-dark {
+  --kid-bg-primary: linear-gradient(135deg, #1e1b4b 0%, #312e81 30%, #4c1d95 70%, #581c87 100%);
+  --kid-bg-surface: rgba(30, 27, 75, 0.9);
+  --kid-bg-card: rgba(55, 48, 107, 0.8);
+  --kid-accent-pink: #f9a8d4;
+  --kid-accent-purple: #c4b5fd;
+  --kid-accent-blue: #93c5fd;
+  --kid-accent-green: #6ee7b7;
+  --kid-accent-yellow: #fde68a;
+  --kid-accent-orange: #fdba74;
+  --kid-text-primary: #f1f5f9;
+  --kid-text-secondary: #a5b4fc;
+  --kid-border: rgba(196, 181, 253, 0.25);
+  --kid-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+.kid-theme-dark body,
+.kid-theme-dark {
+  background: var(--kid-bg-primary) !important;
+  background-attachment: fixed !important;
+  color: var(--kid-text-primary) !important;
+}
+
+.kid-theme-dark .glass,
+.kid-theme-dark .glass-dark {
+  background: var(--kid-bg-surface) !important;
+  border-color: var(--kid-border) !important;
+}
+
+.kid-theme-dark button {
+  background: linear-gradient(135deg, var(--kid-accent-pink), var(--kid-accent-purple)) !important;
+  color: #1e1b4b !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 700;
+}
+
+.kid-theme-dark button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(249, 168, 212, 0.4) !important;
+}
+
+.kid-theme-dark input,
+.kid-theme-dark textarea,
+.kid-theme-dark select {
+  background: rgba(55, 48, 107, 0.6) !important;
+  color: var(--kid-text-primary) !important;
+  border-color: var(--kid-border) !important;
+}
+
+.kid-theme-dark .block-hover:hover {
+  box-shadow: 0 8px 24px rgba(196, 181, 253, 0.2) !important;
+}
+
+.kid-theme-dark canvas {
+  border-color: var(--kid-border) !important;
+}
+
 /* ─── Scrollbar ─── */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
@@ -451,6 +559,59 @@ textarea,
 
 .animate-drop-flash {
   animation: dropFlash 0.4s ease-out;
+}
+
+/* ─── Block Snap Bounce ─── */
+@keyframes blockSnap {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  50% { transform: scale(0.96); }
+  70% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.animate-block-snap {
+  animation: blockSnap 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes snapGlow {
+  0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6); }
+  50% { box-shadow: 0 0 20px 4px rgba(139, 92, 246, 0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.animate-snap-glow {
+  animation: snapGlow 0.5s ease-out;
+}
+
+/* ─── Confetti Animation ─── */
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-10px) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.confetti-piece:nth-child(odd) {
+  border-radius: 50%;
+}
+
+.confetti-piece:nth-child(even) {
+  border-radius: 2px;
 }
 
 /* ─── Block Delete Flash ─── */

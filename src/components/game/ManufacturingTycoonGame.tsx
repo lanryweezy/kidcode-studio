@@ -101,7 +101,7 @@ export const ManufacturingTycoonGame: React.FC<{ onExit: () => void }> = ({ onEx
     if (isPaused || gameState.gameOver) return;
 
     setGameState(prev => {
-      let newDay = prev.day + 0.1 * speed;
+      const newDay = prev.day + 0.1 * speed;
 
       // Produce
       let dayProduction = 0;

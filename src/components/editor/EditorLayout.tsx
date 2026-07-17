@@ -10,6 +10,7 @@ import type { Stage3DHandle } from '../Stage3D';
 import type { useEditorController } from '../../hooks/useEditorController';
 import { useStore } from '../../store/useStore';
 import AIAssistButton from '../AIAssistButton';
+import ErrorBoundary from '../ErrorBoundary';
 
 type ControllerProps = ReturnType<typeof useEditorController>;
 
@@ -81,16 +82,19 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 onToggle3D={() => setIs3DMode(!is3DMode)}
             />
 
-            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-                <Sidebar
-                    handleAppendCode={(cmds: CommandBlock[]) => handleAppendCode(cmds.map((c: CommandBlock) => ({ ...c, id: crypto.randomUUID() })))}
-                    handleReplaceCode={(cmds: CommandBlock[]) => handleReplaceCode(cmds.map((c: CommandBlock) => ({ ...c, id: crypto.randomUUID() })))}
-                    handleGenerateSprite={handleGenerateSprite}
-                    isGeneratingSprite={localIsGeneratingSprite}
-                    setShowQuestEditor={() => setShowQuestEditor(true)}
-                />
+            <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+                <ErrorBoundary>
+                    <Sidebar
+                        handleAppendCode={(cmds: CommandBlock[]) => handleAppendCode(cmds.map((c: CommandBlock) => ({ ...c, id: crypto.randomUUID() })))}
+                        handleReplaceCode={(cmds: CommandBlock[]) => handleReplaceCode(cmds.map((c: CommandBlock) => ({ ...c, id: crypto.randomUUID() })))}
+                        handleGenerateSprite={handleGenerateSprite}
+                        isGeneratingSprite={localIsGeneratingSprite}
+                        setShowQuestEditor={() => setShowQuestEditor(true)}
+                    />
+                </ErrorBoundary>
 
-                <div key={`workspace-${mode}`} id="block-workspace" className="flex-1 bg-slate-100 relative flex flex-col overflow-y-auto animate-in fade-in zoom-in-95 duration-300">
+                <div key={`workspace-${mode}`} id="block-workspace" className="flex-1 bg-slate-100 relative flex flex-col min-h-0 animate-in fade-in zoom-in-95 duration-300">
+                    <ErrorBoundary>
                     <div className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-violet-500 bg-slate-300 transition-colors z-50 hidden lg:flex items-center justify-center opacity-40 hover:opacity-100" onMouseDown={handleMouseDownLeft}>
                         <div className="w-0.5 h-8 bg-current rounded-full" />
                     </div>
@@ -181,65 +185,70 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                             <div className="h-40" />
                         </div>
                     </div>
+                </ErrorBoundary>
                 </div>
 
-                <div key={`stage-${mode}`} className="bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col relative z-20 shrink-0 animate-in fade-in slide-in-from-right-4 duration-500" style={{ width: isMobile ? '100%' : rightPanelWidth }}>
+                <div key={`stage-${mode}`} className="bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col relative z-20 shrink-0 min-h-0 animate-in fade-in slide-in-from-right-4 duration-500" style={{ width: isMobile ? '100%' : rightPanelWidth }}>
                     <div className="absolute top-0 left-0 w-1.5 h-full cursor-col-resize hover:bg-violet-500 bg-slate-300 transition-colors z-50 hidden lg:flex items-center justify-center opacity-40 hover:opacity-100" onMouseDown={handleMouseDownRight}>
                         <div className="w-0.5 h-8 bg-current rounded-full" />
                     </div>
                     <div className="flex-1 p-4 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative min-h-[300px]">
-                        {is3DMode && mode === AppMode.GAME ? (
-                            <React.Suspense fallback={<div className="flex items-center justify-center h-full bg-slate-900"><span className="text-white">Loading 3D...</span></div>}>
-                                <Stage3D
-                                    ref={stageRef as unknown as React.RefObject<Stage3DHandle>}
+                        <ErrorBoundary>
+                            {is3DMode && mode === AppMode.GAME ? (
+                                <React.Suspense fallback={<div className="flex items-center justify-center h-full bg-slate-900"><span className="text-white">Loading 3D...</span></div>}>
+                                    <Stage3D
+                                        ref={stageRef as unknown as React.RefObject<Stage3DHandle>}
+                                        spriteState={spriteState}
+                                        spriteStateRef={spriteStateRef}
+                                        isExecuting={isPlaying}
+                                        shakeAmount={shakeAmount}
+                                        gameCanvasSize={gameCanvasSize}
+                                        onInput={() => { }}
+                                    />
+                                </React.Suspense>
+                            ) : (
+                                <Stage
+                                    ref={stageRef}
+                                    mode={mode}
+                                    hardwareState={hardwareState}
+                                    hardwareStateRef={hardwareStateRef}
                                     spriteState={spriteState}
                                     spriteStateRef={spriteStateRef}
+                                    appState={appState}
+                                    canvasRef={canvasRef}
+                                    circuitComponents={circuitComponents}
+                                    onCircuitUpdate={setCircuitComponents}
+                                    pcbColor={pcbColor}
+                                    setPcbColor={setPcbColor}
                                     isExecuting={isPlaying}
-                                    shakeAmount={shakeAmount}
-                                    gameCanvasSize={gameCanvasSize}
+                                    onNavigate={handleNavigate}
+                                    highlightPin={highlightedPin}
+                                    inputState={null}
                                     onInput={() => { }}
+                                    onHardwareInput={handleHardwareInput}
+                                    onUpdateSpriteState={updateSpriteState}
+                                    shakeAmount={shakeAmount}
+                                    onAppInteraction={handleAppInteraction}
+                                    onTick={advancedPhysics && matterTick ? matterTick : tick}
+                                    wires={wires}
+                                    onWiresUpdate={setWires}
                                 />
-                            </React.Suspense>
-                        ) : (
-                            <Stage
-                                ref={stageRef}
-                                mode={mode}
-                                hardwareState={hardwareState}
-                                hardwareStateRef={hardwareStateRef}
-                                spriteState={spriteState}
-                                spriteStateRef={spriteStateRef}
-                                appState={appState}
-                                canvasRef={canvasRef}
-                                circuitComponents={circuitComponents}
-                                onCircuitUpdate={setCircuitComponents}
-                                pcbColor={pcbColor}
-                                setPcbColor={setPcbColor}
-                                isExecuting={isPlaying}
-                                onNavigate={handleNavigate}
-                                highlightPin={highlightedPin}
-                                inputState={null}
-                                onInput={() => { }}
-                                onHardwareInput={handleHardwareInput}
-                                onUpdateSpriteState={updateSpriteState}
-                                shakeAmount={shakeAmount}
-                                onAppInteraction={handleAppInteraction}
-                                onTick={advancedPhysics && matterTick ? matterTick : tick}
-                                wires={wires}
-                                onWiresUpdate={setWires}
-                            />
-                        )}
+                            )}
+                        </ErrorBoundary>
                     </div>
                 </div>
             </div>
 
             {showConsole && (
-                <div className="h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 shrink-0">
-                    <div className="flex justify-between items-center mb-1 text-slate-500 text-[10px] uppercase font-bold sticky top-0 bg-slate-900">
-                        <span>Console Output</span>
-                        <button onClick={clearLogs} className="hover:text-white" aria-label="Clear console logs">Clear</button>
+                <ErrorBoundary>
+                    <div className="h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 shrink-0">
+                        <div className="flex justify-between items-center mb-1 text-slate-500 text-[10px] uppercase font-bold sticky top-0 bg-slate-900">
+                            <span>Console Output</span>
+                            <button onClick={clearLogs} className="hover:text-white" aria-label="Clear console logs">Clear</button>
+                        </div>
+                        {consoleLogs.map((log, i) => <div key={i} className="border-b border-white/5 py-0.5">{log}</div>)}
                     </div>
-                    {consoleLogs.map((log, i) => <div key={i} className="border-b border-white/5 py-0.5">{log}</div>)}
-                </div>
+                </ErrorBoundary>
             )}
         </>
     );

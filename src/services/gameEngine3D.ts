@@ -107,6 +107,8 @@ export class GameEngine3D {
   private physicsConfig: PhysicsConfig;
   private onRenderCallback?: () => void;
 
+  private resizeHandler?: () => void;
+
   constructor(canvas: HTMLCanvasElement) {
     // Scene
     this.scene = new THREE.Scene();
@@ -154,7 +156,8 @@ export class GameEngine3D {
     this.setupDefaultLighting();
 
     // Handle resize
-    window.addEventListener('resize', () => this.handleResize());
+    this.resizeHandler = () => this.handleResize();
+    window.addEventListener('resize', this.resizeHandler);
   }
 
   private setupDefaultLighting() {
@@ -548,7 +551,7 @@ export class GameEngine3D {
   private updateEntities(entities: EntityState[]) {
     // Simplified entity update for now
     entities.forEach(e => {
-      let obj = this.models.get(e.id);
+      const obj = this.models.get(e.id);
       if (!obj) {
         this.addGameObject({
           id: e.id,
@@ -638,10 +641,50 @@ export class GameEngine3D {
   }
 
   public dispose() {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+
+    if (this.mixer) {
+      this.mixer.stopAllAction();
+      this.mixer = null;
+    }
+
     this.models.forEach((model) => {
       this.scene.remove(model);
+      model.traverse((child: THREE.Object3D) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (mesh.geometry) mesh.geometry.dispose();
+          if (mesh.material) {
+            const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            materials.forEach((mat: THREE.Material) => {
+              Object.values(mat).forEach((value) => {
+                if (value instanceof THREE.Texture) value.dispose();
+              });
+              mat.dispose();
+            });
+          }
+        }
+      });
     });
     this.models.clear();
+
+    this.lights.forEach((light) => {
+      this.scene.remove(light);
+      const dirLight = light as THREE.DirectionalLight;
+      if (dirLight.shadow?.map) {
+        dirLight.shadow.map.dispose();
+      }
+      light.dispose();
+    });
+    this.lights.clear();
+
+    this.animations.clear();
+    this.loadingModels.clear();
+
+    this.scene.clear();
     this.renderer.dispose();
+    this.renderer.forceContextLoss();
   }
 }

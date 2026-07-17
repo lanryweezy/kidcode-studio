@@ -172,7 +172,7 @@ export function lcdPrintFloat(s: LCDState, value: number, decimals: number = 2):
 }
 
 export function lcdPrintHex(s: LCDState, value: number, digits: number = 2): LCDState {
-  return lcdPrint(s, '0x' + value.toString(16).toUpperCase().padStart(digits, '0'));
+  return lcdPrint(s, `0x${  value.toString(16).toUpperCase().padStart(digits, '0')}`);
 }
 
 export function lcdPrintBinary(s: LCDState, value: number, digits: number = 8): LCDState {
@@ -265,7 +265,7 @@ export function lcdProgressBar(s: LCDState, row: number, percent: number, width:
 
 // === MARQUEE ===
 export function lcdMarquee(s: LCDState, text: string, row: number, offset: number): LCDState {
-  const padded = text + '   ' + text;
+  const padded = `${text  }   ${  text}`;
   const start = offset % (text.length + 3);
   return lcdPrintAt(s, row, 0, padded.substring(start, start + s.cols));
 }
@@ -315,9 +315,9 @@ export function lcdBlinkStep(s: LCDState, visible: boolean): LCDState {
 // === BOX DRAWING ===
 export function lcdBox(s: LCDState, row: number, text: string): LCDState {
   const inner = text.padEnd(s.cols - 2).substring(0, s.cols - 2);
-  let ns = lcdPrintAt(s, row, 0, '\u2554' + '\u2550'.repeat(s.cols - 2) + '\u2557');
-  ns = lcdPrintAt(ns, row + 1, 0, '\u2551' + inner + '\u2551');
-  if (row + 2 < s.rows) ns = lcdPrintAt(ns, row + 2, 0, '\u255A' + '\u2550'.repeat(s.cols - 2) + '\u255D');
+  let ns = lcdPrintAt(s, row, 0, `\u2554${  '\u2550'.repeat(s.cols - 2)  }\u2557`);
+  ns = lcdPrintAt(ns, row + 1, 0, `\u2551${  inner  }\u2551`);
+  if (row + 2 < s.rows) ns = lcdPrintAt(ns, row + 2, 0, `\u255A${  '\u2550'.repeat(s.cols - 2)  }\u255D`);
   return ns;
 }
 
@@ -333,8 +333,8 @@ export function lcdFormatTemp(c: number, showUnit: boolean = true): string {
   return c.toFixed(1) + (showUnit ? '\u00B0C' : '');
 }
 
-export function lcdFormatVoltage(v: number): string { return v.toFixed(2) + 'V'; }
-export function lcdFormatPercent(p: number): string { return Math.round(p) + '%'; }
+export function lcdFormatVoltage(v: number): string { return `${v.toFixed(2)  }V`; }
+export function lcdFormatPercent(p: number): string { return `${Math.round(p)  }%`; }
 export function lcdCenter(text: string, width: number): string {
   const p = Math.max(0, Math.floor((width - text.length) / 2));
   return ' '.repeat(p) + text;

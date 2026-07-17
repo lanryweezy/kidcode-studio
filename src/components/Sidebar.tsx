@@ -96,7 +96,7 @@ const Sidebar: React.FC<any> = ({
     }, {} as Record<string, any[]>);
 
     return (
-        <div className="flex h-full overflow-hidden relative">
+        <div className="flex h-full relative">
             <SidebarDock
                 mode={mode}
                 activeTab={activeTab}
@@ -130,7 +130,7 @@ const Sidebar: React.FC<any> = ({
                 {isCollapsed ? '›' : '‹'}
             </button>
 
-            <div className={`${isCollapsed ? 'w-16' : 'w-72'} glass border-r border-slate-200 flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden relative z-20`}>
+            <div className={`${isCollapsed ? 'w-16' : 'w-72'} glass border-r border-slate-200 flex flex-col h-full transition-all duration-300 ease-in-out relative z-20 min-h-0`}>
                 {isCollapsed ? (
                     <div className="flex flex-col items-center gap-2 p-2">
                         <button onClick={() => { setLocalSearch(''); setIsCollapsed(false); }} className="w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors" title="Blocks">
@@ -149,7 +149,7 @@ const Sidebar: React.FC<any> = ({
                 ) : (
                 <>
                 {activeTab === 'export' && (
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50 tab-fade-in">
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50 min-h-0 tab-fade-in">
                         <div className="flex items-center gap-2 mb-6">
                             <div className="w-8 h-8 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center">
                                 <Code2 size={18} />
@@ -205,7 +205,7 @@ const Sidebar: React.FC<any> = ({
                 )}
 
                 {activeTab === 'ai' ? (
-                    <div className="tab-fade-in"><AIChat currentMode={mode} onAppendCode={handleAppendCode} onReplaceCode={handleReplaceCode} /></div>
+                    <div className="flex-1 flex flex-col min-h-0 tab-fade-in"><AIChat currentMode={mode} onAppendCode={handleAppendCode} onReplaceCode={handleReplaceCode} /></div>
                 ) : activeTab === 'design' && mode === AppMode.APP ? (
                     <div className="flex flex-col h-full bg-slate-50 tab-fade-in">
                         <div className="p-4 bg-white border-b border-slate-200">
@@ -285,7 +285,7 @@ const Sidebar: React.FC<any> = ({
                         )}
                     </div>
                 ) : activeTab === 'components' && mode === AppMode.HARDWARE ? (
-                    <div className="flex-1 flex flex-col tab-fade-in">
+                    <div className="flex-1 flex flex-col min-h-0 tab-fade-in">
                         <div className="p-4 border-b border-slate-100 bg-white">
                             <div className="relative">
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -326,7 +326,7 @@ const Sidebar: React.FC<any> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col tab-fade-in">
+                    <div className="flex-1 flex flex-col min-h-0 tab-fade-in">
                         <div className="p-4 border-b border-slate-100">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="font-bold text-slate-700">Block Library</h3>

@@ -1,10 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, Bot, User, Volume2, StopCircle, Bug, Glasses, Mic, Wand2 } from 'lucide-react';
+import { Send, Loader2, Sparkles, Bot, User, Volume2, StopCircle, Bug, Glasses, Mic, Wand2, BookOpen } from 'lucide-react';
 import { generateCodeFromPromptStream, generateSpeech, reviewCode, getFixedCode } from '../services/geminiService';
-import { AppMode, CommandBlock } from '../types';
+import { AppMode, CommandBlock, CommandType } from '../types';
 import { useStore } from '../store/useStore';
 import { playSoundEffect } from '../services/soundService';
+import { startVoiceCommands, stopVoiceCommands, isVoiceListening, isVoiceRecognitionSupported } from '../services/voiceCommands';
+import { explainCodeBlocks, buildContextAwarePrompt } from '../services/aiServiceWrapper';
 
 interface AIChatProps {
   currentMode: AppMode;
@@ -23,7 +25,9 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', text: "👋 Welcome to your AI Copilot! I can help you build games, apps, and circuits. Just describe what you want to create, and I'll write the code blocks for you. Try one of the suggestions below to get started!" }
   ]);
-  const [isPlaying, setIsPlaying] = useState<number | null>(null); // Index of message playing
+  const [isPlaying, setIsPlaying] = useState<number | null>(null);
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
 
@@ -35,6 +39,24 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
     : currentMode === AppMode.APP
     ? ["Create a login screen", "Add a button that speaks", "Make a color picker", "Add a slider control"]
     : ["Make an LED blink", "Read a temperature sensor", "Control a servo motor", "Display text on LCD"];
+
+  useEffect(() => {
+    const handleVoiceAddBlock = (e: CustomEvent) => {
+      const { type, params } = e.detail;
+      const newBlock: Omit<CommandBlock, 'id'> = { type: type as CommandType, params };
+      onAppendCode([newBlock]);
+      setMessages(prev => [...prev, { role: 'assistant', text: `Added a ${type.replace(/_/g, ' ').toLowerCase()} block!` }]);
+    };
+    const handleVoiceRunGame = () => {
+      setMessages(prev => [...prev, { role: 'assistant', text: 'Running the game!' }]);
+    };
+    window.addEventListener('voice-add-block', handleVoiceAddBlock as EventListener);
+    window.addEventListener('voice-run-game', handleVoiceRunGame);
+    return () => {
+      window.removeEventListener('voice-add-block', handleVoiceAddBlock as EventListener);
+      window.removeEventListener('voice-run-game', handleVoiceRunGame);
+    };
+  }, [onAppendCode]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -51,11 +73,18 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
     setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setIsLoading(true);
 
-    // Initialize an empty assistant message that we will update
+    const storeState = useStore.getState();
+    const contextPrompt = buildContextAwarePrompt(userText, {
+      commands: storeState.commands.map(c => ({ type: c.type, params: c.params || {} })),
+      consoleLogs: storeState.consoleLogs,
+      gameMode: currentMode,
+      gameState: storeState.gameState,
+    });
+
     setMessages(prev => [...prev, { role: 'assistant', text: '' }]);
 
     try {
-      const stream = generateCodeFromPromptStream(userText, currentMode);
+      const stream = generateCodeFromPromptStream(contextPrompt, currentMode);
       let finalCommands: Omit<CommandBlock, 'id'>[] | undefined;
 
       for await (const chunk of stream) {
@@ -122,6 +151,53 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
                     setIsLoading(false);
                 }
             };
+  const handleExplain = () => {
+      const { commands } = useStore.getState();
+      if (commands.length === 0) {
+          setMessages(prev => [...prev, { role: 'assistant', text: "Your code is empty! Add some blocks first so I can explain them. 😊" }]);
+          return;
+      }
+      const blocks = commands.map(c => ({ type: c.type, params: c.params || {} }));
+      const explanation = explainCodeBlocks(blocks);
+      setMessages(prev => [...prev, { role: 'user', text: "Explain my code" }]);
+      setMessages(prev => [...prev, { role: 'assistant', text: explanation }]);
+  };
+
+  const handleVoiceToggle = () => {
+      if (!isVoiceRecognitionSupported()) {
+          setMessages(prev => [...prev, { role: 'assistant', text: "Voice commands are not supported in this browser. Try Chrome or Edge!" }]);
+          return;
+      }
+      if (isVoiceActive) {
+          stopVoiceCommands();
+          setIsVoiceActive(false);
+          setVoiceTranscript('');
+      } else {
+          const started = startVoiceCommands({
+              onResult: (result) => {
+                  if (result.recognized) {
+                      setMessages(prev => [...prev, { role: 'assistant', text: `Voice command: "${result.command}" - Action: ${result.action?.replace(/_/g, ' ')}` }]);
+                  } else {
+                      setMessages(prev => [...prev, { role: 'assistant', text: `I heard "${result.command}" but didn't recognize a command. Try "add a loop block" or "run the game".` }]);
+                  }
+                  setIsVoiceActive(false);
+                  setVoiceTranscript('');
+              },
+              onTranscript: (transcript) => {
+                  setVoiceTranscript(transcript);
+              },
+              onError: (error) => {
+                  setMessages(prev => [...prev, { role: 'assistant', text: `Voice error: ${error}` }]);
+                  setIsVoiceActive(false);
+                  setVoiceTranscript('');
+              }
+          });
+          if (started) {
+              setIsVoiceActive(true);
+          }
+      }
+  };
+
   const playMessage = async (text: string, index: number) => {
       if (isPlaying === index) {
           // Stop
@@ -262,6 +338,33 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
                 <Wand2 size={14} /> Fix It!
             </button>
         </div>
+        <div className="flex gap-2 mb-3">
+            <button 
+                type="button"
+                onClick={handleExplain}
+                disabled={isLoading}
+                className="flex-1 py-2 bg-blue-100 text-blue-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-blue-200 transition-all disabled:opacity-50"
+            >
+                <BookOpen size={14} /> Explain Code
+            </button>
+            <button 
+                type="button"
+                onClick={handleVoiceToggle}
+                disabled={isLoading}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${
+                    isVoiceActive 
+                        ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                        : 'bg-green-100 text-green-600 hover:bg-green-200'
+                }`}
+            >
+                <Mic size={14} /> {isVoiceActive ? 'Stop Voice' : 'Voice Commands'}
+            </button>
+        </div>
+        {isVoiceActive && voiceTranscript && (
+            <div className="mb-3 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700 italic">
+                Hearing: "{voiceTranscript}"
+            </div>
+        )}
         <form onSubmit={handleSubmit} className="relative">
           <textarea
             value={input}

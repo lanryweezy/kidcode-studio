@@ -781,7 +781,7 @@ export function simulateColorSensor(env: EnvironmentState): { r: number; g: numb
   const r = clamp(Math.round(128 + gaussianNoise(0, 20)), 0, 255);
   const g = clamp(Math.round(128 + gaussianNoise(0, 20)), 0, 255);
   const b = clamp(Math.round(128 + gaussianNoise(0, 20)), 0, 255);
-  const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+  const hex = `#${  [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')}`;
   return { r, g, b, hex };
 }
 

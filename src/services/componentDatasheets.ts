@@ -787,7 +787,7 @@ export function getElectricalCharacteristicsTable(type: string): string {
   if (chars.length === 0) return 'No electrical characteristics available';
   
   let table = 'Parameter | Symbol | Test Condition | Min | Typ | Max | Unit\n';
-  table += '-'.repeat(80) + '\n';
+  table += `${'-'.repeat(80)  }\n`;
   
   chars.forEach(char => {
     table += `${char.parameter} | ${char.symbol} | ${char.testCondition} | ${char.min} | ${char.typical} | ${char.max} | ${char.unit}\n`;

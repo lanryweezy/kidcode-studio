@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { HardwareState } from '../../types';
 import { isMicrocontroller } from './PinManager';
 
@@ -9,6 +9,15 @@ interface ComponentRenderersProps {
 }
 
 export const ComponentRenderers: React.FC<ComponentRenderersProps> = ({ comp, hardwareState, onHardwareInput }) => {
+    const lastInputTime = useRef<number>(0);
+
+    const throttledHardwareInput = useCallback((pin: number, value: any) => {
+        const now = Date.now();
+        if (now - lastInputTime.current < 100) return;
+        lastInputTime.current = now;
+        onHardwareInput(pin, value);
+    }, [onHardwareInput]);
+
     return (
         <>
             {comp.type.startsWith('LED') && comp.type !== 'RGB_LED' && comp.type !== 'RGB_STRIP' && (
@@ -131,7 +140,7 @@ export const ComponentRenderers: React.FC<ComponentRenderersProps> = ({ comp, ha
                                 type="range"
                                 min="0" max="100"
                                 value={hardwareState.motorLoad || 0}
-                                onChange={(e) => onHardwareInput(comp.pin, { type: 'motorLoad', value: Number(e.target.value) })}
+                                onChange={(e) => throttledHardwareInput(comp.pin, { type: 'motorLoad', value: Number(e.target.value) })}
                                 className="w-full accent-yellow-500 h-1"
                             />
                         </div>
@@ -369,25 +378,56 @@ export const ComponentRenderers: React.FC<ComponentRenderersProps> = ({ comp, ha
 
             {comp.type === 'MULTIMETER' && (
                 <g>
-                    <rect x="0" y="0" width="30" height="40" rx="2" fill="#facc15" stroke="#ca8a04" strokeWidth="1" />
-                    <rect x="3" y="3" width="24" height="12" rx="1" fill="#1e293b" />
-                    <text x="15" y="11" textAnchor="middle" fontSize="6" fill="#10b981" fontFamily="monospace">0.00</text>
-                    <circle cx="15" cy="24" r="6" fill="#334155" stroke="#000" strokeWidth="1" />
-                    <circle cx="15" cy="24" r="4" fill="#1e293b" />
-                    <path d="M 15 24 L 15 20" stroke="#fff" strokeWidth="1" />
-                    <circle cx="10" cy="35" r="2" fill="#ef4444" />
-                    <circle cx="20" cy="35" r="2" fill="#1e293b" />
+                    <rect x="0" y="0" width="40" height="55" rx="3" fill="#f59e0b" stroke="#d97706" strokeWidth="1" />
+                    <rect x="3" y="3" width="34" height="16" rx="1" fill="#0f172a" />
+                    <text x="20" y="10" textAnchor="middle" fontSize="2" fill="#64748b" fontFamily="monospace">AUTO</text>
+                    <text x="20" y="16" textAnchor="middle" fontSize="7" fill="#10b981" fontFamily="monospace" fontWeight="bold">
+                        {hardwareState.multimeterVoltage !== undefined ? hardwareState.multimeterVoltage.toFixed(2) : '0.00'}
+                    </text>
+                    <text x="34" y="16" textAnchor="end" fontSize="4" fill="#10b981" fontFamily="monospace">V</text>
+                    <rect x="8" y="22" width="24" height="3" rx="1" fill="#1e293b" />
+                    <text x="20" y="24" textAnchor="middle" fontSize="1.8" fill="#64748b">DC V</text>
+                    <circle cx="20" cy="34" r="8" fill="#1e293b" stroke="#334155" strokeWidth="1" />
+                    <circle cx="20" cy="34" r="6" fill="#0f172a" />
+                    {hardwareState.multimeterVoltage !== undefined && hardwareState.multimeterVoltage > 0 && (
+                        <path d="M 20 34 L 20 28" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
+                    )}
+                    {[0, 45, 90, 135, 180, 225, 270, 315].map(a => (
+                        <line key={a} x1={20 + 6.5 * Math.cos(a * Math.PI / 180)} y1={34 + 6.5 * Math.sin(a * Math.PI / 180)} x2={20 + 7.5 * Math.cos(a * Math.PI / 180)} y2={34 + 7.5 * Math.sin(a * Math.PI / 180)} stroke="#475569" strokeWidth="0.4" />
+                    ))}
+                    <text x="20" y="46" textAnchor="middle" fontSize="2" fill="#fbbf24">V / mA / Ohm</text>
+                    <rect x="4" y="48" width="4" height="5" rx="1" fill="#ef4444" />
+                    <rect x="12" y="48" width="4" height="5" rx="1" fill="#1e293b" stroke="#475569" strokeWidth="0.3" />
+                    <rect x="20" y="48" width="4" height="5" rx="1" fill="#22c55e" />
+                    <rect x="28" y="48" width="8" height="5" rx="1" fill="#1e293b" stroke="#475569" strokeWidth="0.3" />
+                    <text x="6" y="54.5" textAnchor="middle" fontSize="1.5" fill="#fca5a5">+</text>
+                    <text x="14" y="54.5" textAnchor="middle" fontSize="1.5" fill="#64748b">COM</text>
+                    <text x="22" y="54.5" textAnchor="middle" fontSize="1.5" fill="#86efac">mA</text>
+                    <text x="32" y="54.5" textAnchor="middle" fontSize="1.5" fill="#64748b">V/Ohm</text>
                 </g>
             )}
 
             {comp.type === 'OSCILLOSCOPE' && (
                 <g>
-                    <rect x="0" y="0" width="40" height="30" rx="2" fill="#94a3b8" stroke="#64748b" strokeWidth="1" />
-                    <rect x="3" y="3" width="24" height="20" rx="1" fill="#020617" />
-                    <path d="M 3 13 Q 9 3 15 13 T 27 13" fill="none" stroke="#22c55e" strokeWidth="1" />
-                    <circle cx="34" cy="8" r="3" fill="#334155" />
-                    <circle cx="34" cy="16" r="3" fill="#334155" />
-                    <circle cx="34" cy="24" r="3" fill="#334155" />
+                    <rect x="0" y="0" width="50" height="38" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1" />
+                    <rect x="3" y="3" width="36" height="24" rx="1" fill="#020617" stroke="#1e293b" strokeWidth="0.5" />
+                    {[0, 1, 2, 3, 4].map(i => (
+                        <line key={`h${i}`} x1="3" y1={3 + i * 6} x2="39" y2={3 + i * 6} stroke="#1e293b" strokeWidth="0.3" />
+                    ))}
+                    {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                        <line key={`v${i}`} x1={3 + i * 6} y1="3" x2={3 + i * 6} y2="27" stroke="#1e293b" strokeWidth="0.3" />
+                    ))}
+                    <path d="M 3 15 C 8 5, 13 25, 18 15 C 23 5, 28 25, 33 15 L 39 15" fill="none" stroke="#22c55e" strokeWidth="1.2" />
+                    <path d="M 3 15 C 10 20, 16 8, 22 18 C 28 28, 34 10, 39 15" fill="none" stroke="#3b82f6" strokeWidth="0.8" opacity="0.7" />
+                    <text x="21" y="33" textAnchor="middle" fontSize="3" fill="#64748b" fontFamily="monospace">10ms/div</text>
+                    <text x="21" y="36" textAnchor="middle" fontSize="2.5" fill="#475569" fontFamily="monospace">5V/div</text>
+                    <circle cx="44" cy="6" r="2" fill="#22c55e" />
+                    <circle cx="44" cy="12" r="2" fill="#3b82f6" />
+                    <circle cx="44" cy="18" r="2" fill="#334155" stroke="#475569" strokeWidth="0.3" />
+                    <circle cx="44" cy="24" r="2" fill="#334155" stroke="#475569" strokeWidth="0.3" />
+                    <circle cx="44" cy="30" r="2" fill="#334155" stroke="#475569" strokeWidth="0.3" />
+                    <text x="44" y="8" textAnchor="middle" fontSize="1.5" fill="#22c55e">CH1</text>
+                    <text x="44" y="14" textAnchor="middle" fontSize="1.5" fill="#3b82f6">CH2</text>
                 </g>
             )}
 

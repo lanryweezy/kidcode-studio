@@ -13,7 +13,7 @@ interface ShortcutGroup {
   shortcuts: Shortcut[];
 }
 
-const SHORTCUT_GROUPS: ShortcutGroup[] = [
+export const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     label: 'General',
     icon: <Keyboard size={14} className="text-violet-500" />,

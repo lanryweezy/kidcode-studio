@@ -114,25 +114,25 @@ export const generate3DModel = async (
     const tripoFn = async () => {
         if (isImage) {
             return await tripoAPI.generateFromImage(options.imageUrl!, onProgress);
-        } else {
+        } 
             return await tripoAPI.generateFromText(
               options.prompt!,
               options.style || 'cartoon',
               onProgress
             );
-        }
+        
     };
 
     const meshyFn = async () => {
         if (isImage) {
             return await meshyAPI.generateFromImage(options.imageUrl!, onProgress);
-        } else {
+        } 
             return await meshyAPI.generateFromText(
               options.prompt!,
               options.style || 'cartoon',
               onProgress
             );
-        }
+        
     };
 
     if (provider === 'tripo' || provider === 'meshy') {

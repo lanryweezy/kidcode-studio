@@ -165,7 +165,7 @@ export function capitalize(str: string): string {
 }
 
 export function truncate(str: string, maxLen: number): string {
-  return str.length > maxLen ? str.slice(0, maxLen) + '...' : str;
+  return str.length > maxLen ? `${str.slice(0, maxLen)  }...` : str;
 }
 
 export function slugify(str: string): string {

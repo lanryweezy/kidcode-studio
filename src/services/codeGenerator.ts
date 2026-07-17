@@ -321,6 +321,75 @@ export const generateCode = (
         code += `${i}${cmd.params.varName} = [];\n`;
         break;
 
+      // --- LOCAL DATABASE ---
+      case CommandType.DB_CREATE:
+        code += `${i}const ${cmd.params.varName || 'db'} = createTable("${cmd.params.text || 'data'}", [${cmd.params.text2 || '"id", "name", "value"'}]);\n`;
+        break;
+      case CommandType.DB_INSERT:
+        code += `${i}${cmd.params.varName || 'db'}.insert({ ${cmd.params.text || 'name: "item", value: 0'} });\n`;
+        break;
+      case CommandType.DB_QUERY:
+        code += `${i}${cmd.params.listName || 'results'} = ${cmd.params.varName || 'db'}.select().where("${cmd.params.condition || 'id > 0'}").all();\n`;
+        break;
+      case CommandType.DB_UPDATE:
+        code += `${i}${cmd.params.varName || 'db'}.update({ ${cmd.params.text || 'value: 1'} }).where("${cmd.params.condition || 'id = 1'}");\n`;
+        break;
+      case CommandType.DB_DELETE:
+        code += `${i}${cmd.params.varName || 'db'}.delete().where("${cmd.params.condition || 'id = 1'}");\n`;
+        break;
+      case CommandType.DB_SELECT:
+        code += `${i}${cmd.params.listName || 'results'} = ${cmd.params.varName || 'db'}.select("${cmd.params.text || '*'}").all();\n`;
+        break;
+      case CommandType.DB_COUNT:
+        code += `${i}${cmd.params.listName || 'count'} = ${cmd.params.varName || 'db'}.count();\n`;
+        break;
+      case CommandType.DB_CLEAR:
+        code += `${i}${cmd.params.varName || 'db'}.clear();\n`;
+        break;
+
+      // --- FORM VALIDATION ---
+      case CommandType.VALIDATE_EMAIL:
+        code += `${i}${cmd.params.listName || 'isValid'} = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(${cmd.params.varName || 'email'});\n`;
+        break;
+      case CommandType.VALIDATE_NUMBER:
+        code += `${i}${cmd.params.listName || 'isValid'} = !isNaN(${cmd.params.varName || 'value'}) && ${cmd.params.varName || 'value'} >= ${(cmd.params.value || 0)} && ${cmd.params.varName || 'value'} <= ${(cmd.params.value2 || 100)};\n`;
+        break;
+      case CommandType.VALIDATE_PASSWORD:
+        code += `${i}${cmd.params.listName || 'isValid'} = ${cmd.params.varName || 'password'}.length >= ${(cmd.params.value || 8)};\n`;
+        break;
+      case CommandType.VALIDATE_REQUIRED:
+        code += `${i}${cmd.params.listName || 'isValid'} = ${cmd.params.varName || 'value'} !== null && ${cmd.params.varName || 'value'} !== undefined && String(${cmd.params.varName || 'value'}).trim() !== "";\n`;
+        break;
+      case CommandType.VALIDATE_LENGTH:
+        code += `${i}${cmd.params.listName || 'isValid'} = ${cmd.params.varName || 'text'}.length >= ${(cmd.params.value || 1)} && ${cmd.params.varName || 'text'}.length <= ${(cmd.params.value2 || 255)};\n`;
+        break;
+
+      // --- DEVICE SENSORS ---
+      case CommandType.READ_ACCELEROMETER:
+        code += `${i}${cmd.params.varName || 'accel'} = await getAccelerometer();\n`;
+        break;
+      case CommandType.READ_GYROSCOPE:
+        code += `${i}${cmd.params.varName || 'gyro'} = await getGyroscope();\n`;
+        break;
+      case CommandType.READ_DEVICE_COMPASS:
+        code += `${i}${cmd.params.varName || 'heading'} = await getDeviceCompass();\n`;
+        break;
+
+      // --- PUSH NOTIFICATIONS ---
+      case CommandType.PUSH_NOTIFICATION:
+        code += `${i}sendPushNotification("${cmd.params.text || 'Notification'}", "${cmd.params.message || 'You have a new message'}");\n`;
+        break;
+
+      // --- CUSTOM FONTS ---
+      case CommandType.SET_FONT:
+        code += `${i}app.setFont("${cmd.params.text || 'Roboto'}");\n`;
+        break;
+
+      // --- CHART DATA ---
+      case CommandType.SET_CHART_DATA:
+        code += `${i}${cmd.params.varName || 'chartData'} = ${cmd.params.text || '[10, 20, 30, 40, 50]'};\n`;
+        break;
+
       default:
         code += `${i}// ${cmd.type}\n`;
         break;

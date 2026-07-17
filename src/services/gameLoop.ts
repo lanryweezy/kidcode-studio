@@ -361,7 +361,7 @@ export function updateTransition(state: TransitionState): TransitionState {
         progress: 0,
         direction: 'in',
       };
-    } else {
+    } 
       // Fully faded in
       state.callback?.();
       return {
@@ -370,7 +370,7 @@ export function updateTransition(state: TransitionState): TransitionState {
         progress: 0,
         callback: undefined,
       };
-    }
+    
   }
 
   return { ...state, progress: newProgress };

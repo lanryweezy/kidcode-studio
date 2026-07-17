@@ -171,3 +171,78 @@ export const BarChart: React.FC<BarChartProps> = ({
     </div>
   );
 };
+
+interface PieChartProps {
+  data: { label: string; value: number; color?: string }[];
+  size?: number;
+  title?: string;
+  className?: string;
+}
+
+const PIE_COLORS = ['#8b5cf6', '#ef4444', '#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#06b6d4', '#f97316'];
+
+export const PieChart: React.FC<PieChartProps> = ({
+  data,
+  size = 200,
+  title,
+  className = '',
+}) => {
+  if (data.length === 0) return null;
+
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) return null;
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size / 2 - 10;
+
+  let cumulativePercent = 0;
+
+  const slices = data.map((item, i) => {
+    const percent = item.value / total;
+    const startAngle = cumulativePercent * 2 * Math.PI;
+    cumulativePercent += percent;
+    const endAngle = cumulativePercent * 2 * Math.PI;
+
+    const x1 = cx + radius * Math.sin(startAngle);
+    const y1 = cy - radius * Math.cos(startAngle);
+    const x2 = cx + radius * Math.sin(endAngle);
+    const y2 = cy - radius * Math.cos(endAngle);
+
+    const largeArc = percent > 0.5 ? 1 : 0;
+
+    const pathD = percent >= 1
+      ? `M ${cx} ${cy - radius} A ${radius} ${radius} 0 1 1 ${cx - 0.01} ${cy - radius} Z`
+      : `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+    return {
+      path: pathD,
+      color: item.color || PIE_COLORS[i % PIE_COLORS.length],
+      label: item.label,
+      value: item.value,
+      percent: (percent * 100).toFixed(1),
+    };
+  });
+
+  return (
+    <div className={`bg-slate-900 rounded-xl p-4 ${className}`}>
+      {title && <div className="text-white font-bold mb-3">{title}</div>}
+      <div className="flex items-center gap-4">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {slices.map((slice, i) => (
+            <path key={i} d={slice.path} fill={slice.color} stroke="#0f172a" strokeWidth="2" />
+          ))}
+        </svg>
+        <div className="flex flex-col gap-1.5">
+          {slices.map((slice, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs">
+              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: slice.color }} />
+              <span className="text-slate-400">{slice.label}</span>
+              <span className="text-slate-500">{slice.percent}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};

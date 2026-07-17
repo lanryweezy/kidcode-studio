@@ -144,7 +144,7 @@ export function calculateDamage(
   const strengthBonus = 1 + (attackerStats.strength / 100);
   
   // Calculate raw damage
-  let rawDamage = baseDamage * strengthBonus * critMultiplier;
+  const rawDamage = baseDamage * strengthBonus * critMultiplier;
   
   // Apply defense reduction (diminishing returns)
   const defReduction = defenderDEF / (defenderDEF + 50);
@@ -355,7 +355,7 @@ export function addLootToInventory(
   state: SpriteState,
   drops: { item: LootDrop; quantity: number }[]
 ): SpriteState {
-  let newInventory = [...state.inventory];
+  const newInventory = [...state.inventory];
 
   for (const drop of drops) {
     const existing = newInventory.find(i => i.id === drop.item.itemId);

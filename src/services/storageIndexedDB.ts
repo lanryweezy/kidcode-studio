@@ -92,8 +92,7 @@ const getDB = async (): Promise<IDBPDatabase<KidCodeDB>> => {
  */
 export const saveProjectIndexedDB = async (project: SavedProject): Promise<void> => {
   if (!useIndexedDB) {
-    // Fallback to localStorage
-    localStorage.setItem('kidcode_project_' + project.id, JSON.stringify(project));
+    localStorage.setItem(`kidcode_project_${  project.id}`, JSON.stringify(project));
     return;
   }
 
@@ -112,7 +111,38 @@ export const saveProjectIndexedDB = async (project: SavedProject): Promise<void>
     
   } catch (error) {
     console.error('❌ IndexedDB save failed, using localStorage:', error);
-    localStorage.setItem('kidcode_project_' + project.id, JSON.stringify(project));
+    localStorage.setItem(`kidcode_project_${  project.id}`, JSON.stringify(project));
+  }
+};
+
+export const saveProjectCompressedIndexedDB = async (
+  id: string,
+  compressedData: string,
+  name: string,
+  mode: string,
+  timestamp: number,
+  thumbnail?: string
+): Promise<void> => {
+  if (!useIndexedDB) {
+    const decompressed = decompress(compressedData);
+    localStorage.setItem(`kidcode_project_${  id}`, decompressed);
+    return;
+  }
+
+  try {
+    const database = await getDB();
+    await database.put('projects', {
+      id,
+      data: compressedData,
+      timestamp,
+      name,
+      mode,
+      thumbnail
+    });
+  } catch (error) {
+    console.error('❌ IndexedDB compressed save failed:', error);
+    const decompressed = decompress(compressedData);
+    localStorage.setItem(`kidcode_project_${  id}`, decompressed);
   }
 };
 
@@ -124,7 +154,7 @@ export const saveProjectIndexedDB = async (project: SavedProject): Promise<void>
 export const loadProjectIndexedDB = async (projectId: string): Promise<SavedProject | null> => {
   if (!useIndexedDB) {
     // Try localStorage fallback
-    const data = localStorage.getItem('kidcode_project_' + projectId);
+    const data = localStorage.getItem(`kidcode_project_${  projectId}`);
     if (data) {
       try {
         return JSON.parse(data);
@@ -207,7 +237,7 @@ export const listProjectsIndexedDB = async (): Promise<Array<{
  */
 export const deleteProjectIndexedDB = async (projectId: string): Promise<void> => {
   if (!useIndexedDB) {
-    localStorage.removeItem('kidcode_project_' + projectId);
+    localStorage.removeItem(`kidcode_project_${  projectId}`);
     return;
   }
 
@@ -233,7 +263,7 @@ export const saveAssetIndexedDB = async (
   data: string
 ): Promise<void> => {
   if (!useIndexedDB) {
-    localStorage.setItem('kidcode_asset_' + id, JSON.stringify({ id, name, type, data }));
+    localStorage.setItem(`kidcode_asset_${  id}`, JSON.stringify({ id, name, type, data }));
     return;
   }
 
@@ -262,7 +292,7 @@ export const saveAssetIndexedDB = async (
  */
 export const loadAssetIndexedDB = async (id: string): Promise<string | null> => {
   if (!useIndexedDB) {
-    const data = localStorage.getItem('kidcode_asset_' + id);
+    const data = localStorage.getItem(`kidcode_asset_${  id}`);
     if (data) {
       try {
         const parsed = JSON.parse(data);
@@ -293,7 +323,7 @@ export const loadAssetIndexedDB = async (id: string): Promise<string | null> => 
  */
 export const deleteAssetIndexedDB = async (id: string): Promise<void> => {
   if (!useIndexedDB) {
-    localStorage.removeItem('kidcode_asset_' + id);
+    localStorage.removeItem(`kidcode_asset_${  id}`);
     return;
   }
 

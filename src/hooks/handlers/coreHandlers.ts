@@ -13,6 +13,7 @@ import { serialService } from '../../services/webSerialService';
 import { playSpeakerSound, playTone } from '../../services/soundService';
 import { bgmPlayer, ambientManager, BGMTrack } from '../../services/audioEngine';
 import { commandBlockToIR, executeIRNode } from '../../services/ir';
+import { DEFAULT_SCREEN, STORAGE_KEYS } from '../../constants/actions';
 
 export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> => {
     const {
@@ -233,7 +234,7 @@ export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> =
 
         // --- APP BUILDER ---
         case CommandType.CREATE_SCREEN:
-            renderingScreen.current = cmd.params.text || 'main';
+            renderingScreen.current = cmd.params.text || DEFAULT_SCREEN;
             setAppState(prev => ({ ...prev, screens: { ...prev.screens, [renderingScreen.current]: [] } }));
             return true;
         case CommandType.ADD_BUTTON:
@@ -267,8 +268,8 @@ export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> =
             alert(cmd.params.text);
             return true;
         case CommandType.NAVIGATE:
-            renderingScreen.current = cmd.params.text || 'main';
-            setAppState(prev => ({ ...prev, activeScreen: cmd.params.text || 'main' }));
+            renderingScreen.current = cmd.params.text || DEFAULT_SCREEN;
+            setAppState(prev => ({ ...prev, activeScreen: cmd.params.text || DEFAULT_SCREEN }));
             return true;
         case CommandType.DEFINE_PLUGIN: {
             const name = cmd.params.text || 'MyPlugin';
@@ -292,13 +293,13 @@ export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> =
         }
         case CommandType.CLOUD_SAVE: {
             const dataToSave = spriteStateRef.current.variables;
-            localStorage.setItem('kidcode_cloud', JSON.stringify(dataToSave));
+            localStorage.setItem(STORAGE_KEYS.CLOUD, JSON.stringify(dataToSave));
             setConsoleLogs(prev => [...prev, '☁️ Data saved to cloud!'].slice(-50));
             return true;
         }
         case CommandType.CLOUD_LOAD: {
             try {
-                const raw = localStorage.getItem('kidcode_cloud');
+                const raw = localStorage.getItem(STORAGE_KEYS.CLOUD);
                 if (raw) {
                     const loaded = JSON.parse(raw);
                     if (mode === AppMode.GAME) {
@@ -493,7 +494,7 @@ export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> =
             return true;
         case CommandType.LOGIC_NOT:
             if (cmd.params.varName) {
-                hardwareStateRef.current.variables[cmd.params.varName] = !Boolean(cmd.params.value);
+                hardwareStateRef.current.variables[cmd.params.varName] = !cmd.params.value;
             }
             return true;
 

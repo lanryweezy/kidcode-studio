@@ -46,7 +46,7 @@ export const VictoryCelebration: React.FC<VictoryCelebrationProps> = ({ active, 
       shape: Math.random() > 0.5 ? 'rect' : 'circle',
     }));
 
-    let startTime = Date.now();
+    const startTime = Date.now();
 
     const animate = () => {
       const elapsed = Date.now() - startTime;

@@ -9,17 +9,26 @@ import { getProjects, saveProject, SavedProject, captureThumbnail } from '../ser
 import { generateSprite } from '../services/geminiService';
 import { addXp as originalAddXp, upgradeUserPlan, updateStreak, checkAndUnlockBadge } from '../services/userService';
 import { getUndoManager } from '../services/undoManager';
-import { saveProjectIndexedDB } from '../services/storageIndexedDB';
+import { saveProjectIndexedDB, saveProjectCompressedIndexedDB } from '../services/storageIndexedDB';
 import { registerBuiltInComponents } from '../services/componentRegistry.tsx';
 import { createSpriteStateAdapter } from '../services/gameUtils';
 import { equipItem, useItem, unlockSkill, craftItem, Equipment } from '../services/rpgSystemsExtended';
 import { getCharacterStats } from '../services/rpgEngine';
 import type { StageHandle } from '../components/Stage';
+import { DEFAULT_SCREEN, STORAGE_KEYS } from '../constants/actions';
 
 const MIN_LEFT_WIDTH = 220;
 const MAX_LEFT_WIDTH = 400;
 const MIN_RIGHT_WIDTH = 320;
 const MAX_RIGHT_WIDTH = 600;
+
+let saveWorker: Worker | null = null;
+const getSaveWorker = (): Worker => {
+  if (!saveWorker) {
+    saveWorker = new Worker(new URL('../workers/saveWorker.ts', import.meta.url), { type: 'module' });
+  }
+  return saveWorker;
+};
 
 export function useEditorController() {
     const { toast } = useToast();
@@ -180,10 +189,10 @@ export function useEditorController() {
         const undoManager = getUndoManager(useStore);
         const cleanupKeyboard = undoManager.setupKeyboardShortcuts();
         registerBuiltInComponents();
-        const tutorialShown = localStorage.getItem('tutorial_shown');
+        const tutorialShown = localStorage.getItem(STORAGE_KEYS.TUTORIAL_SHOWN);
         if (!tutorialShown) {
             setTimeout(() => setShowTutorial(true), 2000);
-            localStorage.setItem('tutorial_shown', 'true');
+            localStorage.setItem(STORAGE_KEYS.TUTORIAL_SHOWN, 'true');
         }
         const handleTutorialKey = (e: KeyboardEvent) => {
             if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -208,7 +217,30 @@ export function useEditorController() {
             thumbnail: stageRef.current?.getThumbnail() || undefined,
         };
         try {
-            await saveProjectIndexedDB(updatedProject);
+            if (isAutoSave && typeof Worker !== 'undefined') {
+                const worker = getSaveWorker();
+                const compressed = await new Promise<string>((resolve, reject) => {
+                    const handler = (e: MessageEvent) => {
+                        if (e.data.type === 'saved') {
+                            worker.removeEventListener('message', handler);
+                            if (e.data.success) resolve(e.data.compressed);
+                            else reject(new Error(e.data.error));
+                        }
+                    };
+                    worker.addEventListener('message', handler);
+                    worker.postMessage({ type: 'save', project: updatedProject, thumbnail: updatedProject.thumbnail });
+                });
+                await saveProjectCompressedIndexedDB(
+                    updatedProject.id,
+                    compressed,
+                    updatedProject.name,
+                    updatedProject.mode,
+                    updatedProject.lastEdited,
+                    updatedProject.thumbnail
+                );
+            } else {
+                await saveProjectIndexedDB(updatedProject);
+            }
         } catch (error) {
             console.error('IndexedDB save failed, using localStorage:', error);
             saveProject(updatedProject);
@@ -272,10 +304,10 @@ export function useEditorController() {
     }, [appState.screens, updateAppState]);
 
     const handleDeleteScreen = useCallback((screenId: string) => {
-        if (screenId === 'main') return;
+        if (screenId === DEFAULT_SCREEN) return;
         const newScreens = { ...appState.screens };
         delete newScreens[screenId];
-        updateAppState({ screens: newScreens, activeScreen: 'main' });
+        updateAppState({ screens: newScreens, activeScreen: DEFAULT_SCREEN });
         playSoundEffect('click');
     }, [appState.screens, updateAppState]);
 

@@ -112,7 +112,7 @@ export const createNewProject = (mode: AppMode): SavedProject => {
 // --- EXPORT / IMPORT FEATURES ---
 
 export const exportProjectToFile = (project: SavedProject) => {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(project, null, 2));
+  const dataStr = `data:text/json;charset=utf-8,${  encodeURIComponent(JSON.stringify(project, null, 2))}`;
   const downloadAnchorNode = document.createElement('a');
   downloadAnchorNode.setAttribute("href", dataStr);
   downloadAnchorNode.setAttribute("download", `${project.name.replace(/\s+/g, '_')}_kidcode.json`);

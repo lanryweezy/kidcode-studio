@@ -3,6 +3,9 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { CommandBlock, CommandType } from '../types';
 import { Trash2, GripVertical, Copy, StickyNote, PanelTop, Bug } from 'lucide-react';
 import { AVAILABLE_BLOCKS } from '../constants';
+import { useBlockStyling } from '../hooks/useBlockStyling';
+import { useBlockDrag } from '../hooks/useBlockDrag';
+import { useBlockAnimation } from '../hooks/useBlockAnimation';
 
 interface BlockProps {
     block: CommandBlock;
@@ -105,65 +108,26 @@ const Block: React.FC<BlockProps> = ({
     isActive,
     isDragOver = false
 }) => {
-    const blockRef = useRef<HTMLDivElement>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [isFlashing, setIsFlashing] = useState(false);
-    const prevParamsRef = useRef(JSON.stringify(block.params));
+    const { isDeleting, isFlashing, blockRef, handleDelete } = useBlockAnimation({
+        blockId: block.id,
+        params: block.params,
+        onDelete,
+        isActive,
+    });
 
-    useEffect(() => {
-        const prev = prevParamsRef.current;
-        const curr = JSON.stringify(block.params);
-        if (prev !== curr) {
-            prevParamsRef.current = curr;
-            setIsFlashing(true);
-            const timer = setTimeout(() => setIsFlashing(false), 400);
-            return () => clearTimeout(timer);
-        }
-    }, [block.params]);
-
-    const handleDelete = useCallback(() => {
-        setIsDeleting(true);
-    }, []);
-
-    useEffect(() => {
-        if (isDeleting) {
-            const timer = setTimeout(() => onDelete(block.id), 300);
-            return () => clearTimeout(timer);
-        }
-    }, [isDeleting, block.id, onDelete]);
-
-    // Scroll logic is now handled via ID lookup in App.tsx for performance, 
-    // but kept here for fallback or non-execution highlighting
-    useEffect(() => {
-        if (isActive && blockRef.current) {
-            blockRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }, [isActive]);
+    const { handleDragStart, handleTouchStart } = useBlockDrag({
+        onDragStart,
+        isDraggable,
+    });
 
     const def = BLOCK_DEF_MAP[block.type];
     if (!def) return null;
 
     const Icon = def.icon;
 
-    // Memoize update handler to avoid passing new functions to DebouncedInput on every render
     const handleParamChange = useCallback((key: string, value: any) => {
         onUpdate(block.id, { ...block.params, [key]: value });
     }, [block.id, block.params, onUpdate]);
-
-    const handleDragStart = useCallback((e: React.DragEvent) => {
-        if (blockRef.current && e.dataTransfer && typeof e.dataTransfer.setDragImage === 'function') {
-            const ghost = blockRef.current.cloneNode(true) as HTMLElement;
-            ghost.style.opacity = '0.6';
-            ghost.style.transform = 'scale(1.05)';
-            ghost.style.position = 'absolute';
-            ghost.style.top = '-1000px';
-            ghost.style.pointerEvents = 'none';
-            document.body.appendChild(ghost);
-            e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
-            requestAnimationFrame(() => document.body.removeChild(ghost));
-        }
-        onDragStart?.(e);
-    }, [onDragStart]);
 
     const toggleBreakpoint = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -214,38 +178,7 @@ const Block: React.FC<BlockProps> = ({
         );
     }
 
-    const isControlBlock = block.type === CommandType.REPEAT || block.type === CommandType.END_REPEAT;
-    const isLogicBlock = block.type === CommandType.IF || block.type === CommandType.END_IF || block.type === CommandType.ELSE || block.type === CommandType.WAIT_FOR_PRESS;
-    const isDataBlock = block.type.startsWith('SET_VAR') || block.type.startsWith('CHANGE_VAR') || block.type.startsWith('LIST_') || block.type.startsWith('CALC_') || block.type.startsWith('STR_');
-    const isNavBlock = block.type === CommandType.CREATE_SCREEN || block.type === CommandType.NAVIGATE;
-
-    let borderColor = 'border-slate-200';
-    let bgColor = 'bg-white';
-    let labelColor = 'text-slate-700';
-
-    if (isControlBlock) {
-        borderColor = 'border-violet-200';
-        bgColor = 'bg-violet-50';
-        labelColor = 'text-violet-700';
-    } else if (isLogicBlock) {
-        borderColor = 'border-indigo-200';
-        bgColor = 'bg-indigo-50';
-        labelColor = 'text-indigo-700';
-    } else if (isDataBlock) {
-        borderColor = 'border-orange-200';
-        bgColor = 'bg-orange-50';
-        labelColor = 'text-orange-700';
-    } else if (isNavBlock) {
-        borderColor = 'border-slate-600';
-        bgColor = 'bg-slate-700';
-        labelColor = 'text-white';
-    }
-
-    const isElse = block.type === CommandType.ELSE;
-    if (isElse) {
-        bgColor = 'bg-indigo-100';
-        borderColor = 'border-indigo-300';
-    }
+    const { borderColor, bgColor, labelColor, isElse } = useBlockStyling(block);
 
     // Active Style is now controlled by class toggling for performance, but this remains for fallback
     const activeStyle = isActive
@@ -268,27 +201,16 @@ const Block: React.FC<BlockProps> = ({
                 ref={blockRef}
                 className={`
             relative group flex-1 flex items-center gap-3 p-3 rounded-xl border-2 mb-3
-            transition-all duration-200 select-none touch-none block-hover hover:-translate-y-1 hover:shadow-lg
+            transition-all duration-200 select-none touch-none block-hover
             ${borderColor} ${bgColor} ${activeStyle}
             ${isDeleting ? 'animate-delete-flash' : ''}
             ${isFlashing ? 'ring-2 ring-emerald-400 border-emerald-400 animate-pulse' : ''}
             ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
-            ${isDragOver ? 'ring-4 ring-violet-400 border-violet-400 scale-[1.02] bg-violet-50/30 rotate-1' : ''}
+            ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01]' : ''}
         `}
                 draggable={isDraggable}
                 onDragStart={handleDragStart}
-                onTouchStart={(e) => {
-                    if (!isDraggable) return;
-                    if (onDragStart) {
-                        onDragStart({
-                            dataTransfer: {
-                                setData: () => { },
-                                setDragImage: () => { },
-                                effectAllowed: 'move'
-                            }
-                        } as unknown as React.DragEvent);
-                    }
-                }}
+                onTouchStart={handleTouchStart}
                 onDragEnter={(e) => { e.preventDefault(); onDragEnter?.(index); }}
                 onDragOver={(e) => e.preventDefault()}
                 onMouseEnter={onMouseEnter}

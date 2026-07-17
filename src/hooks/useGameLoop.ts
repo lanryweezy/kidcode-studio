@@ -29,7 +29,7 @@ export const useGameLoop = ({
 
   const advanceTime = useCallback((hours: number) => {
     setHour(prev => {
-      let newHour = prev + hours;
+      const newHour = prev + hours;
       if (newHour >= 24) {
         setDay(d => d + 1);
         return newHour - 24;

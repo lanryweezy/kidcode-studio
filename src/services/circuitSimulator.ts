@@ -150,12 +150,36 @@ export interface NodeVoltage {
   components: string[];
 }
 
+export interface ComponentPowerBreakdown {
+  componentId: string;
+  componentType: string;
+  power: number;
+  current: number;
+  voltage: number;
+  efficiency: number;
+  isActive: boolean;
+  percentage: number;
+}
+
+export interface PowerConsumptionMetrics {
+  totalPower: number;
+  totalCurrent: number;
+  totalVoltage: number;
+  componentBreakdown: ComponentPowerBreakdown[];
+  maxPowerBudget: number;
+  remainingBudget: number;
+  efficiency: number;
+  estimatedBatteryLife: number;
+  powerWarnings: string[];
+}
+
 export interface SimulationResult {
   componentStates: Map<string, ComponentState>;
   totalCurrent: number;
   totalVoltage: number;
   totalResistance: number;
   powerDraw: number;
+  powerMetrics: PowerConsumptionMetrics;
   isShortCircuit: boolean;
   isOpenCircuit: boolean;
   errors: string[];
@@ -175,6 +199,105 @@ export interface ComponentState {
   speed?: number;         // For motors (0-100%)
   temperature?: number;   // For components that heat up
   state: Record<string, unknown> | string | null;
+}
+
+// === POWER CONSUMPTION CALCULATION ===
+
+function calculateComponentEfficiency(type: string, power: number, maxPower: number): number {
+  if (maxPower <= 0) return 0;
+  const efficiencyMap: Record<string, number> = {
+    LED_RED: 0.9, LED_BLUE: 0.85, LED_GREEN: 0.88, LED_YELLOW: 0.87,
+    LED_ORANGE: 0.86, LED_WHITE: 0.82, RGB_LED: 0.80, BULB: 0.15,
+    MOTOR_DC: 0.65, SERVO: 0.70, FAN: 0.55, BUZZER: 0.40,
+    RESISTOR: 0.0, CAPACITOR_ELEC: 0.95, CAPACITOR_CERAMIC: 0.95,
+    TRANSISTOR_NPN: 0.90, TRANSISTOR_PNP: 0.90, MOSFET_N: 0.95, MOSFET_P: 0.95,
+    RELAY: 0.85, LASER: 0.30, SPEAKER: 0.60, VIBRATION: 0.50,
+    LCD: 0.75, OLED: 0.80, STEPPER: 0.60, PUMP: 0.45,
+    WIFI: 0.35, BLUETOOTH: 0.40, SD_CARD: 0.50, NEOPIXEL_RING: 0.70,
+  };
+  return efficiencyMap[type] ?? 0.5;
+}
+
+function estimateBatteryLife(totalPower: number, batteryVoltage: number): number {
+  if (totalPower <= 0) return Infinity;
+  const batteryCapacity = 2000;
+  const energyWh = (batteryVoltage * batteryCapacity) / 1000;
+  return (energyWh / totalPower) * 3600;
+}
+
+function calculatePowerMetrics(
+  components: CircuitComponent[],
+  componentStates: Map<string, ComponentState>,
+  totalVoltage: number,
+  totalCurrent: number
+): PowerConsumptionMetrics {
+  const breakdown: ComponentPowerBreakdown[] = [];
+  const powerWarnings: string[] = [];
+  let totalPower = 0;
+  let activePower = 0;
+  let totalMaxPower = 0;
+
+  components.forEach(comp => {
+    const state = componentStates.get(comp.id);
+    const power = state?.power ?? 0;
+    const current = state?.current ?? 0;
+    const voltage = state?.voltage ?? totalVoltage;
+    const props = ELECTRICAL_PROPS[comp.type];
+    const maxCurrent = props?.maxCurrent ?? 1.0;
+    const maxPower = voltage * maxCurrent;
+
+    const efficiency = calculateComponentEfficiency(comp.type, power, maxPower);
+    const isActive = state?.isActive ?? false;
+
+    totalPower += power;
+    if (isActive) activePower += power;
+    totalMaxPower += maxPower;
+
+    breakdown.push({
+      componentId: comp.id,
+      componentType: comp.type,
+      power,
+      current,
+      voltage,
+      efficiency,
+      isActive,
+      percentage: 0,
+    });
+  });
+
+  const maxPowerBudget = totalVoltage > 0 ? totalVoltage * 2.0 : 10.0;
+  const remainingBudget = maxPowerBudget - totalPower;
+
+  breakdown.forEach(item => {
+    item.percentage = totalPower > 0 ? (item.power / totalPower) * 100 : 0;
+  });
+
+  breakdown.sort((a, b) => b.power - a.power);
+
+  if (totalPower > maxPowerBudget) {
+    powerWarnings.push(`Total power ${totalPower.toFixed(2)}W exceeds budget ${maxPowerBudget.toFixed(2)}W`);
+  }
+
+  breakdown.forEach(item => {
+    if (item.power > 0.5) {
+      powerWarnings.push(`${item.componentType} consuming ${item.power.toFixed(2)}W`);
+    }
+  });
+
+  const efficiency = totalMaxPower > 0 ? (activePower / totalMaxPower) * 100 : 0;
+  const estimatedBatteryLife = estimateBatteryLife(totalPower, totalVoltage);
+
+  return {
+    totalPower,
+    totalCurrent,
+    totalVoltage,
+    componentBreakdown: breakdown,
+    maxPowerBudget,
+    remainingBudget,
+    efficiency,
+    estimatedBatteryLife,
+    powerWarnings,
+  };
 }
 
 // === CIRCUIT TOPOLOGY ANALYSIS ===
@@ -621,7 +744,8 @@ export function simulateCircuit(
   });
 
   if (components.length === 0) {
-    return { componentStates, totalCurrent: 0, totalVoltage: 0, totalResistance: 0, powerDraw: 0, isShortCircuit: false, isOpenCircuit: false, errors, warnings, nodeVoltages, nodeDetails, propagationDelay: 0 };
+    const emptyMetrics = calculatePowerMetrics(components, componentStates, 0, 0);
+    return { componentStates, totalCurrent: 0, totalVoltage: 0, totalResistance: 0, powerDraw: 0, powerMetrics: emptyMetrics, isShortCircuit: false, isOpenCircuit: false, errors, warnings, nodeVoltages, nodeDetails, propagationDelay: 0 };
   }
 
   // Find power sources
@@ -631,7 +755,8 @@ export function simulateCircuit(
 
   if (batteries.length === 0) {
     warnings.push('No power source found. Add a battery or power supply.');
-    return { componentStates, totalCurrent: 0, totalVoltage: 0, totalResistance: 0, powerDraw: 0, isShortCircuit: false, isOpenCircuit: false, errors, warnings, nodeVoltages, nodeDetails, propagationDelay: 0 };
+    const noPowerMetrics = calculatePowerMetrics(components, componentStates, 0, 0);
+    return { componentStates, totalCurrent: 0, totalVoltage: 0, totalResistance: 0, powerDraw: 0, powerMetrics: noPowerMetrics, isShortCircuit: false, isOpenCircuit: false, errors, warnings, nodeVoltages, nodeDetails, propagationDelay: 0 };
   }
 
   // Find connected groups
@@ -775,12 +900,20 @@ export function simulateCircuit(
   // Calculate propagation delay
   const propagationDelay = calculatePropagationDelay(components, wires);
 
+  const powerMetrics = calculatePowerMetrics(
+    components,
+    componentStates,
+    totalVoltage,
+    totalCurrent
+  );
+
   return {
     componentStates,
     totalCurrent,
     totalVoltage,
     totalResistance,
-    powerDraw: totalVoltage * totalCurrent * 1000, // Convert to mW
+    powerDraw: totalVoltage * totalCurrent * 1000,
+    powerMetrics,
     isShortCircuit,
     isOpenCircuit: openCircuitResult.isOpen,
     errors,
@@ -1389,11 +1522,11 @@ export function runMonteCarloSimulation(
         const u2 = Math.random();
         const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
         return ct.nominal * (1 + z * ct.tolerance / 100);
-      } else {
+      } 
         // Uniform distribution
         const range = ct.nominal * ct.tolerance / 100;
         return ct.nominal + (Math.random() * 2 - 1) * range;
-      }
+      
     });
 
     results.push(calculateFunction(componentValues));

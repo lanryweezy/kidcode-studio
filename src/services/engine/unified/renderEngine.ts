@@ -225,10 +225,10 @@ function renderDialogue(ctx: CanvasRenderingContext2D, state: GameContext['state
   let line = '';
   let lineY = boxY + 45;
   words.forEach(word => {
-    const testLine = line + word + ' ';
+    const testLine = `${line + word  } `;
     if (ctx.measureText(testLine).width > width - 100) {
       ctx.fillText(line, 40, lineY);
-      line = word + ' ';
+      line = `${word  } `;
       lineY += 18;
     } else {
       line = testLine;

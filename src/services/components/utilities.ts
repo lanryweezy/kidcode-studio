@@ -159,7 +159,7 @@ export function executeComponentMethod(
     case 'printHex': {
         const value = asNumber(args[0], 0);
         const digits = asNumber(args[1], 2);
-        return executeComponentMethod(comp, 'print', ['0x' + value.toString(16).toUpperCase().padStart(digits, '0')], hardwareState);
+        return executeComponentMethod(comp, 'print', [`0x${  value.toString(16).toUpperCase().padStart(digits, '0')}`], hardwareState);
     }
     case 'printBinary': {
         const value = asNumber(args[0], 0);
@@ -213,15 +213,15 @@ export function executeComponentMethod(
     }
     case 'formatTemp': {
         const c = asNumber(args[0], 0);
-        return c.toFixed(1) + '\u00B0C';
+        return `${c.toFixed(1)  }\u00B0C`;
     }
     case 'formatVoltage': {
         const v = asNumber(args[0], 0);
-        return v.toFixed(2) + 'V';
+        return `${v.toFixed(2)  }V`;
     }
     case 'formatPercent': {
         const p = asNumber(args[0], 0);
-        return Math.round(p) + '%';
+        return `${Math.round(p)  }%`;
     }
     case 'getText': return hardwareState.lcdLines.join('\n');
     case 'getLine': return hardwareState.lcdLines[asNumber(args[0], 0)] || '';

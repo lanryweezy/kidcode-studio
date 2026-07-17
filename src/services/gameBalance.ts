@@ -271,7 +271,7 @@ export function calculateDamage(
   const defenseReduction = defender.defense / (defender.defense + 100);
   const mitigatedDamage = baseDamage * (1 - defenseReduction);
 
-  let isCritical = options.isCritical ?? (Math.random() < attacker.critChance);
+  const isCritical = options.isCritical ?? (Math.random() < attacker.critChance);
   const critMultiplier = isCritical ? attacker.critDamage : 1;
 
   let finalDamage = mitigatedDamage * critMultiplier;

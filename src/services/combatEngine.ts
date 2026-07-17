@@ -646,7 +646,7 @@ export function registerHit(state: ComboState): ComboState {
       damageMultiplier: Math.min(3, newMultiplier), // Cap at 3x
       lastHitTime: now,
     };
-  } else {
+  } 
     // Combo dropped
     return {
       count: 1,
@@ -655,7 +655,7 @@ export function registerHit(state: ComboState): ComboState {
       damageMultiplier: 1.0,
       lastHitTime: now,
     };
-  }
+  
 }
 
 export function updateComboState(state: ComboState): ComboState {

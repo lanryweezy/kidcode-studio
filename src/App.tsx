@@ -110,7 +110,7 @@ const AppInner: React.FC = () => {
     }, [contextMenu, handleDeleteBlock, setContextMenu]);
 
     return (
-        <div className={`h-[100dvh] h-screen flex flex-col overflow-hidden bg-slate-50 text-slate-800 ${hackerMode ? 'hacker-mode' : ''} ${highContrast ? 'high-contrast' : ''}`}>
+        <div className={`h-[100dvh] h-screen flex flex-col bg-slate-50 text-slate-800 ${hackerMode ? 'hacker-mode' : ''} ${highContrast ? 'high-contrast' : ''}`}>
             <a href="#block-workspace" className="skip-nav">
                 Skip to block workspace
             </a>
@@ -134,7 +134,7 @@ const AppInner: React.FC = () => {
                         />
                     </React.Suspense>
                 )}
-                <div className={`fade-enter ${viewVisible ? 'fade-enter-active' : ''}`}>
+                <div className={`flex-1 min-h-0 fade-enter ${viewVisible ? 'fade-enter-active' : ''}`}>
                     {showLanding ? (
                         <LandingPage />
                     ) : showGallery ? (

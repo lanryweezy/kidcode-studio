@@ -1,4 +1,5 @@
 import { EngineEntity, EngineTile, GameState } from './types';
+import { SCENES } from '../../constants/actions';
 
 export function renderBackground(
   ctx: CanvasRenderingContext2D,
@@ -7,14 +8,14 @@ export function renderBackground(
   height: number
 ): void {
   const sceneColors: Record<string, string> = {
-    space: '#0a0a1a',
-    forest: '#1a2e1a',
-    grid: '#1a1a2e',
+    [SCENES.SPACE]: '#0a0a1a',
+    [SCENES.FOREST]: '#1a2e1a',
+    [SCENES.GRID]: '#1a1a2e',
   };
-  ctx.fillStyle = sceneColors[scene || 'grid'] || '#1a1a2e';
+  ctx.fillStyle = sceneColors[scene || SCENES.GRID] || '#1a1a2e';
   ctx.fillRect(0, 0, width, height);
 
-  if (scene === 'space') {
+  if (scene === SCENES.SPACE) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     for (let i = 0; i < 50; i++) {
       const x = (i * 137.5) % width;

@@ -159,5 +159,5 @@ export function formatPlayTime(seconds: number): string {
 
 export function formatTimestamp(timestamp: number): string {
   const d = new Date(timestamp);
-  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return `${d.toLocaleDateString()  } ${  d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 }

@@ -137,8 +137,8 @@ export const ShippingTycoonGame: React.FC<{ onExit: () => void }> = ({ onExit })
     if (isPaused || gameState.gameOver) return;
 
     setGameState(prev => {
-      let newDay = prev.day + 0.1 * speed;
-      let dayRevenue = 0;
+      const newDay = prev.day + 0.1 * speed;
+      const dayRevenue = 0;
 
       const updatedShips = prev.ships.map(ship => {
         if (ship.status !== 'sailing') return ship;

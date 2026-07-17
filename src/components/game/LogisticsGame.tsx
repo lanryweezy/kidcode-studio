@@ -123,7 +123,7 @@ export const LogisticsGame: React.FC<{ onExit: () => void }> = ({ onExit }) => {
     if (isPaused || gameState.gameOver) return;
 
     setGameState(prev => {
-      let newDay = prev.day + 0.05 * speed;
+      const newDay = prev.day + 0.05 * speed;
 
       // Generate new deliveries
       if (Math.random() < 0.1 * speed) {

@@ -2,6 +2,7 @@ import { SpriteState } from '../types';
 import {
     Square, BrickWall, Waves, Flame, Boxes, ArrowUp, ArrowUpCircle, Coins, Key as KeyIcon, DoorOpen, Triangle, Flag, Eraser, ZoomIn, Eye, Film, Crosshair, Ghost, Sparkles, Copy, MessageSquare, Play, Trash, Music, Wind, Video, Sun, Moon, Activity, Timer, Heart, RotateCcw, RotateCw, Anchor, Trophy, Variable, MousePointer2, Box
 } from 'lucide-react';
+import { SCENES, WEATHER_TYPES, CAMERA_MODES } from './actions';
 
 export const INITIAL_SPRITE_STATE: SpriteState = {
     x: 200,
@@ -20,8 +21,8 @@ export const INITIAL_SPRITE_STATE: SpriteState = {
     currentAnimation: null,
     animationSpeed: 5,
     speech: null,
-    scene: 'grid',
-    weather: 'none' as 'none' | 'rain' | 'snow',
+    scene: SCENES.GRID,
+    weather: WEATHER_TYPES.NONE,
     score: 0,
     keys: 0,
     health: 3,
@@ -29,7 +30,7 @@ export const INITIAL_SPRITE_STATE: SpriteState = {
     variables: {},
 
     is3D: false,
-    cameraMode: 'third_person' as 'first_person' | 'third_person' | 'top_down',
+    cameraMode: CAMERA_MODES.THIRD_PERSON,
 
     // Powerups
     powerups: {

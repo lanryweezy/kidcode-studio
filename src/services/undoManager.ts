@@ -274,7 +274,7 @@ export const UndoActionFactory = {
     getState: () => StoreState,
     setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => {
-    let previousState: Partial<SpriteState> = {};
+    const previousState: Partial<SpriteState> = {};
     
     return {
       type: 'UPDATE_SPRITE_STATE',
@@ -302,7 +302,7 @@ export const UndoActionFactory = {
     getState: () => StoreState,
     setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => {
-    let previousState: Partial<HardwareState> = {};
+    const previousState: Partial<HardwareState> = {};
     
     return {
       type: 'UPDATE_HARDWARE_STATE',
@@ -329,7 +329,7 @@ export const UndoActionFactory = {
     getState: () => StoreState,
     setState: (fn: Partial<StoreState>) => void
   ): Omit<UndoAction, 'id' | 'timestamp'> => {
-    let previousState: Partial<AppState> = {};
+    const previousState: Partial<AppState> = {};
     
     return {
       type: 'UPDATE_APP_STATE',

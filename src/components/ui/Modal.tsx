@@ -61,12 +61,10 @@ export const Modal: React.FC<ModalProps> = ({
             e.preventDefault();
             last.focus();
           }
-        } else {
-          if (document.activeElement === last) {
+        } else if (document.activeElement === last) {
             e.preventDefault();
             first.focus();
           }
-        }
       }
     };
 

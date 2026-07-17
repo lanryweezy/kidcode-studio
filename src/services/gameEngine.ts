@@ -8,6 +8,7 @@ import {
 } from './engine';
 import { saveHighScore } from './gameSaveSystem';
 import { spatialPlaySound, getMuted } from './soundService';
+import { SCENES, WEATHER_TYPES, CONDITION_VALUES } from '../constants/actions';
 
 // ─── Audio Integration System ───
 
@@ -265,10 +266,10 @@ export class GameEngine {
       commands.forEach(cmd => {
         switch (cmd.type) {
           case 'SET_WEATHER':
-            this.state.weather = cmd.params.text || 'none';
+            this.state.weather = cmd.params.text || WEATHER_TYPES.NONE;
             break;
           case 'SET_SCENE':
-            this.state.scene = cmd.params.text || 'grid';
+            this.state.scene = cmd.params.text || SCENES.GRID;
             break;
           case 'SET_EMOJI':
             this.state.player.emoji = cmd.params.text || '🚀';
@@ -280,7 +281,13 @@ export class GameEngine {
             break;
           }
           case 'SET_GRAVITY':
-            this.gravity = cmd.params.condition === 'true' ? 0.5 : 0;
+            this.gravity = cmd.params.condition === CONDITION_VALUES.TRUE ? 0.5 : 0;
+            break;
+          case 'SET_FRICTION':
+            this.friction = (cmd.params.value ?? 80) / 100;
+            break;
+          case 'SET_BOUNCINESS':
+            this.state.player.restitution = (cmd.params.value ?? 80) / 100;
             break;
           case 'SET_BACKGROUND_MUSIC':
             break;

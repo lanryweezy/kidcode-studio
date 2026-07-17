@@ -15,6 +15,12 @@ import {
     INITIAL_APP_STATE
 } from '../../constants';
 
+export interface VersionSnapshot {
+    commands: CommandBlock[];
+    timestamp: number;
+    label?: string;
+}
+
 export interface ProjectSlice {
     currentProject: any;
     commands: CommandBlock[];
@@ -30,6 +36,7 @@ export interface ProjectSlice {
     redoStack: CommandBlock[][];
     saveStatus: 'saved' | 'saving' | 'unsaved';
     plugins: Record<string, AppElement[]>;
+    versionHistory: VersionSnapshot[];
 
     // Actions
     setProject: (project: any) => void;
@@ -54,6 +61,11 @@ export interface ProjectSlice {
     pushHistory: () => void;
     undo: () => void;
     redo: () => void;
+
+    // Version History Actions
+    saveVersion: (label?: string) => void;
+    restoreVersion: (index: number) => void;
+    getVersionHistory: () => VersionSnapshot[];
 }
 
 export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> = (set, get) => ({
@@ -71,6 +83,7 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
     redoStack: [],
     saveStatus: 'saved',
     plugins: {},
+    versionHistory: [],
 
     setProject: (project) => set({
         currentProject: project,
@@ -153,5 +166,27 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
             history: [...state.history, state.commands],
             redoStack: newRedo
         };
-    })
+    }),
+
+    saveVersion: (label) => set((state) => ({
+        versionHistory: [
+            ...state.versionHistory.slice(-49),
+            { commands: [...state.commands], timestamp: Date.now(), label }
+        ]
+    })),
+
+    restoreVersion: (index) => set((state) => {
+        const version = state.versionHistory[index];
+        if (!version) return state;
+        return {
+            commands: [...version.commands],
+            history: [...state.history, state.commands],
+            redoStack: [],
+            saveStatus: 'unsaved'
+        };
+    }),
+
+    getVersionHistory: () => {
+        return get().versionHistory;
+    }
 });

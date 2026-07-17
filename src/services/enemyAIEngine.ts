@@ -64,8 +64,8 @@ export function updateEnemyAI(
   tilemap: Tile[],
   allEnemies: GameEntity[]
 ): { ai: EnemyAI; entity: GameEntity } {
-  let newAI = { ...ai };
-  let newEntity = { ...entity };
+  const newAI = { ...ai };
+  const newEntity = { ...entity };
 
   if (newAI.state === 'dead') {
     newAI.deathTimer++;
@@ -758,7 +758,7 @@ export function updateAggression(
   enemyKilled: boolean,
   inCombat: boolean
 ): AggressionSystem {
-  let newSystem = { ...system };
+  const newSystem = { ...system };
   newSystem.playerLevel = playerLevel;
   if (enemyKilled) newSystem.killCount++;
   if (inCombat) newSystem.timeInCombat++;
@@ -897,8 +897,8 @@ export function updateAmbientState(
   ambient: AmbientBehavior,
   entity: GameEntity
 ): { ai: EnemyAI; entity: GameEntity } {
-  let newAI = { ...ai };
-  let newEntity = { ...entity };
+  const newAI = { ...ai };
+  const newEntity = { ...entity };
 
   switch (ambient.type) {
     case 'wander':

@@ -3,6 +3,7 @@
 
 import { GameEngine } from './gameEngine';
 import { playSoundEffect } from './soundService';
+import { SCENES, WEATHER_TYPES } from '../constants/actions';
 
 interface GameConfig {
   name: string;
@@ -24,10 +25,10 @@ const GAME_CONFIGS: Record<string, GameConfig> = {
   'dragon-quest': {
     name: 'Dragon Quest',
     description: 'Medieval RPG with dragons, dungeons, and treasure!',
-    scene: 'forest',
+    scene: SCENES.FOREST,
     playerEmoji: '⚔️',
     gravity: true,
-    weather: 'rain',
+    weather: WEATHER_TYPES.RAIN,
     enemies: [
       { emoji: '👾', behavior: 'patrol', count: 3 },
       { emoji: '🦇', behavior: 'fly', count: 2 },
@@ -50,10 +51,10 @@ const GAME_CONFIGS: Record<string, GameConfig> = {
   'space-warrior': {
     name: 'Space Warrior',
     description: 'Defend the galaxy from alien invaders!',
-    scene: 'space',
+    scene: SCENES.SPACE,
     playerEmoji: '🚀',
     gravity: false,
-    weather: 'none',
+    weather: WEATHER_TYPES.NONE,
     enemies: [
       { emoji: '👾', behavior: 'patrol', count: 4 },
       { emoji: '🛸', behavior: 'chase', count: 2 },
@@ -74,7 +75,7 @@ const GAME_CONFIGS: Record<string, GameConfig> = {
   'ninja-legend': {
     name: 'Ninja Legend',
     description: 'Shadow warrior with deadly precision!',
-    scene: 'grid',
+    scene: SCENES.GRID,
     playerEmoji: '🥷',
     gravity: true,
     weather: 'fog',

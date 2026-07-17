@@ -21,6 +21,8 @@ export interface EngineEntity {
   speed: number;
   behavior: string;
   alive: boolean;
+  restitution?: number;
+  friction?: number;
   data?: Record<string, unknown> & { initialX?: number; range?: number; checkpoint?: { x: number; y: number }; isBoss?: boolean; gravity?: number };
 }
 

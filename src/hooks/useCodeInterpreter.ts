@@ -14,6 +14,7 @@ import { playSoundEffect, playTone, playSpeakerSound } from '../services/soundSe
 import { useStore } from '../store/useStore';
 import { serialService } from '../services/webSerialService';
 import { eventBus } from '../services/eventBus';
+import { DEFAULT_SCREEN } from '../constants/actions';
 
 interface UseCodeInterpreterProps {
     mode: AppMode;
@@ -56,7 +57,7 @@ export const useCodeInterpreter = ({
     const resumeRef = useRef<() => void>(() => { });
     const stopExecution = useRef(false);
     const speedRef = useRef(1);
-    const renderingScreen = useRef<string>('main');
+    const renderingScreen = useRef<string>(DEFAULT_SCREEN);
 
     useEffect(() => {
         speedRef.current = executionSpeed;
@@ -166,7 +167,7 @@ export const useCodeInterpreter = ({
 
                 // --- APP BUILDER ---
                 case CommandType.CREATE_SCREEN:
-                    renderingScreen.current = cmd.params.text || 'main';
+                    renderingScreen.current = cmd.params.text || DEFAULT_SCREEN;
                     setAppState(prev => ({ ...prev, screens: { ...prev.screens, [renderingScreen.current]: [] } }));
                     break;
                 case CommandType.ADD_BUTTON:
@@ -200,8 +201,8 @@ export const useCodeInterpreter = ({
                     alert(cmd.params.text);
                     break;
                 case CommandType.NAVIGATE:
-                    renderingScreen.current = cmd.params.text || 'main';
-                    setAppState(prev => ({ ...prev, activeScreen: cmd.params.text || 'main' }));
+                    renderingScreen.current = cmd.params.text || DEFAULT_SCREEN;
+                    setAppState(prev => ({ ...prev, activeScreen: cmd.params.text || DEFAULT_SCREEN }));
                     break;
                 case CommandType.DEFINE_PLUGIN:
                     const name = cmd.params.text || 'MyPlugin';
@@ -378,7 +379,7 @@ export const useCodeInterpreter = ({
                     break;
                 case CommandType.LOGIC_NOT:
                     if (cmd.params.varName) {
-                        hardwareStateRef.current.variables[cmd.params.varName] = !Boolean(cmd.params.value);
+                        hardwareStateRef.current.variables[cmd.params.varName] = !cmd.params.value;
                     }
                     break;
 
@@ -622,9 +623,9 @@ export const useCodeInterpreter = ({
 
             // Reset state for clean run
             if (mode === AppMode.APP) {
-                setAppState(prev => ({ ...prev, screens: { 'main': [] }, activeScreen: 'main', variables: {} }));
-                appStateRef.current = { ...appStateRef.current, screens: { 'main': [] }, activeScreen: 'main', variables: {} };
-                renderingScreen.current = 'main';
+                setAppState(prev => ({ ...prev, screens: { [DEFAULT_SCREEN]: [] }, activeScreen: DEFAULT_SCREEN, variables: {} }));
+                appStateRef.current = { ...appStateRef.current, screens: { [DEFAULT_SCREEN]: [] }, activeScreen: DEFAULT_SCREEN, variables: {} };
+                renderingScreen.current = DEFAULT_SCREEN;
             }
 
             // --- EVENT REGISTRATION ---

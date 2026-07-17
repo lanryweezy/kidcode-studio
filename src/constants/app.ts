@@ -2,12 +2,13 @@ import { AppMode, AppState, CommandType } from '../types';
 import {
     Layout, Gamepad2, Cpu, Box, MousePointer2, MessageSquare, TextCursorInput, Image, ToggleRight, CheckSquare, SlidersHorizontal, BarChart3, List, Pencil, MapPin, Video, Camera, Activity, Calendar, Palette, Mic, Minus, ArrowUp
 } from 'lucide-react';
+import { DEFAULT_SCREEN } from './actions';
 
 export const INITIAL_APP_STATE: AppState = {
     title: 'My Cool App',
     backgroundColor: '#ffffff',
-    activeScreen: 'main',
-    screens: { 'main': [] },
+    activeScreen: DEFAULT_SCREEN,
+    screens: { [DEFAULT_SCREEN]: [] },
     score: 0,
     variables: {},
     activeLevelTool: undefined

@@ -1,13 +1,43 @@
 import React, { useState } from 'react';
 import { AppState } from '../types';
-import { Layout, Square, ToggleLeft, SlidersHorizontal, PanelTop, Trash2, Plus, Palette } from 'lucide-react';
+import { Layout, Square, ToggleLeft, SlidersHorizontal, PanelTop, Trash2, Plus, Palette, Camera, ChevronDown } from 'lucide-react';
+import { DEFAULT_SCREEN } from '../constants/actions';
 
 interface AppDesignerPanelProps {
   appState: AppState;
   onStateChange: (newState: AppState) => void;
 }
 
+const LAYOUT_MODES = [
+  { id: 'stack', label: 'Stack', icon: '↕️' },
+  { id: 'grid', label: 'Grid', icon: '⊞' },
+  { id: 'row', label: 'Row', icon: '↔️' },
+] as const;
+
+const ELEMENT_CATEGORIES = [
+  {
+    name: 'Basic',
+    elements: [
+      { type: 'text', label: 'Text', icon: Square },
+      { type: 'button', label: 'Button', icon: Square },
+      { type: 'input', label: 'Input', icon: Square },
+      { type: 'image', label: 'Image', icon: Square },
+    ],
+  },
+  {
+    name: 'Interactive',
+    elements: [
+      { type: 'switch', label: 'Toggle', icon: ToggleLeft },
+      { type: 'slider', label: 'Slider', icon: SlidersHorizontal },
+      { type: 'camera', label: 'Camera', icon: Camera },
+    ],
+  },
+];
+
 const AppDesignerPanel: React.FC<AppDesignerPanelProps> = ({ appState, onStateChange }) => {
+  const [layoutMode, setLayoutMode] = useState<'stack' | 'grid' | 'row'>('stack');
+  const [expandedCategory, setExpandedCategory] = useState<string | null>('Basic');
+
   const handleAddScreen = () => {
     const newScreenName = `screen${Object.keys(appState.screens).length + 1}`;
     onStateChange({
@@ -28,6 +58,19 @@ const AppDesignerPanel: React.FC<AppDesignerPanelProps> = ({ appState, onStateCh
     });
   };
 
+  const handleLayoutChange = (mode: 'stack' | 'grid' | 'row') => {
+    setLayoutMode(mode);
+  };
+
+  const getLayoutClasses = () => {
+    switch (layoutMode) {
+      case 'grid': return 'grid grid-cols-2 gap-3';
+      case 'row': return 'flex flex-row gap-3 flex-wrap';
+      case 'stack':
+      default: return 'flex flex-col gap-3';
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-slate-50">
       <div className="p-4 bg-white border-b border-slate-200">
@@ -44,15 +87,36 @@ const AppDesignerPanel: React.FC<AppDesignerPanelProps> = ({ appState, onStateCh
           <div className="text-center p-4">
             <div className="text-4xl mb-2">📱</div>
             <p className="text-slate-500 text-sm">App Preview</p>
-            <p className="text-slate-400 text-xs mt-1">Screen: {appState.activeScreen || 'main'}</p>
+            <p className="text-slate-400 text-xs mt-1">Screen: {appState.activeScreen || DEFAULT_SCREEN}</p>
           </div>
           <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="text-[10px] bg-black/50 text-white px-2 py-1 rounded-full">Preview</span>
           </div>
         </div>
 
+        {/* Layout Mode Selector */}
+        <div className="bg-white p-3 rounded-xl border border-slate-100 mb-6">
+          <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wide mb-2">Layout Mode</h4>
+          <div className="flex gap-2">
+            {LAYOUT_MODES.map(mode => (
+              <button
+                key={mode.id}
+                onClick={() => handleLayoutChange(mode.id)}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
+                  layoutMode === mode.id
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <span>{mode.icon}</span>
+                <span>{mode.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Main Actions */}
-        <div className="space-y-3 mb-6">
+        <div className="flex flex-col gap-3 mb-6">
           <button
             onClick={handleAddScreen}
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
@@ -67,39 +131,34 @@ const AppDesignerPanel: React.FC<AppDesignerPanelProps> = ({ appState, onStateCh
         </div>
 
         {/* App Elements */}
-        <div className="space-y-4 mb-6 bg-white p-4 rounded-xl border border-slate-100">
-          <h4 className="font-bold text-slate-700 text-sm uppercase tracking-wide">UI Components</h4>
-          <div className="grid grid-cols-2 gap-3">
-            <button className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200:bg-slate-600 transition-colors">
-              <Square className="text-slate-600 mb-1" size={20} />
-              <span className="text-xs text-slate-500">Text</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200:bg-slate-600 transition-colors">
-              <Square className="text-slate-600 mb-1" size={20} />
-              <span className="text-xs text-slate-500">Button</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200:bg-slate-600 transition-colors">
-              <Square className="text-slate-600 mb-1" size={20} />
-              <span className="text-xs text-slate-500">Input</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200:bg-slate-600 transition-colors">
-              <Square className="text-slate-600 mb-1" size={20} />
-              <span className="text-xs text-slate-500">Image</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200:bg-slate-600 transition-colors">
-              <ToggleLeft className="text-slate-600 mb-1" size={20} />
-              <span className="text-xs text-slate-500">Toggle</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200:bg-slate-600 transition-colors">
-              <SlidersHorizontal className="text-slate-600 mb-1" size={20} />
-              <span className="text-xs text-slate-500">Slider</span>
-            </button>
-          </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-100 mb-6">
+          <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wide mb-3">UI Components</h4>
+          {ELEMENT_CATEGORIES.map(category => (
+            <div key={category.name} className="mb-3 last:mb-0">
+              <button
+                onClick={() => setExpandedCategory(expandedCategory === category.name ? null : category.name)}
+                className="w-full flex items-center justify-between py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <span>{category.name}</span>
+                <ChevronDown size={14} className={`transition-transform ${expandedCategory === category.name ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedCategory === category.name && (
+                <div className={getLayoutClasses()}>
+                  {category.elements.map(el => (
+                    <button key={el.type} className="flex flex-col items-center justify-center p-3 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
+                      <el.icon className="text-slate-600 mb-1" size={20} />
+                      <span className="text-xs text-slate-500">{el.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Screen List */}
-        <h4 className="font-bold text-slate-700 mb-2 text-sm uppercase tracking-wide">Screens</h4>
-        <div className="space-y-2">
+        <h4 className="font-bold text-slate-700 mb-2 text-xs uppercase tracking-wide">Screens</h4>
+        <div className="flex flex-col gap-2">
           {Object.keys(appState.screens).length > 0 ? (
             Object.keys(appState.screens).map(screenName => (
               <div 

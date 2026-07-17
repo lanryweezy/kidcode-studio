@@ -154,7 +154,7 @@ export const StartupSimulatorGame: React.FC<{ onExit: () => void }> = ({ onExit 
     if (isPaused || gameState.gameOver) return;
 
     setGameState(prev => {
-      let newMonth = prev.month + 0.1 * speed;
+      const newMonth = prev.month + 0.1 * speed;
 
       // Monthly processing
       if (newMonth % 1 === 0 && Math.floor(newMonth) > prev.month) {

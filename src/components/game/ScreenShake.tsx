@@ -21,7 +21,7 @@ export const ScreenShake: React.FC<ScreenShakeProps> = ({
       return;
     }
 
-    let startTime = Date.now();
+    const startTime = Date.now();
     let frameId: number;
 
     const animate = () => {

@@ -344,7 +344,7 @@ const GameCanvas = React.memo(({
             const rawX = clientX - rect.left + editorScrollX;
             const x = Math.floor(rawX / 40);
             const y = Math.floor((clientY - rect.top) / 40);
-            let newMap = [...tilemapRef.current];
+            const newMap = [...tilemapRef.current];
             const existingIdx = newMap.findIndex((t: any) => t.x === x && t.y === y);
             if (existingIdx >= 0 && newMap[existingIdx].type === appState.activeLevelTool) return;
             if (existingIdx >= 0) newMap.splice(existingIdx, 1);

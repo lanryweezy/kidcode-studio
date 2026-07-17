@@ -395,7 +395,7 @@ function generateSummary(issues: ReviewIssue[], score: number): string {
   if (errors > 0) parts.push(`${errors} error${errors > 1 ? 's' : ''}`);
   if (warnings > 0) parts.push(`${warnings} warning${warnings > 1 ? 's' : ''}`);
   if (infos > 0) parts.push(`${infos} suggestion${infos > 1 ? 's' : ''}`);
-  summary += parts.join(', ') + '. ';
+  summary += `${parts.join(', ')  }. `;
 
   if (score >= 80) summary += 'Almost there — just a few tweaks needed!';
   else if (score >= 50) summary += 'Getting close! Fix the errors first.';

@@ -50,7 +50,7 @@ const TopBar: React.FC<TopBarProps> = ({
     setShowHome, mode, undo, redo, setShowHelp,
     setLeftPanelWidth, leftPanelWidth,
     circuitComponents, pcbColor, isLive, setIsLive,
-    setShowMarketplace, commands
+    setShowMarketplace, commands, customAccentColor
   } = useStore();
   
   const { toast } = useToast();
@@ -104,13 +104,14 @@ const TopBar: React.FC<TopBarProps> = ({
         </button>
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
         <div className="flex items-center gap-2">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${MODE_CONFIG[mode].color} shadow-lg shadow-blue-500/20`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/20`} style={{ backgroundColor: customAccentColor }}>
             {React.createElement(MODE_CONFIG[mode].icon, { size: 16 })}
           </div>
           <input
             value={currentProject?.name || 'Untitled'}
             onChange={(e) => setProject({ ...currentProject, name: e.target.value })}
             className="bg-transparent font-bold outline-none hover:bg-white/50 dark:hover:bg-black/20 px-2 py-1 rounded transition-colors truncate max-w-[200px]"
+            style={{ color: customAccentColor }}
           />
         </div>
         <div className="text-xs text-slate-600 flex items-center gap-1 font-medium mr-2">

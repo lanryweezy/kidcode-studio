@@ -73,12 +73,12 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, onClose, onDuplicate, o
   return (
     <div 
       ref={menuRef}
-      className={`fixed z-50 bg-white rounded-xl shadow-xl border border-slate-100 p-1 w-48 origin-top-left overflow-hidden transition-all duration-150 ${isClosing ? 'opacity-0 scale-95' : 'animate-in zoom-in-95 duration-100'}`}
+      className={`fixed z-50 bg-white rounded-2xl shadow-2xl border-4 border-slate-200 p-2 w-64 origin-top-left overflow-hidden transition-all duration-200 transform-gpu ${isClosing ? 'opacity-0 scale-90 translate-y-2' : 'animate-in zoom-in duration-200'}`}
       style={{ top: y, left: x }}
       role="menu"
       aria-label="Block actions"
     >
-      <div className="flex flex-col max-h-80 overflow-y-auto">
+      <div className="flex flex-col gap-2 max-h-80 overflow-y-auto custom-scrollbar">
         {menuItems.map((item, i) => {
           const Icon = item.key === 'duplicate' ? Copy : item.key === 'comment' ? StickyNote : item.key === 'disable' ? Ban : Trash2;
           const isDelete = item.key === 'delete';
@@ -90,14 +90,14 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, onClose, onDuplicate, o
               onMouseEnter={() => setActiveIndex(i)}
               role="menuitem"
               tabIndex={-1}
-              className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left ${
+              className={`flex items-center gap-3 px-4 py-3 text-base rounded-xl font-bold transition-all transform-gpu hover:scale-105 active:scale-95 text-left shadow-sm ${
                 i === activeIndex
-                  ? isDelete ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-blue-600'
-                  : isDelete ? 'text-red-600 hover:bg-red-50' : 'text-slate-700 hover:bg-slate-50 hover:text-blue-600'
+                  ? isDelete ? 'bg-red-500 text-white' : 'bg-violet-500 text-white'
+                  : isDelete ? 'bg-red-50 text-red-600 hover:bg-red-500 hover:text-white' : 'bg-slate-50 text-slate-700 hover:bg-violet-500 hover:text-white'
               }`}
             >
-              <Icon size={16} />
-              <span className="font-bold">{item.label}</span>
+              <Icon size={20} className={i === activeIndex ? 'animate-bounce' : ''} />
+              <span>{item.label}</span>
             </button>
           );
         })}

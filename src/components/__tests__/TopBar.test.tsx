@@ -117,7 +117,7 @@ describe('TopBar', () => {
 
   it('displays save status', () => {
     render(<TopBar {...defaultProps} saveStatus="saved" />);
-    expect(screen.getByText('Project Saved')).toBeTruthy();
+    expect(screen.getByText('Saved')).toBeTruthy();
   });
 
   it('calls undo when undo button is clicked', () => {

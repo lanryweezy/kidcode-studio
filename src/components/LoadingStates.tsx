@@ -54,6 +54,8 @@ export const ThumbnailSkeleton: React.FC<{ className?: string }> = ({ className 
   </div>
 );
 
+import { Zap } from 'lucide-react';
+
 /**
  * Loading Spinner
  */
@@ -63,15 +65,13 @@ export const LoadingSpinner: React.FC<{
   text?: string;
 }> = ({ size = 40, className = '', text }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
-    <div
-      className="relative"
-      style={{ width: size, height: size }}
-    >
-      <div className="absolute inset-0 border-4 border-slate-200 rounded-full" />
-      <div className="absolute inset-0 border-4 border-violet-500 rounded-full border-t-transparent animate-spin" />
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <div className="absolute inset-0 border-4 border-violet-200 rounded-full" />
+      <div className="absolute inset-0 border-4 border-violet-600 rounded-full border-t-transparent animate-spin" />
+      <Zap className="text-violet-500 animate-pulse" size={size / 2} />
     </div>
     {text && (
-      <div className="mt-4 text-slate-600 font-bold text-sm">
+      <div className="mt-4 text-violet-600 font-bold text-sm bg-violet-100 px-4 py-1.5 rounded-full shadow-sm animate-pulse">
         {text}
       </div>
     )}
@@ -82,11 +82,11 @@ export const LoadingSpinner: React.FC<{
  * Full Page Loading State
  */
 export const PageLoader: React.FC<{ message?: string }> = ({ message }) => (
-  <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[300] flex items-center justify-center">
-    <div className="text-center">
-      <LoadingSpinner size={64} />
+  <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[300] flex items-center justify-center">
+    <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
+      <LoadingSpinner size={80} />
       {message && (
-        <div className="mt-6 text-white font-black text-xl animate-pulse">
+        <div className="mt-6 text-slate-800 font-black text-xl bg-violet-100 px-6 py-2 rounded-xl text-center">
           {message}
         </div>
       )}

@@ -13,6 +13,7 @@ export interface UnifiedGameState {
   playerFacing: 'left' | 'right';
   playerInvincible: boolean;
   playerInvincibleTimer: number;
+  playerScale: number;
 
   worldWidth: number;
   worldHeight: number;

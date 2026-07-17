@@ -333,7 +333,8 @@ const Sidebar: React.FC<any> = ({
         blockSearch, setBlockSearch,
         expandedCategories, setExpandedCategories,
         setShowStats,
-        activeMission, setActiveMission
+        activeMission, setActiveMission,
+        highContrast, setHighContrast,
     } = useStore();
 
     useEffect(() => {
@@ -405,6 +406,8 @@ const Sidebar: React.FC<any> = ({
                                 setShowSoundRecorder={setShowSoundRecorder} setShowAssetManager={setShowAssetManager}
                                 setShowAI3DCreator={setShowAI3DCreator} setShowMusicGenerator={setShowMusicGenerator}
                                 setShowSpriteExtractor={setShowSpriteExtractor}
+                                appState={appState} updateAppState={updateAppState}
+                                highContrast={highContrast} setHighContrast={setHighContrast}
                             />
                         </div>
                     </div>
@@ -477,6 +480,8 @@ const Sidebar: React.FC<any> = ({
                                 setShowSoundRecorder={setShowSoundRecorder} setShowAssetManager={setShowAssetManager}
                                 setShowAI3DCreator={setShowAI3DCreator} setShowMusicGenerator={setShowMusicGenerator}
                                 setShowSpriteExtractor={setShowSpriteExtractor}
+                                appState={appState} updateAppState={updateAppState}
+                                highContrast={highContrast} setHighContrast={setHighContrast}
                             />
                         )}
                     </div>

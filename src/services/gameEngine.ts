@@ -7,7 +7,7 @@ import {
   InputEngine, playSoundEffect, PARTICLE_PRESETS, CameraState
 } from './engine';
 import { saveHighScore } from './gameSaveSystem';
-import { spatialPlaySound, getMuted } from './soundService';
+import { spatialPlaySound, getMuted, playBackgroundMusic } from './soundService';
 import { SCENES, WEATHER_TYPES, CONDITION_VALUES } from '../constants/actions';
 
 // ─── Audio Integration System ───
@@ -290,6 +290,7 @@ export class GameEngine {
             this.state.player.restitution = (cmd.params.value ?? 80) / 100;
             break;
           case 'SET_BACKGROUND_MUSIC':
+            playBackgroundMusic(cmd.params.text || 'calm');
             break;
           case 'SPAWN_ENEMY':
             this.spawnSpecificEnemy(cmd.params.text || '👾');

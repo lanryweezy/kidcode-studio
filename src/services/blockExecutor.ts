@@ -281,14 +281,27 @@ export class BlockExecutor {
         ctx.blockIndex++;
         return true;
 
-      case 'SET_SIZE':
-        // Scale player
+      case 'SET_SIZE': {
+        const scale = (Number(block.params.value) || 100) / 100;
+        ctx.engine.state.playerScale = scale;
         ctx.blockIndex++;
         return true;
+      }
 
-      case 'BOUNCE_ON_EDGE':
+      case 'BOUNCE_ON_EDGE': {
+        const wx = ctx.engine.state.worldWidth;
+        const wy = ctx.engine.state.worldHeight;
+        if (ctx.engine.state.playerX <= 0 || ctx.engine.state.playerX >= wx - 32) {
+          ctx.engine.state.playerVx = -ctx.engine.state.playerVx;
+          ctx.engine.state.playerX = Math.max(0, Math.min(wx - 32, ctx.engine.state.playerX));
+        }
+        if (ctx.engine.state.playerY <= 0 || ctx.engine.state.playerY >= wy - 32) {
+          ctx.engine.state.playerVy = -ctx.engine.state.playerVy;
+          ctx.engine.state.playerY = Math.max(0, Math.min(wy - 32, ctx.engine.state.playerY));
+        }
         ctx.blockIndex++;
         return true;
+      }
 
       // === GAME STATE ===
       case 'WIN_GAME':

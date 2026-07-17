@@ -16,20 +16,22 @@ export type SoundEffectType = 'move' | 'turn' | 'ui' | 'click' | 'coin' | 'camer
  */
 export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
   try {
+    if (muted) return;
     const ctx = getContext();
     if (ctx.state === 'suspended') ctx.resume();
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = sfxVolume;
 
-    // Spatial Audio (Panning)
     const panner = ctx.createStereoPanner();
-    // Clamp panX between -1 (left) and 1 (right)
     panner.pan.value = Math.max(-1, Math.min(1, panX));
 
     osc.connect(gain);
     gain.connect(panner);
-    panner.connect(ctx.destination);
+    panner.connect(masterGain);
+    masterGain.connect(ctx.destination);
 
     const now = ctx.currentTime;
 
@@ -204,6 +206,135 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         osc.start(now);
         osc.stop(now + 0.12);
         break;
+
+      case 'attack':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+        break;
+
+      case 'hit':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.06);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+        break;
+
+      case 'death':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.6);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
+        break;
+
+      case 'victory': {
+        osc.type = 'sine';
+        const v1 = ctx.createOscillator();
+        const v1g = ctx.createGain();
+        v1.type = 'sine';
+        osc.frequency.setValueAtTime(523, now);
+        osc.frequency.setValueAtTime(659, now + 0.15);
+        osc.frequency.setValueAtTime(784, now + 0.3);
+        v1.frequency.setValueAtTime(659, now);
+        v1.frequency.setValueAtTime(784, now + 0.15);
+        v1.frequency.setValueAtTime(1047, now + 0.3);
+        v1g.gain.value = 0.08;
+        v1.connect(v1g);
+        v1g.connect(ctx.destination);
+        v1.start(now);
+        v1.stop(now + 0.5);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+        break;
+      }
+
+      case 'achievement':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(1108, now + 0.1);
+        osc.frequency.setValueAtTime(1318, now + 0.2);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        break;
+
+      case 'notification':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(698, now);
+        osc.frequency.setValueAtTime(880, now + 0.1);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+        break;
+
+      case 'gameOver':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(370, now + 0.2);
+        osc.frequency.setValueAtTime(311, now + 0.4);
+        osc.frequency.setValueAtTime(220, now + 0.6);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.8);
+        break;
+
+      case 'levelComplete': {
+        osc.type = 'square';
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+          osc.frequency.setValueAtTime(freq, now + i * 0.12);
+        });
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
+        break;
+      }
+
+      case 'healing':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.linearRampToValueAtTime(800, now + 0.3);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        break;
+
+      case 'menuSelect':
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.setValueAtTime(900, now + 0.04);
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+        break;
+
+      default:
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+        break;
     }
   } catch (e) {
     console.error("Audio playback failed", e);
@@ -333,6 +464,103 @@ export const getMuted = () => muted;
 export const spatialPlaySound = (type: SoundEffectType, x: number = 0, canvasWidth: number = 400) => {
   const panX = ((x / canvasWidth) * 2) - 1;
   playSoundEffect(type, panX);
+};
+
+let bgMusicOsc: OscillatorNode | null = null;
+let bgMusicGain: GainNode | null = null;
+
+const MUSIC_PROFILES: Record<string, { baseFreq: number; type: OscillatorType; filterFreq: number }> = {
+  calm: { baseFreq: 220, type: 'sine', filterFreq: 400 },
+  exploration: { baseFreq: 261, type: 'triangle', filterFreq: 600 },
+  combat: { baseFreq: 329, type: 'sawtooth', filterFreq: 800 },
+  boss: { baseFreq: 196, type: 'square', filterFreq: 500 },
+  victory: { baseFreq: 392, type: 'sine', filterFreq: 1000 },
+  defeat: { baseFreq: 164, type: 'sawtooth', filterFreq: 300 },
+};
+
+export const playBackgroundMusic = (track: string = 'calm') => {
+  stopBackgroundMusic();
+  if (muted) return;
+
+  try {
+    const ctx = getContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const profile = MUSIC_PROFILES[track] || MUSIC_PROFILES.calm;
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    bgMusicGain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(profile.filterFreq, ctx.currentTime);
+
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    lfo.frequency.setValueAtTime(0.3, ctx.currentTime);
+    lfoGain.gain.setValueAtTime(15, ctx.currentTime);
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc1.frequency);
+
+    osc1.type = profile.type;
+    osc1.frequency.setValueAtTime(profile.baseFreq, ctx.currentTime);
+    osc2.type = profile.type;
+    osc2.frequency.setValueAtTime(profile.baseFreq * 1.5, ctx.currentTime);
+
+    const osc2Gain = ctx.createGain();
+    osc2Gain.gain.value = 0.3;
+
+    bgMusicGain.gain.setValueAtTime(0, ctx.currentTime);
+    bgMusicGain.gain.linearRampToValueAtTime(musicVolume * 0.12, ctx.currentTime + 1);
+
+    osc1.connect(filter);
+    osc2.connect(osc2Gain);
+    osc2Gain.connect(filter);
+    filter.connect(bgMusicGain);
+    bgMusicGain.connect(ctx.destination);
+
+    osc1.start();
+    osc2.start();
+    lfo.start();
+
+    bgMusicOsc = osc1;
+    (bgMusicOsc as any)._osc2 = osc2;
+    (bgMusicOsc as any)._lfo = lfo;
+  } catch (e) {
+    console.error('Background music failed', e);
+  }
+};
+
+export const stopBackgroundMusic = () => {
+  if (bgMusicOsc) {
+    try {
+      if (bgMusicGain) {
+        const ctx = bgMusicOsc.context;
+        bgMusicGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
+      }
+      const osc2Ref = (bgMusicOsc as any)._osc2;
+      const lfoRef = (bgMusicOsc as any)._lfo;
+      setTimeout(() => {
+        try {
+          bgMusicOsc?.stop();
+          osc2Ref?.stop();
+          lfoRef?.stop();
+        } catch {}
+        bgMusicOsc = null;
+        bgMusicGain = null;
+      }, 600);
+    } catch {
+      bgMusicOsc = null;
+      bgMusicGain = null;
+    }
+  }
+};
+
+export const setBgMusicVolume = (v: number) => {
+  musicVolume = Math.max(0, Math.min(1, v));
+  if (bgMusicGain) {
+    bgMusicGain.gain.setValueAtTime(muted ? 0 : musicVolume * 0.12, bgMusicGain.context.currentTime);
+  }
 };
 
 export const applyADSR = (param: AudioParam | GainNode, peakVolume: number = 1, envelope: { attack: number; decay: number; sustain: number; release: number } = DEFAULT_ADSR, startTime: number = 0) => {

@@ -59,6 +59,7 @@ export const useCodeInterpreter = ({
     const stopExecution = useRef(false);
     const speedRef = useRef(1);
     const renderingScreen = useRef<string>(DEFAULT_SCREEN);
+    const stepOnceRef = useRef(false);
 
     useEffect(() => {
         speedRef.current = executionSpeed;
@@ -82,7 +83,8 @@ export const useCodeInterpreter = ({
         highlightBlockFast(cmd.id);
 
         if (debugMode) {
-            if (cmd.hasBreakpoint || isPaused) {
+            if (cmd.hasBreakpoint || stepOnceRef.current) {
+                stepOnceRef.current = false;
                 setIsPaused(true);
                 await new Promise<void>(resolve => {
                     resumeRef.current = resolve;
@@ -805,7 +807,16 @@ export const useCodeInterpreter = ({
     };
 
     const stepCode = async () => {
-        // Logic for single step debugging could go here
+        if (!isPlaying) {
+            stepOnceRef.current = true;
+            setDebugMode(true);
+            setIsPaused(true);
+            runCode();
+            return;
+        }
+        stepOnceRef.current = true;
+        setIsPaused(false);
+        resumeRef.current();
     };
 
     const resumeCode = () => {

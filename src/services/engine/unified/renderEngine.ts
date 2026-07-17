@@ -79,14 +79,16 @@ export function render(context: GameContext) {
   ctx.globalAlpha = 1;
 
   if (cam.playerHealth > 0) {
-    ctx.font = '32px serif';
+    const scale = cam.playerScale || 1;
+    const fontSize = Math.round(32 * scale);
+    ctx.font = `${fontSize}px serif`;
     ctx.textAlign = 'center';
     const playerBob = Math.sin(context.frameCount * 0.1) * 2;
-    ctx.fillText(cam.playerEmoji, cam.playerX + 16, cam.playerY + 16 + playerBob);
+    ctx.fillText(cam.playerEmoji, cam.playerX + 16 * scale, cam.playerY + 16 * scale + playerBob);
 
     if (cam.playerInvincible && Math.floor(context.frameCount / 4) % 2 === 0) {
       ctx.globalAlpha = 0.5;
-      ctx.fillText(cam.playerEmoji, cam.playerX + 16, cam.playerY + 16 + playerBob);
+      ctx.fillText(cam.playerEmoji, cam.playerX + 16 * scale, cam.playerY + 16 * scale + playerBob);
       ctx.globalAlpha = 1;
     }
   }

@@ -23,7 +23,7 @@ function createInitialState(): UnifiedGameState {
     playerEmoji: '🚀', playerHealth: 100, playerMaxHealth: 100,
     playerDamage: 10, playerSpeed: 6, playerJumpForce: 12,
     playerIsGrounded: true, playerFacing: 'right', playerInvincible: false,
-    playerInvincibleTimer: 0,
+    playerInvincibleTimer: 0, playerScale: 1,
     worldWidth: 2400, worldHeight: 600, cameraX: 0, cameraY: 0, cameraZoom: 1,
     gravity: 0.6, friction: 0.85,
     tiles: [], background: 'space',

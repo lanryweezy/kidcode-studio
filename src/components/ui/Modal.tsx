@@ -109,6 +109,7 @@ export const Modal: React.FC<ModalProps> = ({
           animate-scale-in
           outline-none
           mx-4 sm:mx-auto
+          gpu-accelerated
           ${className}
         `}
       >
@@ -133,7 +134,7 @@ export const Modal: React.FC<ModalProps> = ({
             <X size={18} strokeWidth={2} />
           </button>
         )}
-        <div className="overflow-y-auto max-h-[80vh] p-6">
+        <div className="overflow-y-auto max-h-[80vh] p-6 scroll-touch">
           {children}
         </div>
       </div>

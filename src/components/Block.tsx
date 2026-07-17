@@ -156,7 +156,7 @@ const Block: React.FC<BlockProps> = ({
                 id={`block-${block.id}`}
                 ref={blockRef}
                 className={`
-                relative group flex flex-col p-4 rounded-xl mb-4 transition-all duration-200 select-none
+                relative group flex flex-col p-4 rounded-xl mb-4 transition-shadow duration-200 select-none
                 bg-yellow-200 border-b-4 border-r-4 border-yellow-300
                 shadow-sm rotate-1 hover:rotate-0 hover:scale-[1.01] hover:shadow-md
                 ${isDeleting ? 'animate-delete-flash' : ''}
@@ -216,13 +216,13 @@ const Block: React.FC<BlockProps> = ({
                 ref={blockRef}
                 className={`
             relative group flex-1 flex items-center gap-3 p-3 rounded-xl border-2 mb-3
-            transition-all duration-200 select-none touch-none block-hover
+            transition-shadow duration-200 select-none touch-none block-hover
             ${borderColor} ${bgColor} ${activeStyle}
             ${isDeleting ? 'animate-delete-flash' : ''}
             ${isFlashing ? 'ring-2 ring-emerald-400 border-emerald-400 animate-pulse' : ''}
             ${isSnapping ? 'animate-snap-bounce animate-glow-pulse' : ''}
             ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
-            ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01] animate-drop-zone-glow' : ''}
+            ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01] animate-drop-zone-glow gpu-accelerated' : ''}
         `}
                 draggable={isDraggable}
                 onDragStart={handleDragStart}
@@ -743,6 +743,8 @@ export default React.memo(Block, (prev, next) => {
     return (
         prev.block === next.block &&
         prev.isActive === next.isActive &&
-        prev.index === next.index
+        prev.isDragOver === next.isDragOver &&
+        prev.index === next.index &&
+        prev.isDraggable === next.isDraggable
     );
 });

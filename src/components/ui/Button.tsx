@@ -47,15 +47,19 @@ export const Button: React.FC<ButtonProps> = ({
 
     const btn = btnRef.current;
     if (btn) {
-      const rect = btn.getBoundingClientRect();
-      const ripple = document.createElement('span');
-      const size = Math.max(rect.width, rect.height);
-      ripple.className = 'ripple-circle';
-      ripple.style.width = ripple.style.height = `${size}px`;
-      ripple.style.left = `${e.clientX - rect.left}px`;
-      ripple.style.top = `${e.clientY - rect.top}px`;
-      btn.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 600);
+      const clientX = e.clientX;
+      const clientY = e.clientY;
+      requestAnimationFrame(() => {
+        const rect = btn.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        const size = Math.max(rect.width, rect.height);
+        ripple.className = 'ripple-circle';
+        ripple.style.width = ripple.style.height = `${size}px`;
+        ripple.style.left = `${clientX - rect.left}px`;
+        ripple.style.top = `${clientY - rect.top}px`;
+        btn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+      });
     }
 
     onClick?.(e);

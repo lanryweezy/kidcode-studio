@@ -65,7 +65,11 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const openMobileDrawer = useCallback(() => setIsMobileDrawerOpen(true), []);
     const closeMobileDrawer = useCallback(() => setIsMobileDrawerOpen(false), []);
 
+    const dragOverThrottleRef = useRef<number>(0);
     const handleDragTrail = useCallback((e: React.DragEvent) => {
+        const now = Date.now();
+        if (now - dragOverThrottleRef.current < 16) return;
+        dragOverThrottleRef.current = now;
         if (!draggedBlockId || !trailContainerRef.current) return;
         const trail = document.createElement('div');
         trail.className = 'drag-trail';
@@ -142,7 +146,12 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         mobileView === 'preview' && isMobile ? 'hidden md:flex' : 'flex'
                     }`}
                     onTouchStart={handleTouchStart}
-                    onTouchEnd={handleTouchEnd}
+                    onTouchEnd={(e) => {
+                        handleTouchEnd(e);
+                        document.getElementById('block-workspace')?.classList.remove('touch-active');
+                    }}
+                    onTouchMove={() => document.getElementById('block-workspace')?.classList.add('touch-active')}
+                    onTouchCancel={() => document.getElementById('block-workspace')?.classList.remove('touch-active')}
                 >
                     <ErrorBoundary>
                     <div className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-violet-500 bg-slate-300 transition-colors z-50 hidden lg:flex items-center justify-center opacity-40 hover:opacity-100" onMouseDown={handleMouseDownLeft}>
@@ -199,7 +208,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         <button onClick={() => setWorkspaceZoom(1)} className="bg-white text-slate-500 hover:text-slate-700 shadow-sm px-2.5 py-1.5 rounded-lg font-bold text-xs active:scale-95 transition-colors border border-slate-200">{(workspaceZoom * 100).toFixed(0)}%</button>
                         <button onClick={() => setWorkspaceZoom(Math.min(2, workspaceZoom + 0.1))} className="bg-white text-slate-500 hover:text-slate-700 shadow-sm p-1.5 rounded-lg text-sm font-bold active:scale-95 transition-colors border border-slate-200" aria-label="Zoom In">+</button>
                     </div>
-                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar relative overflow-y-auto overflow-x-hidden transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={(e) => { handleWorkspaceDragOver(e); handleDragTrail(e); }} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
+                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar scroll-touch relative overflow-y-auto overflow-x-hidden transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={(e) => { handleWorkspaceDragOver(e); handleDragTrail(e); }} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
                         <div ref={trailContainerRef} className="pointer-events-none" />
                         <div style={{ transform: `scale(${workspaceZoom})`, transformOrigin: 'top left', minHeight: '100%' }} className="space-y-1">
                             {commands.length === 0 && (
@@ -253,11 +262,12 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                     style={{ width: isMobile ? '100%' : rightPanelWidth }}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}
+                    onTouchCancel={() => document.getElementById('block-workspace')?.classList.remove('touch-active')}
                 >
                     <div className="absolute top-0 left-0 w-1.5 h-full cursor-col-resize hover:bg-violet-500 bg-slate-300 transition-colors z-50 hidden lg:flex items-center justify-center opacity-40 hover:opacity-100" onMouseDown={handleMouseDownRight}>
                         <div className="w-0.5 h-8 bg-current rounded-full" />
                     </div>
-                    <div className="flex-1 p-4 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative min-h-[300px]">
+                        <div className="flex-1 p-4 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative min-h-[300px] scroll-touch">
                         <ErrorBoundary>
                             {is3DMode && mode === AppMode.GAME ? (
                                 <React.Suspense fallback={<div className="flex items-center justify-center h-full bg-slate-900"><span className="text-white">Loading 3D...</span></div>}>
@@ -306,7 +316,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
 
             {showConsole && (
                 <ErrorBoundary>
-                    <div className="h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 shrink-0 sculpted-inset">
+                        <div className="h-40 bg-slate-900 text-slate-300 font-mono text-xs overflow-y-auto p-2 border-t border-slate-700 shrink-0 sculpted-inset scroll-touch">
                         <div className="flex justify-between items-center mb-1 text-slate-500 text-[10px] uppercase font-bold sticky top-0 bg-slate-900">
                             <span>Console Output</span>
                             <button onClick={clearLogs} className="hover:text-white" aria-label="Clear console logs">Clear</button>

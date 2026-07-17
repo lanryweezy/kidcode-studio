@@ -40,7 +40,7 @@ const SidebarTabContent: React.FC<any> = ({
 }) => {
     if (activeTab === 'export') {
         return (
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50 min-h-0 tab-fade-in">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar scroll-touch bg-slate-50 min-h-0 tab-fade-in">
                 <div className="flex items-center gap-2 mb-6">
                     <div className="w-7 h-7 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center">
                         <Code2 size={16} />
@@ -79,7 +79,7 @@ const SidebarTabContent: React.FC<any> = ({
                 <div className="p-4 bg-white border-b border-slate-200">
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><Layout className="text-blue-500" size={16} /> App Designer</h3>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar scroll-touch">
                     <button className="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 mb-4">
                         <Plus size={16} /> Add New Screen
                     </button>
@@ -108,8 +108,8 @@ const SidebarTabContent: React.FC<any> = ({
                     </div>
                 </div>
                 {designTab === 'sprite' ? (
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                        <div className="aspect-square bg-white rounded-xl border border-slate-200 mb-4 flex items-center justify-center relative overflow-hidden">
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar scroll-touch">
+                            <div className="aspect-square bg-white rounded-xl border border-slate-200 mb-4 flex items-center justify-center relative overflow-hidden">
                             {spriteState.texture ? (
                                 <img src={spriteState.texture} className="max-w-[80%] max-h-[80%] object-contain" alt="Sprite Texture" loading="lazy" />
                             ) : (
@@ -141,7 +141,7 @@ const SidebarTabContent: React.FC<any> = ({
                         <input type="text" placeholder="Search parts..." value={circuitSearch} onChange={(e) => setCircuitSearch(e.target.value)} className="w-full bg-slate-50 pl-9 pr-3 py-2 rounded-lg text-sm outline-none border border-slate-200 focus:border-violet-400 sculpted-inset" />
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                        <div className="flex-1 overflow-y-auto p-3 space-y-1 scroll-touch">
                     {(Object.entries(groupedComponents) as [string, any[]][]).map(([category, components]) => {
                         const filtered = components.filter((c: any) => c.label.toLowerCase().includes(circuitSearch.toLowerCase()));
                         if (filtered.length === 0) return null;
@@ -189,7 +189,7 @@ const SidebarTabContent: React.FC<any> = ({
                     )}
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-1">
+            <div className="flex-1 overflow-y-auto p-4 space-y-1 scroll-touch custom-scrollbar">
                 {isBlockListLoading ? (
                     <div className="space-y-2">
                         {Array.from({ length: 6 }).map((_, i) => (
@@ -377,7 +377,7 @@ const Sidebar: React.FC<any> = ({
                     />
                     <div
                         ref={drawerRef}
-                        className={`fixed top-14 left-0 bottom-0 z-50 flex sculpted ${isMobileDrawerOpen ? 'drawer-enter' : 'hidden'}`}
+                        className={`fixed top-14 left-0 bottom-0 z-50 flex sculpted gpu-accelerated ${isMobileDrawerOpen ? 'drawer-enter' : 'hidden'}`}
                         onTouchStart={handleDrawerTouchStart}
                         onTouchEnd={handleDrawerTouchEnd}
                     >

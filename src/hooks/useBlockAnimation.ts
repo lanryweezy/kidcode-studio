@@ -38,7 +38,10 @@ export function useBlockAnimation({ blockId, params, onDelete, isActive }: UseBl
 
     useEffect(() => {
         if (isActive && blockRef.current) {
-            blockRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const el = blockRef.current;
+            requestAnimationFrame(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         }
     }, [isActive]);
 

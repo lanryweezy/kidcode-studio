@@ -11,7 +11,7 @@ export interface PaletteCommand {
   shortcut?: string;
   description: string;
   action: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 export const GAME_COMMANDS: PaletteCommand[] = [

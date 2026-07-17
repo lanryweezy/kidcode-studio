@@ -359,7 +359,7 @@ export const getLeaderboard = (): LeaderboardEntry[] => {
   });
 
   entries.sort((a, b) => b.xp - a.xp);
-  entries.forEach((e, i) => e.rank = i + 1);
+  entries.forEach((e, i) => { e.rank = i + 1; });
 
   return entries;
 };

@@ -282,7 +282,7 @@ export function renderDayNight(
   canvasHeight: number
 ): void {
   const hour = dayTime;
-  let alpha = 0;
+  let alpha: number;
   if (hour < 6 || hour > 20) alpha = 0.4;
   else if (hour < 8 || hour > 18) alpha = 0.2;
   else alpha = 0;

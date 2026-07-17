@@ -4,16 +4,16 @@ import { useStore } from '../store/useStore';
 import { MODE_CONFIG } from '../constants';
 import { AppMode } from '../types';
 import {
-  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle, MoreHorizontal
+  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle, MoreHorizontal, Download, UploadCloud
 } from 'lucide-react';
 import { exportToStandaloneHTML } from '../services/standaloneExporter';
 import { downloadArduinoCode, exportToArduino } from '../services/codeExporter';
 import { serialService } from '../services/webSerialService';
-import { Download, UploadCloud } from 'lucide-react';
 import { multiplayerService } from '../services/multiplayerService';
 import { diagnoseCode } from '../services/errorDiagnosis';
 import { ErrorDiagnosisHelp } from '../components/ErrorDiagnosisHelp';
 import { useToast } from './ui/Toast';
+import { SavedProject } from '../services/storageService';
 
 interface TopBarProps {
   isPlaying: boolean;
@@ -23,8 +23,8 @@ interface TopBarProps {
   runCode: () => void;
   stopCode: () => void;
   resumeCode: () => void;
-  currentProject: any;
-  setProject: (project: any) => void;
+  currentProject: SavedProject | null;
+  setProject: (project: SavedProject) => void;
   saveStatus: string;
   onOpenCodePages?: () => void;
   is3DMode?: boolean;
@@ -109,7 +109,7 @@ const TopBar: React.FC<TopBarProps> = ({
           </div>
           <input
             value={currentProject?.name || 'Untitled'}
-            onChange={(e) => setProject({ ...currentProject, name: e.target.value })}
+            onChange={(e) => currentProject && setProject({ ...currentProject, name: e.target.value })}
             className="bg-transparent font-bold outline-none hover:bg-white/50 dark:hover:bg-black/20 px-2 py-1 rounded transition-colors truncate max-w-[200px]"
             style={{ color: customAccentColor }}
           />

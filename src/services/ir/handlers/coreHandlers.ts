@@ -363,7 +363,7 @@ export function handleIRNode(node: IRNode, ctx: ExecutionContext): boolean {
 
     // === Misc ===
     case 'set_scene':
-      state.scene = node.scene as any;
+      state.scene = node.scene as SpriteState['scene'];
       return true;
     case 'set_music_volume':
       state.musicVolume = node.volume;

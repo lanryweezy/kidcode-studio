@@ -1,6 +1,5 @@
 import React from 'react';
-import { CircuitComponent } from '../../types';
-import { HardwareState } from '../../types';
+import { CircuitComponent, HardwareState } from '../../types';
 import { isMicrocontroller } from './PinManager';
 
 interface ComponentRenderResult {

@@ -1,4 +1,4 @@
-import { CommandType } from '../types';
+import { CommandType, AppMode } from '../types';
 import { useStore } from '../store/useStore';
 import { playSoundEffect } from './soundService';
 
@@ -13,6 +13,33 @@ export interface VoiceCommandsConfig {
   onResult?: (result: VoiceCommandResult) => void;
   onTranscript?: (transcript: string) => void;
   onError?: (error: string) => void;
+}
+
+interface SpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: { resultIndex: number; results: SpeechRecognitionResultList }) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
 }
 
 const COMMAND_PATTERNS: Array<{
@@ -160,11 +187,11 @@ const COMMAND_PATTERNS: Array<{
   }
 ];
 
-let recognition: any = null;
+let recognition: SpeechRecognitionInstance | null = null;
 let isListening = false;
 let config: VoiceCommandsConfig = {};
 
-const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+const SpeechRecognitionClass = (window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance; webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).SpeechRecognition || (window as unknown as { SpeechRecognition?: new () => SpeechRecognitionInstance; webkitSpeechRecognition?: new () => SpeechRecognitionInstance }).webkitSpeechRecognition;
 
 const getRecognition = () => {
   if (!SpeechRecognitionClass) return null;
@@ -242,17 +269,17 @@ const executeCommand = (result: VoiceCommandResult): void => {
       break;
     }
     case 'set_mode_game': {
-      store.setMode('GAME' as any);
+      store.setMode(AppMode.GAME);
       playSoundEffect('powerup');
       break;
     }
     case 'set_mode_app': {
-      store.setMode('APP' as any);
+      store.setMode(AppMode.APP);
       playSoundEffect('powerup');
       break;
     }
     case 'set_mode_hardware': {
-      store.setMode('HARDWARE' as any);
+      store.setMode(AppMode.HARDWARE);
       playSoundEffect('powerup');
       break;
     }
@@ -285,7 +312,7 @@ export const startVoiceCommands = (voiceConfig: VoiceCommandsConfig = {}): boole
   config = voiceConfig;
   isListening = true;
 
-  rec.onresult = (event: any) => {
+  rec.onresult = (event: { resultIndex: number; results: SpeechRecognitionResultList }) => {
     let finalTranscript = '';
     let interimTranscript = '';
 
@@ -310,7 +337,7 @@ export const startVoiceCommands = (voiceConfig: VoiceCommandsConfig = {}): boole
     }
   };
 
-  rec.onerror = (event: any) => {
+  rec.onerror = (event: { error: string }) => {
     if (event.error !== 'no-speech' && event.error !== 'aborted') {
       config.onError?.(`Voice error: ${event.error}`);
     }
@@ -335,7 +362,7 @@ export const stopVoiceCommands = (): void => {
   if (rec && isListening) {
     try {
       rec.stop();
-    } catch {}
+    } catch { void 0; }
     isListening = false;
   }
 };

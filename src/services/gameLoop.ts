@@ -132,7 +132,8 @@ export function updateJumpState(
   isOnGround: boolean,
   jumpPressed: boolean
 ): JumpState {
-  let { coyoteFrames, jumpBufferFrames, wasOnGround, jumpHeld } = jumpState;
+  let { coyoteFrames, jumpBufferFrames } = jumpState;
+  const { wasOnGround, jumpHeld } = jumpState;
 
   // Coyote time: count frames since leaving ground
   if (isOnGround) {

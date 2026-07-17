@@ -167,7 +167,7 @@ export class WebSerialService {
     return true;
   }
 
-  async sendCommand(cmd: Record<string, unknown>): Promise<void> {
+  async sendCommand(cmd: Record<string, any>): Promise<void> {
     if (!this.writer) return;
     const encoder = new TextEncoder();
     const data = `${JSON.stringify(cmd)  }\n`;
@@ -338,15 +338,13 @@ export class WebSerialService {
     if (this.reader) {
       try {
         await this.reader.cancel();
-      } catch {
-      }
+      } catch { void 0; }
       this.reader = null;
     }
     if (this.writer) {
       try {
         this.writer.releaseLock();
-      } catch {
-      }
+      } catch { void 0; }
       this.writer = null;
     }
     if (this.port) {

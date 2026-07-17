@@ -208,7 +208,7 @@ const AIChat: React.FC<AIChatProps> = ({ currentMode, onAppendCode, onReplaceCod
       
       // Stop current if any
       if (sourceRef.current) {
-          try { sourceRef.current.stop(); } catch {}
+          try { sourceRef.current.stop(); } catch { void 0; }
       }
       setIsPlaying(index);
 

@@ -631,7 +631,7 @@ export class SerialMonitorService {
 
   private detectMessageType(data: string): SerialMessage['type'] {
     if (data.startsWith('{') || data.startsWith('[')) {
-      try { JSON.parse(data); return 'json'; } catch {}
+      try { JSON.parse(data); return 'json'; } catch { void 0; }
     }
     if (data.includes('Error') || data.includes('error') || data.includes('ERR')) {
       return 'error';

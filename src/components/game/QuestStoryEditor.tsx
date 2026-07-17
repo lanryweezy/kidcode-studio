@@ -220,7 +220,7 @@ export const QuestStoryEditor: React.FC<QuestStoryEditorProps> = ({ onClose, onS
                   {OBJECTIVE_TYPES.map(obj => (
                     <button
                       key={obj.id}
-                      onClick={() => updateNode(selected.id, { objective: obj.id as any, objectiveTarget: obj.placeholder.split(',')[0] })}
+                      onClick={() => updateNode(selected.id, { objective: obj.id as QuestNode['objective'], objectiveTarget: obj.placeholder.split(',')[0] })}
                       className={`flex flex-col items-center p-2 rounded-lg text-xs transition-all ${
                         selected.objective === obj.id
                           ? 'bg-blue-200 font-bold'

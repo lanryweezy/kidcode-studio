@@ -15,9 +15,8 @@
  * - Sound effects
  */
 
-import { IRNode } from '../types';
+import { IRNode, commandBlockToIR } from '../types';
 import { CommandBlock, CommandType } from '../../../types';
-import { commandBlockToIR } from '../types';
 
 export interface GodotExportResult {
   script: string;
@@ -203,7 +202,6 @@ ui_right={
 
   const scriptFile = generateGDScriptFromIR(
     (() => {
-      const { commandBlockToIR } = require('./ir');
       const nodes = [];
       for (const cmd of commands) {
         const node = commandBlockToIR(cmd);

@@ -68,7 +68,7 @@ class SimplexNoise {
       a |= 0; a = a + 0x9e3779b9 | 0;
       let t = a ^ a >>> 16; t = Math.imul(t, 0x21f0aaad);
       t = t ^ t >>> 15; t = Math.imul(t, 0x735a2d97);
-      return ((t = t ^ t >>> 15) >>> 0) / 4294967296;
+      return ((t ^ t >>> 15) >>> 0) / 4294967296;
     }
   }
 
@@ -373,8 +373,8 @@ export const generateStructures = (terrain: GeneratedTerrain): GeneratedTerrain 
 /**
  * Convert terrain to game blocks
  */
-export const terrainToGameBlocks = (terrain: GeneratedTerrain): Array<{ type: string; params: Record<string, unknown> }> => {
-  const blocks: Array<{ type: string; params: Record<string, unknown> }> = [];
+export const terrainToGameBlocks = (terrain: GeneratedTerrain): Array<{ type: string; params: Record<string, any> }> => {
+  const blocks: Array<{ type: string; params: Record<string, any> }> = [];
 
   terrain.tiles.forEach(row => {
     row.forEach(tile => {

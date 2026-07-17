@@ -43,7 +43,7 @@ const TeacherDashboard = React.lazy(() => import('../TeacherDashboard'));
 
 type ControllerProps = ReturnType<typeof useEditorController>;
 
-interface EditorModalsProps extends ControllerProps {}
+type EditorModalsProps = ControllerProps;
 
 const EditorModals: React.FC<EditorModalsProps> = React.memo((props) => {
     const { toast } = useToast();

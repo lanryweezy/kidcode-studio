@@ -24,7 +24,7 @@ export interface GameProject {
   audio: AudioAsset[];
   levels: Level[];
   events: GameEvent[];
-  properties: Record<string, unknown>;
+  properties: Record<string, any>;
 }
 
 export interface ProjectMeta {
@@ -41,7 +41,7 @@ export interface GameConfig {
 }
 
 export interface WorldState {
-  vars: Record<string, unknown>;
+  vars: Record<string, any>;
   score: number; health: number; maxHealth: number;
   wave: number; maxWaves: number;
   gameTime: number; isPaused: boolean;
@@ -65,25 +65,25 @@ export interface Entity {
   isBoss: boolean; bossPhase: number;
   physics: { friction: number; bounce: number; mass: number };
   collider: { isTrigger: boolean; layer: string };
-  props: Record<string, unknown>;
+  props: Record<string, any>;
 }
 
 // ═══════════════════════════════════════════════════════════
 // SYSTEM, SCRIPT, EVENT
 // ═══════════════════════════════════════════════════════════
 
-export interface System { id: string; name: string; type: string; priority: number; enabled: boolean; config: Record<string, unknown> }
+export interface System { id: string; name: string; type: string; priority: number; enabled: boolean; config: Record<string, any> }
 export interface Script { id: string; name: string; events: GameEvent[]; vars: Var[] }
 export interface GameEvent { trigger: string; conditions: Condition[]; actions: Action[] }
-export interface Condition { type: string; params: Record<string, unknown> }
-export interface Action { type: string; params: Record<string, unknown> }
+export interface Condition { type: string; params: Record<string, any> }
+export interface Action { type: string; params: Record<string, any> }
 export interface Var { name: string; type: string; value: string | number | boolean }
 
 // ═══════════════════════════════════════════════════════════
 // UI, AUDIO, LEVEL
 // ═══════════════════════════════════════════════════════════
 
-export interface UIOverlay { id: string; type: string; x: number; y: number; config: Record<string, unknown> }
+export interface UIOverlay { id: string; type: string; x: number; y: number; config: Record<string, any> }
 export interface AudioAsset { id: string; name: string; type: string; url: string }
 export interface Level { id: string; name: string; tiles: TileData[]; camera: CameraConfig }
 export interface TileData { x: number; y: number; type: string; solid: boolean }
@@ -96,7 +96,7 @@ export interface CameraConfig { follow: string; smooth: number; bounds: { x: num
 export interface BlockInput {
   id?: string;
   type?: string;
-  params?: Record<string, unknown>;
+  params?: Record<string, any>;
   children?: BlockInput[];
 }
 
@@ -144,11 +144,11 @@ function num(v: unknown, def: number = 0): number {
 }
 
 function str(v: unknown, def: string = ''): string {
-  return v != null ? String(v) : def;
+  return v !== null ? String(v) : def;
 }
 
 function proc(p: GameProject, b: BlockInput) {
-  const P = (b.params || {}) as Record<string, unknown>;
+  const P = (b.params || {}) as Record<string, any>;
   const W = p.world;
   switch (b.type) {
     case 'SET_SCENE': p.levels[0].name = str(P.text, 'Level 1'); break;

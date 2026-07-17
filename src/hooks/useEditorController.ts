@@ -416,7 +416,7 @@ export function useEditorController() {
             }
             if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); isPlaying ? stopCode() : runCode(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); if (isPlaying) stopCode(); else runCode(); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); setLeftPanelWidth((prev: number) => prev === 0 ? 300 : 0); }
             if (e.key === '?' && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
                 e.preventDefault();
@@ -483,7 +483,7 @@ export function useEditorController() {
                 setCommands(newCmds);
                 playSoundEffect('click');
             }
-        } catch (err) { }
+        } catch (err) { void 0; }
         setDropIndex(null);
     }, [commands, draggedBlockId, dropIndex, setCommands]);
 

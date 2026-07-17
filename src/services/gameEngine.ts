@@ -1104,7 +1104,7 @@ export class GameEngine {
       p.y += p.vy;
       
       const data = p.data || {};
-      p.vy += data.gravity != null ? (data.gravity as number) * dt * 60 : 0.1;
+      p.vy += data.gravity !== null ? (data.gravity as number) * dt * 60 : 0.1;
       
       p.hp -= dt;
       
@@ -1639,7 +1639,7 @@ export class GameEngine {
     const isBossActive = this.state.enemies.some(e => e.alive && e.data?.isBoss);
     const healthPercent = this.state.health / this.state.maxHealth;
 
-    let targetTheme: MusicState['targetTheme'] = 'calm';
+    let targetTheme: MusicState['targetTheme'];
 
     if (this.state.victory) {
       targetTheme = 'victory';

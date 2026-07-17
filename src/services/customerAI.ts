@@ -65,7 +65,7 @@ export function serveCustomer(customer: Customer, productId: string): Customer {
   return {
     ...customer,
     items: newItems,
-    state: newState as any,
+    state: newState as Customer['state'],
     satisfaction: Math.min(100, customer.satisfaction + 10),
   };
 }

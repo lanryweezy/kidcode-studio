@@ -126,7 +126,7 @@ export interface TriggerZone {
   y: number;
   width: number;
   height: number;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 export function createTriggerZone(
@@ -720,7 +720,7 @@ export interface EntityPlacement {
   emoji: string;
   x: number;
   y: number;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
 }
 
 export function createEntityPlacement(
@@ -741,7 +741,7 @@ export function createEntityPlacement(
 
 export function updateEntityProperties(
   entity: EntityPlacement,
-  properties: Record<string, any>
+  properties: Record<string, unknown>
 ): EntityPlacement {
   return {
     ...entity,

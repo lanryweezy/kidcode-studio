@@ -8,9 +8,8 @@
  *   IRNode[] → generateReactNative() → React Native component string
  */
 
-import { IRNode } from '../types';
+import { IRNode, commandBlockToIR } from '../types';
 import { CommandBlock } from '../../../types';
-import { commandBlockToIR } from '../types';
 
 export interface ReactNativeExportResult {
   component: string;

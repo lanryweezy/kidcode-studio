@@ -8,7 +8,8 @@ import {
     SpriteState,
     AppState,
     GameEntity,
-    AppElement
+    AppElement,
+    CircuitComponent
 } from '../types';
 import { playSoundEffect, playTone, playSpeakerSound } from '../services/soundService';
 import { useStore } from '../store/useStore';
@@ -28,7 +29,7 @@ interface UseCodeInterpreterProps {
     appState: AppState;
     setAppState: React.Dispatch<React.SetStateAction<AppState>>;
     appStateRef: React.MutableRefObject<AppState>;
-    circuitComponents?: any[];
+    circuitComponents?: CircuitComponent[];
 }
 
 export const useCodeInterpreter = ({
@@ -102,7 +103,7 @@ export const useCodeInterpreter = ({
                 const newEl: AppElement = {
                     id: crypto.randomUUID(),
                     blockId: cmd.id,
-                    type: type as any,
+                    type: type as AppElement['type'],
                     content: cmd.params.text || defaultContent,
                     ...extraParams
                 };
@@ -478,7 +479,7 @@ export const useCodeInterpreter = ({
                 case CommandType.SET_CAMERA:
                 case CommandType.SET_3D_CAMERA:
                     if (spriteStateRef.current.is3D) {
-                        spriteStateRef.current.cameraMode = (cmd.params.text as any) || 'third_person';
+                        spriteStateRef.current.cameraMode = (cmd.params.text as SpriteState['cameraMode']) || 'third_person';
                     }
                     break;
                 case CommandType.GENERATE_ENVIRONMENT:
@@ -577,11 +578,11 @@ export const useCodeInterpreter = ({
     const evaluateCondition = (cmd: CommandBlock): boolean => {
         if (!cmd.params) return true;
 
-        let val1: any = 0;
+        let val1: string | number | boolean = 0;
         if (cmd.params.varName) {
-            if (mode === AppMode.APP) val1 = appStateRef.current.variables[cmd.params.varName];
-            else if (mode === AppMode.GAME) val1 = spriteStateRef.current.variables[cmd.params.varName];
-            else val1 = hardwareStateRef.current.variables[cmd.params.varName];
+            if (mode === AppMode.APP) val1 = appStateRef.current.variables[cmd.params.varName] as string | number | boolean;
+            else if (mode === AppMode.GAME) val1 = spriteStateRef.current.variables[cmd.params.varName] as string | number | boolean;
+            else val1 = hardwareStateRef.current.variables[cmd.params.varName] as string | number | boolean;
         } else if (cmd.params.value !== undefined) {
             val1 = cmd.params.value;
         }
@@ -613,7 +614,7 @@ export const useCodeInterpreter = ({
     };
 
     const runCode = async () => {
-        let syncInterval: any = null;
+        let syncInterval: ReturnType<typeof setInterval> | null = null;
         try {
             if (isPlaying) return;
             setIsPlaying(true);
@@ -681,7 +682,7 @@ export const useCodeInterpreter = ({
             // Background state sync
             syncInterval = setInterval(() => {
                 if (stopExecution.current) {
-                    clearInterval(syncInterval);
+                    if (syncInterval !== null) clearInterval(syncInterval);
                     return;
                 }
                 setHardwareState({ ...hardwareStateRef.current });

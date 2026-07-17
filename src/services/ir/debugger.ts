@@ -4,8 +4,8 @@ export interface DebugInfo {
   nodeId: string;
   kind: string;
   description: string;
-  stateBefore: Record<string, any>;
-  stateAfter: Record<string, any>;
+  stateBefore: Record<string, unknown>;
+  stateAfter: Record<string, unknown>;
   duration: number;
 }
 
@@ -16,7 +16,7 @@ export class IRDebugger {
   enable() { this.enabled = true; }
   disable() { this.enabled = false; }
 
-  logExecution(node: IRNode, stateBefore: Record<string, any>, stateAfter: Record<string, any>, duration: number) {
+  logExecution(node: IRNode, stateBefore: Record<string, unknown>, stateAfter: Record<string, unknown>, duration: number) {
     if (!this.enabled) return;
     this.trace.push({
       nodeId: Math.random().toString(36).slice(2),

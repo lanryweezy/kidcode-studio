@@ -252,7 +252,7 @@ export class BlockExecutor {
         return true;
 
       case 'SAY':
-        ctx.engine.state.playerEmoji = ctx.engine.state.playerEmoji; // Keep emoji
+
         // Show speech bubble via engine
         ctx.engine.state.speechBubble = {
           text: String(block.params.text) || '',

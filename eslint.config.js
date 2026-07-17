@@ -24,6 +24,8 @@ export default tseslint.config(
       'no-useless-concat': 'warn',
       'no-useless-return': 'warn',
       'no-promise-executor-return': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-case-declarations': 'warn',
       'curly': ['error', 'multi-line'],
       'no-else-return': 'warn',
       'no-lonely-if': 'warn',

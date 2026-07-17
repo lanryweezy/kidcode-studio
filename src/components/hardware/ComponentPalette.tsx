@@ -9,9 +9,8 @@ import {
     Usb, Zap, AlertTriangle, CheckCircle, XCircle, Link, Unlink, RotateCw,
     Undo2, Redo2, ZoomIn, ZoomOut, Maximize2, Trash2, Download, FileCode,
     Image, BookOpen, Brain, Eye, Ruler, Activity, Cpu, Copy, Clipboard,
-    HelpCircle, Minimize2, Map, Calculator, Search, Terminal, GitBranch,
+    HelpCircle, Minimize2, Map, Calculator, Search, Terminal, GitBranch, Box,
 } from 'lucide-react';
-import { Box } from 'lucide-react';
 
 interface ToolbarProps {
     isBoardConnected: boolean;

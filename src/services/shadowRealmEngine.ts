@@ -282,7 +282,7 @@ export function createEnemyFromConfig(
     y,
     vx: config.behavior === 'patrol' ? config.speed * mult.enemySpeed : 0,
     vy: config.behavior === 'fly' ? config.speed * mult.enemySpeed : 0,
-    behavior: config.behavior === 'fly' ? 'float_h' : config.behavior as any,
+    behavior: config.behavior === 'fly' ? 'float_h' : config.behavior as GameEntity['behavior'],
     range: config.behavior === 'patrol' ? 100 : undefined,
     initialX: x,
   };

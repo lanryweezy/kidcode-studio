@@ -283,7 +283,7 @@ export const UndoActionFactory = {
         const { spriteState } = getState();
         // Store previous values for undo
         Object.keys(updates).forEach(key => {
-          (previousState as any)[key] = (spriteState as any)[key];
+          (previousState as unknown as Record<string, unknown>)[key] = (spriteState as unknown as Record<string, unknown>)[key];
         });
         setState({ spriteState: { ...spriteState, ...updates } });
       },
@@ -310,7 +310,7 @@ export const UndoActionFactory = {
       execute: () => {
         const { hardwareState } = getState();
         Object.keys(updates).forEach(key => {
-          (previousState as any)[key] = (hardwareState as any)[key];
+          (previousState as unknown as Record<string, unknown>)[key] = (hardwareState as unknown as Record<string, unknown>)[key];
         });
         setState({ hardwareState: { ...hardwareState, ...updates } });
       },
@@ -337,7 +337,7 @@ export const UndoActionFactory = {
       execute: () => {
         const { appState } = getState();
         Object.keys(updates).forEach(key => {
-          (previousState as any)[key] = (appState as any)[key];
+          (previousState as unknown as Record<string, unknown>)[key] = (appState as unknown as Record<string, unknown>)[key];
         });
         setState({ appState: { ...appState, ...updates } });
       },

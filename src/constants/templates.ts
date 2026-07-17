@@ -1,6 +1,6 @@
 import { AppMode, CommandType, CircuitComponent, CommandBlock } from '../types';
 import {
-    ArrowUpCircle, Megaphone, Zap, MessageSquare, User, Lock, Box
+    ArrowUpCircle, Megaphone, Zap, MessageSquare, User, Lock, Box, type LucideIcon
 } from 'lucide-react';
 
 export const EXAMPLE_TEMPLATES: {
@@ -8,7 +8,7 @@ export const EXAMPLE_TEMPLATES: {
     mode: AppMode,
     name: string,
     description: string,
-    icon: any,
+    icon: LucideIcon,
     color: string,
     commands: CommandBlock[],
     circuitComponents?: CircuitComponent[]

@@ -43,7 +43,7 @@ function saveCompletedTutorial(tutorialId: string): void {
     const completed = getCompletedTutorials();
     completed.add(tutorialId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(completed)));
-  } catch {}
+  } catch { void 0; }
 }
 
 export function isTutorialCompleted(tutorialId: string): boolean {

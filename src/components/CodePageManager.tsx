@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { CommandBlock, PageCode, AppElement, AppState } from '../types';
+import { CommandBlock, PageCode, AppElement, AppState, AppMode } from '../types';
 import { FileCode, Copy, Download, Eye, Code2, Layout, Smartphone, Terminal, ChevronRight, Plus, Trash2, Edit2, MousePointer2 } from 'lucide-react';
 import { exportToPython, exportToJavaScript, exportToArduino, exportToHTML5 } from '../services/codeExporter';
-import { AppMode } from '../types';
 import { useToast } from './ui/Toast';
 import { eventBus } from '../services/eventBus';
 import { multiplayerService, RemoteUser } from '../services/multiplayerService';

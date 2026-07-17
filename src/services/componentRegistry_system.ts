@@ -49,7 +49,7 @@ export interface ComponentInstance {
   name: string;
   x: number;
   y: number;
-  overrides: Record<string, any>; // Instance-specific overrides
+  overrides: Record<string, unknown>; // Instance-specific overrides
   createdAt: number;
 }
 
@@ -221,12 +221,12 @@ export class ComponentRegistry {
       template: { ...original.template },
       properties: [...original.properties],
       tags: [...original.tags],
-    } as any);
+    } as Omit<GameObjectComponent, 'id' | 'createdAt' | 'updatedAt'>);
   }
 
   // === Instance Management ===
 
-  createInstance(componentId: string, x: number, y: number, overrides: Record<string, any> = {}): ComponentInstance | null {
+  createInstance(componentId: string, x: number, y: number, overrides: Record<string, unknown> = {}): ComponentInstance | null {
     const component = this.components.get(componentId);
     if (!component) return null;
     const instance: ComponentInstance = {
@@ -267,13 +267,13 @@ export class ComponentRegistry {
   }
 
   // Get resolved properties (template + overrides)
-  getResolvedProperties(instanceId: string): Record<string, any> | null {
+  getResolvedProperties(instanceId: string): Record<string, unknown> | null {
     const instance = this.instances.get(instanceId);
     if (!instance) return null;
     const component = this.components.get(instance.componentId);
     if (!component) return null;
 
-    const resolved: Record<string, any> = { ...component.template };
+    const resolved: Record<string, unknown> = { ...component.template };
     component.properties.forEach(prop => {
       resolved[prop.key] = instance.overrides[prop.key] ?? prop.default;
     });

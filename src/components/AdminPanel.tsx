@@ -69,7 +69,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ open, onClose }) => {
       errorLog: getErrors(),
       blockedContent: getBlockedContent(),
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, refreshKey]);
 
   useEffect(() => {

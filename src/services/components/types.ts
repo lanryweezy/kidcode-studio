@@ -5,7 +5,7 @@ export interface ComponentObject {
   id: string;
   type: ComponentType;
   name: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   methods: string[];
   events: string[];
 }

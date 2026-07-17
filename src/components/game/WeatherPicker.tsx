@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStore } from '../../store/useStore';
+import { SpriteState } from '../../types';
 
 interface WeatherOption {
   type: string;
@@ -25,7 +26,7 @@ export const WeatherPicker: React.FC = React.memo(() => {
 
   const handleWeatherClick = React.useCallback((e: React.MouseEvent) => {
     const type = (e.currentTarget as HTMLElement).dataset.weatherType;
-    if (type) updateSpriteState({ weather: type as any });
+    if (type) updateSpriteState({ weather: type as SpriteState['weather'] });
   }, [updateSpriteState]);
 
   return (

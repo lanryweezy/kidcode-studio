@@ -141,7 +141,7 @@ export const generateCode = (
         break;
 
       case CommandType.IF:
-        let condition = 'true';
+        let condition: string;
         const p = cmd.params;
         if (p.condition === 'IS_PRESSED') condition = `digitalRead(${p.pin || 4}) == HIGH`;
         else if (p.condition === 'IS_DARK') condition = `analogRead(5) < 100`; 

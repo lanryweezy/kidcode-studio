@@ -60,7 +60,7 @@ export const BOARD_PROFILES: Record<string, BoardProfile> = {
 
 export interface CommandHistoryEntry {
   id: string;
-  command: Record<string, unknown>;
+  command: Record<string, any>;
   timestamp: number;
   success: boolean;
   response?: string;
@@ -78,7 +78,7 @@ export interface PinVisualization {
 
 export interface CommandQueueItem {
   id: string;
-  command: Record<string, unknown>;
+  command: Record<string, any>;
   priority: 'low' | 'normal' | 'high';
   timestamp: number;
   retries: number;
@@ -236,7 +236,7 @@ export class HardwareService {
         this.connectionOptions = { ...this.connectionOptions, ...options };
       }
       
-      // @ts-ignore - Web Serial API
+      // @ts-expect-error - Web Serial API
       this.port = await navigator.serial.requestPort();
       if (!this.port) return false;
       
@@ -508,7 +508,7 @@ export class HardwareService {
 
   // === PIN CONTROL ===
 
-  async sendCommand(cmd: Record<string, unknown>): Promise<boolean> {
+  async sendCommand(cmd: Record<string, any>): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const commandItem: CommandQueueItem = {
         id: `cmd_${this.commandIdCounter++}`,
@@ -726,7 +726,7 @@ export class HardwareService {
     this.commandHistory = [];
   }
 
-  private addToHistory(command: Record<string, unknown>, success: boolean, duration: number, response?: string) {
+  private addToHistory(command: Record<string, any>, success: boolean, duration: number, response?: string) {
     const entry: CommandHistoryEntry = {
       id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       command,
@@ -826,7 +826,7 @@ export class HardwareService {
     this.commandQueue = [];
   }
 
-  async sendHighPriorityCommand(cmd: Record<string, unknown>): Promise<boolean> {
+  async sendHighPriorityCommand(cmd: Record<string, any>): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const commandItem: CommandQueueItem = {
         id: `cmd_${this.commandIdCounter++}`,

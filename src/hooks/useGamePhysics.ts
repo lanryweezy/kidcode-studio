@@ -84,7 +84,8 @@ export const useGamePhysics = ({
         const canvasW = gameCanvasSizeRef.current.w;
         const canvasH = gameCanvasSizeRef.current.h;
 
-        let { x, y, vx, vy, isJumping, gravity, projectiles, enemies, items, health, score, effectTrigger, tilemap } = state;
+        const { gravity, projectiles, enemies, items, health, score, effectTrigger, tilemap } = state;
+        let { x, y, vx, vy, isJumping } = state;
         let newHealth = health;
         let newEffect = effectTrigger;
 

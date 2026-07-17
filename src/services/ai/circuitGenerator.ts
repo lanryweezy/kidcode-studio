@@ -3,9 +3,8 @@
 // Circuit Generation - all generate* functions, patterns, and design logic
 // ============================================================
 
-import { CircuitComponent, Wire, ComponentType } from '../../types';
+import { CircuitComponent, Wire, ComponentType, AppMode } from '../../types';
 import { generateCodeFromPrompt } from '../geminiService';
-import { AppMode } from '../../types';
 import { CircuitDesignRequest, CircuitDesignResult } from './index';
 
 // === CIRCUIT DESIGN PATTERNS ===

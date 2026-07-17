@@ -45,6 +45,18 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: 'es2020',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'three': ['three'],
+            'matter': ['matter-js'],
+            'vendor-react': ['react', 'react-dom'],
+            'vendor-zustand': ['zustand'],
+            'vendor-icons': ['lucide-react'],
+            'vendor-i18n': ['i18next', 'react-i18next'],
+          }
+        }
+      }
     },
 
     resolve: {

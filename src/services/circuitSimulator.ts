@@ -198,7 +198,7 @@ export interface ComponentState {
   brightness?: number;    // For LEDs/bulbs (0-100%)
   speed?: number;         // For motors (0-100%)
   temperature?: number;   // For components that heat up
-  state: Record<string, unknown> | string | null;
+  state: Record<string, any> | string | null;
 }
 
 // === POWER CONSUMPTION CALCULATION ===
@@ -493,7 +493,7 @@ function calculateGroupResistance(
 ): { totalResistance: number; componentCurrents: Map<string, number>; isShort: boolean } {
   const componentCurrents = new Map<string, number>();
   let totalResistance = 0;
-  let isShort = false;
+  const isShort = false;
 
   const loadComponents = groupComponents.filter(c =>
     !c.type.startsWith('BATTERY') && c.type !== 'SOLAR' &&
@@ -501,7 +501,6 @@ function calculateGroupResistance(
   );
 
   if (loadComponents.length === 0) {
-    isShort = true;
     return { totalResistance: 0.01, componentCurrents, isShort: true };
   }
 
@@ -1023,7 +1022,7 @@ export function simulateTransistor(
     ? collectorSupply - collectorCurrent * emitterResistance
     : -(collectorSupply - collectorCurrent * emitterResistance);
 
-  let mode: TransistorState['mode'] = 'cutoff';
+  let mode: TransistorState['mode'];
   if (baseCurrent <= 0.000001) {
     mode = 'cutoff';
     collectorCurrent = 0;

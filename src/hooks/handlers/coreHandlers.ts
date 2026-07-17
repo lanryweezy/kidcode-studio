@@ -101,7 +101,6 @@ export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> =
         case CommandType.SET_HEALTH:
         case CommandType.GAME_OVER:
         case CommandType.WIN_GAME:
-        case CommandType.SET_CAMERA:
         case CommandType.SHAKE_SCREEN:
         case CommandType.SHAKE_CAMERA:
         case CommandType.PLAY_SOUND:
@@ -413,9 +412,6 @@ export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> =
                 if (!ctx.isPlaying) setHardwareState({ ...hardwareStateRef.current });
             }, (cmd.params.duration || 0.5) * 1000);
             return true;
-        case CommandType.PLAY_SOUND:
-            playSpeakerSound(cmd.params.text || 'beep');
-            return true;
         case CommandType.PLAY_TONE:
             playTone(cmd.params.duration || 0.5);
             await wait((cmd.params.duration || 0.5) * 1000);
@@ -563,8 +559,6 @@ export const handleCoreCommand = async (ctx: HandlerContext): Promise<boolean> =
                     hardwareStateRef.current.motorLoad = Number(propValue);
                 } else if (propName === 'active' && (type === 'RELAY' || type === 'RELAY_MODULE')) {
                     hardwareStateRef.current.relayState = Boolean(propValue);
-                } else if (propName === 'on' && type === 'LASER') {
-                    hardwareStateRef.current.laserActive = Boolean(propValue);
                 } else if (propName === 'brightness' && type.startsWith('LED')) {
                     hardwareStateRef.current.pins[targetComp.pin] = Number(propValue) > 0;
                 } else if (propName === 'color' && type === 'RGB_LED') {

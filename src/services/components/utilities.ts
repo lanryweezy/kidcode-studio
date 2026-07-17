@@ -36,7 +36,7 @@ export const COMPONENT_LABELS_MAP: Record<string, string> = {
 
 export function createComponentObject(comp: CircuitComponent, COMPONENT_SCHEMA: ComponentSchemaMap): ComponentObject {
   const schema = COMPONENT_SCHEMA[comp.type];
-  const properties: Record<string, any> = {};
+  const properties: Record<string, unknown> = {};
 
   if (schema) {
     schema.properties.forEach(p => {
@@ -93,7 +93,13 @@ export function executeComponentMethod(
     // Servo methods
     case 'setAngle': hardwareState.servoAngle = Math.max(0, Math.min(180, asNumber(args[0], 90))); return hardwareState.servoAngle;
     case 'sweep': { return { action: 'sweep', from: asNumber(args[0], 0), to: asNumber(args[1], 180), speed: asNumber(args[2], 50) }; }
-    case 'center': hardwareState.servoAngle = 90; return 90;
+    case 'center': {
+        hardwareState.servoAngle = 90;
+        const text = asString(args[0], '');
+        const row = asNumber(args[1], 0);
+        const padded = text.padStart(Math.floor((16 + text.length) / 2)).padEnd(16);
+        return executeComponentMethod(comp, 'printAt', [row, 0, padded], hardwareState);
+    }
     case 'calibrate': { return { action: 'calibrate' }; }
 
     // Motor methods
@@ -183,12 +189,7 @@ export function executeComponentMethod(
     case 'autoScrollOff': return false;
     case 'leftToRight': return { direction: 'ltr' };
     case 'rightToLeft': return { direction: 'rtl' };
-    case 'center': {
-        const text = asString(args[0], '');
-        const row = asNumber(args[1], 0);
-        const padded = text.padStart(Math.floor((16 + text.length) / 2)).padEnd(16);
-        return executeComponentMethod(comp, 'printAt', [row, 0, padded], hardwareState);
-    }
+    
     case 'rightAlign': {
         const text = asString(args[0], '');
         const row = asNumber(args[1], 0);
@@ -262,8 +263,6 @@ export function executeComponentMethod(
     case 'isConnected': return hardwareState.wifiConnected;
 
     // Display clear
-    case 'clear': return true;
-
     default: return null;
   }
 }

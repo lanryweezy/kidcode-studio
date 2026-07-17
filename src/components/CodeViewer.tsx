@@ -23,11 +23,11 @@ const CodeViewer: React.FC<CodeViewerProps> = ({ code, onClose }) => {
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) { formatted.push(''); continue; }
-      if (/^\s*[\})\]]/.test(trimmed) || /^end\b/i.test(trimmed)) {
+      if (/^\s*[})\]]/.test(trimmed) || /^end\b/i.test(trimmed)) {
         indent = Math.max(0, indent - 1);
       }
       formatted.push('  '.repeat(indent) + trimmed);
-      if (/[{\(\[]\s*$/.test(trimmed) || /^(repeat|function|if|else|for|while|def|class)\b/i.test(trimmed)) {
+      if (/[{[(]\s*$/.test(trimmed) || /^(repeat|function|if|else|for|while|def|class)\b/i.test(trimmed)) {
         indent++;
       }
     }

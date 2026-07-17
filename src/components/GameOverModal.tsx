@@ -3,7 +3,14 @@ import React, { useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Trophy, RotateCcw, Home, Skull } from 'lucide-react';
 
-const GameOverModal: React.FC<any> = ({ onRestart, score, totalBlocksUsed, totalBlocksAvailable }) => {
+interface GameOverModalProps {
+  onRestart: () => void;
+  score?: number;
+  totalBlocksUsed?: number;
+  totalBlocksAvailable?: number;
+}
+
+const GameOverModal: React.FC<GameOverModalProps> = ({ onRestart, score, totalBlocksUsed, totalBlocksAvailable }) => {
   const { gameState, setGameState, setShowHome } = useStore();
   const allBlocksUsed = totalBlocksUsed && totalBlocksAvailable && totalBlocksUsed >= totalBlocksAvailable;
 

@@ -14,7 +14,7 @@ import ErrorBoundary from '../ErrorBoundary';
 
 type ControllerProps = ReturnType<typeof useEditorController>;
 
-interface EditorLayoutProps extends ControllerProps {}
+type EditorLayoutProps = ControllerProps;
 
 const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const { initCollaboration, destroyCollaboration, collaborators, workspaceZoom, setWorkspaceZoom, customAccentColor } = useStore();

@@ -276,7 +276,7 @@ const GameCanvas = React.memo(({
 
             // Animation Logic
             if (target.frames && target.frames.length > 0) {
-                let frameIndex = 0;
+                let frameIndex;
                 if (target.currentAnimation && target.animations[target.currentAnimation]) {
                     const sequence = target.animations[target.currentAnimation];
                     const totalFrames = sequence.length;
@@ -412,8 +412,8 @@ const GameCanvas = React.memo(({
             {!isExecuting && (
                 <div className="h-12 bg-slate-800 rounded-lg flex flex-col justify-center px-2 relative select-none shadow-inner border border-slate-700" style={{ width: '100%' }}>
                     <div className="h-4 bg-slate-700 rounded w-full relative cursor-pointer"
-                        onMouseDown={(e) => { e.buttons === 1 && handleTimelineDrag(e); }}
-                        onMouseMove={(e) => { e.buttons === 1 && handleTimelineDrag(e); }}
+                        onMouseDown={(e) => { if (e.buttons === 1) handleTimelineDrag(e); }}
+                        onMouseMove={(e) => { if (e.buttons === 1) handleTimelineDrag(e); }}
                     >
                         <div className="absolute h-full bg-indigo-500/50 border-x-2 border-indigo-400" style={{ left: `${((editorScrollX + width / 2) / 20000) * 100}%`, width: `${(width / 20000) * 100}%` }}></div>
                     </div>

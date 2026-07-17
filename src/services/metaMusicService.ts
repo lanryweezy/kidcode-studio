@@ -111,7 +111,7 @@ export const generateMusic = async (
     const url = URL.createObjectURL(audioBlob);
     
     // Get duration from blob
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     const arrayBuffer = await audioBlob.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     const actualDuration = audioBuffer.duration * 1000; // ms

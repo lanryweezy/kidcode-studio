@@ -3,7 +3,7 @@ import React from 'react';
 import { useStore } from '../store/useStore';
 import { AppMode, CircuitComponent } from '../types';
 import { MODE_CONFIG, EXAMPLE_TEMPLATES } from '../constants';
-import { createNewProject, getProjects, remixProject, deleteProject } from '../services/storageService';
+import { createNewProject, getProjects, remixProject, deleteProject, SavedProject } from '../services/storageService';
 import { playSoundEffect } from '../services/soundService';
 import {
     Zap,
@@ -38,7 +38,7 @@ const HomeScreen: React.FC = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    const handleRemix = React.useCallback((e: React.MouseEvent, proj: any) => {
+    const handleRemix = React.useCallback((e: React.MouseEvent, proj: SavedProject) => {
         e.stopPropagation();
         const optimisticId = `temp-remix-${  Date.now()}`;
         const optimisticProject = { ...proj, id: optimisticId, name: `${proj.name  } (Remix)`, lastEdited: Date.now() };
@@ -244,7 +244,7 @@ const HomeScreen: React.FC = () => {
                                     setTimeout(() => {
                                         const newProj = createNewProject(tpl.mode);
                                         newProj.name = tpl.name;
-                                        newProj.data.commands = tpl.commands.map(c => ({ ...c, id: (window.crypto as any).randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11) }));
+                                        newProj.data.commands = tpl.commands.map(c => ({ ...c, id: window.crypto.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11) }));
                                         if (tpl.circuitComponents && tpl.mode === AppMode.HARDWARE) {
                                             newProj.data.circuitComponents = tpl.circuitComponents as CircuitComponent[];
                                         }
@@ -333,8 +333,8 @@ const HomeScreen: React.FC = () => {
                                 className="bg-white border border-slate-200 p-4 rounded-2xl hover:shadow-md transition-all text-left relative group"
                             >
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${(MODE_CONFIG as any)[proj.mode]?.color || 'bg-slate-500'}`}>
-                                        {(MODE_CONFIG as any)[proj.mode]?.label || proj.mode}
+                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${MODE_CONFIG[proj.mode]?.color || 'bg-slate-500'}`}>
+                                        {MODE_CONFIG[proj.mode]?.label || proj.mode}
                                     </span>
 
                                     <span className="text-[10px] text-slate-400">{new Date(proj.lastEdited).toLocaleDateString()}</span>

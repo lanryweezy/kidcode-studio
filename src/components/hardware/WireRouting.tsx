@@ -32,7 +32,7 @@ interface WireRoutingProps {
 export const WireRouting: React.FC<WireRoutingProps> = ({ localComponents, hardwareState, wireRefs }) => {
     return (
         <>
-            {localComponents.map((comp: any) => {
+            {localComponents.map((comp) => {
                 const isMC = isMicrocontroller(comp.type);
                 let pinCoords;
                 if (isMC) {

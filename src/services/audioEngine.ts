@@ -251,7 +251,7 @@ export function playSFX(sfxId: string, volume: number = 0.3, pan: number = 0): v
   if (!sfx) return;
 
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     if (ctx.state === 'suspended') ctx.resume();
 
     const osc = ctx.createOscillator();

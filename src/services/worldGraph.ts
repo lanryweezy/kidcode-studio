@@ -38,7 +38,7 @@ export interface GraphNode {
   description: string;
   x: number;
   y: number;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   tags: string[];
   createdAt: number;
   updatedAt: number;
@@ -50,7 +50,7 @@ export interface GraphEdge {
   target: string;
   type: GraphEdgeType;
   label?: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   createdAt: number;
 }
 

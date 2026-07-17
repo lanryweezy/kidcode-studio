@@ -21,8 +21,7 @@
   *   collab.removeNode(index);
  */
 
-import { IRNode } from '../ir/types';
-import { commandBlockToIR } from '../ir/types';
+import { IRNode, commandBlockToIR } from '../ir/types';
 import { CommandBlock } from '../../types';
 import { WebSocketTransport, TransportState, TransportMessage, createTransport } from './websocketTransport';
 

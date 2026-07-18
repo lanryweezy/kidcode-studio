@@ -55,6 +55,14 @@ vi.mock('../../components/ErrorDiagnosisHelp', () => ({
   ErrorDiagnosisHelp: vi.fn(() => <div data-testid="error-diagnosis-help" />),
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+  Trans: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('TopBar', () => {
   const defaultProps = {
     isPlaying: false,
@@ -117,7 +125,7 @@ describe('TopBar', () => {
 
   it('displays save status', () => {
     render(<TopBar {...defaultProps} saveStatus="saved" />);
-    expect(screen.getByText('Saved')).toBeTruthy();
+    expect(screen.getByText('topbar.saved')).toBeTruthy();
   });
 
   it('calls undo when undo button is clicked', () => {
@@ -147,7 +155,7 @@ describe('TopBar', () => {
   it('calls runCode when run button is clicked', () => {
     const runCode = vi.fn();
     render(<TopBar {...defaultProps} runCode={runCode} />);
-    const runButton = screen.getByRole('button', { name: /run code/i });
+    const runButton = screen.getByRole('button', { name: /run/i });
     fireEvent.click(runButton);
     expect(runCode).toHaveBeenCalled();
   });
@@ -155,7 +163,7 @@ describe('TopBar', () => {
   it('calls stopCode when stop button is clicked while playing', () => {
     const stopCode = vi.fn();
     render(<TopBar {...defaultProps} isPlaying={true} stopCode={stopCode} />);
-    const stopButton = screen.getByRole('button', { name: /stop code/i });
+    const stopButton = screen.getByRole('button', { name: /stop/i });
     fireEvent.click(stopButton);
     expect(stopCode).toHaveBeenCalled();
   });
@@ -170,7 +178,7 @@ describe('TopBar', () => {
 
   it('displays publish button', () => {
     render(<TopBar {...defaultProps} />);
-    expect(screen.getByRole('button', { name: /publish to web/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /publish/i })).toBeTruthy();
   });
 
   it('displays help button', () => {
@@ -185,12 +193,12 @@ describe('TopBar', () => {
 
   it('displays run code button', () => {
     render(<TopBar {...defaultProps} />);
-    expect(screen.getByRole('button', { name: /run code/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /run/i })).toBeTruthy();
   });
 
   it('shows step over button in debug mode', () => {
     render(<TopBar {...defaultProps} debugMode={true} />);
-    expect(screen.getByRole('button', { name: /step over/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /step/i })).toBeTruthy();
   });
 
   it('displays project name input', () => {

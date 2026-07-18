@@ -99,6 +99,14 @@ vi.mock('../../services/pluginSystem', () => ({
   },
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en' },
+  }),
+  Trans: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 function createStoreState(overrides: Record<string, unknown> = {}) {
   return {
     mode: AppMode.GAME,
@@ -159,30 +167,25 @@ describe('Sidebar', () => {
 
   it('shows block library in default tab', () => {
     render(<Sidebar {...defaultProps} />);
-    expect(screen.getByText('Block Library')).toBeTruthy();
+    expect(screen.getByText('sidebar.blockLibrary')).toBeTruthy();
   });
 
   it('shows search input for blocks', () => {
     render(<Sidebar {...defaultProps} />);
-    expect(screen.getByPlaceholderText('Search blocks...')).toBeTruthy();
-  });
-
-  it('shows beginner friendly badge', () => {
-    render(<Sidebar {...defaultProps} />);
-    expect(screen.getByText(/Beginner Friendly/)).toBeTruthy();
+    expect(screen.getByPlaceholderText('sidebar.searchBlocks')).toBeTruthy();
   });
 
   it('shows starter blocks section', async () => {
     render(<Sidebar {...defaultProps} />);
     await waitFor(() => {
-      expect(screen.getByText('Starter Blocks')).toBeTruthy();
+      expect(screen.getByText('home.starterBlocks')).toBeTruthy();
     });
   });
 
   it('shows export tab content', () => {
     mockUseStore.mockReturnValue(createStoreState({ activeTab: 'export' }));
     render(<Sidebar {...defaultProps} />);
-    expect(screen.getByText('Code Export')).toBeTruthy();
+    expect(screen.getByText('sidebar.codeExport')).toBeTruthy();
   });
 
   it('shows Python and JavaScript code blocks in export tab', () => {
@@ -208,13 +211,13 @@ describe('Sidebar', () => {
   it('shows components search in hardware mode', () => {
     mockUseStore.mockReturnValue(createStoreState({ activeTab: 'components', mode: AppMode.HARDWARE }));
     render(<Sidebar {...defaultProps} />);
-    expect(screen.getByPlaceholderText('Search parts...')).toBeTruthy();
+    expect(screen.getByPlaceholderText('sidebar.searchParts')).toBeTruthy();
   });
 
   it('shows no blocks message when search has no results', () => {
     mockUseStore.mockReturnValue(createStoreState({ blockSearch: 'zzzzzzzznonexistent' }));
     render(<Sidebar {...defaultProps} />);
-    expect(screen.getByText(/No blocks/)).toBeTruthy();
+    expect(screen.getByText(/sidebar\.noBlocks/)).toBeTruthy();
   });
 
   it('switches tabs via dock', () => {

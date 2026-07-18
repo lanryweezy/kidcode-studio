@@ -325,6 +325,7 @@ const TopBar: React.FC<TopBarProps> = ({
         )}
 
         <button
+          id="run-button"
           onClick={isPlaying ? stopCode : runCode}
           className={`flex items-center gap-2 px-5 py-1.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95 ${isPlaying ? 'bg-rose-500 hover:bg-rose-600' : 'bg-emerald-500 hover:bg-emerald-600'}`}
           title={isPlaying ? t('topbar.stop') : t('topbar.run')}

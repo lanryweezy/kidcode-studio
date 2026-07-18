@@ -240,3 +240,31 @@ export function exportAnalyticsAsJSON(): string {
   const report = generateAnalyticsReport();
   return JSON.stringify(report, null, 2);
 }
+
+// ═══════════════════════════════════════════════════════════
+// FIRST-RUN ONBOARDING EVENTS
+// ═══════════════════════════════════════════════════════════
+
+export function trackFirstRunStarted(): void {
+  trackFeatureUse('first_run_started');
+}
+
+export function trackFirstRunTourStep(step: number): void {
+  trackFeatureUse(`first_run_tour_step_${step}`);
+}
+
+export function trackFirstRunCompleted(): void {
+  trackFeatureUse('first_run_completed');
+}
+
+export function trackFirstRunSkipped(): void {
+  trackFeatureUse('first_run_skipped');
+}
+
+export function trackQuickStartClicked(): void {
+  trackFeatureUse('quick_start_clicked');
+}
+
+export function trackModeSelected(mode: string): void {
+  trackFeatureUse(`mode_selected_${mode}`);
+}

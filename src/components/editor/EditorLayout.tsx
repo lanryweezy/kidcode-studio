@@ -6,6 +6,9 @@ import Sidebar from '../Sidebar';
 import Block from '../Block';
 import Stage from '../Stage';
 import MobileBottomNav from '../MobileBottomNav';
+import FirstRunTour from '../FirstRunTour';
+import { STARTER_TEMPLATES } from '../../constants/templates/starter';
+import { trackFeatureUse } from '../../services/kidcodeAnalytics';
 const Stage3D = React.lazy(() => import('../Stage3D'));
 const VariableMonitor = React.lazy(() => import('../VariableMonitor'));
 import type { Stage3DHandle } from '../Stage3D';
@@ -19,8 +22,12 @@ type ControllerProps = ReturnType<typeof useEditorController>;
 type EditorLayoutProps = ControllerProps;
 
 const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
-    const { initCollaboration, destroyCollaboration, collaborators, workspaceZoom, setWorkspaceZoom, customAccentColor } = useStore();
+    const { initCollaboration, destroyCollaboration, collaborators, workspaceZoom, setWorkspaceZoom, customAccentColor, mode } = useStore();
     const [showShareInput, setShowShareInput] = useState(false);
+    const [isFirstRun, setIsFirstRun] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return !localStorage.getItem('kidcode_has_visited');
+    });
     const [transportUrl, setTransportUrl] = useState('');
     const [isCollaborating, setIsCollaborating] = useState(false);
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -66,6 +73,29 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const closeMobileDrawer = useCallback(() => setIsMobileDrawerOpen(false), []);
 
     const dragOverThrottleRef = useRef<number>(0);
+
+    useEffect(() => {
+        if (isFirstRun && commands.length === 0) {
+            const starter = STARTER_TEMPLATES[mode];
+            if (starter) {
+                const cmds = starter.commands.map(c => ({ ...c, id: crypto.randomUUID() }));
+                props.handleReplaceCode(cmds);
+            }
+        }
+    }, [isFirstRun, mode]);
+
+    const handleTourComplete = useCallback(() => {
+        localStorage.setItem('kidcode_has_visited', 'true');
+        setIsFirstRun(false);
+        trackFeatureUse('first_run_completed');
+    }, []);
+
+    const handleTourSkip = useCallback(() => {
+        localStorage.setItem('kidcode_has_visited', 'true');
+        setIsFirstRun(false);
+        trackFeatureUse('first_run_skipped');
+    }, []);
+
     const handleDragTrail = useCallback((e: React.DragEvent) => {
         const now = Date.now();
         if (now - dragOverThrottleRef.current < 16) return;
@@ -82,7 +112,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
         isMobile, viewVisible,
         isPlaying, debugMode, setDebugMode, isPaused, runCode, stopCode, resumeCode, restartCode, activeBlockId,
         currentProject, setProject, saveStatus,
-        mode, commands,
+        commands,
         dropIndex, draggedBlockId, isOverTrash, setIsOverTrash,
         handleUpdateBlock, handleDeleteBlock, handleDuplicateBlock,
         setContextMenu,
@@ -341,6 +371,13 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 onMenu={openMobileDrawer}
                 activeView={mobileView}
             />
+
+            {isFirstRun && (
+                <FirstRunTour
+                    onComplete={handleTourComplete}
+                    onSkip={handleTourSkip}
+                />
+            )}
         </>
     );
 });

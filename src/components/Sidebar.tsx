@@ -178,7 +178,7 @@ const SidebarTabContent: React.FC<any> = ({
         );
     }
     return (
-        <div className="flex-1 flex flex-col min-h-0 tab-fade-in">
+        <div id="sidebar-blocks" className="flex-1 flex flex-col min-h-0 tab-fade-in">
             <div className="p-4 border-b border-slate-200">
                 <h3 className="font-bold text-slate-700 text-sm mb-2">{t('sidebar.blockLibrary')}</h3>
                 <div className="relative">

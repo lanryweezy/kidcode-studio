@@ -4,9 +4,11 @@ import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
 import { AppMode, CircuitComponent } from '../types';
 import { MODE_CONFIG, EXAMPLE_TEMPLATES } from '../constants';
+import { STARTER_TEMPLATES } from '../constants/templates/starter';
 import { createNewProject, getProjects, remixProject, deleteProject, SavedProject } from '../services/storageService';
 import { generateModePlaceholder } from '../services/thumbnailGenerator';
 import { playSoundEffect } from '../services/soundService';
+import { trackFeatureUse } from '../services/kidcodeAnalytics';
 import {
     Zap,
     Crown,
@@ -19,7 +21,12 @@ import {
     Users,
     CheckCircle2,
     X,
-    FolderPlus
+    FolderPlus,
+    Play,
+    Gamepad2,
+    Smartphone,
+    Cpu,
+    Pickaxe
 } from 'lucide-react';
 import { SkeletonCard } from './ui/Skeleton';
 import { STORAGE_KEYS } from '../constants/actions';
@@ -82,6 +89,31 @@ const HomeScreen: React.FC = () => {
     });
 
     const isReturningUser = recentProjects.length > 0;
+    const isFirstVisit = !localStorage.getItem('kidcode_has_visited');
+
+    const handleQuickStart = React.useCallback(() => {
+        trackFeatureUse('quick_start_clicked');
+        const starter = STARTER_TEMPLATES[AppMode.GAME];
+        const newProj = createNewProject(AppMode.GAME);
+        newProj.name = starter.name;
+        newProj.data.commands = starter.commands.map(c => ({ ...c, id: window.crypto.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11) }));
+        if (starter.circuitComponents) {
+            newProj.data.circuitComponents = starter.circuitComponents as CircuitComponent[];
+        }
+        setProject(newProj);
+    }, [setProject]);
+
+    const handleModeSelect = React.useCallback((selectedMode: AppMode) => {
+        trackFeatureUse('mode_selected');
+        const starter = STARTER_TEMPLATES[selectedMode];
+        const newProj = createNewProject(selectedMode);
+        newProj.name = starter.name;
+        newProj.data.commands = starter.commands.map(c => ({ ...c, id: window.crypto.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11) }));
+        if (starter.circuitComponents) {
+            newProj.data.circuitComponents = starter.circuitComponents as CircuitComponent[];
+        }
+        setProject(newProj);
+    }, [setProject]);
 
     const handleDismissOnboarding = () => {
         setOnboardingDismissed(true);
@@ -114,8 +146,54 @@ const HomeScreen: React.FC = () => {
         }
     }, [deleteTarget, recentProjects]);
 
+    const MODE_ICONS: Record<AppMode, React.ReactNode> = {
+        [AppMode.GAME]: <Gamepad2 size={32} />,
+        [AppMode.APP]: <Smartphone size={32} />,
+        [AppMode.HARDWARE]: <Cpu size={32} />,
+        [AppMode.MINECRAFT]: <Pickaxe size={32} />,
+    };
+
+    const MODE_DESCRIPTIONS: Record<AppMode, string> = {
+        [AppMode.GAME]: 'Build platformers, adventures, and arcade games',
+        [AppMode.APP]: 'Design mobile apps with buttons, inputs, and screens',
+        [AppMode.HARDWARE]: 'Simulate Arduino circuits with LEDs and sensors',
+        [AppMode.MINECRAFT]: 'Create Minecraft mods and build terrains',
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors font-sans pb-20 relative">
+            {isFirstVisit && (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6">
+                    <div className="max-w-2xl w-full text-center mb-12">
+                        <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-3xl flex items-center justify-center text-white shadow-xl animate-float">
+                            <Zap size={40} fill="currentColor" />
+                        </div>
+                        <h1 className="text-4xl font-black mb-3">What do you want to build today?</h1>
+                        <p className="text-lg text-slate-500 font-medium">Pick a mode and start creating in seconds!</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl w-full">
+                        {Object.values(AppMode).map((m) => {
+                            const config = MODE_CONFIG[m];
+                            return (
+                                <button
+                                    key={m}
+                                    onClick={() => handleModeSelect(m)}
+                                    className="group p-6 rounded-3xl bg-white border-2 border-slate-200 hover:border-violet-400 hover:shadow-xl transition-all duration-300 text-left hover:scale-[1.03] sculpted"
+                                >
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-4 shadow-md ${config.color} group-hover:scale-110 transition-transform`}>
+                                        {MODE_ICONS[m]}
+                                    </div>
+                                    <h3 className="text-xl font-black text-slate-800 mb-1">{config.label}</h3>
+                                    <p className="text-sm text-slate-500 font-medium">{MODE_DESCRIPTIONS[m]}</p>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {!isFirstVisit && (<>
             <div className="absolute top-20 right-[5%] text-4xl bob-float opacity-15 select-none pointer-events-none" aria-hidden="true">🎮</div>
             <div className="absolute top-[40%] left-[3%] text-3xl bob-float bob-float-delay-1 opacity-10 select-none pointer-events-none rotate-12" aria-hidden="true">⚡</div>
             <div className="absolute bottom-[20%] right-[8%] text-3xl bob-float bob-float-delay-2 opacity-10 select-none pointer-events-none -rotate-6" aria-hidden="true">🚀</div>
@@ -227,6 +305,21 @@ const HomeScreen: React.FC = () => {
                         </div>
                     </div>
                 )}
+
+                <div className="mb-8">
+                    <button
+                        onClick={handleQuickStart}
+                        className="w-full p-6 rounded-3xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white flex items-center justify-center gap-4 shadow-xl hover:scale-[1.02] transition-all duration-300 group sculpted-lg"
+                    >
+                        <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
+                            <Play size={28} fill="currentColor" />
+                        </div>
+                        <div className="text-left">
+                            <h3 className="text-2xl font-black mb-0.5">Start Building Now</h3>
+                            <p className="text-sm opacity-90 font-medium">No setup needed — jump right in!</p>
+                        </div>
+                    </button>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12" style={{ gap: '1.5rem' }}>
                     {Object.values(AppMode).map((m, i) => {
@@ -497,6 +590,7 @@ const HomeScreen: React.FC = () => {
                     </div>
                 </div>
             )}
+            </>)}
         </div>
     );
 };

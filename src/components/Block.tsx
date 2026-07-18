@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { CommandBlock, CommandType } from '../types';
 import { Trash2, GripVertical, Copy, StickyNote, PanelTop, Bug } from 'lucide-react';
@@ -7,6 +6,7 @@ import { useBlockStyling } from '../hooks/useBlockStyling';
 import { useBlockDrag } from '../hooks/useBlockDrag';
 import { useBlockAnimation } from '../hooks/useBlockAnimation';
 import { playSoundEffect } from '../services/soundService';
+import { isBlockNew } from '../services/blockDragManager';
 
 interface BlockProps {
     block: CommandBlock;
@@ -16,13 +16,13 @@ interface BlockProps {
     onDelete: (id: string) => void;
     onDuplicate?: (id: string) => void;
     isDraggable?: boolean;
-    onDragStart?: (e: React.DragEvent) => void;
     onDragEnter?: (index: number) => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
     onContextMenu?: (e: React.MouseEvent, id: string) => void;
     isActive?: boolean;
     isDragOver?: boolean;
+    isSnapping?: boolean;
 }
 
 // O(1) Lookup Map
@@ -101,37 +101,58 @@ const Block: React.FC<BlockProps> = ({
     onDelete,
     onDuplicate,
     isDraggable,
-    onDragStart,
     onDragEnter,
     onMouseEnter,
     onMouseLeave,
     onContextMenu,
     isActive,
-    isDragOver = false
+    isDragOver = false,
+    isSnapping: externalSnapping,
 }) => {
-    const { isDeleting, isFlashing, blockRef, handleDelete } = useBlockAnimation({
+    const blockRef = useRef<HTMLDivElement>(null);
+    const { isDeleting, isFlashing, handleDelete } = useBlockAnimation({
         blockId: block.id,
         params: block.params,
         onDelete,
         isActive,
     });
 
-    const [isSnapping, setIsSnapping] = useState(false);
+    const [internalSnapping, setInternalSnapping] = useState(false);
     const prevIndexRef = useRef(index);
+    const mountedRef = useRef(true);
+
+    const isSnapping = externalSnapping || internalSnapping;
 
     useEffect(() => {
-        if (prevIndexRef.current !== index) {
-            setIsSnapping(true);
-            playSoundEffect('click', 0);
-            const timer = setTimeout(() => setIsSnapping(false), 250);
-            prevIndexRef.current = index;
-            return () => clearTimeout(timer);
+        if (!mountedRef.current) {
+            if (prevIndexRef.current !== index) {
+                setInternalSnapping(true);
+                playSoundEffect('click', 0);
+                const timer = setTimeout(() => setInternalSnapping(false), 250);
+                prevIndexRef.current = index;
+                return () => clearTimeout(timer);
+            }
         }
     }, [index]);
 
-    const { handleDragStart, handleTouchStart } = useBlockDrag({
-        onDragStart,
+    useEffect(() => {
+        if (isBlockNew(block.id)) {
+            setInternalSnapping(true);
+            playSoundEffect('click', 0);
+            const timer = setTimeout(() => setInternalSnapping(false), 250);
+            return () => clearTimeout(timer);
+        }
+    }, [block.id]);
+
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => { mountedRef.current = false; };
+    }, []);
+
+    const { handlePointerDown, handleTouchMove, handleTouchEnd } = useBlockDrag({
+        blockId: block.id,
         isDraggable,
+        sourceRef: blockRef,
     });
 
     const def = BLOCK_DEF_MAP[block.type];
@@ -150,6 +171,19 @@ const Block: React.FC<BlockProps> = ({
 
     const isComment = block.type === CommandType.COMMENT;
 
+    const notchVars: React.CSSProperties = (() => {
+        const isControlBlock = block.type === CommandType.REPEAT || block.type === CommandType.END_REPEAT;
+        const isLogicBlock = block.type === CommandType.IF || block.type === CommandType.END_IF || block.type === CommandType.ELSE || block.type === CommandType.WAIT_FOR_PRESS;
+        const isDataBlock = block.type.startsWith('SET_VAR') || block.type.startsWith('CHANGE_VAR') || block.type.startsWith('LIST_') || block.type.startsWith('CALC_') || block.type.startsWith('STR_');
+        const isNavBlock = block.type === CommandType.CREATE_SCREEN || block.type === CommandType.NAVIGATE;
+
+        if (isControlBlock) return { '--block-notch-color': '#c4b5fd', '--block-notch-bg': '#f5f3ff' } as React.CSSProperties;
+        if (isLogicBlock) return { '--block-notch-color': '#a5b4fc', '--block-notch-bg': '#eef2ff' } as React.CSSProperties;
+        if (isDataBlock) return { '--block-notch-color': '#fed7aa', '--block-notch-bg': '#fff7ed' } as React.CSSProperties;
+        if (isNavBlock) return { '--block-notch-color': '#475569', '--block-notch-bg': '#334155' } as React.CSSProperties;
+        return { '--block-notch-color': '#e2e8f0', '--block-notch-bg': '#ffffff' } as React.CSSProperties;
+    })();
+
     if (isComment) {
         return (
             <div
@@ -160,11 +194,12 @@ const Block: React.FC<BlockProps> = ({
                 bg-yellow-200 border-b-4 border-r-4 border-yellow-300
                 shadow-sm rotate-1 hover:rotate-0 hover:scale-[1.01] hover:shadow-md
                 ${isDeleting ? 'animate-delete-flash' : ''}
-                ${isSnapping ? 'animate-snap-bounce animate-glow-pulse' : ''}
+                ${isSnapping ? 'block-snap block-glow-pulse' : ''}
                 ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
             `}
-                draggable={isDraggable}
-                onDragStart={onDragStart}
+                onPointerDown={handlePointerDown}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 onDragEnter={(e) => { e.preventDefault(); onDragEnter?.(index); }}
                 onDragOver={(e) => e.preventDefault()}
                 onMouseEnter={onMouseEnter}
@@ -195,13 +230,15 @@ const Block: React.FC<BlockProps> = ({
 
     const { borderColor, bgColor, labelColor, isElse } = useBlockStyling(block);
 
-    // Active Style is now controlled by class toggling for performance, but this remains for fallback
     const activeStyle = isActive
         ? 'ring-4 ring-yellow-400 border-yellow-500 shadow-xl scale-[1.02] z-10'
         : 'hover:shadow-lg hover:border-slate-400 dark:hover:border-slate-500 shadow-sm';
 
+    const containerTypes = [CommandType.REPEAT, CommandType.IF, CommandType.FOREVER];
+    const isContainerOpen = containerTypes.includes(block.type);
+
     return (
-        <div className="flex gap-2 items-center">
+        <div className={`flex gap-2 items-center ${isContainerOpen ? 'block-notch-bottom' : ''} ${isSnapping ? 'block-snap' : ''}`} style={notchVars}>
             <button
                 className={`w-4 h-4 rounded-full cursor-pointer flex items-center justify-center transition-all ${block.hasBreakpoint ? 'bg-red-500 hover:bg-red-600 scale-100' : 'bg-transparent hover:bg-red-200 scale-75'}`}
                 onClick={toggleBreakpoint}
@@ -220,13 +257,13 @@ const Block: React.FC<BlockProps> = ({
             ${borderColor} ${bgColor} ${activeStyle}
             ${isDeleting ? 'animate-delete-flash' : ''}
             ${isFlashing ? 'ring-2 ring-emerald-400 border-emerald-400 animate-pulse' : ''}
-            ${isSnapping ? 'animate-snap-bounce animate-glow-pulse' : ''}
+            ${isSnapping ? 'block-glow-pulse' : ''}
             ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
             ${isDragOver ? 'ring-2 ring-violet-400 border-violet-400 scale-[1.01] animate-drop-zone-glow gpu-accelerated' : ''}
         `}
-                draggable={isDraggable}
-                onDragStart={handleDragStart}
-                onTouchStart={handleTouchStart}
+                onPointerDown={handlePointerDown}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 onDragEnter={(e) => { e.preventDefault(); onDragEnter?.(index); }}
                 onDragOver={(e) => e.preventDefault()}
                 onMouseEnter={onMouseEnter}

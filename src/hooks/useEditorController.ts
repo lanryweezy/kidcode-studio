@@ -17,6 +17,7 @@ import { equipItem, useItem, unlockSkill, craftItem, Equipment } from '../servic
 import { getCharacterStats } from '../services/rpgEngine';
 import type { StageHandle } from '../components/Stage';
 import { DEFAULT_SCREEN, STORAGE_KEYS } from '../constants/actions';
+import { setGlobalDragCallbacks, markBlockAsNew } from '../services/blockDragManager';
 
 const MIN_LEFT_WIDTH = 220;
 const MAX_LEFT_WIDTH = 400;
@@ -103,6 +104,7 @@ export function useEditorController() {
     const [viewVisible, setViewVisible] = useState(true);
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; blockId: string } | null>(null);
     const [gameCanvasSize, setGameCanvasSize] = useState({ w: 400, h: 400 });
+    const [snappingBlockId, setSnappingBlockId] = useState<string | null>(null);
 
     const prevViewRef = useRef<string>('');
     const saveTimeoutRef = useRef<number | undefined>(undefined);
@@ -128,6 +130,48 @@ export function useEditorController() {
     const adaptedSetHardwareState = useCallback(createSpriteStateAdapter(updateHardwareState, hardwareState), [hardwareState]);
     const adaptedSetSpriteState = useCallback(createSpriteStateAdapter(updateSpriteState, spriteState), [spriteState]);
     const adaptedSetAppState = useCallback(createSpriteStateAdapter(updateAppState, appState), [appState]);
+
+    const handlePointerDrop = useCallback((info: {
+        type: 'move' | 'new' | 'trash';
+        sourceBlockId?: string;
+        blockDef?: any;
+        dropIndex: number;
+    }) => {
+        pushHistory();
+        if (info.type === 'trash' && info.sourceBlockId) {
+            setCommands(prev => prev.filter(c => c.id !== info.sourceBlockId));
+            return;
+        }
+        if (info.type === 'move' && info.sourceBlockId) {
+            setCommands(prev => {
+                const oldIndex = prev.findIndex(c => c.id === info.sourceBlockId);
+                if (oldIndex === -1) return prev;
+                const newCmds = [...prev];
+                const [moved] = newCmds.splice(oldIndex, 1);
+                const newIndex = oldIndex < info.dropIndex ? info.dropIndex - 1 : info.dropIndex;
+                newCmds.splice(newIndex, 0, moved);
+                return newCmds;
+            });
+            setSnappingBlockId(info.sourceBlockId);
+            setTimeout(() => setSnappingBlockId(null), 300);
+            return;
+        }
+        if (info.type === 'new' && info.blockDef) {
+            const newBlock: CommandBlock = {
+                id: crypto.randomUUID(),
+                type: info.blockDef.type,
+                params: { ...info.blockDef.defaultParams },
+            };
+            markBlockAsNew(newBlock.id);
+            setCommands(prev => {
+                const newCmds = [...prev];
+                newCmds.splice(info.dropIndex, 0, newBlock);
+                return newCmds;
+            });
+            setSnappingBlockId(newBlock.id);
+            setTimeout(() => setSnappingBlockId(null), 300);
+        }
+    }, [pushHistory, setCommands]);
 
     useEffect(() => {
         if (commands.length > prevCommandsLengthRef.current && workspaceRef.current) {
@@ -430,6 +474,19 @@ export function useEditorController() {
     }, [currentProject, setProject, toast]);
 
     useEffect(() => {
+        setGlobalDragCallbacks({
+            onDropIndexChange: (index) => setDropIndex(index),
+            onDragStart: () => setDraggedBlockId('__dragging__'),
+            onDragEnd: () => {
+                setDraggedBlockId(null);
+                setDropIndex(null);
+                setIsOverTrash(false);
+            },
+            onDrop: handlePointerDrop,
+        });
+    }, [handlePointerDrop]);
+
+    useEffect(() => {
         const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
         const handleKonami = (e: KeyboardEvent) => {
             konamiRef.current = [...konamiRef.current, e.code].slice(-10);
@@ -586,7 +643,7 @@ export function useEditorController() {
         currentProject, setProject, saveStatus,
         mode, commands,
         dropIndex, setDropIndex, draggedBlockId, setDraggedBlockId,
-        isOverTrash, setIsOverTrash,
+        isOverTrash, setIsOverTrash, snappingBlockId,
         handleUpdateBlock, handleDeleteBlock, handleDuplicateBlock,
         setContextMenu, contextMenu,
         handleWorkspaceDragOver, handleWorkspaceDragLeave, handleWorkspaceDrop,

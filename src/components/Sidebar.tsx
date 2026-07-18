@@ -17,6 +17,7 @@ import { useToast } from './ui/Toast';
 import { exportToPython, exportToJavaScript } from '../services/codeExporter';
 import AnimationSequencer from './AnimationSequencer';
 import MissionProgress from './MissionProgress';
+import { useBlockDrag } from '../hooks/useBlockDrag';
 
 const useDebounce = <T,>(value: T, delay: number): T => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -26,6 +27,32 @@ const useDebounce = <T,>(value: T, delay: number): T => {
     }, [value, delay]);
     return debouncedValue;
 };
+
+const DraggableBlockItem: React.FC<{ def: any; style?: React.CSSProperties; className?: string }> = React.memo(({ def, style, className }) => {
+    const itemRef = useRef<HTMLDivElement>(null);
+    const { handlePointerDown, handleTouchMove, handleTouchEnd } = useBlockDrag({
+        blockDef: def,
+        isDraggable: true,
+        sourceRef: itemRef,
+    });
+
+    return (
+        <div
+            ref={itemRef}
+            className={`flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all ${className || ''}`}
+            style={style}
+            onPointerDown={handlePointerDown}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>{React.createElement(def.icon as React.ComponentType<any>, { size: 14 })}</div>
+            <div className="flex-1 min-w-0">
+                <span className="font-semibold text-xs text-slate-700 block">{def.label}</span>
+                {def.description && <span className="text-[10px] text-slate-400 leading-snug line-clamp-2 block">{def.description}</span>}
+            </div>
+        </div>
+    );
+});
 
 const SidebarTabContent: React.FC<any> = ({
     activeTab, mode, designTab, setDesignTab,
@@ -203,16 +230,10 @@ const SidebarTabContent: React.FC<any> = ({
                         <h4 className="font-bold text-slate-700 text-xs mb-3">{t('home.starterBlocks')}</h4>
                         <div className="grid grid-cols-1 gap-1.5">
                             {groupedBlocks['Events']?.slice(0, 2).map((def: any) => (
-                                <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all">
-                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>{React.createElement(def.icon as React.ComponentType<any>, { size: 14 })}</div>
-                                    <span className="font-semibold text-xs text-slate-700">{def.label}</span>
-                                </div>
+                                <DraggableBlockItem key={def.type} def={def} />
                             ))}
                             {groupedBlocks['Motion']?.slice(0, 2).map((def: any) => (
-                                <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className="flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all">
-                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>{React.createElement(def.icon as React.ComponentType<any>, { size: 14 })}</div>
-                                    <span className="font-semibold text-xs text-slate-700">{def.label}</span>
-                                </div>
+                                <DraggableBlockItem key={def.type} def={def} />
                             ))}
                         </div>
                     </div>
@@ -236,14 +257,12 @@ const SidebarTabContent: React.FC<any> = ({
                                 <div className="overflow-hidden">
                                     <div className="space-y-1.5 py-1">
                                         {filtered.map((def: any, idx: number) => (
-                                            <div key={def.type} draggable onDragStart={(e) => { e.dataTransfer.setData('application/json', JSON.stringify(def)); }} className={`flex items-center gap-2 p-2 rounded-xl border border-slate-200 bg-white cursor-grab active:cursor-grabbing hover:border-violet-300 transition-all ${isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}`}
-                                                 style={{ animationDelay: `${idx * 25}ms` }}>
-                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white ${def.color} shadow-sm`}>{React.createElement(def.icon as React.ComponentType<any>, { size: 14 })}</div>
-                                                <div className="flex-1 min-w-0">
-                                                    <span className="font-semibold text-xs text-slate-700 block">{def.label}</span>
-                                                    {def.description && <span className="text-[10px] text-slate-400 leading-snug line-clamp-2 block">{def.description}</span>}
-                                                </div>
-                                            </div>
+                                            <DraggableBlockItem
+                                                key={def.type}
+                                                def={def}
+                                                className={isExpanded ? 'animate-in slide-in-from-left-4 fade-in duration-200' : ''}
+                                                style={{ animationDelay: `${idx * 25}ms` }}
+                                            />
                                         ))}
                                     </div>
                                 </div>

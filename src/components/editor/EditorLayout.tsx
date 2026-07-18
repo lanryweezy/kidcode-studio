@@ -34,7 +34,6 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const [mobileView, setMobileView] = useState<'blocks' | 'preview'>('blocks');
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
-    const trailContainerRef = useRef<HTMLDivElement>(null);
 
     const handleShareClick = useCallback(() => {
         if (isCollaborating) {
@@ -72,8 +71,6 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const openMobileDrawer = useCallback(() => setIsMobileDrawerOpen(true), []);
     const closeMobileDrawer = useCallback(() => setIsMobileDrawerOpen(false), []);
 
-    const dragOverThrottleRef = useRef<number>(0);
-
     useEffect(() => {
         if (isFirstRun && commands.length === 0) {
             const starter = STARTER_TEMPLATES[mode];
@@ -96,28 +93,14 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
         trackFeatureUse('first_run_skipped');
     }, []);
 
-    const handleDragTrail = useCallback((e: React.DragEvent) => {
-        const now = Date.now();
-        if (now - dragOverThrottleRef.current < 16) return;
-        dragOverThrottleRef.current = now;
-        if (!draggedBlockId || !trailContainerRef.current) return;
-        const trail = document.createElement('div');
-        trail.className = 'drag-trail';
-        trail.style.left = `${e.clientX}px`;
-        trail.style.top = `${e.clientY}px`;
-        document.body.appendChild(trail);
-        setTimeout(() => trail.remove(), 400);
-    }, [draggedBlockId]);
     const {
         isMobile, viewVisible,
         isPlaying, debugMode, setDebugMode, isPaused, runCode, stopCode, resumeCode, restartCode, activeBlockId,
         currentProject, setProject, saveStatus,
         commands,
-        dropIndex, draggedBlockId, isOverTrash, setIsOverTrash,
+        dropIndex, draggedBlockId, isOverTrash, setIsOverTrash, snappingBlockId,
         handleUpdateBlock, handleDeleteBlock, handleDuplicateBlock,
         setContextMenu,
-        handleWorkspaceDragOver, handleWorkspaceDragLeave, handleWorkspaceDrop,
-        handleTrashDragOver, handleTrashDrop,
         workspaceRef, stageRef, canvasRef,
         rightPanelWidth,
         hardwareState, hardwareStateRef, spriteState, spriteStateRef,
@@ -222,11 +205,9 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                     </div>
 
                     {draggedBlockId && (
-                        <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 p-3 rounded-xl transition-all z-40 flex items-center gap-2 ${isOverTrash ? 'bg-rose-500 text-white scale-110 shadow-lg' : 'bg-white text-slate-400 shadow-md border border-slate-200'}`}
-                            onDragEnter={() => setIsOverTrash(true)}
-                            onDragLeave={() => setIsOverTrash(false)}
-                            onDragOver={handleTrashDragOver}
-                            onDrop={handleTrashDrop}
+                        <div
+                            data-trash-zone
+                            className={`absolute bottom-6 left-1/2 -translate-x-1/2 p-3 rounded-xl transition-all z-40 flex items-center gap-2 ${isOverTrash ? 'bg-rose-500 text-white scale-110 shadow-lg' : 'bg-white text-slate-400 shadow-md border border-slate-200'}`}
                         >
                             <Trash size={20} className={isOverTrash ? "animate-bounce" : ""} />
                             {isOverTrash && <span className="font-bold text-sm">Drop to Delete</span>}
@@ -238,8 +219,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         <button onClick={() => setWorkspaceZoom(1)} className="bg-white text-slate-500 hover:text-slate-700 shadow-sm px-2.5 py-1.5 rounded-lg font-bold text-xs active:scale-95 transition-colors border border-slate-200">{(workspaceZoom * 100).toFixed(0)}%</button>
                         <button onClick={() => setWorkspaceZoom(Math.min(2, workspaceZoom + 0.1))} className="bg-white text-slate-500 hover:text-slate-700 shadow-sm p-1.5 rounded-lg text-sm font-bold active:scale-95 transition-colors border border-slate-200" aria-label="Zoom In">+</button>
                     </div>
-                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar scroll-touch relative overflow-y-auto overflow-x-hidden transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`} onDragOver={(e) => { handleWorkspaceDragOver(e); handleDragTrail(e); }} onDragLeave={handleWorkspaceDragLeave} onDrop={handleWorkspaceDrop}>
-                        <div ref={trailContainerRef} className="pointer-events-none" />
+                    <div ref={workspaceRef} className={`flex-1 p-3 lg:p-6 custom-scrollbar scroll-touch relative overflow-y-auto overflow-x-hidden transition-all duration-200 ${draggedBlockId ? 'bg-violet-50/50 ring-2 ring-inset ring-violet-300' : ''}`}>
                         <div style={{ transform: `scale(${workspaceZoom})`, transformOrigin: 'top left', minHeight: '100%' }} className="space-y-1">
                             {commands.length === 0 && (
                                 <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-slate-400 opacity-60 pointer-events-none animate-in zoom-in duration-500">
@@ -263,7 +243,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                                         <span className="text-blue-500 font-bold text-xs tracking-widest">+ SNAP HERE</span>
                                     </div>
                                 )}
-                                <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} onDragStart={(e) => { props.setDraggedBlockId(cmd.id); e.dataTransfer.effectAllowed = 'move'; const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; e.dataTransfer.setDragImage(img, 0, 0); }} isActive={cmd.id === activeBlockId} onContextMenu={(e, id) => setContextMenu({ x: e.clientX, y: e.clientY, blockId: id })} />
+                                <Block block={cmd} index={idx} mode={mode} onUpdate={handleUpdateBlock} onDelete={handleDeleteBlock} onDuplicate={handleDuplicateBlock} isDraggable={!isPlaying} isSnapping={snappingBlockId === cmd.id} isActive={cmd.id === activeBlockId} onContextMenu={(e, id) => setContextMenu({ x: e.clientX, y: e.clientY, blockId: id })} />
                             </div>
                             ))}
                             {dropIndex === commands.length && (

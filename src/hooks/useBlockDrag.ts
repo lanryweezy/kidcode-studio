@@ -1,85 +1,115 @@
 import { useCallback, useRef, useEffect } from 'react';
+import { startDrag, isDraggingActive, DRAG_THRESHOLD } from '../services/blockDragManager';
 
 interface UseBlockDragProps {
-    onDragStart?: (e: React.DragEvent) => void;
+    blockId?: string;
+    blockDef?: any;
     isDraggable?: boolean;
+    sourceRef?: React.RefObject<HTMLElement>;
 }
 
-export function useBlockDrag({ onDragStart, isDraggable }: UseBlockDragProps) {
-    const blockRef = useRef<HTMLDivElement>(null);
+export function useBlockDrag({
+    blockId,
+    blockDef,
+    isDraggable = false,
+    sourceRef,
+}: UseBlockDragProps) {
     const longPressTimer = useRef<number | undefined>(undefined);
-    const isTouchDragging = useRef(false);
-    const rafId = useRef<number | undefined>(undefined);
+    const isPointerDown = useRef(false);
+    const startRef = useRef({ x: 0, y: 0 });
+    const pendingMoveHandler = useRef<((e: PointerEvent) => void) | null>(null);
+    const pendingUpHandler = useRef<((e: PointerEvent) => void) | null>(null);
+
+    const cleanup = useCallback(() => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = undefined;
+        }
+        if (pendingMoveHandler.current) {
+            document.removeEventListener('pointermove', pendingMoveHandler.current);
+            pendingMoveHandler.current = null;
+        }
+        if (pendingUpHandler.current) {
+            document.removeEventListener('pointerup', pendingUpHandler.current);
+            document.removeEventListener('pointercancel', pendingUpHandler.current);
+            pendingUpHandler.current = null;
+        }
+        isPointerDown.current = false;
+    }, []);
+
+    const beginDrag = useCallback(() => {
+        const el = sourceRef?.current;
+        if (!el || !isDraggable || isDraggingActive()) return;
+
+        startDrag({
+            type: blockDef ? 'sidebar' : 'workspace',
+            sourceBlockId: blockId,
+            blockDef,
+            sourceElement: el,
+            clientX: startRef.current.x,
+            clientY: startRef.current.y,
+        });
+    }, [blockId, blockDef, isDraggable, sourceRef]);
+
+    const handlePointerDown = useCallback((e: React.PointerEvent) => {
+        if (!isDraggable || isDraggingActive()) return;
+        if (e.button !== 0) return;
+
+        const el = sourceRef?.current || (e.currentTarget as HTMLElement);
+        if (!el) return;
+
+        cleanup();
+        isPointerDown.current = true;
+        startRef.current = { x: e.clientX, y: e.clientY };
+
+        if (e.pointerType === 'touch') {
+            longPressTimer.current = window.setTimeout(() => {
+                if (!isPointerDown.current) return;
+                isPointerDown.current = false;
+                beginDrag();
+            }, 300);
+        } else {
+            const moveHandler = (me: PointerEvent) => {
+                if (!isPointerDown.current) return;
+                const dx = me.clientX - startRef.current.x;
+                const dy = me.clientY - startRef.current.y;
+                if (Math.abs(dx) >= DRAG_THRESHOLD || Math.abs(dy) >= DRAG_THRESHOLD) {
+                    cleanup();
+                    isPointerDown.current = false;
+                    beginDrag();
+                }
+            };
+            const upHandler = () => {
+                cleanup();
+            };
+
+            pendingMoveHandler.current = moveHandler;
+            pendingUpHandler.current = upHandler;
+            document.addEventListener('pointermove', moveHandler);
+            document.addEventListener('pointerup', upHandler);
+            document.addEventListener('pointercancel', upHandler);
+        }
+    }, [isDraggable, sourceRef, cleanup, beginDrag]);
+
+    const handleTouchMove = useCallback(() => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = undefined;
+        }
+        isPointerDown.current = false;
+    }, []);
+
+    const handleTouchEnd = useCallback(() => {
+        cleanup();
+    }, [cleanup]);
 
     useEffect(() => {
-        const el = blockRef.current;
-        if (!el || !isDraggable || !onDragStart) return;
-
-        const handleTouchMove = () => {
-            if (longPressTimer.current) {
-                clearTimeout(longPressTimer.current);
-                longPressTimer.current = undefined;
-            }
-            isTouchDragging.current = false;
-        };
-
-        const handleTouchEnd = () => {
-            if (longPressTimer.current) {
-                clearTimeout(longPressTimer.current);
-                longPressTimer.current = undefined;
-            }
-            isTouchDragging.current = false;
-        };
-
-        el.addEventListener('touchmove', handleTouchMove, { passive: true });
-        el.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-        return () => {
-            el.removeEventListener('touchmove', handleTouchMove);
-            el.removeEventListener('touchend', handleTouchEnd);
-            if (longPressTimer.current) clearTimeout(longPressTimer.current);
-            if (rafId.current) cancelAnimationFrame(rafId.current);
-        };
-    }, [isDraggable, onDragStart]);
-
-    const handleDragStart = useCallback((e: React.DragEvent) => {
-        if (!isDraggable) return;
-
-        if (blockRef.current) {
-            const ghost = blockRef.current.cloneNode(true) as HTMLElement;
-            ghost.style.opacity = '0.6';
-            ghost.style.transform = 'scale(1.05) translateZ(0)';
-            ghost.style.position = 'absolute';
-            ghost.style.top = '-1000px';
-            ghost.style.pointerEvents = 'none';
-            document.body.appendChild(ghost);
-            e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
-            requestAnimationFrame(() => document.body.removeChild(ghost));
-        }
-        onDragStart?.(e);
-    }, [isDraggable, onDragStart]);
-
-    const handleTouchStart = useCallback(() => {
-        if (!isDraggable || !onDragStart) return;
-        if (longPressTimer.current) clearTimeout(longPressTimer.current);
-        isTouchDragging.current = true;
-        longPressTimer.current = window.setTimeout(() => {
-            if (!isTouchDragging.current) return;
-            rafId.current = requestAnimationFrame(() => {
-                onDragStart({
-                    dataTransfer: {
-                        setData: () => {},
-                        setDragImage: () => {},
-                        effectAllowed: 'move'
-                    }
-                } as unknown as React.DragEvent);
-            });
-        }, 300);
-    }, [isDraggable, onDragStart]);
+        return cleanup;
+    }, [cleanup]);
 
     return {
-        blockRef,
-        handleDragStart,
-        handleTouchStart,
+        handlePointerDown,
+        handleTouchMove,
+        handleTouchEnd,
     };
 }

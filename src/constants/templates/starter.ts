@@ -1,5 +1,5 @@
 import { AppMode, CommandType, CircuitComponent, CommandBlock } from '../../types';
-import { Gamepad2, Smartphone, Cpu, Pickaxe, type LucideIcon } from 'lucide-react';
+import { Gamepad2, Smartphone, Cpu, Pickaxe, PenTool, type LucideIcon } from 'lucide-react';
 
 export interface StarterTemplate {
     id: string;
@@ -86,6 +86,17 @@ export const STARTER_TEMPLATES: Record<AppMode, StarterTemplate> = {
             { id: 'smc6', type: CommandType.MC_SET_BLOCK, params: { x: 2, y: -1, z: 0, blockType: 'stone' } },
             { id: 'smc7', type: CommandType.MC_SET_BLOCK, params: { x: 1, y: 1, z: 0, blockType: 'oak_log' } },
             { id: 'smc8', type: CommandType.MC_SET_BLOCK, params: { x: 1, y: 2, z: 0, blockType: 'oak_leaves' } },
+        ],
+    },
+    [AppMode.CAD]: {
+        id: 'starter_cad',
+        mode: AppMode.CAD,
+        name: 'My First 3D Model',
+        description: 'Create a simple 3D object ready for 3D printing!',
+        icon: PenTool,
+        color: 'bg-gradient-to-r from-cyan-500 to-blue-500',
+        commands: [
+            { id: 'scad1', type: CommandType.CREATE_BOX, params: { width: 30, height: 30, depth: 30 } },
         ],
     },
 };

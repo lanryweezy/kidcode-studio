@@ -157,6 +157,7 @@ const HomeScreen: React.FC = () => {
         [AppMode.APP]: <Smartphone size={32} />,
         [AppMode.HARDWARE]: <Cpu size={32} />,
         [AppMode.MINECRAFT]: <Pickaxe size={32} />,
+        [AppMode.CAD]: <Pickaxe size={32} />,
     };
 
     const MODE_DESCRIPTIONS: Record<AppMode, string> = {
@@ -164,6 +165,7 @@ const HomeScreen: React.FC = () => {
         [AppMode.APP]: 'Design mobile apps with buttons, inputs, and screens',
         [AppMode.HARDWARE]: 'Simulate Arduino circuits with LEDs and sensors',
         [AppMode.MINECRAFT]: 'Create Minecraft mods and build terrains',
+        [AppMode.CAD]: 'Design 3D models for 3D printing and engineering',
     };
 
     return (
@@ -355,7 +357,7 @@ const HomeScreen: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-black mb-2 skew-1">{config.label}</h3>
-                                    <p className="opacity-90 font-medium text-sm leading-relaxed">{m === AppMode.APP ? 'Design real mobile apps with buttons, inputs & screens.' : m === AppMode.GAME ? 'Build 2D platformers & 3D open-world adventures.' : m === AppMode.HARDWARE ? 'Simulate Arduino circuits with 50+ parts.' : 'Create Minecraft mods and datapacks with blocks!'}</p>
+                                    <p className="opacity-90 font-medium text-sm leading-relaxed">{m === AppMode.APP ? 'Design real mobile apps with buttons, inputs & screens.' : m === AppMode.GAME ? 'Build 2D platformers & 3D open-world adventures.' : m === AppMode.HARDWARE ? 'Simulate Arduino circuits with 50+ parts.' : m === AppMode.MINECRAFT ? 'Create Minecraft mods and datapacks with blocks!' : 'Design 3D models and export for 3D printing!'}</p>
                                 </div>
                                 <div className="absolute bottom-6 right-6 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 group-hover:rotate-90 duration-300">
                                     <Plus size={24} />

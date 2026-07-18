@@ -49,6 +49,8 @@ export interface CommandBlock {
     z?: number;
     width?: number;
     height?: number;
+    depth?: number;
+    radius?: number;
     direction?: 'cw' | 'ccw';
     effect?: 'color' | 'fisheye' | 'whirl' | 'pixelate' | 'mosaic' | 'brightness' | 'ghost';
 

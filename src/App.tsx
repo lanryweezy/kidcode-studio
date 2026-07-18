@@ -27,6 +27,7 @@ import HomeScreen from './components/HomeScreen';
 import LandingPage from './components/LandingPage';
 import GalleryPage from './components/GalleryPage';
 import { useStore } from './store/useStore';
+import { AppMode } from './types';
 import { useEditorController } from './hooks/useEditorController';
 import { ShortcutsOverlay } from './components/ui/ShortcutsOverlay';
 import { ToastProvider } from './components/ui/Toast';
@@ -35,6 +36,7 @@ import ContextMenu from './components/ContextMenu';
 import EditorLayout from './components/editor/EditorLayout';
 import EditorModals from './components/editor/EditorModals';
 import TycoonOverlay from './components/editor/TycoonOverlay';
+const CADLayout = React.lazy(() => import('./components/cad/CADLayout'));
 
 const MatterPhysicsLazy = React.lazy(() => import('./components/MatterPhysicsBridge'));
 
@@ -65,6 +67,7 @@ const AppInner: React.FC = () => {
         showLanding, showHome, showGallery, hackerMode,
         showShortcuts, setShowShortcuts, advancedPhysics,
         spriteState, advancedPhysics: advPhysics, highContrast,
+        mode, showHome: showHomeState,
     } = useStore();
 
     const controller = useEditorController();
@@ -141,6 +144,10 @@ const AppInner: React.FC = () => {
                         <GalleryPage onBack={handleGalleryBack} />
                     ) : showHome ? (
                         <HomeScreen />
+                    ) : mode === AppMode.CAD ? (
+                        <React.Suspense fallback={<LoadingScreen />}>
+                            <CADLayout onBack={() => useStore.getState().setShowHome(true)} />
+                        </React.Suspense>
                     ) : (
                         <EditorLayout {...controller} />
                     )}

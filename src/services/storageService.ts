@@ -129,7 +129,7 @@ export const deleteProject = async (id: string) => {
 export const createNewProject = (mode: AppMode): SavedProject => {
   return {
     id: crypto.randomUUID(),
-    name: `My ${mode === AppMode.GAME ? 'Game' : mode === AppMode.APP ? 'App' : mode === AppMode.MINECRAFT ? 'Minecraft' : 'Circuit'} Project`,
+    name: `My ${mode === AppMode.GAME ? 'Game' : mode === AppMode.APP ? 'App' : mode === AppMode.MINECRAFT ? 'Minecraft' : mode === AppMode.CAD ? '3D Model' : 'Circuit'} Project`,
     mode,
     lastEdited: Date.now(),
     data: {

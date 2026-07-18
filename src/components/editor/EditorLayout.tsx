@@ -10,6 +10,7 @@ import FirstRunTour from '../FirstRunTour';
 import { STARTER_TEMPLATES } from '../../constants/templates/starter';
 import { trackFeatureUse } from '../../services/kidcodeAnalytics';
 const Stage3D = React.lazy(() => import('../Stage3D'));
+const Scene3DEditor = React.lazy(() => import('../Scene3DEditor'));
 const VariableMonitor = React.lazy(() => import('../VariableMonitor'));
 import type { Stage3DHandle } from '../Stage3D';
 import type { useEditorController } from '../../hooks/useEditorController';
@@ -32,6 +33,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const [isCollaborating, setIsCollaborating] = useState(false);
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
     const [mobileView, setMobileView] = useState<'blocks' | 'preview'>('blocks');
+    const [showScene3DEditor, setShowScene3DEditor] = useState(false);
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
 
@@ -182,7 +184,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         </button>
                         <AIAssistButton currentMode={mode} onAppendCode={handleAppendCode} />
                         <nav className="flex items-center gap-1 px-2 py-1 bg-white/80 backdrop-blur rounded-lg text-[10px] text-slate-500 font-medium border border-slate-200" aria-label="Breadcrumb">
-                            <span>{mode === AppMode.GAME ? 'Game' : mode === AppMode.APP ? 'App' : 'Hardware'}</span>
+                            <span>{mode === AppMode.GAME ? 'Game' : mode === AppMode.APP ? 'App' : mode === AppMode.CAD ? 'CAD' : 'Hardware'}</span>
                             <ChevronRight size={10} className="text-slate-400" />
                             <span className="text-slate-700 font-bold">{currentProject?.name || 'Untitled'}</span>
                         </nav>
@@ -280,17 +282,25 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                         <div className="flex-1 p-4 bg-slate-50 flex flex-col items-center justify-center overflow-hidden relative min-h-[300px] scroll-touch">
                         <ErrorBoundary>
                             {is3DMode && mode === AppMode.GAME ? (
-                                <React.Suspense fallback={<div className="flex items-center justify-center h-full bg-slate-900"><span className="text-white">Loading 3D...</span></div>}>
-                                    <Stage3D
-                                        ref={stageRef as unknown as React.RefObject<Stage3DHandle>}
-                                        spriteState={spriteState}
-                                        spriteStateRef={spriteStateRef}
-                                        isExecuting={isPlaying}
-                                        shakeAmount={shakeAmount}
-                                        gameCanvasSize={gameCanvasSize}
-                                        onInput={() => { }}
-                                    />
-                                </React.Suspense>
+                                <div className="relative w-full h-full">
+                                    <React.Suspense fallback={<div className="flex items-center justify-center h-full bg-slate-900"><span className="text-white">Loading 3D...</span></div>}>
+                                        <Stage3D
+                                            ref={stageRef as unknown as React.RefObject<Stage3DHandle>}
+                                            spriteState={spriteState}
+                                            spriteStateRef={spriteStateRef}
+                                            isExecuting={isPlaying}
+                                            shakeAmount={shakeAmount}
+                                            gameCanvasSize={gameCanvasSize}
+                                            onInput={() => { }}
+                                        />
+                                    </React.Suspense>
+                                    <button
+                                        onClick={() => setShowScene3DEditor(true)}
+                                        className="absolute top-3 right-3 px-3 py-1.5 bg-violet-600 text-white text-xs font-bold rounded-lg hover:bg-violet-700 transition-colors shadow-lg z-10"
+                                    >
+                                        Open Editor
+                                    </button>
+                                </div>
                             ) : (
                                 <Stage
                                     ref={stageRef}
@@ -351,6 +361,22 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 onMenu={openMobileDrawer}
                 activeView={mobileView}
             />
+
+            {showScene3DEditor && (
+                <React.Suspense fallback={
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-100">
+                        <div className="w-10 h-10 border-4 border-slate-200 rounded-full border-t-violet-500 animate-spin" />
+                    </div>
+                }>
+                    <Scene3DEditor
+                        onClose={() => setShowScene3DEditor(false)}
+                        onSave={(data) => {
+                            const json = JSON.stringify(data);
+                            console.log('Scene saved:', json.length, 'bytes');
+                        }}
+                    />
+                </React.Suspense>
+            )}
 
             {isFirstRun && (
                 <FirstRunTour

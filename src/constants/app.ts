@@ -1,6 +1,6 @@
 import { AppMode, AppState, CommandType } from '../types';
 import {
-    Layout, Gamepad2, Cpu, Box, MousePointer2, MessageSquare, TextCursorInput, Image, ToggleRight, CheckSquare, SlidersHorizontal, BarChart3, List, Pencil, MapPin, Video, Camera, Activity, Calendar, Palette, Mic, Minus, ArrowUp, Pickaxe
+    Layout, Gamepad2, Cpu, Box, MousePointer2, MessageSquare, TextCursorInput, Image, ToggleRight, CheckSquare, SlidersHorizontal, BarChart3, List, Pencil, MapPin, Video, Camera, Activity, Calendar, Palette, Mic, Minus, ArrowUp, Pickaxe, PenTool
 } from 'lucide-react';
 import { DEFAULT_SCREEN } from './actions';
 
@@ -18,7 +18,8 @@ export const MODE_CONFIG = {
     [AppMode.APP]: { label: 'App Maker', color: 'bg-blue-500', icon: Layout },
     [AppMode.GAME]: { label: 'Game Builder', color: 'bg-orange-500', icon: Gamepad2 },
     [AppMode.HARDWARE]: { label: 'Circuit Lab', color: 'bg-emerald-500', icon: Cpu },
-    [AppMode.MINECRAFT]: { label: 'Minecraft Mod', color: 'bg-green-600', icon: Pickaxe }
+    [AppMode.MINECRAFT]: { label: 'Minecraft Mod', color: 'bg-green-600', icon: Pickaxe },
+    [AppMode.CAD]: { label: '3D Creator', color: 'bg-cyan-600', icon: PenTool }
 };
 
 export const UI_PALETTE = [

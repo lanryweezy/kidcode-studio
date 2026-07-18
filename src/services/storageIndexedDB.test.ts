@@ -48,7 +48,7 @@ describe('storageIndexedDB', () => {
     const { saveProjectIndexedDB } = await import('./storageIndexedDB');
     const project = {
       id: 'proj1', name: 'Test', mode: AppMode.GAME,
-      lastEdited: Date.now(), data: {} as any,
+      lastEdited: Date.now(), data: { commands: [] } as any,
     };
     await saveProjectIndexedDB(project);
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -61,7 +61,7 @@ describe('storageIndexedDB', () => {
     const { saveProjectIndexedDB, loadProjectIndexedDB } = await import('./storageIndexedDB');
     const project = {
       id: 'proj2', name: 'Load Test', mode: AppMode.GAME,
-      lastEdited: Date.now(), data: {} as any,
+      lastEdited: Date.now(), data: { commands: [] } as any,
     };
     await saveProjectIndexedDB(project);
     const loaded = await loadProjectIndexedDB('proj2');
@@ -79,7 +79,7 @@ describe('storageIndexedDB', () => {
     const { saveProjectIndexedDB, deleteProjectIndexedDB } = await import('./storageIndexedDB');
     const project = {
       id: 'proj3', name: 'Delete Test', mode: AppMode.GAME,
-      lastEdited: Date.now(), data: {} as any,
+      lastEdited: Date.now(), data: { commands: [] } as any,
     };
     await saveProjectIndexedDB(project);
     await deleteProjectIndexedDB('proj3');
@@ -89,10 +89,10 @@ describe('storageIndexedDB', () => {
   it('listProjectsIndexedDB lists from localStorage', async () => {
     const { saveProjectIndexedDB, listProjectsIndexedDB } = await import('./storageIndexedDB');
     await saveProjectIndexedDB({
-      id: 'p1', name: 'A', mode: AppMode.GAME, lastEdited: 100, data: {} as any,
+      id: 'p1', name: 'A', mode: AppMode.GAME, lastEdited: 100, data: { commands: [] } as any,
     });
     await saveProjectIndexedDB({
-      id: 'p2', name: 'B', mode: AppMode.GAME, lastEdited: 200, data: {} as any,
+      id: 'p2', name: 'B', mode: AppMode.GAME, lastEdited: 200, data: { commands: [] } as any,
     });
     const list = await listProjectsIndexedDB();
     expect(list).toHaveLength(2);
@@ -137,7 +137,7 @@ describe('storageIndexedDB', () => {
   it('getStorageStats returns counts', async () => {
     const { saveProjectIndexedDB, saveAssetIndexedDB, getStorageStats } = await import('./storageIndexedDB');
     await saveProjectIndexedDB({
-      id: 'p1', name: 'P', mode: AppMode.GAME, lastEdited: 0, data: {} as any,
+      id: 'p1', name: 'P', mode: AppMode.GAME, lastEdited: 0, data: { commands: [] } as any,
     });
     await saveAssetIndexedDB('a1', 'A', 'image', 'd');
     const stats = await getStorageStats();
@@ -148,7 +148,7 @@ describe('storageIndexedDB', () => {
   it('clearAllIndexedDB clears kidcode keys', async () => {
     const { saveProjectIndexedDB, clearAllIndexedDB } = await import('./storageIndexedDB');
     await saveProjectIndexedDB({
-      id: 'p1', name: 'P', mode: AppMode.GAME, lastEdited: 0, data: {} as any,
+      id: 'p1', name: 'P', mode: AppMode.GAME, lastEdited: 0, data: { commands: [] } as any,
     });
     await clearAllIndexedDB();
     expect(localStorageMock.removeItem).toHaveBeenCalled();

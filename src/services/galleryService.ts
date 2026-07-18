@@ -56,10 +56,26 @@ const getDB = async (): Promise<IDBPDatabase<GalleryDB>> => {
 const AVATARS = ['🦊', '🐱', '🐶', '🦁', '🐸', '🐰', '🐻', '🐼', '🦄', '🐯'];
 const AUTHOR_NAMES = ['CodyKid', 'CodeQueen', 'MakerMax', 'RobotBob', 'JuniorDev', 'SoundWave', 'PixelPro', 'GameWizard', 'TechTiger', 'BrainyBot'];
 
-const generateAuthor = (): { name: string; avatar: string } => ({
-  name: AUTHOR_NAMES[Math.floor(Math.random() * AUTHOR_NAMES.length)],
-  avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)],
-});
+const AUTHOR_STORAGE_KEY = 'kidcode_gallery_author';
+
+const getOrCreateAuthor = (): { name: string; avatar: string } => {
+  const stored = localStorage.getItem(AUTHOR_STORAGE_KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      // fall through
+    }
+  }
+  const author = {
+    name: AUTHOR_NAMES[Math.floor(Math.random() * AUTHOR_NAMES.length)],
+    avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)],
+  };
+  localStorage.setItem(AUTHOR_STORAGE_KEY, JSON.stringify(author));
+  return author;
+};
+
+const generateAuthor = (): { name: string; avatar: string } => getOrCreateAuthor();
 
 export const publishProject = async (
   projectData: any,
@@ -153,8 +169,12 @@ export const likeProject = async (id: string): Promise<void> => {
   const existingLike = await db.get('likes', id);
   if (!existingLike) {
     project.likes += 1;
-    await db.put('projects', project);
-    await db.put('likes', { projectId: id, timestamp: Date.now() });
+    const tx = db.transaction(['projects', 'likes'], 'readwrite');
+    await Promise.all([
+      tx.objectStore('projects').put(project),
+      tx.objectStore('likes').put({ projectId: id, timestamp: Date.now() }),
+      tx.done,
+    ]);
     trackFeatureUse('project_liked');
   }
 };
@@ -167,8 +187,12 @@ export const unlikeProject = async (id: string): Promise<void> => {
   const existingLike = await db.get('likes', id);
   if (existingLike) {
     project.likes = Math.max(0, project.likes - 1);
-    await db.put('projects', project);
-    await db.delete('likes', id);
+    const tx = db.transaction(['projects', 'likes'], 'readwrite');
+    await Promise.all([
+      tx.objectStore('projects').put(project),
+      tx.objectStore('likes').delete(id),
+      tx.done,
+    ]);
   }
 };
 
@@ -245,16 +269,21 @@ export const remixProject = async (id: string): Promise<GalleryProject | null> =
 
 export const deleteProject = async (id: string): Promise<void> => {
   const db = await getDB();
-  await db.delete('projects', id);
   const comments = await db.getAllFromIndex('comments', 'projectId', id);
-  for (const comment of comments) {
-    await db.delete('comments', comment.id);
-  }
+  const tx = db.transaction(['projects', 'comments'], 'readwrite');
+  await Promise.all([
+    tx.objectStore('projects').delete(id),
+    ...comments.map(c => tx.objectStore('comments').delete(c.id)),
+    tx.done,
+  ]);
 };
 
 export const getMyProjects = async (): Promise<GalleryProject[]> => {
+  const stored = localStorage.getItem(AUTHOR_STORAGE_KEY);
+  if (!stored) return [];
+  const author = JSON.parse(stored);
   const projects = await getGalleryProjects('recent');
-  return projects;
+  return projects.filter(p => p.author === author.name);
 };
 
 export const getTrendingProjects = async (limit = 8): Promise<GalleryProject[]> => {
@@ -284,4 +313,11 @@ export const initGalleryWithSamples = async (samples: any[]): Promise<void> => {
 export const getProjectCount = async (): Promise<number> => {
   const db = await getDB();
   return db.count('projects');
+};
+
+export const clearGalleryDB = async (): Promise<void> => {
+  const db = await getDB();
+  await db.clear('projects');
+  await db.clear('comments');
+  await db.clear('likes');
 };

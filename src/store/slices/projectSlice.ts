@@ -17,6 +17,11 @@ import {
 
 export interface VersionSnapshot {
     commands: CommandBlock[];
+    hardwareState: HardwareState;
+    spriteState: SpriteState;
+    appState: AppState;
+    circuitComponents: CircuitComponent[];
+    wires: Wire[];
     timestamp: number;
     label?: string;
 }
@@ -171,7 +176,16 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
     saveVersion: (label) => set((state) => ({
         versionHistory: [
             ...state.versionHistory.slice(-49),
-            { commands: [...state.commands], timestamp: Date.now(), label }
+            {
+                commands: [...state.commands],
+                hardwareState: { ...state.hardwareState },
+                spriteState: { ...state.spriteState },
+                appState: { ...state.appState },
+                circuitComponents: [...state.circuitComponents],
+                wires: [...state.wires],
+                timestamp: Date.now(),
+                label,
+            }
         ]
     })),
 
@@ -180,6 +194,11 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
         if (!version) return state;
         return {
             commands: [...version.commands],
+            hardwareState: { ...version.hardwareState },
+            spriteState: { ...version.spriteState },
+            appState: { ...version.appState },
+            circuitComponents: [...version.circuitComponents],
+            wires: [...version.wires],
             history: [...state.history, state.commands],
             redoStack: [],
             saveStatus: 'unsaved'

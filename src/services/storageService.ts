@@ -63,7 +63,7 @@ export const captureThumbnail = (canvas: HTMLCanvasElement): string => {
     }
 };
 
-export const saveProject = (project: SavedProject, thumbnail?: string): SaveProjectResult => {
+export const saveProject = async (project: SavedProject, thumbnail?: string): Promise<SaveProjectResult> => {
   try {
     const projects = getProjects();
     const index = projects.findIndex(p => p.id === project.id);
@@ -93,30 +93,34 @@ export const saveProject = (project: SavedProject, thumbnail?: string): SaveProj
       return result;
     }
     
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-    saveProjectIndexedDB(project).catch(() => {});
+    try {
+      await saveProjectIndexedDB(project);
+    } catch (e) {
+      console.warn('IndexedDB save failed, falling back to localStorage:', e);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    }
   } catch (e) {
     console.error("Failed to save project", e);
   }
   return 'saved';
 };
 
-export const remixProject = (project: SavedProject): SavedProject => {
+export const remixProject = async (project: SavedProject): Promise<SavedProject> => {
     const remixed: SavedProject = {
         ...project,
         id: crypto.randomUUID(),
         name: `${project.name} (Remix)`,
         lastEdited: Date.now()
     };
-    saveProject(remixed);
+    await saveProject(remixed);
     return remixed;
 };
 
-export const deleteProject = (id: string) => {
+export const deleteProject = async (id: string) => {
   try {
     const projects = getProjects().filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-    deleteProjectIndexedDB(id).catch(() => {});
+    await deleteProjectIndexedDB(id);
   } catch (e) {
     console.error("Failed to delete project", e);
   }

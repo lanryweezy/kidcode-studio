@@ -72,7 +72,7 @@ const HomeScreen: React.FC = () => {
         getStudios().then(setUserStudios);
     }, []);
 
-    const handleRemix = React.useCallback((e: React.MouseEvent, proj: SavedProject) => {
+    const handleRemix = React.useCallback(async (e: React.MouseEvent, proj: SavedProject) => {
         e.stopPropagation();
         const optimisticId = `temp-remix-${  Date.now()}`;
         const optimisticProject = { ...proj, id: optimisticId, name: `${proj.name  } (Remix)`, lastEdited: Date.now() };
@@ -80,7 +80,7 @@ const HomeScreen: React.FC = () => {
         playSoundEffect('powerup');
 
         try {
-            remixProject(proj);
+            await remixProject(proj);
             setRecentProjects(getProjects());
         } catch (error) {
             setRecentProjects(prev => prev.filter(p => p.id !== optimisticId));
@@ -138,7 +138,7 @@ const HomeScreen: React.FC = () => {
         setDeleteTarget({ id: proj.id, name: proj.name });
     }, []);
 
-    const confirmDelete = React.useCallback(() => {
+    const confirmDelete = React.useCallback(async () => {
         if (!deleteTarget) return;
         const previousProjects = recentProjects;
         setRecentProjects(prev => prev.filter(p => p.id !== deleteTarget.id));
@@ -146,7 +146,7 @@ const HomeScreen: React.FC = () => {
         setDeleteTarget(null);
 
         try {
-            deleteProject(deleteTarget.id);
+            await deleteProject(deleteTarget.id);
         } catch (error) {
             setRecentProjects(previousProjects);
         }

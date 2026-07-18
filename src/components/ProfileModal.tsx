@@ -40,10 +40,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onUpdateUser
     onUpdateUser(updated);
   };
 
-  const handleDeleteProject = (id: string, e: React.MouseEvent) => {
+  const handleDeleteProject = async (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
       if (confirm("Are you sure you want to delete this project?")) {
-          deleteProject(id);
+          await deleteProject(id);
           refreshProjects();
       }
   };
@@ -54,8 +54,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onUpdateUser
       setNewProjectName(proj.name);
   };
 
-  const saveProjectRename = (proj: SavedProject) => {
-      saveProject({ ...proj, name: newProjectName });
+  const saveProjectRename = async (proj: SavedProject) => {
+      await saveProject({ ...proj, name: newProjectName });
       setEditingProjectId(null);
       refreshProjects();
   };

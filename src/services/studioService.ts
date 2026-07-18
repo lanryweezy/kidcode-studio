@@ -192,6 +192,9 @@ export const reorderProjectsInStudio = async (studioId: string, fromIndex: numbe
   const studio = await getStudio(studioId);
   if (!studio) return null;
 
+  if (fromIndex < 0 || fromIndex >= studio.projects.length) return studio;
+  if (toIndex < 0 || toIndex >= studio.projects.length) return studio;
+
   const [moved] = studio.projects.splice(fromIndex, 1);
   studio.projects.splice(toIndex, 0, moved);
   studio.updatedAt = Date.now();
@@ -206,4 +209,17 @@ export const updateStudio = async (id: string, updates: Partial<Pick<Studio, 'na
   Object.assign(studio, updates, { updatedAt: Date.now() });
   await saveStudio(studio);
   return studio;
+};
+
+export const clearStudioDB = async (): Promise<void> => {
+  if (!useIndexedDB) {
+    localStorage.removeItem(LS_KEY);
+    return;
+  }
+  try {
+    const database = await getDB();
+    await database.clear('studios');
+  } catch (error) {
+    console.error('Failed to clear studios:', error);
+  }
 };

@@ -55,6 +55,17 @@ interface KidCodeDB extends DBSchema {
 let db: IDBPDatabase<KidCodeDB> | null = null;
 let useIndexedDB = true;
 
+function validateSavedProject(project: any): project is SavedProject {
+  if (!project || typeof project !== 'object') return false;
+  if (typeof project.id !== 'string' || project.id.length === 0) return false;
+  if (typeof project.name !== 'string') return false;
+  if (typeof project.mode !== 'string') return false;
+  if (typeof project.lastEdited !== 'number') return false;
+  if (!project.data || typeof project.data !== 'object') return false;
+  if (!Array.isArray(project.data.commands)) return false;
+  return true;
+}
+
 /**
  * Initialize or get IndexedDB database
  */
@@ -91,6 +102,10 @@ const getDB = async (): Promise<IDBPDatabase<KidCodeDB>> => {
  * @returns Promise resolving when save is complete
  */
 export const saveProjectIndexedDB = async (project: SavedProject): Promise<void> => {
+  if (!validateSavedProject(project)) {
+    throw new Error('Invalid project data: failed validation before IndexedDB write');
+  }
+
   if (!useIndexedDB) {
     localStorage.setItem(`kidcode_project_${  project.id}`, JSON.stringify(project));
     return;
@@ -172,6 +187,10 @@ export const loadProjectIndexedDB = async (projectId: string): Promise<SavedProj
     if (!record) return null;
     
     const decompressed = decompress(record.data);
+    if (decompressed === undefined || decompressed === null || decompressed === '') {
+      console.error('Corrupted data detected for project:', record.id);
+      return null;
+    }
     return JSON.parse(decompressed);
   } catch (error) {
     console.error('❌ IndexedDB load failed:', error);
@@ -310,7 +329,12 @@ export const loadAssetIndexedDB = async (id: string): Promise<string | null> => 
     
     if (!record) return null;
     
-    return decompress(record.data);
+    const decompressed = decompress(record.data);
+    if (decompressed === undefined || decompressed === null || decompressed === '') {
+      console.error('Corrupted data detected for asset:', id);
+      return null;
+    }
+    return decompressed;
   } catch (error) {
     console.error('❌ Asset load failed:', error);
     return null;
@@ -460,6 +484,7 @@ export const clearAllIndexedDB = async (): Promise<void> => {
     const database = await getDB();
     await database.clear('projects');
     await database.clear('assets');
+    await database.clear('metadata');
   } catch (error) {
     console.error('❌ Clear failed:', error);
   }
@@ -489,6 +514,10 @@ export const importProjectFromFile = async (file: File): Promise<SavedProject> =
     reader.onload = (e) => {
       try {
         const project = JSON.parse(e.target?.result as string);
+        if (!validateSavedProject(project)) {
+          reject(new Error('Invalid project file: data failed validation'));
+          return;
+        }
         resolve(project);
       } catch (error) {
         reject(new Error('Invalid project file'));

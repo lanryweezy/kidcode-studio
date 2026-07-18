@@ -324,7 +324,7 @@ export function useEditorController() {
             }
         } catch (error) {
             console.error('IndexedDB save failed, using localStorage:', error);
-            const saveResult = saveProject(updatedProject);
+            const saveResult = await saveProject(updatedProject);
             if (saveResult === 'limit-reached') {
                 toast('error', 'Project limit reached. Delete old projects to save new ones.');
             } else if (saveResult === 'limit-warning') {
@@ -523,7 +523,7 @@ export function useEditorController() {
                             spriteState: spriteStateRef.current, appState: appStateRef.current,
                             circuitComponents, wires, pcbColor,
                         },
-                    }, thumb);
+                    }, thumb).catch((err) => console.error('Save failed:', err));
                     setSaveStatus('saved');
                     playSoundEffect('click');
                 }

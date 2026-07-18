@@ -11,7 +11,8 @@ import {
   AnalyticsReport,
 } from './kidcodeAnalytics';
 import { getEducationState } from './educationSystem';
-import { getStudios } from './studioService';
+import { getStudios, clearStudioDB } from './studioService';
+import { clearGalleryDB } from './galleryService';
 
 const EDUCATION_STORAGE_KEY = 'kidcode_education';
 const INPUT_MAPPER_KEY = 'kidcode_input_bindings';
@@ -113,6 +114,8 @@ export const exportAllData = async (): Promise<void> => {
 
 export const deleteAllData = async (): Promise<void> => {
   await clearAllIndexedDB();
+  await clearGalleryDB();
+  await clearStudioDB();
 
   clearAnalytics();
 

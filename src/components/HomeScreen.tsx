@@ -26,11 +26,17 @@ import {
     Gamepad2,
     Smartphone,
     Cpu,
-    Pickaxe
+    Pickaxe,
+    TrendingUp,
+    Heart,
+    Eye,
 } from 'lucide-react';
 import { SkeletonCard } from './ui/Skeleton';
 import { STORAGE_KEYS } from '../constants/actions';
 import { getStudios, Studio } from '../services/studioService';
+import { GalleryProject } from '../types/gallery';
+import { getTrendingProjects, initGalleryWithSamples } from '../services/galleryService';
+import { getSampleProjects } from '../constants/sampleProjects';
 
 const SCATTERED_ROTATIONS = [-2, 1.5, -0.8, 2, -1.2];
 const SCATTERED_OFFSETS = [
@@ -414,6 +420,8 @@ const HomeScreen: React.FC = () => {
                     </button>
                 </div>
 
+                <TrendingGallerySection />
+
                 {/* Studios Section */}
                 <div className="mb-12">
                     <div className="flex justify-between items-center mb-4">
@@ -591,6 +599,85 @@ const HomeScreen: React.FC = () => {
                 </div>
             )}
             </>)}
+        </div>
+    );
+};
+
+const TrendingGallerySection: React.FC = () => {
+    const { setProject, setShowGallery } = useStore();
+    const [trending, setTrending] = React.useState<GalleryProject[]>([]);
+    const [loaded, setLoaded] = React.useState(false);
+
+    React.useEffect(() => {
+        const load = async () => {
+            const samples = getSampleProjects();
+            await initGalleryWithSamples(samples);
+            const projects = await getTrendingProjects(4);
+            setTrending(projects);
+            setLoaded(true);
+        };
+        load();
+    }, []);
+
+    if (!loaded || trending.length === 0) return null;
+
+    return (
+        <div className="mb-12">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold flex items-center gap-2 skew-1">
+                    <TrendingUp size={20} className="text-rose-500" /> Trending <span className="font-extralight italic text-slate-400">in Gallery</span>
+                </h3>
+                <button onClick={() => setShowGallery(true)} className="text-sm font-bold text-violet-500 hover:text-violet-600">
+                    View All
+                </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {trending.map((proj) => {
+                    const config = MODE_CONFIG[proj.mode];
+                    return (
+                        <div
+                            key={proj.id}
+                            className="bg-white border border-slate-200 rounded-2xl hover:shadow-xl transition-all duration-300 text-left relative group overflow-hidden card-hover-tilt hover:border-violet-300"
+                        >
+                            <div
+                                className="relative h-28 bg-cover bg-center flex items-end"
+                                style={{
+                                    background: proj.thumbnail
+                                        ? `url(${proj.thumbnail}) center/cover`
+                                        : undefined,
+                                    backgroundColor: !proj.thumbnail ? undefined : undefined,
+                                }}
+                            >
+                                {!proj.thumbnail && (
+                                    <div className={`absolute inset-0 ${config.color} flex items-center justify-center`}>
+                                        <div className="text-white/20">
+                                            {React.createElement(config.icon, { size: 40 })}
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                <div className="relative z-10 p-3 w-full">
+                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full text-white ${config.color}`}>
+                                        {config.label.split(' ')[0]}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="p-3">
+                                <h4 className="font-bold text-slate-800 truncate text-sm mb-1">{proj.name}</h4>
+                                <p className="text-xs text-slate-400 truncate mb-2">by {proj.author}</p>
+                                <div className="flex items-center gap-3 text-xs text-slate-400 font-bold">
+                                    <span className="flex items-center gap-1">
+                                        <Heart size={12} className="text-rose-400" /> {proj.likes}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Eye size={12} /> {proj.views}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };

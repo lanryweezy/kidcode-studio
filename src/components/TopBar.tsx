@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { MODE_CONFIG } from '../constants';
 import { AppMode } from '../types';
 import {
-  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle, MoreHorizontal, Download, UploadCloud, Camera, FolderPlus
+  Home, Undo2, Redo2, Bug, StepForward, Pause, Play, Check, RotateCcw, Menu, HelpCircle, Globe, Code2, Box, Square, Users, Radio, ShoppingBag, AlertCircle, MoreHorizontal, Download, UploadCloud, Camera, FolderPlus, Images
 } from 'lucide-react';
 import { exportToStandaloneHTML } from '../services/standaloneExporter';
 import { exportToDatapack, exportToMCWorld } from '../services/minecraftExporter';
@@ -57,7 +57,7 @@ const TopBar: React.FC<TopBarProps> = ({
     setLeftPanelWidth, leftPanelWidth,
     circuitComponents, pcbColor, isLive, setIsLive,
     setShowMarketplace, commands, customAccentColor,
-    setShowAddToStudio,
+    setShowAddToStudio, setShowGallery,
   } = useStore();
   
   const { t } = useTranslation();
@@ -107,6 +107,10 @@ const TopBar: React.FC<TopBarProps> = ({
 
         <button onClick={() => setShowHome(true)} className="p-2.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2" title={t('topbar.home')} aria-label="Go to Home">
           <Home size={18} />
+        </button>
+
+        <button onClick={() => setShowGallery(true)} className="p-2.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2" title="Gallery" aria-label="Go to Gallery">
+          <Images size={18} />
         </button>
 
         <div className="h-5 w-px bg-slate-200 hidden sm:block" />
@@ -258,6 +262,9 @@ const TopBar: React.FC<TopBarProps> = ({
                 <div className="border-t border-slate-100 my-1" />
                 <button onClick={() => { handlePublish(); setShowOverflow(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                   <Globe size={16} className="text-violet-500" /> {t('topbar.publish')}
+                </button>
+                <button onClick={() => { setShowGallery(true); setShowOverflow(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                  <Images size={16} className="text-violet-500" /> Gallery
                 </button>
                 <button onClick={() => { handleToggleLive(); setShowOverflow(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
                   {isLive ? <Radio size={16} className="text-rose-500" /> : <Users size={16} className="text-slate-500" />}

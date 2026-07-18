@@ -268,3 +268,28 @@ export function trackQuickStartClicked(): void {
 export function trackModeSelected(mode: string): void {
   trackFeatureUse(`mode_selected_${mode}`);
 }
+
+// ═══════════════════════════════════════════════════════════
+// GALLERY EVENTS
+// ═══════════════════════════════════════════════════════════
+
+export function trackProjectPublished(projectId: string, mode: string): void {
+  trackFeatureUse('project_published');
+  trackFeatureUse(`project_published_${mode}`);
+}
+
+export function trackProjectLiked(projectId: string): void {
+  trackFeatureUse('project_liked');
+}
+
+export function trackProjectRemixed(projectId: string): void {
+  trackFeatureUse('project_remixed');
+}
+
+export function trackProjectViewed(projectId: string): void {
+  trackFeatureUse('project_viewed');
+}
+
+export function trackCommentAdded(projectId: string): void {
+  trackFeatureUse('comment_added');
+}

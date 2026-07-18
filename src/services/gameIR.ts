@@ -144,7 +144,7 @@ function num(v: unknown, def: number = 0): number {
 }
 
 function str(v: unknown, def: string = ''): string {
-  return v !== null ? String(v) : def;
+  return v != null ? String(v) : def;
 }
 
 function proc(p: GameProject, b: BlockInput) {

@@ -79,6 +79,12 @@ export interface SpriteState {
   currentAnimation: string | null;
   animationSpeed: number; // FPS-like
   speech: string | null;
+  speechType: 'say' | 'think';
+  costume: string;
+  costumes: string[];
+  penDown: boolean;
+  penColor: string;
+  penTrails: { x: number; y: number; color: string }[];
   scene?: string;
   weather: 'none' | 'rain' | 'snow';
   score: number;

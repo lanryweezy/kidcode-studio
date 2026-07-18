@@ -84,6 +84,7 @@ export interface CADObject3D {
   locked: boolean;
   children: string[];
   parentId?: string;
+  groupId?: string;
   parameters: CADParameter[];
   operation?: CADOperation;
   sketchId?: string;
@@ -111,7 +112,7 @@ export type CADSketchTool = 'line' | 'rectangle' | 'circle' | 'polygon' | 'arc' 
 
 export type CADViewPreset = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom' | 'isometric' | 'home';
 
-export type CADMaterialType = 'PLA' | 'ABS' | 'Resin' | 'Wood' | 'Metal' | 'Rubber';
+export type CADMaterialType = 'PLA' | 'ABS' | 'Resin' | 'Wood' | 'Metal' | 'Rubber' | 'Glass' | 'Stone' | 'Fabric';
 
 export interface CADMaterialConfig {
   name: string;
@@ -128,6 +129,8 @@ export interface CADExportOptions {
   unit: 'mm' | 'cm' | 'inch';
   includeColors: boolean;
   onProgress?: (progress: number, message: string) => void;
+  simplifyOption?: number;
+  perBody?: boolean;
 }
 
 export type CADConstraintType = 'horizontal' | 'vertical' | 'equal' | 'parallel' | 'perpendicular' | 'fixed' | 'dimension';
@@ -184,6 +187,30 @@ export const PRINT_BED: CADPrintBedConfig = {
   depth: 220,
 };
 
+export interface PrinterProfile {
+  id: string;
+  name: string;
+  bedWidth: number;
+  bedDepth: number;
+  bedHeight: number;
+  maxSpeed: number;
+  layerHeight: number;
+  nozzleDiameter: number;
+  filamentPricePerKg: number;
+}
+
+export const PRINTER_PROFILES: PrinterProfile[] = [
+  { id: 'ender3', name: 'Ender 3', bedWidth: 220, bedDepth: 220, bedHeight: 250, maxSpeed: 150, layerHeight: 0.2, nozzleDiameter: 0.4, filamentPricePerKg: 20 },
+  { id: 'prusa-mk3', name: 'Prusa MK3', bedWidth: 250, bedDepth: 210, bedHeight: 210, maxSpeed: 200, layerHeight: 0.2, nozzleDiameter: 0.4, filamentPricePerKg: 25 },
+  { id: 'bambu-a1', name: 'Bambu Lab A1', bedWidth: 256, bedDepth: 256, bedHeight: 256, maxSpeed: 500, layerHeight: 0.2, nozzleDiameter: 0.4, filamentPricePerKg: 22 },
+  { id: 'bambu-x1c', name: 'Bambu Lab X1C', bedWidth: 256, bedDepth: 256, bedHeight: 256, maxSpeed: 500, layerHeight: 0.2, nozzleDiameter: 0.4, filamentPricePerKg: 28 },
+];
+
+export interface UndoEntry {
+  objects: CADObject3D[];
+  label: string;
+}
+
 export interface CADState {
   objects: CADObject3D[];
   sketches: CADSketch[];
@@ -210,8 +237,8 @@ export interface CADState {
   assemblyConstraints: CADAssemblyConstraint[];
   activePanel: 'properties' | 'operations' | 'bom' | 'print' | 'assembly';
   showPrintPreview: boolean;
-  undoStack: CADObject3D[][];
-  redoStack: CADObject3D[][];
+  undoStack: UndoEntry[];
+  redoStack: UndoEntry[];
 }
 
 export const INITIAL_CAD_STATE: CADState = {
@@ -251,4 +278,27 @@ export const CAD_MATERIALS: Record<CADMaterialType, CADMaterialConfig> = {
   Wood: { name: 'Wood-fill', type: 'Wood', color: '#b5894e', roughness: 0.95, metalness: 0, opacity: 1, transparent: false },
   Metal: { name: 'Metal', type: 'Metal', color: '#c0c0c0', roughness: 0.15, metalness: 0.9, opacity: 1, transparent: false },
   Rubber: { name: 'Rubber', type: 'Rubber', color: '#333333', roughness: 0.98, metalness: 0, opacity: 1, transparent: false },
+  Glass: { name: 'Glass', type: 'Glass', color: '#e8f4f8', roughness: 0.05, metalness: 0.1, opacity: 0.3, transparent: true },
+  Stone: { name: 'Stone', type: 'Stone', color: '#8B8682', roughness: 0.95, metalness: 0, opacity: 1, transparent: false },
+  Fabric: { name: 'Fabric', type: 'Fabric', color: '#D2691E', roughness: 1.0, metalness: 0, opacity: 1, transparent: false },
+};
+
+export type CADLightPreset = 'studio' | 'outdoor' | 'night' | 'dramatic' | 'colorful';
+
+export interface CADLightPresetConfig {
+  name: string;
+  ambientIntensity: number;
+  ambientColor: string;
+  directionalIntensity: number;
+  directionalColor: string;
+  directionalPosition: [number, number, number];
+  background: string;
+}
+
+export const CAD_LIGHT_PRESETS: Record<CADLightPreset, CADLightPresetConfig> = {
+  studio: { name: 'Studio', ambientIntensity: 0.6, ambientColor: '#ffffff', directionalIntensity: 1.2, directionalColor: '#ffffff', directionalPosition: [10, 20, 10], background: '#f0f4f8' },
+  outdoor: { name: 'Outdoor', ambientIntensity: 0.5, ambientColor: '#87ceeb', directionalIntensity: 1.5, directionalColor: '#fff8dc', directionalPosition: [5, 30, 5], background: '#87ceeb' },
+  night: { name: 'Night', ambientIntensity: 0.15, ambientColor: '#1a1a3e', directionalIntensity: 0.3, directionalColor: '#6666ff', directionalPosition: [-5, 10, -5], background: '#0a0a1e' },
+  dramatic: { name: 'Dramatic', ambientIntensity: 0.2, ambientColor: '#330000', directionalIntensity: 2.0, directionalColor: '#ff6644', directionalPosition: [10, 5, 0], background: '#1a0a0a' },
+  colorful: { name: 'Colorful', ambientIntensity: 0.4, ambientColor: '#ff88ff', directionalIntensity: 1.0, directionalColor: '#88ffaa', directionalPosition: [8, 12, 8], background: '#f8e8ff' },
 };

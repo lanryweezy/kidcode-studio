@@ -40,7 +40,7 @@ const CADLayout: React.FC<CADLayoutProps> = ({ onBack }) => {
   const pushHistory = useCallback(() => {
     setState(prev => ({
       ...prev,
-      undoStack: [...prev.undoStack.slice(-30), prev.objects],
+      undoStack: [...prev.undoStack.slice(-30), { objects: prev.objects, label: '' }],
       redoStack: [],
     }));
   }, []);
@@ -48,12 +48,12 @@ const CADLayout: React.FC<CADLayoutProps> = ({ onBack }) => {
   const undo = useCallback(() => {
     setState(prev => {
       if (prev.undoStack.length === 0) return prev;
-      const prevObjects = prev.undoStack[prev.undoStack.length - 1];
+      const prevEntry = prev.undoStack[prev.undoStack.length - 1];
       return {
         ...prev,
         undoStack: prev.undoStack.slice(0, -1),
-        redoStack: [prev.objects, ...prev.redoStack],
-        objects: prevObjects,
+        redoStack: [{ objects: prev.objects, label: '' }, ...prev.redoStack],
+        objects: prevEntry.objects,
         selectedObjectIds: [],
       };
     });
@@ -62,12 +62,12 @@ const CADLayout: React.FC<CADLayoutProps> = ({ onBack }) => {
   const redo = useCallback(() => {
     setState(prev => {
       if (prev.redoStack.length === 0) return prev;
-      const nextObjects = prev.redoStack[0];
+      const nextEntry = prev.redoStack[0];
       return {
         ...prev,
         redoStack: prev.redoStack.slice(1),
-        undoStack: [...prev.undoStack, prev.objects],
-        objects: nextObjects,
+        undoStack: [...prev.undoStack, { objects: prev.objects, label: '' }],
+        objects: nextEntry.objects,
         selectedObjectIds: [],
       };
     });

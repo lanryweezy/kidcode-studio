@@ -4,15 +4,17 @@
  */
 
 export interface GameLoopConfig {
-  physicsFPS: number;      // Fixed physics rate (default 60)
-  maxFrameSkip: number;    // Max physics steps per frame (default 5)
-  cameraSmooth: number;    // Camera lerp factor 0-1 (default 0.1)
-  cameraLookAhead: number; // Pixels to look ahead of movement (default 50)
+  physicsFPS: number;      
+  maxFrameSkip: number;    
+  maxDeltaMs: number;      
+  cameraSmooth: number;    
+  cameraLookAhead: number; 
 }
 
 export const DEFAULT_LOOP_CONFIG: GameLoopConfig = {
   physicsFPS: 60,
   maxFrameSkip: 5,
+  maxDeltaMs: 250,
   cameraSmooth: 0.1,
   cameraLookAhead: 50,
 };
@@ -497,5 +499,80 @@ export function updateScreenShake(shake: {
     duration: shake.duration - 1,
     offsetX,
     offsetY,
+  };
+}
+
+export interface FixedTimestepLoop {
+  start: (onUpdate: (dt: number) => void, onRender: (alpha: number) => void) => void;
+  stop: () => void;
+  isRunning: () => boolean;
+  getFPS: () => number;
+  getPhysicsFPS: () => number;
+}
+
+export function createFixedTimestepLoop(config: GameLoopConfig = DEFAULT_LOOP_CONFIG): FixedTimestepLoop {
+  let running = false;
+  let rafId = 0;
+  let lastTime = 0;
+  let accumulator = 0;
+  let fps = 0;
+  let frameCount = 0;
+  let fpsTimer = 0;
+  const fixedDt = 1000 / config.physicsFPS;
+
+  const start = (onUpdate: (dt: number) => void, onRender: (alpha: number) => void) => {
+    if (running) return;
+    running = true;
+    lastTime = performance.now();
+    accumulator = 0;
+
+    const loop = (time: number) => {
+      if (!running) return;
+
+      let delta = time - lastTime;
+      lastTime = time;
+
+      if (delta > config.maxDeltaMs) {
+        delta = config.maxDeltaMs;
+      }
+
+      accumulator += delta;
+      frameCount++;
+      fpsTimer += delta;
+
+      if (fpsTimer >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        fpsTimer -= 1000;
+      }
+
+      let steps = 0;
+      while (accumulator >= fixedDt && steps < config.maxFrameSkip) {
+        onUpdate(fixedDt);
+        accumulator -= fixedDt;
+        steps++;
+      }
+
+      const alpha = accumulator / fixedDt;
+      onRender(alpha);
+
+      rafId = requestAnimationFrame(loop);
+    };
+
+    rafId = requestAnimationFrame(loop);
+  };
+
+  const stop = () => {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  };
+
+  return {
+    start,
+    stop,
+    isRunning: () => running,
+    getFPS: () => fps,
+    getPhysicsFPS: () => config.physicsFPS,
   };
 }

@@ -98,12 +98,325 @@ function fixFlippedNormals(geo: THREE.BufferGeometry): void {
   geo.computeVertexNormals();
 }
 
+export function simplifyMesh(geo: THREE.BufferGeometry, targetRatio: number): THREE.BufferGeometry {
+  const simplified = geo.clone();
+  const pos = simplified.attributes.position;
+  const index = simplified.index;
+
+  if (!pos || !index || targetRatio >= 1) return simplified;
+
+  const currentVertexCount = pos.count;
+  const targetVertexCount = Math.floor(currentVertexCount * targetRatio);
+
+  if (targetVertexCount >= currentVertexCount) return simplified;
+
+  const edges: { length: number; v1: number; v2: number }[] = [];
+  const edgeMap = new Map<string, { v1: number; v2: number }>();
+
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+
+    const pairs = [[a, b], [b, c], [c, a]];
+    for (const [v1, v2] of pairs) {
+      const key = `${Math.min(v1, v2)}-${Math.max(v1, v2)}`;
+      if (!edgeMap.has(key)) {
+        const p1 = new THREE.Vector3().fromBufferAttribute(pos as THREE.BufferAttribute, v1);
+        const p2 = new THREE.Vector3().fromBufferAttribute(pos as THREE.BufferAttribute, v2);
+        const length = p1.distanceTo(p2);
+        edgeMap.set(key, { v1, v2 });
+        edges.push({ length, v1, v2 });
+      }
+    }
+  }
+
+  edges.sort((a, b) => a.length - b.length);
+
+  const vertexMapping = new Map<number, number>();
+  let collapsedCount = 0;
+
+  for (const edge of edges) {
+    if (pos.count - collapsedCount <= targetVertexCount) break;
+
+    const v1 = edge.v1;
+    const v2 = edge.v2;
+
+    const mappedV1 = vertexMapping.get(v1) ?? v1;
+    const mappedV2 = vertexMapping.get(v2) ?? v2;
+
+    if (mappedV1 === mappedV2) continue;
+
+    vertexMapping.set(mappedV2, mappedV1);
+    collapsedCount++;
+  }
+
+  const newPositions: number[] = [];
+  const newIndices: number[] = [];
+  const keptVertices = new Map<number, number>();
+  let newIndex = 0;
+
+  for (let i = 0; i < pos.count; i++) {
+    const mapped = vertexMapping.get(i) ?? i;
+    if (!keptVertices.has(mapped)) {
+      keptVertices.set(mapped, newIndex);
+      newPositions.push(
+        pos.getX(mapped),
+        pos.getY(mapped),
+        pos.getZ(mapped)
+      );
+      newIndex++;
+    }
+  }
+
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+
+    const newA = keptVertices.get(vertexMapping.get(a) ?? a)!;
+    const newB = keptVertices.get(vertexMapping.get(b) ?? b)!;
+    const newC = keptVertices.get(vertexMapping.get(c) ?? c)!;
+
+    if (newA !== newB && newB !== newC && newC !== newA) {
+      newIndices.push(newA, newB, newC);
+    }
+  }
+
+  simplified.setAttribute('position', new THREE.Float32BufferAttribute(newPositions, 3));
+  simplified.setIndex(newIndices);
+  simplified.computeVertexNormals();
+
+  return simplified;
+}
+
+export function detectNonManifoldEdges(geo: THREE.BufferGeometry): number {
+  const pos = geo.attributes.position;
+  const index = geo.index;
+
+  if (!pos || !index) return 0;
+
+  const edgeTriangleCount = new Map<string, number>();
+
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+
+    const pairs = [[a, b], [b, c], [c, a]];
+    for (const [v1, v2] of pairs) {
+      const key = `${Math.min(v1, v2)}-${Math.max(v1, v2)}`;
+      edgeTriangleCount.set(key, (edgeTriangleCount.get(key) || 0) + 1);
+    }
+  }
+
+  let nonManifoldCount = 0;
+  edgeTriangleCount.forEach((count) => {
+    if (count > 2) {
+      nonManifoldCount++;
+    }
+  });
+
+  return nonManifoldCount;
+}
+
+export function autoRepairMesh(geo: THREE.BufferGeometry): THREE.BufferGeometry {
+  const repaired = geo.clone();
+  repaired.computeVertexNormals();
+
+  const pos = repaired.attributes.position;
+  const index = repaired.index;
+
+  if (!pos || !index) return repaired;
+
+  const validIndices: number[] = [];
+  const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), v3 = new THREE.Vector3();
+  const e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), cross = new THREE.Vector3();
+
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+
+    v1.fromBufferAttribute(pos as THREE.BufferAttribute, a);
+    v2.fromBufferAttribute(pos as THREE.BufferAttribute, b);
+    v3.fromBufferAttribute(pos as THREE.BufferAttribute, c);
+
+    e1.subVectors(v2, v1);
+    e2.subVectors(v3, v1);
+    cross.crossVectors(e1, e2);
+    const area = cross.length();
+
+    if (area >= 1e-10) {
+      validIndices.push(a, b, c);
+    }
+  }
+
+  repaired.setIndex(validIndices);
+  repaired.computeVertexNormals();
+
+  return repaired;
+}
+
+export async function exportSTLPerBody(
+  objects: CADObject3D[],
+  options: CADExportOptions
+): Promise<void> {
+  const onProgress = options.onProgress;
+  const unitScale = options.unit === 'mm' ? 10 : options.unit === 'cm' ? 1 : 2.54;
+  const binary = options.format === 'stl_binary';
+
+  for (let i = 0; i < objects.length; i++) {
+    const obj = objects[i];
+    if (!obj.mesh) continue;
+
+    onProgress?.((i / objects.length) * 100, `Exporting ${obj.name}...`);
+
+    const scene = new THREE.Scene();
+    const clone = obj.mesh.clone();
+    clone.position.set(obj.position.x, obj.position.y, obj.position.z);
+    clone.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+    clone.scale.set(obj.scale.x, obj.scale.y, obj.scale.z);
+    scene.add(clone);
+
+    if (binary) {
+      let triangles = 0;
+      scene.traverse(child => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (mesh.geometry.index) {
+            triangles += mesh.geometry.index.count / 3;
+          } else {
+            triangles += mesh.geometry.attributes.position.count / 3;
+          }
+        }
+      });
+
+      const headerText = 'KidCode Studio CAD Export';
+      const bufferLength = 80 + 4 + triangles * 50;
+      const buffer = new ArrayBuffer(bufferLength);
+      const dataView = new DataView(buffer);
+
+      for (let j = 0; j < 80; j++) {
+        dataView.setUint8(j, j < headerText.length ? headerText.charCodeAt(j) : 0);
+      }
+      dataView.setUint32(80, triangles, true);
+
+      let offset = 84;
+      const tempNormal = new THREE.Vector3();
+      const tempVertex = new THREE.Vector3();
+
+      scene.traverse(child => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          const geo = mesh.geometry.clone();
+          geo.scale(unitScale, unitScale, unitScale);
+          mesh.updateMatrixWorld();
+          geo.applyMatrix4(mesh.matrixWorld);
+
+          const positions = geo.attributes.position;
+          const geoIndex = geo.index;
+          const count = geoIndex ? geoIndex.count : positions.count;
+
+          for (let j = 0; j < count; j += 3) {
+            const a = geoIndex ? geoIndex.getX(j) : j;
+            const b = geoIndex ? geoIndex.getX(j + 1) : j + 1;
+            const c = geoIndex ? geoIndex.getX(j + 2) : j + 2;
+
+            tempVertex.fromBufferAttribute(positions, a);
+            const v1 = new THREE.Vector3().copy(tempVertex);
+            tempVertex.fromBufferAttribute(positions, b);
+            const v2 = new THREE.Vector3().copy(tempVertex);
+            tempVertex.fromBufferAttribute(positions, c);
+            const v3 = new THREE.Vector3().copy(tempVertex);
+
+            const edge1 = new THREE.Vector3().subVectors(v2, v1);
+            const edge2 = new THREE.Vector3().subVectors(v3, v1);
+            tempNormal.crossVectors(edge1, edge2).normalize();
+
+            dataView.setFloat32(offset, tempNormal.x, true); offset += 4;
+            dataView.setFloat32(offset, tempNormal.y, true); offset += 4;
+            dataView.setFloat32(offset, tempNormal.z, true); offset += 4;
+
+            [v1, v2, v3].forEach(v => {
+              dataView.setFloat32(offset, v.x, true); offset += 4;
+              dataView.setFloat32(offset, v.y, true); offset += 4;
+              dataView.setFloat32(offset, v.z, true); offset += 4;
+            });
+
+            dataView.setUint16(offset, 0, true); offset += 2;
+          }
+          geo.dispose();
+        }
+      });
+
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      saveAs(blob, `${obj.name}.stl`);
+    } else {
+      let stl = `solid ${obj.name}\n`;
+      const tempNormal = new THREE.Vector3();
+      const tempVertex = new THREE.Vector3();
+
+      scene.traverse(child => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          const geo = mesh.geometry.clone();
+          geo.scale(unitScale, unitScale, unitScale);
+          mesh.updateMatrixWorld();
+          geo.applyMatrix4(mesh.matrixWorld);
+
+          const positions = geo.attributes.position;
+          const geoIndex = geo.index;
+          const count = geoIndex ? geoIndex.count : positions.count;
+
+          for (let j = 0; j < count; j += 3) {
+            const a = geoIndex ? geoIndex.getX(j) : j;
+            const b = geoIndex ? geoIndex.getX(j + 1) : j + 1;
+            const c = geoIndex ? geoIndex.getX(j + 2) : j + 2;
+
+            tempVertex.fromBufferAttribute(positions, a);
+            const v1 = new THREE.Vector3().copy(tempVertex);
+            tempVertex.fromBufferAttribute(positions, b);
+            const v2 = new THREE.Vector3().copy(tempVertex);
+            tempVertex.fromBufferAttribute(positions, c);
+            const v3 = new THREE.Vector3().copy(tempVertex);
+
+            const edge1 = new THREE.Vector3().subVectors(v2, v1);
+            const edge2 = new THREE.Vector3().subVectors(v3, v1);
+            tempNormal.crossVectors(edge1, edge2).normalize();
+
+            stl += `  facet normal ${tempNormal.x} ${tempNormal.y} ${tempNormal.z}\n`;
+            stl += '    outer loop\n';
+            stl += `      vertex ${v1.x} ${v1.y} ${v1.z}\n`;
+            stl += `      vertex ${v2.x} ${v2.y} ${v2.z}\n`;
+            stl += `      vertex ${v3.x} ${v3.y} ${v3.z}\n`;
+            stl += '    endloop\n';
+            stl += '  endfacet\n';
+          }
+          geo.dispose();
+        }
+      });
+
+      stl += `endsolid ${obj.name}\n`;
+      const blob = new Blob([stl], { type: 'text/plain' });
+      saveAs(blob, `${obj.name}.stl`);
+    }
+  }
+
+  onProgress?.(100, 'Per-body export complete!');
+}
+
 export async function exportCADModel(
   objects: CADObject3D[],
   options: CADExportOptions
 ): Promise<void> {
   const onProgress = options.onProgress;
   onProgress?.(0, 'Preparing export...');
+
+  if (options.perBody) {
+    await exportSTLPerBody(objects, options);
+    return;
+  }
 
   const scene = new THREE.Scene();
   objects.forEach(obj => {
@@ -134,6 +447,18 @@ export async function exportCADModel(
 
   if (!allValid) {
     onProgress?.(20, 'Fixed mesh issues, continuing export...');
+  }
+
+  if (options.simplifyOption !== undefined && options.simplifyOption < 1) {
+    onProgress?.(25, 'Simplifying meshes...');
+    scene.traverse(child => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.geometry) {
+          mesh.geometry = simplifyMesh(mesh.geometry, options.simplifyOption!);
+        }
+      }
+    });
   }
 
   switch (options.format) {

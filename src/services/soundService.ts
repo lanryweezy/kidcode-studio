@@ -28,29 +28,32 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
     const panner = ctx.createStereoPanner();
     panner.pan.value = Math.max(-1, Math.min(1, panX));
 
+    const pitchShift = ctx.createBiquadFilter();
+    pitchShift.type = 'allpass';
+    pitchShift.frequency.value = 20000;
+
     osc.connect(gain);
     gain.connect(panner);
     panner.connect(masterGain);
     masterGain.connect(ctx.destination);
 
     const now = ctx.currentTime;
+    const p = sfxPitch;
 
     switch (type) {
       case 'jump':
-        // Quick upward sweep
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+        osc.frequency.setValueAtTime(400 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(800 * p, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now);
         osc.stop(now + 0.1);
         break;
       case 'move':
-        // Soft sine slide (retro movement sound)
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.linearRampToValueAtTime(150, now + 0.15);
+        osc.frequency.setValueAtTime(300 * p, now);
+        osc.frequency.linearRampToValueAtTime(150 * p, now + 0.15);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.start(now);
@@ -58,10 +61,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'turn':
-        // Quick ratchet/blip
         osc.type = 'square';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.linearRampToValueAtTime(300, now + 0.05);
+        osc.frequency.setValueAtTime(200 * p, now);
+        osc.frequency.linearRampToValueAtTime(300 * p, now + 0.05);
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
         osc.start(now);
@@ -69,10 +71,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'ui':
-        // Happy chime for messages/emojis
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+        osc.frequency.setValueAtTime(800 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(1200 * p, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now);
@@ -80,9 +81,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'click':
-        // Mechanical click for LEDs
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.setValueAtTime(800 * p, now);
         gain.gain.setValueAtTime(0.05, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
         osc.start(now);
@@ -90,10 +90,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'coin':
-        // Coin sound
         osc.type = 'square';
-        osc.frequency.setValueAtTime(900, now);
-        osc.frequency.setValueAtTime(1200, now + 0.1);
+        osc.frequency.setValueAtTime(900 * p, now);
+        osc.frequency.setValueAtTime(1200 * p, now + 0.1);
         gain.gain.setValueAtTime(0.05, now);
         gain.gain.setValueAtTime(0.05, now + 0.1);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
@@ -102,10 +101,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'camera':
-        // Shutter sound
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+        osc.frequency.setValueAtTime(1200 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(100 * p, now + 0.15);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.start(now);
@@ -113,11 +111,10 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'powerup':
-        // Powerup sound
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.linearRampToValueAtTime(600, now + 0.2);
-        osc.frequency.linearRampToValueAtTime(1200, now + 0.5);
+        osc.frequency.setValueAtTime(200 * p, now);
+        osc.frequency.linearRampToValueAtTime(600 * p, now + 0.2);
+        osc.frequency.linearRampToValueAtTime(1200 * p, now + 0.5);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.5);
         osc.start(now);
@@ -125,10 +122,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'laser':
-        // Laser sound
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+        osc.frequency.setValueAtTime(1200 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(200 * p, now + 0.3);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         osc.start(now);
@@ -136,10 +132,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'explosion':
-        // Explosion noise (white noise approximation)
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(100, now);
-        osc.frequency.exponentialRampToValueAtTime(10, now + 0.4);
+        osc.frequency.setValueAtTime(100 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(10 * p, now + 0.4);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
         osc.start(now);
@@ -147,10 +142,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
 
       case 'hurt':
-        // Hurt sound
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.linearRampToValueAtTime(150, now + 0.1);
+        osc.frequency.setValueAtTime(200 * p, now);
+        osc.frequency.linearRampToValueAtTime(150 * p, now + 0.1);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now);
@@ -158,8 +152,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         break;
       case 'dash':
         osc.type = 'square';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+        osc.frequency.setValueAtTime(800 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(100 * p, now + 0.15);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.start(now);
@@ -168,8 +162,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'snap':
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+        osc.frequency.setValueAtTime(1200 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(800 * p, now + 0.05);
         gain.gain.setValueAtTime(0.06, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
         osc.start(now);
@@ -178,9 +172,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'success':
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(523, now);
-        osc.frequency.setValueAtTime(659, now + 0.1);
-        osc.frequency.setValueAtTime(784, now + 0.2);
+        osc.frequency.setValueAtTime(523 * p, now);
+        osc.frequency.setValueAtTime(659 * p, now + 0.1);
+        osc.frequency.setValueAtTime(784 * p, now + 0.2);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.35);
         osc.start(now);
@@ -189,8 +183,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'error':
         osc.type = 'square';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.setValueAtTime(150, now + 0.1);
+        osc.frequency.setValueAtTime(200 * p, now);
+        osc.frequency.setValueAtTime(150 * p, now + 0.1);
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
         osc.start(now);
@@ -199,8 +193,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'drop':
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+        osc.frequency.setValueAtTime(600 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(400 * p, now + 0.1);
         gain.gain.setValueAtTime(0.07, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
         osc.start(now);
@@ -209,8 +203,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'attack':
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
+        osc.frequency.setValueAtTime(300 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(1200 * p, now + 0.08);
         gain.gain.setValueAtTime(0.12, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
         osc.start(now);
@@ -219,8 +213,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'hit':
         osc.type = 'square';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.exponentialRampToValueAtTime(50, now + 0.06);
+        osc.frequency.setValueAtTime(200 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(50 * p, now + 0.06);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.start(now);
@@ -229,8 +223,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'death':
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(80, now + 0.6);
+        osc.frequency.setValueAtTime(800 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(80 * p, now + 0.6);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.6);
         osc.start(now);
@@ -242,12 +236,12 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         const v1 = ctx.createOscillator();
         const v1g = ctx.createGain();
         v1.type = 'sine';
-        osc.frequency.setValueAtTime(523, now);
-        osc.frequency.setValueAtTime(659, now + 0.15);
-        osc.frequency.setValueAtTime(784, now + 0.3);
-        v1.frequency.setValueAtTime(659, now);
-        v1.frequency.setValueAtTime(784, now + 0.15);
-        v1.frequency.setValueAtTime(1047, now + 0.3);
+        osc.frequency.setValueAtTime(523 * p, now);
+        osc.frequency.setValueAtTime(659 * p, now + 0.15);
+        osc.frequency.setValueAtTime(784 * p, now + 0.3);
+        v1.frequency.setValueAtTime(659 * p, now);
+        v1.frequency.setValueAtTime(784 * p, now + 0.15);
+        v1.frequency.setValueAtTime(1047 * p, now + 0.3);
         v1g.gain.value = 0.08;
         v1.connect(v1g);
         v1g.connect(ctx.destination);
@@ -262,9 +256,9 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'achievement':
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.setValueAtTime(1108, now + 0.1);
-        osc.frequency.setValueAtTime(1318, now + 0.2);
+        osc.frequency.setValueAtTime(880 * p, now);
+        osc.frequency.setValueAtTime(1108 * p, now + 0.1);
+        osc.frequency.setValueAtTime(1318 * p, now + 0.2);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.4);
         osc.start(now);
@@ -273,8 +267,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'notification':
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(698, now);
-        osc.frequency.setValueAtTime(880, now + 0.1);
+        osc.frequency.setValueAtTime(698 * p, now);
+        osc.frequency.setValueAtTime(880 * p, now + 0.1);
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
         osc.start(now);
@@ -283,10 +277,10 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'gameOver':
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.setValueAtTime(370, now + 0.2);
-        osc.frequency.setValueAtTime(311, now + 0.4);
-        osc.frequency.setValueAtTime(220, now + 0.6);
+        osc.frequency.setValueAtTime(440 * p, now);
+        osc.frequency.setValueAtTime(370 * p, now + 0.2);
+        osc.frequency.setValueAtTime(311 * p, now + 0.4);
+        osc.frequency.setValueAtTime(220 * p, now + 0.6);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.8);
         osc.start(now);
@@ -297,7 +291,7 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
         osc.type = 'square';
         const notes = [523, 659, 784, 1047];
         notes.forEach((freq, i) => {
-          osc.frequency.setValueAtTime(freq, now + i * 0.12);
+          osc.frequency.setValueAtTime(freq * p, now + i * 0.12);
         });
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.6);
@@ -308,8 +302,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'healing':
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.linearRampToValueAtTime(800, now + 0.3);
+        osc.frequency.setValueAtTime(400 * p, now);
+        osc.frequency.linearRampToValueAtTime(800 * p, now + 0.3);
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.4);
         osc.start(now);
@@ -318,8 +312,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       case 'menuSelect':
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.setValueAtTime(900, now + 0.04);
+        osc.frequency.setValueAtTime(600 * p, now);
+        osc.frequency.setValueAtTime(900 * p, now + 0.04);
         gain.gain.setValueAtTime(0.07, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
         osc.start(now);
@@ -328,8 +322,8 @@ export const playSoundEffect = (type: SoundEffectType, panX: number = 0) => {
 
       default:
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+        osc.frequency.setValueAtTime(800 * p, now);
+        osc.frequency.exponentialRampToValueAtTime(1200 * p, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now);
@@ -451,6 +445,7 @@ export const playSpeakerSound = (type: string, volume: number = 0.5): number => 
 let sfxVolume = 0.5;
 let musicVolume = 0.5;
 let muted = false;
+let sfxPitch = 1.0;
 
 export const setSfxVolume = (v: number) => { sfxVolume = Math.max(0, Math.min(1, v)); };
 export const getSfxVolume = () => sfxVolume;
@@ -459,6 +454,8 @@ export const getMusicVolume = () => musicVolume;
 export const toggleMute = () => { muted = !muted; return muted; };
 export const setMuted = (v: boolean) => { muted = v; };
 export const getMuted = () => muted;
+export const setSfxPitch = (v: number) => { sfxPitch = Math.max(0.25, Math.min(4, v)); };
+export const getSfxPitch = () => sfxPitch;
 
 /** Plays a sound effect panned based on the entity's x position relative to canvas width. */
 export const spatialPlaySound = (type: SoundEffectType, x: number = 0, canvasWidth: number = 400) => {
@@ -560,6 +557,70 @@ export const setBgMusicVolume = (v: number) => {
   musicVolume = Math.max(0, Math.min(1, v));
   if (bgMusicGain) {
     bgMusicGain.gain.setValueAtTime(muted ? 0 : musicVolume * 0.12, bgMusicGain.context.currentTime);
+  }
+};
+
+export const crossfadeMusic = (track: string = 'calm', fadeDuration: number = 1) => {
+  if (bgMusicGain && bgMusicOsc) {
+    const ctx = bgMusicOsc.context;
+    bgMusicGain.gain.linearRampToValueAtTime(0, ctx.currentTime + fadeDuration);
+    setTimeout(() => {
+      playBackgroundMusic(track);
+    }, fadeDuration * 1000);
+  } else {
+    playBackgroundMusic(track);
+  }
+};
+
+export const playSoundWithReverb = (type: SoundEffectType, decay: number = 1.5, panX: number = 0) => {
+  try {
+    if (muted) return;
+    const ctx = getContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const reverb = createReverb(ctx, { decay });
+    const reverbGain = ctx.createGain();
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = Math.max(-1, Math.min(1, panX));
+
+    reverbGain.gain.value = 0.3;
+
+    osc.connect(gain);
+    gain.connect(panner);
+    panner.connect(ctx.destination);
+    gain.connect(reverbGain);
+    reverbGain.connect(reverb);
+    reverb.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+
+    switch (type) {
+      case 'explosion':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(10, now + 0.4);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        break;
+      case 'hit':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.06);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+        break;
+      default:
+        playSoundEffect(type, panX);
+        return;
+    }
+  } catch (e) {
+    console.error('Reverb playback failed', e);
   }
 };
 

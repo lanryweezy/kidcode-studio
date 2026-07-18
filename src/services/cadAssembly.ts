@@ -147,3 +147,123 @@ export function calculateAssemblyBounds(
     maxZ: isFinite(maxZ) ? maxZ : 0,
   };
 }
+
+function getWorldBounds(obj: CADObject3D): { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number } | null {
+  const geo = obj.geometry;
+  if (!geo) return null;
+  geo.computeBoundingBox();
+  if (!geo.boundingBox) return null;
+
+  const bb = geo.boundingBox;
+  const sx = obj.scale.x, sy = obj.scale.y, sz = obj.scale.z;
+  const px = obj.position.x, py = obj.position.y, pz = obj.position.z;
+
+  return {
+    minX: bb.min.x * sx + px,
+    maxX: bb.max.x * sx + px,
+    minY: bb.min.y * sy + py,
+    maxY: bb.max.y * sy + py,
+    minZ: bb.min.z * sz + pz,
+    maxZ: bb.max.z * sz + pz,
+  };
+}
+
+export function detectInterference(objects: CADObject3D[]): Array<{objectIdA: string; objectIdB: string; volume: number}> {
+  const results: Array<{objectIdA: string; objectIdB: string; volume: number}> = [];
+
+  for (let i = 0; i < objects.length; i++) {
+    for (let j = i + 1; j < objects.length; j++) {
+      const boundsA = getWorldBounds(objects[i]);
+      const boundsB = getWorldBounds(objects[j]);
+      if (!boundsA || !boundsB) continue;
+
+      const overlapX = Math.min(boundsA.maxX, boundsB.maxX) - Math.max(boundsA.minX, boundsB.minX);
+      const overlapY = Math.min(boundsA.maxY, boundsB.maxY) - Math.max(boundsA.minY, boundsB.minY);
+      const overlapZ = Math.min(boundsA.maxZ, boundsB.maxZ) - Math.max(boundsA.minZ, boundsB.minZ);
+
+      if (overlapX > 0 && overlapY > 0 && overlapZ > 0) {
+        results.push({
+          objectIdA: objects[i].id,
+          objectIdB: objects[j].id,
+          volume: overlapX * overlapY * overlapZ,
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
+export function createExplodedView(objects: CADObject3D[], amount: number): CADObject3D[] {
+  if (objects.length === 0) return objects;
+
+  const bounds = calculateAssemblyBounds(objects);
+  const centerX = (bounds.minX + bounds.maxX) / 2;
+  const centerY = (bounds.minY + bounds.maxY) / 2;
+  const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+
+  return objects.map(obj => {
+    const dx = obj.position.x - centerX;
+    const dy = obj.position.y - centerY;
+    const dz = obj.position.z - centerZ;
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (dist === 0) return obj;
+
+    return {
+      ...obj,
+      position: {
+        x: obj.position.x + (dx / dist) * amount,
+        y: obj.position.y + (dy / dist) * amount,
+        z: obj.position.z + (dz / dist) * amount,
+      },
+    };
+  });
+}
+
+export function snapFaces(
+  objA: CADObject3D,
+  objB: CADObject3D,
+  faceNormalA: { x: number; y: number; z: number },
+  faceNormalB: { x: number; y: number; z: number }
+): CADObject3D[] {
+  const boundsA = getWorldBounds(objA);
+  const boundsB = getWorldBounds(objB);
+  if (!boundsA || !boundsB) return [objA, objB];
+
+  const faceCenterA = {
+    x: faceNormalA.x > 0 ? boundsA.maxX : faceNormalA.x < 0 ? boundsA.minX : (boundsA.minX + boundsA.maxX) / 2,
+    y: faceNormalA.y > 0 ? boundsA.maxY : faceNormalA.y < 0 ? boundsA.minY : (boundsA.minY + boundsA.maxY) / 2,
+    z: faceNormalA.z > 0 ? boundsA.maxZ : faceNormalA.z < 0 ? boundsA.minZ : (boundsA.minZ + boundsA.maxZ) / 2,
+  };
+
+  const faceCenterB = {
+    x: faceNormalB.x > 0 ? boundsB.maxX : faceNormalB.x < 0 ? boundsB.minX : (boundsB.minX + boundsB.maxX) / 2,
+    y: faceNormalB.y > 0 ? boundsB.maxY : faceNormalB.y < 0 ? boundsB.minY : (boundsB.minY + boundsB.maxY) / 2,
+    z: faceNormalB.z > 0 ? boundsB.maxZ : faceNormalB.z < 0 ? boundsB.minZ : (boundsB.minZ + boundsB.maxZ) / 2,
+  };
+
+  const newBPos = {
+    x: faceCenterA.x - faceCenterB.x + objB.position.x,
+    y: faceCenterA.y - faceCenterB.y + objB.position.y,
+    z: faceCenterA.z - faceCenterB.z + objB.position.z,
+  };
+
+  return [
+    objA,
+    { ...objB, position: newBPos },
+  ];
+}
+
+export function groupRigidObjects(objects: CADObject3D[], groupId: string): CADObject3D[] {
+  return objects.map(obj => ({ ...obj, groupId }));
+}
+
+export function ungroupObjects(objects: CADObject3D[], groupId: string): CADObject3D[] {
+  return objects.map(obj => {
+    if (obj.groupId === groupId) {
+      const { groupId: _, ...rest } = obj;
+      return rest;
+    }
+    return obj;
+  });
+}

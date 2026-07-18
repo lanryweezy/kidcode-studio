@@ -154,6 +154,43 @@ export const AVAILABLE_BLOCKS: Record<AppMode, BlockDefinition[]> = {
         { type: CommandType.WALL_JUMP, label: 'Enable Wall Jump', icon: ArrowUp, defaultParams: { condition: 'true' }, color: 'bg-blue-500', category: 'Motion', description: 'Enable wall jumping.' },
         { type: CommandType.GRAPPLE, label: 'Grapple', icon: Anchor, defaultParams: { value: 100 }, color: 'bg-amber-600', category: 'Motion', description: 'Grapple to position.' },
 
+        // --- ADVANCED MOTION ---
+        { type: CommandType.GLIDE_TO_XY, label: 'Glide To', icon: Move, defaultParams: { x: 100, y: 100, value: 1 }, color: 'bg-blue-600', category: 'Motion', description: 'Smoothly glide to x,y over N seconds.' },
+        { type: CommandType.POINT_TOWARDS, label: 'Point Toward', icon: Compass, defaultParams: { text: 'enemy' }, color: 'bg-blue-500', category: 'Motion', description: 'Rotate to face another object.' },
+
+        // --- SENSING ---
+        { type: CommandType.DISTANCE_TO, label: 'Distance To', icon: Crosshair, defaultParams: { text: 'enemy', varName: 'dist' }, color: 'bg-teal-500', category: 'Sensing', description: 'Get distance to another object.' },
+        { type: CommandType.TOUCHING_COLOR, label: 'Touching Color', icon: Palette, defaultParams: { color: '#ff0000' }, color: 'bg-teal-600', category: 'Sensing', description: 'Check if touching a color.' },
+        { type: CommandType.ASK_AND_WAIT, label: 'Ask & Wait', icon: TextCursorInput, defaultParams: { text: 'What is your name?' }, color: 'bg-teal-400', category: 'Sensing', description: 'Prompt user for input.' },
+        { type: CommandType.ANSWER, label: 'Get Answer', icon: MessageSquare, defaultParams: { varName: 'answer' }, color: 'bg-teal-500', category: 'Sensing', description: 'Get the last user answer.' },
+
+        // --- OPERATORS ---
+        { type: CommandType.MATH_OP, label: 'Math Operation', icon: Calculator, defaultParams: { text: 'sqrt', value: 0, varName: 'result' }, color: 'bg-emerald-500', category: 'Operators', description: 'Advanced math functions.' },
+        { type: CommandType.RANDOM_BETWEEN, label: 'Random Between', icon: Hash, defaultParams: { value: 1, value2: 100, varName: 'rand' }, color: 'bg-emerald-600', category: 'Operators', description: 'Random number in range.' },
+        { type: CommandType.STRING_CONTAINS, label: 'String Contains', icon: Scan, defaultParams: { text: 'hello', text2: 'ell', varName: 'found' }, color: 'bg-emerald-400', category: 'Operators', description: 'Check if string contains substring.' },
+
+        // --- ADVANCED CONTROL ---
+        { type: CommandType.WAIT_UNTIL, label: 'Wait Until', icon: Clock, defaultParams: { condition: 'IS_TOUCHING_EDGE' }, color: 'bg-violet-600', category: 'Control', description: 'Wait until condition is true.' },
+        { type: CommandType.WHEN_CLONE_STARTS, label: 'When Cloned', icon: Copy, defaultParams: {}, color: 'bg-orange-500', category: 'Events', description: 'Run when clone is created.' },
+        { type: CommandType.DELETE_THIS_CLONE, label: 'Delete Clone', icon: Trash, defaultParams: {}, color: 'bg-orange-600', category: 'Actions', description: 'Delete the current clone.' },
+
+        // --- ADVANCED GAMEPLAY ---
+        { type: CommandType.SET_GRAVITY_STRENGTH, label: 'Gravity Strength', icon: ArrowBigUp, defaultParams: { value: 0.5 }, color: 'bg-blue-700', category: 'Physics', description: 'Set gravity strength.' },
+        { type: CommandType.SET_CAMERA_TARGET, label: 'Camera Target', icon: Video, defaultParams: { text: 'player' }, color: 'bg-slate-700', category: 'Looks', description: 'Make camera follow an object.' },
+
+        // --- SPRITE FEATURES ---
+        { type: CommandType.SWITCH_COSTUME, label: 'Switch Costume', icon: Image, defaultParams: { text: 'costume1' }, color: 'bg-purple-600', category: 'Looks', description: 'Change sprite appearance.' },
+        { type: CommandType.SAY_THINK, label: 'Say/Think', icon: MessageSquare, defaultParams: { text: 'Hello!', message: 'say' }, color: 'bg-purple-500', category: 'Looks', description: 'Show speech bubble.' },
+        { type: CommandType.GHOST_EFFECT, label: 'Ghost Effect', icon: Eye, defaultParams: { value: 50 }, color: 'bg-purple-400', category: 'Looks', description: 'Set transparency effect.' },
+        { type: CommandType.COLOR_EFFECT, label: 'Color Effect', icon: Palette, defaultParams: { value: 0 }, color: 'bg-pink-500', category: 'Looks', description: 'Change color effect.' },
+        { type: CommandType.SIZE_EFFECT, label: 'Size Effect', icon: ZoomIn, defaultParams: { value: 100 }, color: 'bg-purple-300', category: 'Looks', description: 'Set size effect.' },
+
+        // --- PEN DRAWING ---
+        { type: CommandType.PEN_DOWN, label: 'Pen Down', icon: Pencil, defaultParams: {}, color: 'bg-green-500', category: 'Pen', description: 'Start drawing trail.' },
+        { type: CommandType.PEN_UP, label: 'Pen Up', icon: Pencil, defaultParams: {}, color: 'bg-green-600', category: 'Pen', description: 'Stop drawing trail.' },
+        { type: CommandType.PEN_CLEAR, label: 'Clear Drawing', icon: Eraser, defaultParams: {}, color: 'bg-green-700', category: 'Pen', description: 'Erase all pen trails.' },
+        { type: CommandType.PEN_COLOR, label: 'Pen Color', icon: Palette, defaultParams: { color: '#ff0000' }, color: 'bg-green-400', category: 'Pen', description: 'Set pen color.' },
+
         // Checkpoints
         { type: CommandType.CREATE_CHECKPOINT, label: 'Create Checkpoint', icon: Flag, defaultParams: { text: 'Save Point' }, color: 'bg-green-600', category: 'Progress', description: 'Create save point.' },
         { type: CommandType.LOAD_CHECKPOINT, label: 'Load Checkpoint', icon: RotateCcw, defaultParams: {}, color: 'bg-green-500', category: 'Progress', description: 'Load last checkpoint.' },

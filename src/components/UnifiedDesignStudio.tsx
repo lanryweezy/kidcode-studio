@@ -86,6 +86,10 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   const transformRef = useRef<TransformControls | null>(null);
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
+  const geometryPoolRef = useRef<Map<string, THREE.BufferGeometry>>(new Map());
+  const materialPoolRef = useRef<Map<string, THREE.MeshStandardMaterial>>(new Map());
+  const frustumRef = useRef<THREE.Frustum>(new THREE.Frustum());
+  const projScreenMatrixRef = useRef<THREE.Matrix4>(new THREE.Matrix4());
 
   const [mode, setMode] = useState<StudioMode>('scene');
   const [sceneData, setSceneData] = useState<Scene3DData>(initialData || createDefaultScene());
@@ -122,7 +126,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   const [showPrefabMenu, setShowPrefabMenu] = useState(false);
   const [groups, setGroups] = useState<Array<{ id: string; name: string; childIds: string[] }>>([]);
   const [history, setHistory] = useState<Array<{
-    objects: Scene3DObject[]; lights: Scene3DLight[]; animations: Animation3D[]; backgroundColor: string;
+    objects: Scene3DObject[]; lights: Scene3DLight[]; animations: Animation3D[]; backgroundColor: string; label: string;
   }>>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -155,12 +159,13 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   const selectedCADObj = selectedId && selectedType === 'cad' ? cadState.objects.find((o) => o.id === selectedId) : null;
   const isMultiSelect = selectedIds.size > 1;
 
-  const pushHistory = useCallback(() => {
+  const pushHistory = useCallback((label = '') => {
     const entry = {
       objects: JSON.parse(JSON.stringify(sceneData.objects)),
       lights: JSON.parse(JSON.stringify(sceneData.lights)),
       animations: JSON.parse(JSON.stringify(sceneData.animations)),
       backgroundColor: sceneData.backgroundColor,
+      label,
     };
     setHistory((prev) => {
       const newHistory = prev.slice(0, historyIndex + 1);
@@ -202,10 +207,10 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
     return Math.round(v / snapSize) * snapSize;
   }, [snapToGrid, snapSize]);
 
-  const pushCADHistory = useCallback(() => {
+  const pushCADHistory = useCallback((label = '') => {
     setCADState(prev => ({
       ...prev,
-      undoStack: [...prev.undoStack.slice(-30), prev.objects],
+      undoStack: [...prev.undoStack.slice(-30), { objects: prev.objects, label }],
       redoStack: [],
     }));
   }, []);
@@ -213,11 +218,12 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   const undoCAD = useCallback(() => {
     setCADState(prev => {
       if (prev.undoStack.length === 0) return prev;
-      const prevObjects = prev.undoStack[prev.undoStack.length - 1];
+      const prevEntry = prev.undoStack[prev.undoStack.length - 1];
+      const prevObjects = prevEntry.objects;
       return {
         ...prev,
         undoStack: prev.undoStack.slice(0, -1),
-        redoStack: [prev.objects, ...prev.redoStack],
+        redoStack: [{ objects: prev.objects, label: '' }, ...prev.redoStack],
         objects: prevObjects,
         selectedObjectIds: [],
       };
@@ -227,11 +233,12 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   const redoCAD = useCallback(() => {
     setCADState(prev => {
       if (prev.redoStack.length === 0) return prev;
-      const nextObjects = prev.redoStack[0];
+      const nextEntry = prev.redoStack[0];
+      const nextObjects = nextEntry.objects;
       return {
         ...prev,
         redoStack: prev.redoStack.slice(1),
-        undoStack: [...prev.undoStack, prev.objects],
+        undoStack: [...prev.undoStack, { objects: prev.objects, label: '' }],
         objects: nextObjects,
         selectedObjectIds: [],
       };
@@ -324,6 +331,18 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
     animFrameRef.current = requestAnimationFrame(animate);
     if (controlsRef.current) controlsRef.current.update();
     if (rendererRef.current && sceneRef.current && cameraRef.current) {
+      if (cameraRef.current) {
+        projScreenMatrixRef.current.multiplyMatrices(cameraRef.current.projectionMatrix, cameraRef.current.matrixWorldInverse);
+        frustumRef.current.setFromProjectionMatrix(projScreenMatrixRef.current);
+        const camPos = cameraRef.current.position;
+        objectMeshesRef.current.forEach((mesh) => {
+          if (transformRef.current && mesh === transformRef.current.object) return;
+          if (mesh instanceof THREE.Mesh) {
+            const dist = mesh.position.distanceTo(camPos);
+            mesh.visible = dist < 200;
+          }
+        });
+      }
       rendererRef.current.render(sceneRef.current, cameraRef.current);
     }
   }, []);
@@ -336,6 +355,14 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
       const isSceneObj = sceneData.objects.find((o) => o.id === id);
       const isCADObj = cadState.objects.find((o) => o.id === id);
       if (!isSceneObj && !isCADObj) {
+        if (mesh instanceof THREE.Mesh) {
+          const m = mesh as THREE.Mesh;
+          if (m.geometry) m.geometry.dispose();
+          if (m.material) {
+            if (Array.isArray(m.material)) m.material.forEach(mt => mt.dispose());
+            else m.material.dispose();
+          }
+        }
         scene.remove(mesh);
         objectMeshesRef.current.delete(id);
       }
@@ -343,6 +370,14 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
 
     for (const [id, light] of lightMeshesRef.current) {
       if (!sceneData.lights.find((l) => l.id === id)) {
+        if (light instanceof THREE.Mesh) {
+          const m = light as THREE.Mesh;
+          if (m.geometry) m.geometry.dispose();
+          if (m.material) {
+            if (Array.isArray(m.material)) m.material.forEach(mt => mt.dispose());
+            else m.material.dispose();
+          }
+        }
         scene.remove(light);
         lightMeshesRef.current.delete(id);
         const helper = helpersRef.current.get(id);
@@ -458,51 +493,88 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
     }
   }, [sceneData, cadState.objects, selectedIds]);
 
+  function getLODSegments(baseSegments: number, distance: number): number {
+    if (distance > 50) return Math.max(4, Math.floor(baseSegments * 0.25));
+    if (distance > 20) return Math.max(8, Math.floor(baseSegments * 0.5));
+    return baseSegments;
+  }
+
   const createMeshForObject = useCallback((obj: Scene3DObject): THREE.Mesh => {
+    const cameraPos = cameraRef.current?.position;
+    const objPos = new THREE.Vector3(obj.position[0], obj.position[1], obj.position[2]);
+    const distance = cameraPos ? cameraPos.distanceTo(objPos) : 0;
     let geometry: THREE.BufferGeometry;
     switch (obj.type) {
       case 'cube': {
         const p = obj.geometryParams || {};
-        geometry = new THREE.BoxGeometry(p.width || 1, p.height || 1, p.depth || 1);
+        const key = `cube_${p.width || 1}_${p.height || 1}_${p.depth || 1}`;
+        const pooled = geometryPoolRef.current.get(key);
+        geometry = pooled ? pooled : new THREE.BoxGeometry(p.width || 1, p.height || 1, p.depth || 1);
+        if (!pooled) geometryPoolRef.current.set(key, geometry);
         break;
       }
       case 'sphere': {
         const p = obj.geometryParams || {};
-        geometry = new THREE.SphereGeometry(p.radius || 0.5, p.widthSegments || 32, p.heightSegments || 32);
+        const segs = getLODSegments(p.widthSegments || 32, distance);
+        const key = `sphere_${p.radius || 0.5}_${segs}`;
+        const pooled = geometryPoolRef.current.get(key);
+        geometry = pooled ? pooled : new THREE.SphereGeometry(p.radius || 0.5, segs, getLODSegments(p.heightSegments || 32, distance));
+        if (!pooled) geometryPoolRef.current.set(key, geometry);
         break;
       }
       case 'cylinder': {
         const p = obj.geometryParams || {};
-        geometry = new THREE.CylinderGeometry(p.radiusTop || 0.5, p.radiusBottom || 0.5, p.height || 1, p.radialSegments || 32);
+        const segs = getLODSegments(p.radialSegments || 32, distance);
+        const key = `cylinder_${p.radiusTop || 0.5}_${p.radiusBottom || 0.5}_${p.height || 1}_${segs}`;
+        const pooled = geometryPoolRef.current.get(key);
+        geometry = pooled ? pooled : new THREE.CylinderGeometry(p.radiusTop || 0.5, p.radiusBottom || 0.5, p.height || 1, segs);
+        if (!pooled) geometryPoolRef.current.set(key, geometry);
         break;
       }
       case 'cone': {
         const p = obj.geometryParams || {};
-        geometry = new THREE.ConeGeometry(p.radius || 0.5, p.height || 1, p.radialSegments || 32);
+        const segs = getLODSegments(p.radialSegments || 32, distance);
+        const key = `cone_${p.radius || 0.5}_${p.height || 1}_${segs}`;
+        const pooled = geometryPoolRef.current.get(key);
+        geometry = pooled ? pooled : new THREE.ConeGeometry(p.radius || 0.5, p.height || 1, segs);
+        if (!pooled) geometryPoolRef.current.set(key, geometry);
         break;
       }
       case 'torus': {
         const p = obj.geometryParams || {};
-        geometry = new THREE.TorusGeometry(p.radius || 0.5, p.tube || 0.2, p.radialSegments || 16, p.tubularSegments || 32);
+        const rSegs = getLODSegments(p.radialSegments || 16, distance);
+        const tSegs = getLODSegments(p.tubularSegments || 32, distance);
+        const key = `torus_${p.radius || 0.5}_${p.tube || 0.2}_${rSegs}_${tSegs}`;
+        const pooled = geometryPoolRef.current.get(key);
+        geometry = pooled ? pooled : new THREE.TorusGeometry(p.radius || 0.5, p.tube || 0.2, rSegs, tSegs);
+        if (!pooled) geometryPoolRef.current.set(key, geometry);
         break;
       }
       case 'plane': {
         const p = obj.geometryParams || {};
-        geometry = new THREE.PlaneGeometry(p.width || 2, p.height || 2);
+        const key = `plane_${p.width || 2}_${p.height || 2}`;
+        const pooled = geometryPoolRef.current.get(key);
+        geometry = pooled ? pooled : new THREE.PlaneGeometry(p.width || 2, p.height || 2);
+        if (!pooled) geometryPoolRef.current.set(key, geometry);
         break;
       }
       default:
         geometry = new THREE.BoxGeometry(1, 1, 1);
     }
-    const material = new THREE.MeshStandardMaterial({
-      color: obj.material.color,
-      opacity: obj.material.opacity,
-      transparent: obj.material.opacity < 1,
-      metalness: obj.material.metalness,
-      roughness: obj.material.roughness,
-      wireframe: obj.material.wireframe,
-      side: obj.material.doubleSided ? THREE.DoubleSide : THREE.FrontSide,
-    });
+    const colorKey = `${obj.material.color}_${obj.material.opacity}_${obj.material.metalness}_${obj.material.roughness}_${obj.material.wireframe}_${obj.material.doubleSided}`;
+    let material = materialPoolRef.current.get(colorKey);
+    if (!material) {
+      material = new THREE.MeshStandardMaterial({
+        color: obj.material.color,
+        opacity: obj.material.opacity,
+        transparent: obj.material.opacity < 1,
+        metalness: obj.material.metalness,
+        roughness: obj.material.roughness,
+        wireframe: obj.material.wireframe,
+        side: obj.material.doubleSided ? THREE.DoubleSide : THREE.FrontSide,
+      });
+      materialPoolRef.current.set(colorKey, material);
+    }
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -654,6 +726,68 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
         });
       } else if (e.key === 'Delete') {
         e.preventDefault(); deleteSelected();
+      } else if (e.key === 'X' && e.shiftKey) {
+        e.preventDefault();
+        if (transformRef.current) {
+          transformRef.current.showX = true;
+          transformRef.current.showY = false;
+          transformRef.current.showZ = false;
+        }
+      } else if (e.key === 'Y' && e.shiftKey) {
+        e.preventDefault();
+        if (transformRef.current) {
+          transformRef.current.showX = false;
+          transformRef.current.showY = true;
+          transformRef.current.showZ = false;
+        }
+      } else if (e.key === 'Z' && e.shiftKey) {
+        e.preventDefault();
+        if (transformRef.current) {
+          transformRef.current.showX = false;
+          transformRef.current.showY = false;
+          transformRef.current.showZ = true;
+        }
+      } else if (e.key === 'Escape') {
+        if (transformRef.current) {
+          transformRef.current.showX = true;
+          transformRef.current.showY = true;
+          transformRef.current.showZ = true;
+        }
+        setSelectedIds(new Set());
+        setSelectedType(null);
+      } else if (e.key === 'W' && e.shiftKey) {
+        e.preventDefault();
+        setSpaceMode(prev => {
+          const next = prev === 'world' ? 'local' : 'world';
+          if (transformRef.current) transformRef.current.setSpace(next);
+          return next;
+        });
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSceneExport();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault(); duplicateSelected();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'g' && !e.shiftKey) {
+        e.preventDefault();
+        if (selectedIds.size > 1) {
+          const groupId = `grp_${Date.now()}`;
+          const childIds = Array.from(selectedIds);
+          setGroups(prev => [...prev, { id: groupId, name: `Group ${prev.length + 1}`, childIds }]);
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'g' && e.shiftKey) {
+        e.preventDefault();
+        setGroups(prev => prev.filter(g => {
+          if (selectedIds.has(g.id)) {
+            return false;
+          }
+          return true;
+        }));
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        setIsPlaying(prev => !prev);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        setMode('export');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -739,7 +873,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   }, []);
 
   const addObject = useCallback((type: Scene3DObject['type']) => {
-    pushHistory();
+    pushHistory('Add Object');
     const creators: Record<string, () => Scene3DObject> = {
       cube: createCube, sphere: createSphere, cylinder: createCylinder,
       cone: createCone, torus: createTorus, plane: createPlane,
@@ -752,7 +886,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   }, [pushHistory]);
 
   const addLight = useCallback((type: Scene3DLight['type']) => {
-    pushHistory();
+    pushHistory('Add Light');
     const newLight = createLight(type);
     setSceneData((prev) => ({ ...prev, lights: [...prev.lights, newLight] }));
     setSelectedIds(new Set([newLight.id]));
@@ -761,7 +895,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   }, [pushHistory]);
 
   const addPrefab = useCallback((prefab: PrefabDefinition) => {
-    pushHistory();
+    pushHistory('Add Prefab');
     const center: [number, number, number] = controlsRef.current
       ? [Math.round(controlsRef.current.target.x), 0, Math.round(controlsRef.current.target.z)]
       : [0, 0, 0];
@@ -775,7 +909,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
   }, [pushHistory]);
 
   const addCADObject = useCallback((type: 'box' | 'cylinder' | 'sphere') => {
-    pushCADHistory();
+    pushCADHistory('Add CAD Object');
     const id = genId();
     let obj: CADObject3D;
     switch (type) {
@@ -827,7 +961,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
 
   const deleteSelected = useCallback(() => {
     if (selectedIds.size === 0) return;
-    pushHistory();
+    pushHistory('Delete Selected');
     if (selectedType === 'object') {
       setSceneData((prev) => ({
         ...prev,
@@ -852,7 +986,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
 
   const duplicateSelected = useCallback(() => {
     if (selectedIds.size === 0) return;
-    pushHistory();
+    pushHistory('Duplicate');
     const newIds: string[] = [];
     for (const id of selectedIds) {
       const obj = sceneData.objects.find((o) => o.id === id);
@@ -934,7 +1068,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
 
   const handleCADOperation = useCallback((type: CADOperationType, params: Record<string, number | string>) => {
     if (cadState.selectedObjectIds.length === 0 && type !== 'extrude') return;
-    pushCADHistory();
+    pushCADHistory('CAD Operation');
 
     if (type === 'fillet' || type === 'chamfer' || type === 'shell') {
       const targetObj = cadState.objects.find(o => cadState.selectedObjectIds.includes(o.id));
@@ -1132,7 +1266,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
                 {obj.locked ? <Lock size={12} className="text-amber-500" /> : <Unlock size={12} />}
               </button>
               <button onClick={(e) => {
-                e.stopPropagation(); pushHistory();
+                e.stopPropagation(); pushHistory('Delete Object');
                 setSceneData(prev => ({ ...prev, objects: prev.objects.filter(o => o.id !== obj.id) }));
                 if (selectedIds.has(obj.id)) setSelectedIds(prev => { const next = new Set(prev); next.delete(obj.id); return next; });
               }} className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-rose-100 hover:text-rose-600 rounded">
@@ -1170,7 +1304,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
                 {obj.locked ? <Lock size={12} className="text-amber-500" /> : <Unlock size={12} />}
               </button>
               <button onClick={(e) => {
-                e.stopPropagation(); pushCADHistory();
+                e.stopPropagation(); pushCADHistory('Delete CAD Object');
                 setCADState(s => ({ ...s, objects: s.objects.filter(o => o.id !== obj.id), selectedObjectIds: s.selectedObjectIds.filter(sid => sid !== obj.id) }));
                 if (selectedIds.has(obj.id)) setSelectedIds(prev => { const next = new Set(prev); next.delete(obj.id); return next; });
               }} className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-rose-100 hover:text-rose-600 rounded">
@@ -1231,7 +1365,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
                     <div className="text-[9px] text-slate-400 font-mono">{axis}</div>
                     <input type="number" step={0.1} value={Number(field.values[i].toFixed(2))}
                       onChange={(e) => {
-                        pushHistory();
+                        pushHistory('Transform');
                         const newValues = [...field.values] as [number, number, number];
                         newValues[i] = parseFloat(e.target.value) || 0;
                         updateObject(selectedObj.id, { [field.key]: newValues });
@@ -1255,7 +1389,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
               <span className="w-4 font-bold text-slate-400 text-center text-[10px]">{axis.toUpperCase()}</span>
               <input type="number" step={0.1} value={selectedCADObj.position[axis]}
                 onChange={e => {
-                  pushCADHistory();
+                  pushCADHistory('CAD Transform');
                   setCADState(s => ({
                     ...s, objects: s.objects.map(o => o.id === selectedCADObj.id
                       ? { ...o, position: { ...o.position, [axis]: parseFloat(e.target.value) || 0 } } : o),
@@ -1271,7 +1405,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
               <span className="w-4 font-bold text-slate-400 text-center text-[10px]">{axis.toUpperCase()}</span>
               <input type="number" step={5} value={Math.round(selectedCADObj.rotation[axis] * (180 / Math.PI))}
                 onChange={e => {
-                  pushCADHistory();
+                  pushCADHistory('CAD Transform');
                   setCADState(s => ({
                     ...s, objects: s.objects.map(o => o.id === selectedCADObj.id
                       ? { ...o, rotation: { ...o.rotation, [axis]: (parseFloat(e.target.value) || 0) * (Math.PI / 180) } } : o),
@@ -1293,7 +1427,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
                   </div>
                   <input type="range" min={param.min} max={param.max} step={param.step} value={param.value}
                     onChange={e => {
-                      pushCADHistory();
+                      pushCADHistory('CAD Parameter');
                       setCADState(s => ({
                         ...s, objects: s.objects.map(o => {
                           if (o.id !== selectedCADObj.id) return o;
@@ -2127,6 +2261,11 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
                 { key: 'Ctrl+Z', desc: 'Undo' }, { key: 'Ctrl+Y', desc: 'Redo' },
                 { key: 'Ctrl+A', desc: 'Select all' }, { key: 'Tab', desc: 'Switch modes' },
                 { key: '1-7', desc: 'Camera presets' }, { key: '?', desc: 'Show shortcuts' },
+                { key: 'Shift+X/Y/Z', desc: 'Constrain axis' }, { key: 'Shift+W', desc: 'Toggle world/local' },
+                { key: 'Escape', desc: 'Reset selection' }, { key: 'Space', desc: 'Play/pause' },
+                { key: 'Ctrl+S', desc: 'Save scene' }, { key: 'Ctrl+D', desc: 'Duplicate' },
+                { key: 'Ctrl+G', desc: 'Group' }, { key: 'Ctrl+Shift+G', desc: 'Ungroup' },
+                { key: 'Ctrl+E', desc: 'Export mode' }, { key: 'Delete', desc: 'Delete selected' },
               ].map((shortcut) => (
                 <div key={shortcut.key} className="flex items-center gap-2 py-1">
                   <kbd className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-mono font-bold min-w-[60px] text-center">

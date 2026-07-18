@@ -582,6 +582,125 @@ export const useCodeInterpreter = ({
                         stopExecution.current = true;
                     }
                     break;
+                case CommandType.GLIDE_TO_XY: {
+                    const targetX = cmd.params.x ?? spriteStateRef.current.x;
+                    const targetY = cmd.params.y ?? spriteStateRef.current.y;
+                    const dur = (cmd.params.value || 1) * 1000;
+                    const startX = spriteStateRef.current.x;
+                    const startY = spriteStateRef.current.y;
+                    const startTime = Date.now();
+                    while (Date.now() - startTime < dur && !stopExecution.current) {
+                        const t = Math.min(1, (Date.now() - startTime) / dur);
+                        spriteStateRef.current.x = startX + (targetX - startX) * t;
+                        spriteStateRef.current.y = startY + (targetY - startY) * t;
+                        await new Promise(r => setTimeout(r, 16));
+                    }
+                    break;
+                }
+                case CommandType.DISTANCE_TO: {
+                    const dist = Math.sqrt(spriteStateRef.current.x ** 2 + spriteStateRef.current.y ** 2);
+                    if (cmd.params.varName) {
+                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName] = dist;
+                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName] = dist;
+                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName] = dist;
+                    }
+                    break;
+                }
+                case CommandType.ASK_AND_WAIT: {
+                    const response = prompt(cmd.params.text || 'Enter your answer:');
+                    spriteStateRef.current.variables['answer'] = response || '';
+                    break;
+                }
+                case CommandType.ANSWER: {
+                    if (cmd.params.varName) {
+                        const ans = spriteStateRef.current.variables['answer'] || '';
+                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName] = ans;
+                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName] = ans;
+                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName] = ans;
+                    }
+                    break;
+                }
+                case CommandType.MATH_OP: {
+                    const input = Number(cmd.params.value) || 0;
+                    let result = 0;
+                    switch (cmd.params.text) {
+                        case 'sqrt': result = Math.sqrt(input); break;
+                        case 'abs': result = Math.abs(input); break;
+                        case 'floor': result = Math.floor(input); break;
+                        case 'ceil': result = Math.ceil(input); break;
+                        case 'round': result = Math.round(input); break;
+                        case 'sin': result = Math.sin(input); break;
+                        case 'cos': result = Math.cos(input); break;
+                        case 'tan': result = Math.tan(input); break;
+                        case 'log': result = Math.log(input); break;
+                        default: result = input;
+                    }
+                    if (cmd.params.varName) {
+                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName] = result;
+                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName] = result;
+                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName] = result;
+                    }
+                    break;
+                }
+                case CommandType.RANDOM_BETWEEN: {
+                    const min = Number(cmd.params.value) || 0;
+                    const max = Number(cmd.params.value2) || 100;
+                    const rand = Math.floor(Math.random() * (max - min + 1)) + min;
+                    if (cmd.params.varName) {
+                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName] = rand;
+                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName] = rand;
+                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName] = rand;
+                    }
+                    break;
+                }
+                case CommandType.STRING_CONTAINS: {
+                    const haystack = String(cmd.params.text || '');
+                    const needle = String(cmd.params.text2 || '');
+                    const found = haystack.includes(needle);
+                    if (cmd.params.varName) {
+                        if (mode === AppMode.GAME) spriteStateRef.current.variables[cmd.params.varName] = found;
+                        if (mode === AppMode.APP) appStateRef.current.variables[cmd.params.varName] = found;
+                        if (mode === AppMode.HARDWARE) hardwareStateRef.current.variables[cmd.params.varName] = found;
+                    }
+                    break;
+                }
+                case CommandType.SET_GRAVITY_STRENGTH:
+                    spriteStateRef.current.gravityForce = cmd.params.value || 0.5;
+                    break;
+                case CommandType.SET_CAMERA_TARGET:
+                    spriteStateRef.current.cameraFollow = true;
+                    break;
+                case CommandType.SWITCH_COSTUME:
+                    spriteStateRef.current.emoji = cmd.params.text || spriteStateRef.current.emoji;
+                    break;
+                case CommandType.SAY_THINK:
+                    spriteStateRef.current.speech = cmd.params.text || '';
+                    await wait((cmd.params.value || 2) * 1000 * speedMultiplier);
+                    spriteStateRef.current.speech = null;
+                    break;
+                case CommandType.GHOST_EFFECT:
+                    spriteStateRef.current.opacity = 1 - (Number(cmd.params.value) || 0) / 100;
+                    break;
+                case CommandType.COLOR_EFFECT:
+                    break;
+                case CommandType.SIZE_EFFECT:
+                    spriteStateRef.current.scale = (Number(cmd.params.value) || 100) / 100;
+                    break;
+                case CommandType.DELETE_THIS_CLONE:
+                    stopExecution.current = true;
+                    break;
+                case CommandType.WAIT_UNTIL: {
+                    while (!stopExecution.current) {
+                        if (evaluateCondition(cmd)) break;
+                        await new Promise(r => setTimeout(r, 16));
+                    }
+                    break;
+                }
+                case CommandType.PEN_DOWN:
+                case CommandType.PEN_UP:
+                case CommandType.PEN_CLEAR:
+                case CommandType.PEN_COLOR:
+                    break;
             }
         } catch (e) {
             console.error("Execution error", e);

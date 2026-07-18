@@ -716,6 +716,148 @@ const Block: React.FC<BlockProps> = ({
                         </>
                     )}
 
+                    {block.type === CommandType.GLIDE_TO_XY && (
+                        <div className="flex items-center gap-1 bg-blue-50 rounded px-2 py-1">
+                            <span className="text-xs text-blue-500 font-bold">X</span>
+                            <DebouncedInput type="number" value={block.params.x} onChange={(val) => handleParamChange('x', val)} className="w-12 bg-transparent outline-none font-mono text-sm text-blue-700" />
+                            <span className="text-xs text-blue-500 font-bold">Y</span>
+                            <DebouncedInput type="number" value={block.params.y} onChange={(val) => handleParamChange('y', val)} className="w-12 bg-transparent outline-none font-mono text-sm text-blue-700" />
+                            <span className="text-xs text-blue-500 font-bold">SEC</span>
+                            <DebouncedInput type="number" step="0.1" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-12 bg-transparent outline-none font-mono text-sm text-blue-700" />
+                        </div>
+                    )}
+                    {block.type === CommandType.POINT_TOWARDS && (
+                        <div className="flex items-center gap-1 bg-blue-50 rounded px-2 py-1">
+                            <span className="text-xs text-blue-500 font-bold">TARGET</span>
+                            <DebouncedInput value={block.params.text} onChange={(val) => handleParamChange('text', val)} className="w-20 bg-transparent outline-none text-sm text-blue-700" placeholder="object" />
+                        </div>
+                    )}
+                    {block.type === CommandType.DISTANCE_TO && (
+                        <div className="flex items-center gap-1 bg-teal-50 rounded px-2 py-1">
+                            <span className="text-xs text-teal-500 font-bold">TO</span>
+                            <DebouncedInput value={block.params.text} onChange={(val) => handleParamChange('text', val)} className="w-16 bg-transparent outline-none text-sm text-teal-700" placeholder="object" />
+                            <span className="text-xs text-teal-500 font-bold">{'\u2192'}</span>
+                            <DebouncedInput value={block.params.varName} onChange={(val) => handleParamChange('varName', val)} className="w-16 bg-white border border-teal-200 rounded px-1 py-1 text-sm font-bold text-teal-700" placeholder="saveTo" />
+                        </div>
+                    )}
+                    {block.type === CommandType.TOUCHING_COLOR && (
+                        <div className="flex items-center gap-1 bg-white border border-teal-200 rounded p-1">
+                            <input type="color" value={block.params.color || '#ff0000'} onChange={(e) => handleParamChange('color', e.target.value)} className="w-10 h-6 rounded cursor-pointer border-0 p-0" />
+                            <span className="text-xs font-mono text-teal-600">{block.params.color}</span>
+                        </div>
+                    )}
+                    {block.type === CommandType.ASK_AND_WAIT && (
+                        <DebouncedInput value={block.params.text} onChange={(val) => handleParamChange('text', val)} className="flex-1 min-w-[100px] bg-teal-50 rounded px-2 py-1 outline-none text-sm border border-teal-200 focus:ring-2 focus:ring-teal-200" placeholder="Ask something..." />
+                    )}
+                    {block.type === CommandType.ANSWER && (
+                        <div className="flex items-center gap-1 bg-teal-50 rounded px-2 py-1 border border-teal-200">
+                            <span className="text-xs text-teal-500 font-bold">{'\u2192'}</span>
+                            <DebouncedInput value={block.params.varName} onChange={(val) => handleParamChange('varName', val)} className="w-20 bg-transparent outline-none text-sm font-bold text-teal-700" placeholder="saveTo" />
+                        </div>
+                    )}
+                    {block.type === CommandType.MATH_OP && (
+                        <div className="flex items-center gap-1 bg-emerald-50 rounded px-2 py-1 border border-emerald-200">
+                            <select value={block.params.text} onChange={(e) => handleParamChange('text', e.target.value)} className="bg-transparent outline-none text-xs font-bold text-emerald-700 cursor-pointer">
+                                <option value="sqrt">sqrt</option>
+                                <option value="abs">abs</option>
+                                <option value="floor">floor</option>
+                                <option value="ceil">ceil</option>
+                                <option value="round">round</option>
+                                <option value="sin">sin</option>
+                                <option value="cos">cos</option>
+                                <option value="tan">tan</option>
+                                <option value="log">log</option>
+                            </select>
+                            <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-14 bg-white border border-emerald-200 rounded px-1 py-1 text-center font-mono text-sm text-slate-700" />
+                            <span className="text-xs text-emerald-500 font-bold">{'\u2192'}</span>
+                            <DebouncedInput value={block.params.varName} onChange={(val) => handleParamChange('varName', val)} className="w-14 bg-white border border-emerald-200 rounded px-1 py-1 text-sm font-bold text-emerald-700" placeholder="result" />
+                        </div>
+                    )}
+                    {block.type === CommandType.RANDOM_BETWEEN && (
+                        <div className="flex items-center gap-1 bg-emerald-50 rounded px-2 py-1 border border-emerald-200">
+                            <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-12 bg-white border border-emerald-200 rounded px-1 py-1 text-center font-mono text-sm" placeholder="min" />
+                            <span className="text-emerald-500 font-bold">TO</span>
+                            <DebouncedInput type="number" value={block.params.value2} onChange={(val) => handleParamChange('value2', val)} className="w-12 bg-white border border-emerald-200 rounded px-1 py-1 text-center font-mono text-sm" placeholder="max" />
+                            <span className="text-xs text-emerald-500 font-bold">{'\u2192'}</span>
+                            <DebouncedInput value={block.params.varName} onChange={(val) => handleParamChange('varName', val)} className="w-14 bg-white border border-emerald-200 rounded px-1 py-1 text-sm font-bold text-emerald-700" placeholder="result" />
+                        </div>
+                    )}
+                    {block.type === CommandType.STRING_CONTAINS && (
+                        <div className="flex items-center gap-1 bg-emerald-50 rounded px-2 py-1 border border-emerald-200">
+                            <DebouncedInput value={block.params.text} onChange={(val) => handleParamChange('text', val)} className="w-16 bg-white border border-emerald-200 rounded px-1 py-1 text-sm" placeholder="text" />
+                            <span className="text-emerald-500 font-bold text-xs">HAS</span>
+                            <DebouncedInput value={block.params.text2} onChange={(val) => handleParamChange('text2', val)} className="w-16 bg-white border border-emerald-200 rounded px-1 py-1 text-sm" placeholder="search" />
+                            <span className="text-xs text-emerald-500 font-bold">{'\u2192'}</span>
+                            <DebouncedInput value={block.params.varName} onChange={(val) => handleParamChange('varName', val)} className="w-14 bg-white border border-emerald-200 rounded px-1 py-1 text-sm font-bold text-emerald-700" placeholder="result" />
+                        </div>
+                    )}
+                    {block.type === CommandType.WAIT_UNTIL && (
+                        <div className="flex items-center gap-1 bg-white border border-violet-100 rounded px-2 py-1 shadow-sm">
+                            <select value={block.params.condition} onChange={(e) => handleParamChange('condition', e.target.value)} className="bg-transparent outline-none text-sm font-bold text-violet-700 cursor-pointer pr-2">
+                                <option value="IS_TOUCHING_EDGE">Touching Edge</option>
+                                <option value="IS_TOUCHING_ENEMY">Touching Enemy</option>
+                                <option value="IS_TOUCHING_ITEM">Touching Item</option>
+                                <option value="KEY_IS">Key Pressed</option>
+                            </select>
+                        </div>
+                    )}
+                    {block.type === CommandType.SET_GRAVITY_STRENGTH && (
+                        <div className="flex items-center gap-1 bg-blue-50 rounded px-2 py-1 border border-blue-200">
+                            <span className="text-xs text-blue-500 font-bold">FORCE</span>
+                            <DebouncedInput type="number" step="0.1" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-16 bg-transparent outline-none font-mono text-sm text-blue-700" />
+                        </div>
+                    )}
+                    {block.type === CommandType.SET_CAMERA_TARGET && (
+                        <div className="flex items-center gap-1 bg-slate-100 rounded px-2 py-1">
+                            <span className="text-xs text-slate-500 font-bold">FOLLOW</span>
+                            <DebouncedInput value={block.params.text} onChange={(val) => handleParamChange('text', val)} className="w-20 bg-transparent outline-none text-sm font-bold text-slate-700" placeholder="player" />
+                        </div>
+                    )}
+                    {block.type === CommandType.SWITCH_COSTUME && (
+                        <div className="flex items-center gap-1 bg-white border border-purple-200 rounded px-2 py-1">
+                            <select value={block.params.text} onChange={(e) => handleParamChange('text', e.target.value)} className="bg-transparent outline-none text-sm font-bold text-purple-700 cursor-pointer">
+                                <option value="default">Default</option>
+                                <option value="walk1">Walk 1</option>
+                                <option value="walk2">Walk 2</option>
+                                <option value="jump">Jump</option>
+                                <option value="hurt">Hurt</option>
+                                <option value="attack">Attack</option>
+                            </select>
+                        </div>
+                    )}
+                    {block.type === CommandType.SAY_THINK && (
+                        <div className="flex items-center gap-1 bg-white border border-purple-200 rounded px-2 py-1">
+                            <select value={block.params.message} onChange={(e) => handleParamChange('message', e.target.value)} className="bg-transparent outline-none text-xs font-bold text-purple-700 cursor-pointer">
+                                <option value="say">Say</option>
+                                <option value="think">Think</option>
+                            </select>
+                            <DebouncedInput value={block.params.text} onChange={(val) => handleParamChange('text', val)} className="flex-1 min-w-[60px] bg-transparent outline-none text-sm text-purple-700" placeholder="Text..." />
+                        </div>
+                    )}
+                    {block.type === CommandType.GHOST_EFFECT && (
+                        <div className="flex items-center gap-1 bg-purple-50 rounded px-2 py-1 border border-purple-200">
+                            <span className="text-xs text-purple-500 font-bold">%</span>
+                            <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-16 bg-transparent outline-none font-mono text-sm text-purple-700" />
+                        </div>
+                    )}
+                    {block.type === CommandType.COLOR_EFFECT && (
+                        <div className="flex items-center gap-1 bg-pink-50 rounded px-2 py-1 border border-pink-200">
+                            <span className="text-xs text-pink-500 font-bold">EFFECT</span>
+                            <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-16 bg-transparent outline-none font-mono text-sm text-pink-700" />
+                        </div>
+                    )}
+                    {block.type === CommandType.SIZE_EFFECT && (
+                        <div className="flex items-center gap-1 bg-purple-50 rounded px-2 py-1 border border-purple-200">
+                            <span className="text-xs text-purple-500 font-bold">%</span>
+                            <DebouncedInput type="number" value={block.params.value} onChange={(val) => handleParamChange('value', val)} className="w-16 bg-transparent outline-none font-mono text-sm text-purple-700" />
+                        </div>
+                    )}
+                    {block.type === CommandType.PEN_COLOR && (
+                        <div className="flex items-center gap-1 bg-white border border-green-200 rounded p-1">
+                            <input type="color" value={block.params.color || '#ff0000'} onChange={(e) => handleParamChange('color', e.target.value)} className="w-10 h-6 rounded cursor-pointer border-0 p-0" />
+                            <span className="text-xs font-mono text-green-600">{block.params.color}</span>
+                        </div>
+                    )}
                     {block.type === CommandType.IF && (
                         <>
                             <div className="flex items-center gap-1 bg-white border border-indigo-100 rounded px-2 py-1 shadow-sm">

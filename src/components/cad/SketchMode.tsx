@@ -11,6 +11,8 @@ interface SketchModeProps {
   onConstraintAdd?: (constraint: CADConstraint) => void;
 }
 
+type InternalTool = CADSketchTool | 'arc_tangent' | 'fillet' | 'offset' | 'mirror';
+
 const GRID_SPACING = 10;
 
 const CONSTRAINT_ICONS: Record<CADConstraintType, string> = {
@@ -45,6 +47,19 @@ const SketchMode: React.FC<SketchModeProps> = ({
   const [activeConstraint, setActiveConstraint] = useState<CADConstraintType | null>(null);
   const [constraints, setConstraints] = useState<CADConstraint[]>([]);
   const [dimensionValue, setDimensionValue] = useState<string>('');
+  const [internalTool, setInternalTool] = useState<InternalTool>('select');
+  const [filletRadius, setFilletRadius] = useState<number>(20);
+  const [offsetDistance, setOffsetDistance] = useState<number>(10);
+  const [mirrorAxis, setMirrorAxis] = useState<'x' | 'y'>('x');
+  const [filletShape1, setFilletShape1] = useState<string | null>(null);
+  const [filletShape2, setFilletShape2] = useState<string | null>(null);
+  const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
+  const [offsetPreview, setOffsetPreview] = useState<CADPoint[] | null>(null);
+  const [mirrorPreview, setMirrorPreview] = useState<CADPoint[] | null>(null);
+
+  const effectiveTool: InternalTool = internalTool !== 'select' && internalTool !== activeTool
+    ? internalTool
+    : (activeTool as InternalTool);
 
   const screenToWorld = useCallback((sx: number, sy: number): CADPoint => {
     return {
@@ -91,6 +106,113 @@ const SketchMode: React.FC<SketchModeProps> = ({
   }, []);
 
   const generateId = () => Math.random().toString(36).substring(2, 10);
+
+  const computeTangentArc = useCallback((startPt: CADPoint, endPt: CADPoint, midPt: CADPoint): { center: CADPoint; radius: number; startAngle: number; endAngle: number } | null => {
+    const ax = startPt.x - midPt.x;
+    const ay = startPt.y - midPt.y;
+    const bx = endPt.x - midPt.x;
+    const by = endPt.y - midPt.y;
+    const lenA = Math.sqrt(ax * ax + ay * ay);
+    const lenB = Math.sqrt(bx * bx + by * by);
+    if (lenA < 1 || lenB < 1) return null;
+    const nx = ax / lenA;
+    const ny = ay / lenA;
+    const bx2 = endPt.x - startPt.x;
+    const by2 = endPt.y - startPt.y;
+    const len2 = Math.sqrt(bx2 * bx2 + by2 * by2);
+    if (len2 < 1) return null;
+    const mx = (startPt.x + endPt.x) / 2;
+    const my = (startPt.y + endPt.y) / 2;
+    const radius = len2 / 2;
+    const center = { x: mx + ny * radius * 0.5, y: my - nx * radius * 0.5, id: '' };
+    const startAngle = Math.atan2(startPt.y - center.y, startPt.x - center.x);
+    const endAngle = Math.atan2(endPt.y - center.y, endPt.x - center.x);
+    return { center, radius, startAngle, endAngle };
+  }, []);
+
+  const computeFilletArc = useCallback((l1Start: CADPoint, l1End: CADPoint, l2Start: CADPoint, l2End: CADPoint, radius: number): { center: CADPoint; radius: number; startAngle: number; endAngle: number; trimmed1End: CADPoint; trimmed2Start: CADPoint } | null => {
+    const dx1 = l1End.x - l1Start.x;
+    const dy1 = l1End.y - l1Start.y;
+    const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+    if (len1 < 1) return null;
+    const ux1 = dx1 / len1;
+    const uy1 = dy1 / len1;
+    const dx2 = l2End.x - l2Start.x;
+    const dy2 = l2End.y - l2Start.y;
+    const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+    if (len2 < 1) return null;
+    const ux2 = dx2 / len2;
+    const uy2 = dy2 / len2;
+    const ix = l1End.x;
+    const iy = l1End.y;
+    const t1 = radius / Math.sqrt(1 - (ux1 * ux2 + uy1 * uy2) ** 2 || 1);
+    const trimmed1End = { x: ix - ux1 * t1, y: iy - uy1 * t1, id: '' };
+    const trimmed2Start = { x: ix + ux2 * t1, y: iy + uy2 * t1, id: '' };
+    const nx1 = -uy1;
+    const ny1 = ux1;
+    const nx2 = -uy2;
+    const ny2 = ux2;
+    const cx = trimmed1End.x + nx1 * radius;
+    const cy = trimmed1End.y + ny1 * radius;
+    const center = { x: cx, y: cy, id: '' };
+    const startAngle = Math.atan2(trimmed1End.y - cy, trimmed1End.x - cx);
+    const endAngle = Math.atan2(trimmed2Start.y - cy, trimmed2Start.x - cx);
+    return { center, radius, startAngle, endAngle, trimmed1End, trimmed2Start };
+  }, []);
+
+  const computeOffsetPolygon = useCallback((points: CADPoint[], dist: number): CADPoint[] => {
+    if (points.length < 3) return [];
+    const result: CADPoint[] = [];
+    for (let i = 0; i < points.length; i++) {
+      const prev = points[(i - 1 + points.length) % points.length];
+      const curr = points[i];
+      const next = points[(i + 1) % points.length];
+      const dx1 = curr.x - prev.x;
+      const dy1 = curr.y - prev.y;
+      const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+      if (len1 < 1) { result.push({ ...curr }); continue; }
+      const nx1 = -dy1 / len1 * dist;
+      const ny1 = dx1 / len1 * dist;
+      const dx2 = next.x - curr.x;
+      const dy2 = next.y - curr.y;
+      const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+      if (len2 < 1) { result.push({ ...curr }); continue; }
+      const nx2 = -dy2 / len2 * dist;
+      const ny2 = dx2 / len2 * dist;
+      const mx = (nx1 + nx2) / 2;
+      const my = (ny1 + ny2) / 2;
+      const mLen = Math.sqrt(mx * mx + my * my);
+      if (mLen < 0.001) {
+        result.push({ x: curr.x + nx1, y: curr.y + ny1, id: '' });
+      } else {
+        const d = dist / Math.cos(Math.atan2(my, mx) - Math.atan2(ny1, nx1));
+        result.push({ x: curr.x + mx / mLen * d, y: curr.y + my / mLen * d, id: '' });
+      }
+    }
+    return result;
+  }, []);
+
+  const computeOffsetLine = useCallback((start: CADPoint, end: CADPoint, dist: number): { start: CADPoint; end: CADPoint } => {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 1) return { start, end };
+    const nx = -dy / len * dist;
+    const ny = dx / len * dist;
+    return {
+      start: { x: start.x + nx, y: start.y + ny, id: '' },
+      end: { x: end.x + nx, y: end.y + ny, id: '' },
+    };
+  }, []);
+
+  const computeMirrorPoints = useCallback((points: CADPoint[], axis: 'x' | 'y'): CADPoint[] => {
+    return points.map(p => ({
+      ...p,
+      x: axis === 'y' ? -p.x : p.x,
+      y: axis === 'x' ? -p.y : p.y,
+      id: '',
+    }));
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -140,7 +262,9 @@ const SketchMode: React.FC<SketchModeProps> = ({
 
     if (sketch) {
       sketch.shapes.forEach(shape => {
-        drawShape(ctx, shape, false);
+        const isHovered = effectiveTool === 'fillet' && (filletShape1 === shape.data.id || filletShape2 === shape.data.id) ||
+          effectiveTool === 'mirror' && selectedShapes.includes(shape.data.id);
+        drawShape(ctx, shape, isHovered);
       });
     }
 
@@ -210,6 +334,63 @@ const SketchMode: React.FC<SketchModeProps> = ({
       }
     }
 
+    if (effectiveTool === 'arc_tangent' && points.length === 1) {
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2 / zoom;
+      ctx.setLineDash([4 / zoom, 4 / zoom]);
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      if (hoveredPoint) {
+        ctx.lineTo(hoveredPoint.x, hoveredPoint.y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    if (effectiveTool === 'arc_tangent' && points.length === 2) {
+      const prevShape = sketch?.shapes.filter(s => s.type === 'line').pop();
+      if (prevShape && prevShape.type === 'line') {
+        const arc = computeTangentArc(prevShape.data.end, points[1], points[0]);
+        if (arc) {
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 2 / zoom;
+          ctx.setLineDash([4 / zoom, 4 / zoom]);
+          ctx.beginPath();
+          ctx.arc(arc.center.x, arc.center.y, arc.radius, arc.startAngle, arc.endAngle);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+    }
+
+    if (effectiveTool === 'offset' && offsetPreview) {
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2 / zoom;
+      ctx.setLineDash([6 / zoom, 4 / zoom]);
+      ctx.beginPath();
+      ctx.moveTo(offsetPreview[0].x, offsetPreview[0].y);
+      for (let i = 1; i < offsetPreview.length; i++) {
+        ctx.lineTo(offsetPreview[i].x, offsetPreview[i].y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    if (effectiveTool === 'mirror' && mirrorPreview) {
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2 / zoom;
+      ctx.setLineDash([6 / zoom, 4 / zoom]);
+      ctx.beginPath();
+      ctx.moveTo(mirrorPreview[0].x, mirrorPreview[0].y);
+      for (let i = 1; i < mirrorPreview.length; i++) {
+        ctx.lineTo(mirrorPreview[i].x, mirrorPreview[i].y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
     ctx.restore();
 
     if (dragStart) {
@@ -227,7 +408,7 @@ const SketchMode: React.FC<SketchModeProps> = ({
       const sy = hoveredPoint.y * zoom + pan.y;
       drawPointMarker(ctx, sx, sy, '#22d3ee');
     }
-  }, [sketch, points, dragStart, dragCurrent, pan, zoom, hoveredPoint, activeTool, constraints]);
+  }, [sketch, points, dragStart, dragCurrent, pan, zoom, hoveredPoint, activeTool, constraints, effectiveTool, filletShape1, filletShape2, selectedShapes, offsetPreview, mirrorPreview]);
 
   const drawShape = (ctx: CanvasRenderingContext2D, shape: CADSketchShape, _hover: boolean) => {
     ctx.strokeStyle = shape.data.isConstruction ? '#94a3b8' : '#06b6d4';
@@ -328,6 +509,63 @@ const SketchMode: React.FC<SketchModeProps> = ({
     ctx.textAlign = 'left';
   };
 
+  const hitTestShape = useCallback((worldPt: CADPoint): CADSketchShape | null => {
+    if (!sketch) return null;
+    const threshold = 10 / zoom;
+    for (const shape of sketch.shapes) {
+      switch (shape.type) {
+        case 'line': {
+          const dx = shape.data.end.x - shape.data.start.x;
+          const dy = shape.data.end.y - shape.data.start.y;
+          const lenSq = dx * dx + dy * dy;
+          if (lenSq < 1) continue;
+          let t = ((worldPt.x - shape.data.start.x) * dx + (worldPt.y - shape.data.start.y) * dy) / lenSq;
+          t = Math.max(0, Math.min(1, t));
+          const px = shape.data.start.x + t * dx;
+          const py = shape.data.start.y + t * dy;
+          const dist = Math.sqrt((worldPt.x - px) ** 2 + (worldPt.y - py) ** 2);
+          if (dist < threshold) return shape;
+          break;
+        }
+        case 'circle': {
+          const dist = Math.sqrt((worldPt.x - shape.data.center.x) ** 2 + (worldPt.y - shape.data.center.y) ** 2);
+          if (Math.abs(dist - shape.data.radius) < threshold) return shape;
+          break;
+        }
+        case 'rectangle': {
+          const x1 = Math.min(shape.data.corner1.x, shape.data.corner2.x);
+          const y1 = Math.min(shape.data.corner1.y, shape.data.corner2.y);
+          const x2 = Math.max(shape.data.corner1.x, shape.data.corner2.x);
+          const y2 = Math.max(shape.data.corner1.y, shape.data.corner2.y);
+          const onTop = Math.abs(worldPt.y - y1) < threshold && worldPt.x >= x1 && worldPt.x <= x2;
+          const onBottom = Math.abs(worldPt.y - y2) < threshold && worldPt.x >= x1 && worldPt.x <= x2;
+          const onLeft = Math.abs(worldPt.x - x1) < threshold && worldPt.y >= y1 && worldPt.y <= y2;
+          const onRight = Math.abs(worldPt.x - x2) < threshold && worldPt.y >= y1 && worldPt.y <= y2;
+          if (onTop || onBottom || onLeft || onRight) return shape;
+          break;
+        }
+        case 'polygon': {
+          for (let i = 0; i < shape.data.points.length; i++) {
+            const a = shape.data.points[i];
+            const b = shape.data.points[(i + 1) % shape.data.points.length];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const lenSq = dx * dx + dy * dy;
+            if (lenSq < 1) continue;
+            let t = ((worldPt.x - a.x) * dx + (worldPt.y - a.y) * dy) / lenSq;
+            t = Math.max(0, Math.min(1, t));
+            const px = a.x + t * dx;
+            const py = a.y + t * dy;
+            const dist = Math.sqrt((worldPt.x - px) ** 2 + (worldPt.y - py) ** 2);
+            if (dist < threshold) return shape;
+          }
+          break;
+        }
+      }
+    }
+    return null;
+  }, [sketch, zoom]);
+
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -340,6 +578,105 @@ const SketchMode: React.FC<SketchModeProps> = ({
 
     const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
     const snapped = shiftHeld ? snapToHorizontalVertical(points[points.length - 1] || { x: 0, y: 0, id: '' }, world) : snapToGrid(world);
+
+    if (effectiveTool === 'fillet') {
+      const hit = hitTestShape(snapped);
+      if (hit) {
+        if (!filletShape1) {
+          setFilletShape1(hit.data.id);
+        } else if (filletShape2) {
+          return;
+        } else if (hit.data.id !== filletShape1) {
+          setFilletShape2(hit.data.id);
+          const s1 = sketch?.shapes.find(s => s.data.id === filletShape1);
+          if (s1 && s1.type === 'line' && hit.type === 'line') {
+            const arc = computeFilletArc(
+              s1.data.start, s1.data.end,
+              hit.data.start, hit.data.end,
+              filletRadius
+            );
+            if (arc) {
+              onShapeAdd({
+                type: 'arc',
+                data: {
+                  center: arc.center,
+                  radius: arc.radius,
+                  startAngle: arc.startAngle,
+                  endAngle: arc.endAngle,
+                  id: generateId(),
+                  isConstruction: false,
+                },
+              });
+              onShapeRemove(s1.data.id);
+              onShapeRemove(hit.data.id);
+              onShapeAdd({
+                type: 'line',
+                data: {
+                  start: { ...s1.data.start, id: generateId() },
+                  end: { ...arc.trimmed1End, id: generateId() },
+                  id: generateId(),
+                  isConstruction: s1.data.isConstruction,
+                },
+              });
+              onShapeAdd({
+                type: 'line',
+                data: {
+                  start: { ...arc.trimmed2Start, id: generateId() },
+                  end: { ...hit.data.end, id: generateId() },
+                  id: generateId(),
+                  isConstruction: hit.data.isConstruction,
+                },
+              });
+            }
+          }
+          setFilletShape1(null);
+          setFilletShape2(null);
+        }
+        return;
+      }
+    }
+
+    if (effectiveTool === 'mirror') {
+      const hit = hitTestShape(snapped);
+      if (hit) {
+        setSelectedShapes(prev => {
+          if (prev.includes(hit.data.id)) return prev.filter(id => id !== hit.data.id);
+          return [...prev, hit.data.id];
+        });
+        return;
+      }
+    }
+
+    if (effectiveTool === 'arc_tangent') {
+      if (points.length === 0) {
+        const prevLine = sketch?.shapes.filter(s => s.type === 'line').pop();
+        if (prevLine && prevLine.type === 'line') {
+          setPoints([prevLine.data.end]);
+        }
+      } else if (points.length === 1) {
+        setPoints(prev => [...prev, snapped]);
+      } else if (points.length === 2) {
+        const prevLine = sketch?.shapes.filter(s => s.type === 'line').pop();
+        if (prevLine && prevLine.type === 'line') {
+          const arc = computeTangentArc(prevLine.data.end, points[1], snapped);
+          if (arc) {
+            onShapeAdd({
+              type: 'arc',
+              data: {
+                center: arc.center,
+                radius: arc.radius,
+                startAngle: arc.startAngle,
+                endAngle: arc.endAngle,
+                id: generateId(),
+                isConstruction: false,
+              },
+            });
+          }
+        }
+        setPoints([]);
+      }
+      return;
+    }
 
     if (activeTool === 'rectangle' || activeTool === 'circle') {
       setDragStart(snapped);
@@ -372,6 +709,29 @@ const SketchMode: React.FC<SketchModeProps> = ({
     const snapped = snapToGrid(world);
     setHoveredPoint(snapped);
 
+    if (effectiveTool === 'offset' && sketch) {
+      const hit = hitTestShape(snapped);
+      if (hit && hit.type === 'polygon') {
+        setOffsetPreview(computeOffsetPolygon(hit.data.points, offsetDistance));
+      } else {
+        setOffsetPreview(null);
+      }
+    }
+
+    if (effectiveTool === 'mirror' && selectedShapes.length > 0 && sketch) {
+      const allPoints: CADPoint[] = [];
+      sketch.shapes.forEach(shape => {
+        if (selectedShapes.includes(shape.data.id)) {
+          if (shape.type === 'polygon') allPoints.push(...shape.data.points);
+          else if (shape.type === 'line') { allPoints.push(shape.data.start); allPoints.push(shape.data.end); }
+          else if (shape.type === 'rectangle') { allPoints.push(shape.data.corner1); allPoints.push(shape.data.corner2); }
+          else if (shape.type === 'circle') allPoints.push(shape.data.center);
+        }
+      });
+      if (allPoints.length > 0) setMirrorPreview(computeMirrorPoints(allPoints, mirrorAxis));
+      else setMirrorPreview(null);
+    }
+
     if (dragStart) {
       if (shiftHeld || activeConstraint === 'horizontal' || activeConstraint === 'vertical') {
         const constrained = activeConstraint === 'horizontal'
@@ -394,6 +754,79 @@ const SketchMode: React.FC<SketchModeProps> = ({
 
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
+
+    if (effectiveTool === 'offset' && offsetPreview) {
+      const world = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+      const hit = hitTestShape(world);
+      if (hit && hit.type === 'polygon') {
+        onShapeAdd({
+          type: 'polygon',
+          data: {
+            points: [...offsetPreview],
+            id: generateId(),
+            isConstruction: false,
+            closed: hit.data.closed,
+          },
+        });
+      }
+      setOffsetPreview(null);
+      return;
+    }
+
+    if (effectiveTool === 'mirror' && selectedShapes.length > 0 && sketch) {
+      selectedShapes.forEach(shapeId => {
+        const shape = sketch.shapes.find(s => s.data.id === shapeId);
+        if (!shape) return;
+        if (shape.type === 'polygon') {
+          const mirrored = computeMirrorPoints(shape.data.points, mirrorAxis);
+          onShapeAdd({
+            type: 'polygon',
+            data: {
+              points: mirrored,
+              id: generateId(),
+              isConstruction: shape.data.isConstruction,
+              closed: shape.data.closed,
+            },
+          });
+        } else if (shape.type === 'line') {
+          const mirrored = computeMirrorPoints([shape.data.start, shape.data.end], mirrorAxis);
+          onShapeAdd({
+            type: 'line',
+            data: {
+              start: { ...mirrored[0], id: generateId() },
+              end: { ...mirrored[1], id: generateId() },
+              id: generateId(),
+              isConstruction: shape.data.isConstruction,
+            },
+          });
+        } else if (shape.type === 'rectangle') {
+          const mirrored = computeMirrorPoints([shape.data.corner1, shape.data.corner2], mirrorAxis);
+          onShapeAdd({
+            type: 'rectangle',
+            data: {
+              corner1: { ...mirrored[0], id: generateId() },
+              corner2: { ...mirrored[1], id: generateId() },
+              id: generateId(),
+              isConstruction: shape.data.isConstruction,
+            },
+          });
+        } else if (shape.type === 'circle') {
+          const mirrored = computeMirrorPoints([shape.data.center], mirrorAxis);
+          onShapeAdd({
+            type: 'circle',
+            data: {
+              center: { ...mirrored[0], id: generateId() },
+              radius: shape.data.radius,
+              id: generateId(),
+              isConstruction: shape.data.isConstruction,
+            },
+          });
+        }
+      });
+      setSelectedShapes([]);
+      setMirrorPreview(null);
+      return;
+    }
 
     if (dragStart && dragCurrent) {
       if (activeTool === 'rectangle') {
@@ -488,6 +921,12 @@ const SketchMode: React.FC<SketchModeProps> = ({
         setDragStart(null);
         setDragCurrent(null);
         setActiveConstraint(null);
+        setInternalTool('select');
+        setFilletShape1(null);
+        setFilletShape2(null);
+        setSelectedShapes([]);
+        setOffsetPreview(null);
+        setMirrorPreview(null);
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (points.length > 0) {
@@ -513,14 +952,42 @@ const SketchMode: React.FC<SketchModeProps> = ({
           {(['select', 'line', 'rectangle', 'circle', 'polygon'] as CADSketchTool[]).map(tool => (
             <button
               key={tool}
-              onClick={() => onToolChange(tool)}
+              onClick={() => { onToolChange(tool); setInternalTool('select'); setFilletShape1(null); setFilletShape2(null); setSelectedShapes([]); }}
               className={`px-2 py-1 rounded-md text-[10px] font-bold transition-colors ${
-                activeTool === tool
+                activeTool === tool && internalTool === 'select'
                   ? 'bg-cyan-500 text-white'
                   : 'hover:bg-slate-100 text-slate-600'
               }`}
             >
               {tool === 'select' ? '↖' : tool === 'line' ? '/' : tool === 'rectangle' ? '▭' : tool === 'circle' ? '○' : '⬠'}
+            </button>
+          ))}
+          {([
+            { key: 'arc_tangent', label: '⌒', title: 'Tangent Arc' },
+            { key: 'fillet', label: '⌐', title: 'Fillet' },
+            { key: 'offset', label: '⇌', title: 'Offset' },
+            { key: 'mirror', label: '∣', title: 'Mirror' },
+          ] as const).map(item => (
+            <button
+              key={item.key}
+              onClick={() => {
+                setInternalTool(item.key);
+                onToolChange('select' as CADSketchTool);
+                setSelectedShapes([]);
+                setFilletShape1(null);
+                setFilletShape2(null);
+                setOffsetPreview(null);
+                setMirrorPreview(null);
+                setPoints([]);
+              }}
+              className={`px-2 py-1 rounded-md text-[10px] font-bold transition-colors ${
+                effectiveTool === item.key
+                  ? 'bg-amber-500 text-white'
+                  : 'hover:bg-slate-100 text-slate-600'
+              }`}
+              title={item.title}
+            >
+              {item.label}
             </button>
           ))}
         </div>
@@ -542,6 +1009,47 @@ const SketchMode: React.FC<SketchModeProps> = ({
           ))}
         </div>
 
+        {effectiveTool === 'fillet' && (
+          <div className="flex items-center gap-1 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1">
+            <label className="text-[10px] text-slate-500">R:</label>
+            <input
+              type="number"
+              value={filletRadius}
+              onChange={e => setFilletRadius(Number(e.target.value))}
+              className="w-12 text-[10px] border border-slate-300 rounded px-1 py-0.5"
+            />
+          </div>
+        )}
+
+        {effectiveTool === 'offset' && (
+          <div className="flex items-center gap-1 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1">
+            <label className="text-[10px] text-slate-500">D:</label>
+            <input
+              type="number"
+              value={offsetDistance}
+              onChange={e => setOffsetDistance(Number(e.target.value))}
+              className="w-12 text-[10px] border border-slate-300 rounded px-1 py-0.5"
+            />
+          </div>
+        )}
+
+        {effectiveTool === 'mirror' && (
+          <div className="flex items-center gap-1 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1">
+            <button
+              onClick={() => setMirrorAxis('x')}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${mirrorAxis === 'x' ? 'bg-purple-500 text-white' : 'hover:bg-slate-100 text-slate-600'}`}
+            >
+              X
+            </button>
+            <button
+              onClick={() => setMirrorAxis('y')}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${mirrorAxis === 'y' ? 'bg-purple-500 text-white' : 'hover:bg-slate-100 text-slate-600'}`}
+            >
+              Y
+            </button>
+          </div>
+        )}
+
         <button
           onClick={onClose}
           className="px-2 py-1 bg-white rounded-lg shadow-md border border-slate-200 text-[10px] font-bold text-slate-600 hover:text-red-500 transition-colors"
@@ -551,12 +1059,30 @@ const SketchMode: React.FC<SketchModeProps> = ({
       </div>
 
       <div className="absolute top-2 right-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
-        {(zoom * 100).toFixed(0)}% | {activeTool} {shiftHeld ? '| Snap' : ''} {activeConstraint ? `| ${activeConstraint}` : ''}
+        {(zoom * 100).toFixed(0)}% | {effectiveTool} {shiftHeld ? '| Snap' : ''} {activeConstraint ? `| ${activeConstraint}` : ''}
       </div>
 
-      {points.length > 0 && (
+      {points.length > 0 && effectiveTool === 'arc_tangent' && (
+        <div className="absolute bottom-2 left-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
+          Click to place tangent arc endpoint | ESC to cancel
+        </div>
+      )}
+
+      {points.length > 0 && effectiveTool !== 'arc_tangent' && (
         <div className="absolute bottom-2 left-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
           Click to add points | Double-click to close | ESC to cancel | {points.length} points
+        </div>
+      )}
+
+      {effectiveTool === 'fillet' && filletShape1 && !filletShape2 && (
+        <div className="absolute bottom-2 left-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
+          Click second adjacent line to create fillet
+        </div>
+      )}
+
+      {effectiveTool === 'mirror' && selectedShapes.length > 0 && (
+        <div className="absolute bottom-2 left-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
+          {selectedShapes.length} shapes selected | Click shapes to toggle
         </div>
       )}
 

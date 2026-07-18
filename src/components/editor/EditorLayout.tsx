@@ -10,7 +10,7 @@ import FirstRunTour from '../FirstRunTour';
 import { STARTER_TEMPLATES } from '../../constants/templates/starter';
 import { trackFeatureUse } from '../../services/kidcodeAnalytics';
 const Stage3D = React.lazy(() => import('../Stage3D'));
-const Scene3DEditor = React.lazy(() => import('../Scene3DEditor'));
+const UnifiedDesignStudio = React.lazy(() => import('../UnifiedDesignStudio'));
 const VariableMonitor = React.lazy(() => import('../VariableMonitor'));
 import type { Stage3DHandle } from '../Stage3D';
 import type { useEditorController } from '../../hooks/useEditorController';
@@ -33,7 +33,7 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
     const [isCollaborating, setIsCollaborating] = useState(false);
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
     const [mobileView, setMobileView] = useState<'blocks' | 'preview'>('blocks');
-    const [showScene3DEditor, setShowScene3DEditor] = useState(false);
+    const [showUnifiedStudio, setShowUnifiedStudio] = useState(false);
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
 
@@ -295,10 +295,10 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                                         />
                                     </React.Suspense>
                                     <button
-                                        onClick={() => setShowScene3DEditor(true)}
+                                        onClick={() => setShowUnifiedStudio(true)}
                                         className="absolute top-3 right-3 px-3 py-1.5 bg-violet-600 text-white text-xs font-bold rounded-lg hover:bg-violet-700 transition-colors shadow-lg z-10"
                                     >
-                                        Open Editor
+                                        Open 3D Studio
                                     </button>
                                 </div>
                             ) : (
@@ -362,14 +362,14 @@ const EditorLayout: React.FC<EditorLayoutProps> = React.memo((props) => {
                 activeView={mobileView}
             />
 
-            {showScene3DEditor && (
+            {showUnifiedStudio && (
                 <React.Suspense fallback={
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-100">
                         <div className="w-10 h-10 border-4 border-slate-200 rounded-full border-t-violet-500 animate-spin" />
                     </div>
                 }>
-                    <Scene3DEditor
-                        onClose={() => setShowScene3DEditor(false)}
+                    <UnifiedDesignStudio
+                        onClose={() => setShowUnifiedStudio(false)}
                         onSave={(data) => {
                             const json = JSON.stringify(data);
                             console.log('Scene saved:', json.length, 'bytes');

@@ -293,3 +293,31 @@ export function trackProjectViewed(projectId: string): void {
 export function trackCommentAdded(projectId: string): void {
   trackFeatureUse('comment_added');
 }
+
+// ═══════════════════════════════════════════════════════════
+// ACHIEVEMENT & CHALLENGE TRACKING
+// ═══════════════════════════════════════════════════════════
+
+export function trackBlockPlaced(blockType: string): void {
+  trackBlockUsage(blockType, 'achievement');
+}
+
+export function trackProjectCreated(mode: string): void {
+  trackFeatureUse('project_created');
+  trackFeatureUse(`project_created_${mode}`);
+}
+
+export function trackChallengeCompleted(challengeId: string, timeSpent: number): void {
+  trackFeatureUse('challenge_completed');
+  trackFeatureUse(`challenge_completed_${challengeId}`);
+}
+
+export function trackExportMade(format: string): void {
+  trackFeatureUse('export_made');
+  trackFeatureUse(`export_made_${format}`);
+}
+
+export function trackModeAttempted(mode: string): void {
+  trackFeatureUse('mode_attempted');
+  trackFeatureUse(`mode_attempted_${mode}`);
+}

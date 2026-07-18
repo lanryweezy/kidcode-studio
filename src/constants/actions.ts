@@ -50,6 +50,9 @@ export const STORAGE_KEYS = {
     USER_PROFILE: 'kidcode_user_profile',
     COMPONENTS: 'kidcode_components',
     WEEKLY_QUESTS: 'kidcode_weekly_quests',
+    PROGRESS: 'kidcode_progress',
+    USER_STATS: 'kidcode_user_stats',
+    ACHIEVEMENTS_DATA: 'kidcode_achievements_data',
 } as const;
 
 export const BLOCK_CATEGORIES = {

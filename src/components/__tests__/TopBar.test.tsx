@@ -4,11 +4,16 @@ import React from 'react';
 import TopBar from '../TopBar';
 import { AppMode } from '../../types';
 
-const mockUseStore = vi.fn();
-
-vi.mock('../../store/useStore', () => ({
-  useStore: (...args: unknown[]) => mockUseStore(...args),
+const { mockUseStore, mockGetState } = vi.hoisted(() => ({
+  mockUseStore: vi.fn(),
+  mockGetState: vi.fn(() => ({ userProfile: { level: 1, coins: 0 } })),
 }));
+
+vi.mock('../../store/useStore', () => {
+  const fn = (...args: unknown[]) => mockUseStore(...args);
+  (fn as any).getState = mockGetState;
+  return { useStore: fn };
+});
 
 vi.mock('../../components/ui/Toast', () => ({
   useToast: vi.fn(() => ({

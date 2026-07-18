@@ -30,6 +30,7 @@ import {
     TrendingUp,
     Heart,
     Eye,
+    Target,
 } from 'lucide-react';
 import { SkeletonCard } from './ui/Skeleton';
 import { STORAGE_KEYS } from '../constants/actions';
@@ -37,6 +38,9 @@ import { getStudios, Studio } from '../services/studioService';
 import { GalleryProject } from '../types/gallery';
 import { getTrendingProjects, initGalleryWithSamples } from '../services/galleryService';
 import { getSampleProjects } from '../constants/sampleProjects';
+import ChallengePanel from './ChallengePanel';
+import { DailyChallenge } from '../constants/dailyChallenges';
+import { completeChallenge, validateChallenge } from '../services/challengeService';
 
 const SCATTERED_ROTATIONS = [-2, 1.5, -0.8, 2, -1.2];
 const SCATTERED_OFFSETS = [
@@ -93,6 +97,8 @@ const HomeScreen: React.FC = () => {
     const [onboardingDismissed, setOnboardingDismissed] = React.useState(() => {
         return localStorage.getItem(STORAGE_KEYS.ONBOARDING_DISMISSED) === 'true';
     });
+    const [showChallenges, setShowChallenges] = React.useState(false);
+    const [activeChallenge, setActiveChallenge] = React.useState<DailyChallenge | null>(null);
 
     const isReturningUser = recentProjects.length > 0;
     const isFirstVisit = !localStorage.getItem('kidcode_has_visited');
@@ -125,6 +131,19 @@ const HomeScreen: React.FC = () => {
         setOnboardingDismissed(true);
         localStorage.setItem(STORAGE_KEYS.ONBOARDING_DISMISSED, 'true');
     };
+
+    const handleStartChallenge = React.useCallback((challenge: DailyChallenge) => {
+        setShowChallenges(false);
+        setActiveChallenge(challenge);
+        const starter = STARTER_TEMPLATES[challenge.mode] || STARTER_TEMPLATES[AppMode.GAME];
+        const newProj = createNewProject(challenge.mode);
+        newProj.name = challenge.title;
+        newProj.data.commands = starter.commands.map(c => ({ ...c, id: window.crypto.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).substring(2, 11) }));
+        if (starter.circuitComponents) {
+            newProj.data.circuitComponents = starter.circuitComponents as CircuitComponent[];
+        }
+        setProject(newProj);
+    }, [setProject]);
 
     const onboardingSteps = [
         { label: 'Choose a mode', description: 'Pick App, Game, or Hardware', done: false },
@@ -325,6 +344,21 @@ const HomeScreen: React.FC = () => {
                         <div className="text-left">
                             <h3 className="text-2xl font-black mb-0.5">Start Building Now</h3>
                             <p className="text-sm opacity-90 font-medium">No setup needed — jump right in!</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div className="mb-8">
+                    <button
+                        onClick={() => setShowChallenges(true)}
+                        className="w-full p-5 rounded-3xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-center gap-4 shadow-xl hover:scale-[1.02] transition-all duration-300 group sculpted-lg"
+                    >
+                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
+                            <Target size={24} />
+                        </div>
+                        <div className="text-left">
+                            <h3 className="text-xl font-black mb-0.5">Daily Challenges</h3>
+                            <p className="text-sm opacity-90 font-medium">Earn XP, coins, and badges!</p>
                         </div>
                     </button>
                 </div>
@@ -601,6 +635,13 @@ const HomeScreen: React.FC = () => {
                 </div>
             )}
             </>)}
+
+            {showChallenges && (
+                <ChallengePanel
+                    onStartChallenge={handleStartChallenge}
+                    onClose={() => setShowChallenges(false)}
+                />
+            )}
         </div>
     );
 };

@@ -16,6 +16,8 @@ import { diagnoseCode } from '../services/errorDiagnosis';
 import { ErrorDiagnosisHelp } from '../components/ErrorDiagnosisHelp';
 import { useToast } from './ui/Toast';
 import { SavedProject } from '../services/storageService';
+import { getChallengeProgress } from '../services/challengeService';
+import { getUnlockedCount, getTotalAchievementCount } from '../services/achievementService';
 
 interface TopBarProps {
   isPlaying: boolean;
@@ -300,6 +302,12 @@ const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <div className="flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-bold text-slate-600 mr-2">
+          <span className="text-amber-500">⭐</span>
+          <span>LVL {useStore.getState().userProfile?.level || 1}</span>
+          <span className="text-slate-400">|</span>
+          <span className="text-emerald-500">🪙 {getChallengeProgress().totalCoinsEarned}</span>
+        </div>
         <button onClick={undo} className="p-2.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 hidden sm:flex" title={t('topbar.undo')} aria-label="Undo"><Undo2 size={16} /></button>
         <button onClick={redo} className="p-2.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 hidden sm:flex" title={t('topbar.redo')} aria-label="Redo"><Redo2 size={16} /></button>
 

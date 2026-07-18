@@ -39,6 +39,7 @@ import TycoonOverlay from './components/editor/TycoonOverlay';
 const CADLayout = React.lazy(() => import('./components/cad/CADLayout'));
 
 const MatterPhysicsLazy = React.lazy(() => import('./components/MatterPhysicsBridge'));
+import AchievementPopup from './components/AchievementPopup';
 
 const LoadingScreen: React.FC = () => {
     const [msgIdx, setMsgIdx] = useState(0);
@@ -167,6 +168,7 @@ const AppInner: React.FC = () => {
                     onDelete={handleContextMenuDelete}
                 />
             )}
+            <AchievementPopup />
         </div>
     );
 };

@@ -61,6 +61,7 @@ export interface UISlice {
     showStudioManager: boolean;
     showStudioDetail: string | null;
     showAddToStudio: string | null;
+    showChallenges: boolean;
 
     // UI/UX Enhancements for Kids
     customAccentColor: string;
@@ -122,6 +123,7 @@ export interface UISlice {
     setShowStudioManager: (show: boolean) => void;
     setShowStudioDetail: (studioId: string | null) => void;
     setShowAddToStudio: (projectId: string | null) => void;
+    setShowChallenges: (show: boolean) => void;
 
     // UI/UX Actions
     setCustomAccentColor: (color: string) => void;
@@ -189,6 +191,7 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     showStudioManager: false,
     showStudioDetail: null,
     showAddToStudio: null,
+    showChallenges: false,
     customAccentColor: '#8b5cf6', // Default violet-500
     showJoyride: false,
     workspaceZoom: 1,
@@ -249,6 +252,7 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
     setShowStudioManager: (showStudioManager) => set({ showStudioManager }),
     setShowStudioDetail: (showStudioDetail) => set({ showStudioDetail }),
     setShowAddToStudio: (showAddToStudio) => set({ showAddToStudio }),
+    setShowChallenges: (showChallenges) => set({ showChallenges }),
     setCustomAccentColor: (customAccentColor) => set({ customAccentColor }),
     setShowJoyride: (showJoyride) => set({ showJoyride }),
     setWorkspaceZoom: (workspaceZoom) => set({ workspaceZoom }),

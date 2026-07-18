@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { CADSketch, CADPoint, CADSketchShape, CADSketchTool } from '../../types/cad';
+import { CADSketch, CADPoint, CADSketchShape, CADSketchTool, CADConstraint, CADConstraintType } from '../../types/cad';
 
 interface SketchModeProps {
   sketch: CADSketch | null;
@@ -8,9 +8,20 @@ interface SketchModeProps {
   onShapeRemove: (shapeId: string) => void;
   onToolChange: (tool: CADSketchTool) => void;
   onClose: () => void;
+  onConstraintAdd?: (constraint: CADConstraint) => void;
 }
 
 const GRID_SPACING = 10;
+
+const CONSTRAINT_ICONS: Record<CADConstraintType, string> = {
+  horizontal: '━',
+  vertical: '┃',
+  equal: '=',
+  parallel: '∥',
+  perpendicular: '⊥',
+  fixed: '🔒',
+  dimension: '📐',
+};
 
 const SketchMode: React.FC<SketchModeProps> = ({
   sketch,
@@ -19,6 +30,7 @@ const SketchMode: React.FC<SketchModeProps> = ({
   onShapeRemove,
   onToolChange,
   onClose,
+  onConstraintAdd,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [points, setPoints] = useState<CADPoint[]>([]);
@@ -30,6 +42,9 @@ const SketchMode: React.FC<SketchModeProps> = ({
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [shiftHeld, setShiftHeld] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<CADPoint | null>(null);
+  const [activeConstraint, setActiveConstraint] = useState<CADConstraintType | null>(null);
+  const [constraints, setConstraints] = useState<CADConstraint[]>([]);
+  const [dimensionValue, setDimensionValue] = useState<string>('');
 
   const screenToWorld = useCallback((sx: number, sy: number): CADPoint => {
     return {
@@ -54,6 +69,24 @@ const SketchMode: React.FC<SketchModeProps> = ({
       return { x: start.x, y: end.y, id: '' };
     } else {
       return { x: end.x, y: start.y, id: '' };
+    }
+  }, []);
+
+  const applyConstraintToPoints = useCallback((p1: CADPoint, p2: CADPoint, constraint: CADConstraintType): { start: CADPoint; end: CADPoint } => {
+    switch (constraint) {
+      case 'horizontal':
+        return { start: p1, end: { ...p2, y: p1.y, id: '' } };
+      case 'vertical':
+        return { start: p1, end: { ...p2, x: p1.x, id: '' } };
+      case 'equal': {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len === 0) return { start: p1, end: p2 };
+        return { start: p1, end: { x: p1.x + dx, y: p1.y + dy, id: '' } };
+      }
+      default:
+        return { start: p1, end: p2 };
     }
   }, []);
 
@@ -111,6 +144,10 @@ const SketchMode: React.FC<SketchModeProps> = ({
       });
     }
 
+    constraints.forEach(c => {
+      drawConstraintIcon(ctx, c);
+    });
+
     if (points.length > 1) {
       ctx.strokeStyle = '#06b6d4';
       ctx.lineWidth = 2 / zoom;
@@ -131,10 +168,14 @@ const SketchMode: React.FC<SketchModeProps> = ({
         ctx.setLineDash([4 / zoom, 4 / zoom]);
         const x = Math.min(dragStart.x, dragCurrent.x);
         const y = Math.min(dragStart.y, dragCurrent.y);
-        const w = Math.abs(dragCurrent.x - dragStart.x);
-        const h = Math.abs(dragCurrent.y - dragStart.y);
-        ctx.strokeRect(x, y, w, h);
+        const rw = Math.abs(dragCurrent.x - dragStart.x);
+        const rh = Math.abs(dragCurrent.y - dragStart.y);
+        ctx.strokeRect(x, y, rw, rh);
         ctx.setLineDash([]);
+
+        ctx.font = `${10 / zoom}px monospace`;
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(`${(rw / 10).toFixed(1)} x ${(rh / 10).toFixed(1)}`, x + 3 / zoom, y - 5 / zoom);
       } else if (activeTool === 'circle') {
         ctx.strokeStyle = '#06b6d4';
         ctx.lineWidth = 2 / zoom;
@@ -146,6 +187,26 @@ const SketchMode: React.FC<SketchModeProps> = ({
         ctx.arc(dragStart.x, dragStart.y, radius, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
+
+        ctx.font = `${10 / zoom}px monospace`;
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(`R ${(radius / 10).toFixed(1)}`, dragStart.x + 5 / zoom, dragStart.y - 5 / zoom);
+      } else if (activeTool === 'line') {
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 2 / zoom;
+        ctx.setLineDash([4 / zoom, 4 / zoom]);
+        ctx.beginPath();
+        ctx.moveTo(dragStart.x, dragStart.y);
+        ctx.lineTo(dragCurrent.x, dragCurrent.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const len = Math.sqrt((dragCurrent.x - dragStart.x) ** 2 + (dragCurrent.y - dragStart.y) ** 2);
+        const mx = (dragStart.x + dragCurrent.x) / 2;
+        const my = (dragStart.y + dragCurrent.y) / 2;
+        ctx.font = `${10 / zoom}px monospace`;
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(`${(len / 10).toFixed(1)}`, mx + 5 / zoom, my - 5 / zoom);
       }
     }
 
@@ -166,7 +227,7 @@ const SketchMode: React.FC<SketchModeProps> = ({
       const sy = hoveredPoint.y * zoom + pan.y;
       drawPointMarker(ctx, sx, sy, '#22d3ee');
     }
-  }, [sketch, points, dragStart, dragCurrent, pan, zoom, hoveredPoint, activeTool]);
+  }, [sketch, points, dragStart, dragCurrent, pan, zoom, hoveredPoint, activeTool, constraints]);
 
   const drawShape = (ctx: CanvasRenderingContext2D, shape: CADSketchShape, _hover: boolean) => {
     ctx.strokeStyle = shape.data.isConstruction ? '#94a3b8' : '#06b6d4';
@@ -239,6 +300,34 @@ const SketchMode: React.FC<SketchModeProps> = ({
     ctx.stroke();
   };
 
+  const drawConstraintIcon = (ctx: CanvasRenderingContext2D, constraint: CADConstraint) => {
+    const icon = CONSTRAINT_ICONS[constraint.type];
+    if (!icon) return;
+
+    ctx.font = `${14 / zoom}px sans-serif`;
+    ctx.fillStyle = '#f59e0b';
+    ctx.textAlign = 'center';
+
+    if (sketch) {
+      const firstShape = sketch.shapes.find(s => s.data.id === constraint.shapeIds[0]);
+      if (firstShape) {
+        let cx = 0, cy = 0;
+        if (firstShape.type === 'line') {
+          cx = (firstShape.data.start.x + firstShape.data.end.x) / 2;
+          cy = (firstShape.data.start.y + firstShape.data.end.y) / 2 - 15 / zoom;
+        } else if (firstShape.type === 'rectangle') {
+          cx = (firstShape.data.corner1.x + firstShape.data.corner2.x) / 2;
+          cy = Math.min(firstShape.data.corner1.y, firstShape.data.corner2.y) - 15 / zoom;
+        } else if (firstShape.type === 'circle') {
+          cx = firstShape.data.center.x;
+          cy = firstShape.data.center.y - firstShape.data.radius - 15 / zoom;
+        }
+        ctx.fillText(icon, cx, cy);
+      }
+    }
+    ctx.textAlign = 'left';
+  };
+
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -256,6 +345,16 @@ const SketchMode: React.FC<SketchModeProps> = ({
       setDragStart(snapped);
       setDragCurrent(snapped);
     } else if (activeTool === 'line' || activeTool === 'polygon') {
+      if (activeConstraint === 'fixed') {
+        const fixedConstraint: CADConstraint = {
+          id: generateId(),
+          type: 'fixed',
+          shapeIds: [],
+        };
+        setConstraints(prev => [...prev, fixedConstraint]);
+        onConstraintAdd?.(fixedConstraint);
+        return;
+      }
       setPoints(prev => [...prev, { ...snapped, id: generateId() }]);
     }
   };
@@ -274,8 +373,13 @@ const SketchMode: React.FC<SketchModeProps> = ({
     setHoveredPoint(snapped);
 
     if (dragStart) {
-      if (shiftHeld) {
-        setDragCurrent(snapToHorizontalVertical(dragStart, snapped));
+      if (shiftHeld || activeConstraint === 'horizontal' || activeConstraint === 'vertical') {
+        const constrained = activeConstraint === 'horizontal'
+          ? { x: snapped.x, y: dragStart.y, id: '' }
+          : activeConstraint === 'vertical'
+            ? { x: dragStart.x, y: snapped.y, id: '' }
+            : snapToHorizontalVertical(dragStart, snapped);
+        setDragCurrent(constrained);
       } else {
         setDragCurrent(snapped);
       }
@@ -302,6 +406,10 @@ const SketchMode: React.FC<SketchModeProps> = ({
             isConstruction: false,
           },
         });
+        if (activeConstraint) {
+          const shapeId = generateId();
+          setConstraints(prev => [...prev, { id: generateId(), type: activeConstraint, shapeIds: [shapeId] }]);
+        }
       } else if (activeTool === 'circle') {
         const dx = dragCurrent.x - dragStart.x;
         const dy = dragCurrent.y - dragStart.y;
@@ -315,15 +423,31 @@ const SketchMode: React.FC<SketchModeProps> = ({
             isConstruction: false,
           },
         });
+      } else if (activeTool === 'line') {
+        const applied = activeConstraint
+          ? applyConstraintToPoints(dragStart, dragCurrent, activeConstraint)
+          : { start: dragStart, end: dragCurrent };
+        onShapeAdd({
+          type: 'line',
+          data: {
+            start: { ...applied.start, id: generateId() },
+            end: { ...applied.end, id: generateId() },
+            id: generateId(),
+            isConstruction: false,
+          },
+        });
       }
     }
 
     if (activeTool === 'line' && points.length === 2) {
+      const applied = activeConstraint
+        ? applyConstraintToPoints(points[0], points[1], activeConstraint)
+        : { start: points[0], end: points[1] };
       onShapeAdd({
         type: 'line',
         data: {
-          start: points[0],
-          end: points[1],
+          start: { ...applied.start, id: generateId() },
+          end: { ...applied.end, id: generateId() },
           id: generateId(),
           isConstruction: false,
         },
@@ -363,6 +487,7 @@ const SketchMode: React.FC<SketchModeProps> = ({
         setPoints([]);
         setDragStart(null);
         setDragCurrent(null);
+        setActiveConstraint(null);
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (points.length > 0) {
@@ -399,6 +524,24 @@ const SketchMode: React.FC<SketchModeProps> = ({
             </button>
           ))}
         </div>
+
+        <div className="flex items-center gap-1 bg-white rounded-lg shadow-md border border-slate-200 p-0.5">
+          {(['horizontal', 'vertical', 'equal', 'parallel', 'perpendicular', 'fixed'] as CADConstraintType[]).map(ct => (
+            <button
+              key={ct}
+              onClick={() => setActiveConstraint(activeConstraint === ct ? null : ct)}
+              className={`px-1.5 py-1 rounded-md text-[10px] font-bold transition-colors ${
+                activeConstraint === ct
+                  ? 'bg-amber-500 text-white'
+                  : 'hover:bg-slate-100 text-slate-600'
+              }`}
+              title={ct}
+            >
+              {CONSTRAINT_ICONS[ct]}
+            </button>
+          ))}
+        </div>
+
         <button
           onClick={onClose}
           className="px-2 py-1 bg-white rounded-lg shadow-md border border-slate-200 text-[10px] font-bold text-slate-600 hover:text-red-500 transition-colors"
@@ -408,12 +551,18 @@ const SketchMode: React.FC<SketchModeProps> = ({
       </div>
 
       <div className="absolute top-2 right-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
-        {(zoom * 100).toFixed(0)}% | {activeTool} {shiftHeld ? '| Snap' : ''}
+        {(zoom * 100).toFixed(0)}% | {activeTool} {shiftHeld ? '| Snap' : ''} {activeConstraint ? `| ${activeConstraint}` : ''}
       </div>
 
       {points.length > 0 && (
         <div className="absolute bottom-2 left-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
           Click to add points | Double-click to close | ESC to cancel | {points.length} points
+        </div>
+      )}
+
+      {constraints.length > 0 && (
+        <div className="absolute bottom-2 right-2 z-10 bg-white rounded-lg shadow-md border border-slate-200 px-2 py-1 text-[10px] text-slate-500">
+          {constraints.length} constraints active
         </div>
       )}
 

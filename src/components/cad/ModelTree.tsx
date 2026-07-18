@@ -49,6 +49,12 @@ const ModelTree: React.FC<ModelTreeProps> = ({
       case 'extrude': return '⬒';
       case 'revolve': return '↻';
       case 'boolean': return '⊕';
+      case 'fillet': return '◎';
+      case 'chamfer': return '◇';
+      case 'shell': return '▢';
+      case 'pattern': return '⊞';
+      case 'sweep': return '⟿';
+      case 'loft': return '⊿';
       default: return '◆';
     }
   };

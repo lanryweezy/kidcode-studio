@@ -1,5 +1,6 @@
 import React from 'react';
 import { CADObject3D, CADParameter, CADMaterialType, CAD_MATERIALS } from '../../types/cad';
+import { calculateObjectVolume } from '../../services/cadParametrics';
 
 interface PropertiesPanelProps {
   selectedObject: CADObject3D | null;
@@ -18,6 +19,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onPositionChange,
   onRotationChange,
 }) => {
+  const volume = selectedObject?.geometry ? calculateObjectVolume(selectedObject.geometry) : 0;
+
   return (
     <div className="h-full flex flex-col text-xs">
       <div className="px-3 py-2 border-b border-slate-200 bg-slate-50">
@@ -115,6 +118,14 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <div className="flex justify-between">
                   <span>ID</span>
                   <span className="font-mono text-[10px]">{selectedObject.id.slice(0, 8)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Volume</span>
+                  <span className="font-mono text-[10px]">{(volume).toFixed(1)} mm³</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Volume</span>
+                  <span className="font-mono text-[10px]">{(volume / 1000).toFixed(2)} cm³</span>
                 </div>
               </div>
             </div>

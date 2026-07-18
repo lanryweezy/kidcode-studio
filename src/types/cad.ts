@@ -57,6 +57,7 @@ export interface CADSketch {
   plane: 'XY' | 'XZ' | 'YZ';
   locked: boolean;
   visible: boolean;
+  constraints: CADConstraint[];
 }
 
 export interface CADParameter {
@@ -72,7 +73,7 @@ export interface CADParameter {
 export interface CADObject3D {
   id: string;
   name: string;
-  type: 'box' | 'cylinder' | 'sphere' | 'extrude' | 'revolve' | 'sweep' | 'loft' | 'boolean' | 'imported';
+  type: 'box' | 'cylinder' | 'sphere' | 'extrude' | 'revolve' | 'sweep' | 'loft' | 'boolean' | 'imported' | 'fillet' | 'chamfer' | 'shell' | 'pattern';
   mesh?: THREE.Mesh;
   geometry?: THREE.BufferGeometry;
   materialId: string;
@@ -88,7 +89,11 @@ export interface CADObject3D {
   sketchId?: string;
 }
 
-export type CADOperationType = 'extrude' | 'revolve' | 'sweep' | 'loft' | 'union' | 'subtract' | 'intersect';
+export type CADOperationType =
+  | 'extrude' | 'revolve' | 'sweep' | 'loft'
+  | 'union' | 'subtract' | 'intersect'
+  | 'fillet' | 'chamfer' | 'shell'
+  | 'linear_array' | 'circular_array' | 'mirror';
 
 export interface CADOperation {
   type: CADOperationType;
@@ -96,7 +101,7 @@ export interface CADOperation {
 }
 
 export interface CADMeasureResult {
-  type: 'distance' | 'angle' | 'area' | 'volume';
+  type: 'distance' | 'angle' | 'area' | 'volume' | 'radius';
   value: number;
   unit: string;
   points: CADPoint[];
@@ -119,10 +124,65 @@ export interface CADMaterialConfig {
 }
 
 export interface CADExportOptions {
-  format: 'stl' | 'stl_binary' | 'obj' | 'gltf' | 'glb' | '3mf';
+  format: 'stl' | 'stl_binary' | 'obj' | 'gltf' | 'glb' | '3mf' | 'step';
   unit: 'mm' | 'cm' | 'inch';
   includeColors: boolean;
+  onProgress?: (progress: number, message: string) => void;
 }
+
+export type CADConstraintType = 'horizontal' | 'vertical' | 'equal' | 'parallel' | 'perpendicular' | 'fixed' | 'dimension';
+
+export interface CADConstraint {
+  id: string;
+  type: CADConstraintType;
+  shapeIds: string[];
+  value?: number;
+}
+
+export type CADMirrorPlane = 'XY' | 'XZ' | 'YZ';
+
+export interface CADAssemblyConstraint {
+  id: string;
+  type: 'planar' | 'axial' | 'point';
+  objectIdA: string;
+  objectIdB: string;
+  faceIndexA?: number;
+  faceIndexB?: number;
+  axisA?: 'X' | 'Y' | 'Z';
+  axisB?: 'X' | 'Y' | 'Z';
+}
+
+export interface CADAssemblyNode {
+  id: string;
+  objectId: string;
+  children: string[];
+  parentId?: string;
+  constraints: CADAssemblyConstraint[];
+}
+
+export interface CADBOMItem {
+  id: string;
+  name: string;
+  quantity: number;
+  volume: number;
+  material: CADMaterialType;
+  estimatedPrintTime: number;
+  width: number;
+  height: number;
+  depth: number;
+}
+
+export interface CADPrintBedConfig {
+  width: number;
+  height: number;
+  depth: number;
+}
+
+export const PRINT_BED: CADPrintBedConfig = {
+  width: 220,
+  height: 250,
+  depth: 220,
+};
 
 export interface CADState {
   objects: CADObject3D[];
@@ -139,12 +199,19 @@ export interface CADState {
   wireframeMode: boolean;
   crossSectionEnabled: boolean;
   crossSectionY: number;
+  crossSectionNormal: { x: number; y: number; z: number };
+  crossSectionFlipped: boolean;
   explodedView: boolean;
   explodeAmount: number;
   viewPreset: CADViewPreset;
   materialId: string;
-  measureMode: 'none' | 'distance' | 'angle' | 'area' | 'volume';
+  measureMode: 'none' | 'distance' | 'angle' | 'area' | 'volume' | 'radius';
   measurePoints: CADPoint[];
+  assemblyConstraints: CADAssemblyConstraint[];
+  activePanel: 'properties' | 'operations' | 'bom' | 'print' | 'assembly';
+  showPrintPreview: boolean;
+  undoStack: CADObject3D[][];
+  redoStack: CADObject3D[][];
 }
 
 export const INITIAL_CAD_STATE: CADState = {
@@ -162,12 +229,19 @@ export const INITIAL_CAD_STATE: CADState = {
   wireframeMode: false,
   crossSectionEnabled: false,
   crossSectionY: 0,
+  crossSectionNormal: { x: 0, y: 1, z: 0 },
+  crossSectionFlipped: false,
   explodedView: false,
   explodeAmount: 0,
   viewPreset: 'home',
   materialId: 'PLA',
   measureMode: 'none',
   measurePoints: [],
+  assemblyConstraints: [],
+  activePanel: 'properties',
+  showPrintPreview: false,
+  undoStack: [],
+  redoStack: [],
 };
 
 export const CAD_MATERIALS: Record<CADMaterialType, CADMaterialConfig> = {

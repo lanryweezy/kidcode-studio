@@ -75,6 +75,7 @@ const CADViewport = forwardRef<CADViewportHandle, CADViewportProps>(({
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
+    renderer.localClippingEnabled = true;
     rendererRef.current = renderer;
 
     const scene = new THREE.Scene();
@@ -198,6 +199,7 @@ const CADViewport = forwardRef<CADViewportHandle, CADViewportProps>(({
           metalness: matConfig.metalness,
           opacity: matConfig.opacity,
           transparent: matConfig.transparent,
+          side: THREE.DoubleSide,
         });
       }
 
@@ -218,41 +220,65 @@ const CADViewport = forwardRef<CADViewportHandle, CADViewportProps>(({
 
       scene.add(mesh);
     });
-  }, [state.objects, state.selectedObjectIds, state.wireframeMode, state.materialId]);
-
-  useEffect(() => {
-    if (!sceneRef.current || !cameraRef.current) return;
-    const scene = sceneRef.current;
-    const camera = cameraRef.current;
 
     if (state.crossSectionEnabled) {
-      const clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), state.crossSectionY / 10);
+      const normal = new THREE.Vector3(
+        state.crossSectionNormal.x,
+        state.crossSectionNormal.y,
+        state.crossSectionNormal.z,
+      );
+      if (state.crossSectionFlipped) normal.negate();
+      const clipPlane = new THREE.Plane(normal, state.crossSectionY / 10);
+
       scene.traverse(child => {
-        if ((child as THREE.Mesh).isMesh) {
+        if ((child as THREE.Mesh).isMesh && !child.name.startsWith('__')) {
           const mesh = child as THREE.Mesh;
-          if (!mesh.name.startsWith('__')) {
-            const mat = mesh.material as THREE.MeshStandardMaterial;
-            if (mat.clippingPlanes === undefined || mat.clippingPlanes === null) {
-              mat.clippingPlanes = [clipPlane];
-              mat.clipShadows = true;
-            }
+          const mat = mesh.material as THREE.MeshStandardMaterial;
+          if (mat.clippingPlanes !== undefined) {
+            mat.clippingPlanes = [clipPlane];
+            mat.clipShadows = true;
+            mat.side = THREE.DoubleSide;
           }
         }
       });
       if (rendererRef.current) rendererRef.current.localClippingEnabled = true;
     } else {
       scene.traverse(child => {
-        if ((child as THREE.Mesh).isMesh) {
+        if ((child as THREE.Mesh).isMesh && !child.name.startsWith('__')) {
           const mesh = child as THREE.Mesh;
-          if (!mesh.name.startsWith('__')) {
-            const mat = mesh.material as THREE.MeshStandardMaterial;
+          const mat = mesh.material as THREE.MeshStandardMaterial;
+          if (mat.clippingPlanes !== undefined) {
             mat.clippingPlanes = [];
           }
         }
       });
       if (rendererRef.current) rendererRef.current.localClippingEnabled = false;
     }
-  }, [state.crossSectionEnabled, state.crossSectionY]);
+
+    if (state.measureMode !== 'none' && state.measurePoints.length > 0) {
+      const measureGroup = new THREE.Group();
+      measureGroup.name = '__measurements';
+
+      const mat = new THREE.LineBasicMaterial({ color: 0xff6600, linewidth: 2 });
+      const points3D = state.measurePoints.map(p => new THREE.Vector3(p.x / 10, 0.5, p.y / 10));
+
+      if (points3D.length >= 2) {
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points3D);
+        const line = new THREE.Line(lineGeo, mat);
+        measureGroup.add(line);
+
+        for (const p of points3D) {
+          const dotGeo = new THREE.SphereGeometry(0.1, 8, 8);
+          const dotMat = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+          const dot = new THREE.Mesh(dotGeo, dotMat);
+          dot.position.copy(p);
+          measureGroup.add(dot);
+        }
+      }
+
+      scene.add(measureGroup);
+    }
+  }, [state.objects, state.selectedObjectIds, state.wireframeMode, state.materialId, state.crossSectionEnabled, state.crossSectionY, state.crossSectionNormal, state.crossSectionFlipped, state.measureMode, state.measurePoints]);
 
   const setViewPreset = useCallback((preset: CADViewPreset) => {
     if (!cameraRef.current || !controlsRef.current) return;
@@ -289,6 +315,21 @@ const CADViewport = forwardRef<CADViewportHandle, CADViewportProps>(({
     mouseRef.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     mouseRef.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
+    if (state.measureMode !== 'none') {
+      raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+      const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const intersectPoint = new THREE.Vector3();
+      raycasterRef.current.ray.intersectPlane(groundPlane, intersectPoint);
+
+      if (intersectPoint) {
+        const newPoint = { x: intersectPoint.x * 10, y: intersectPoint.z * 10, id: Math.random().toString(36).substring(2, 10) };
+        onStateChange({
+          measurePoints: [...state.measurePoints, newPoint],
+        });
+      }
+      return;
+    }
+
     raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
     const meshes: THREE.Object3D[] = [];
     sceneRef.current.children.forEach(child => {
@@ -304,7 +345,7 @@ const CADViewport = forwardRef<CADViewportHandle, CADViewportProps>(({
     } else {
       onObjectSelect('');
     }
-  }, [onObjectSelect]);
+  }, [onObjectSelect, state.measureMode, state.measurePoints, onStateChange]);
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current || !cameraRef.current || !sceneRef.current) return;
@@ -341,6 +382,48 @@ const CADViewport = forwardRef<CADViewportHandle, CADViewportProps>(({
       {hoveredObjectId && (
         <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/70 text-white text-xs font-medium rounded-lg backdrop-blur-sm pointer-events-none">
           {state.objects.find(o => o.id === hoveredObjectId)?.name || hoveredObjectId}
+        </div>
+      )}
+      {state.crossSectionEnabled && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-3 flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-slate-600">CUT</span>
+            <input
+              type="range"
+              min={-50}
+              max={50}
+              value={state.crossSectionY}
+              onChange={e => onStateChange({ crossSectionY: parseInt(e.target.value) })}
+              className="w-32 h-1 rounded-full appearance-none bg-slate-200 accent-cyan-500"
+            />
+            <span className="text-[10px] font-mono text-slate-500">{state.crossSectionY}mm</span>
+          </div>
+          <div className="w-px h-4 bg-slate-200" />
+          <button
+            onClick={() => onStateChange({ crossSectionFlipped: !state.crossSectionFlipped })}
+            className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${state.crossSectionFlipped ? 'bg-cyan-500 text-white' : 'bg-slate-100 text-slate-600'}`}
+          >
+            Flip
+          </button>
+          <div className="flex gap-0.5">
+            {[
+              { normal: { x: 0, y: 1, z: 0 }, label: 'Y' },
+              { normal: { x: 1, y: 0, z: 0 }, label: 'X' },
+              { normal: { x: 0, y: 0, z: 1 }, label: 'Z' },
+            ].map(n => (
+              <button
+                key={n.label}
+                onClick={() => onStateChange({ crossSectionNormal: n.normal })}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-colors ${
+                  state.crossSectionNormal.x === n.normal.x && state.crossSectionNormal.y === n.normal.y && state.crossSectionNormal.z === n.normal.z
+                    ? 'bg-cyan-500 text-white'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                {n.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -794,6 +794,99 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
 }
 
+/* ─── 3D Editor Coordinate Display ─── */
+.coord-display {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  color: #475569;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ─── 3D Editor Shortcuts Overlay ─── */
+.shortcuts-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shortcuts-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e2e8f0;
+}
+
+/* ─── 3D Editor Transform Mode Indicator ─── */
+.transform-mode-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ─── 3D Editor Environment Panel ─── */
+.env-panel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 12px;
+  margin: 8px;
+}
+
+/* ─── 3D Editor Prefab Card ─── */
+.prefab-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.prefab-card:hover {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+/* ─── 3D Editor Snap Grid Toggle ─── */
+.snap-active {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+/* ─── 3D Editor Multi-Select Highlight ─── */
+.multi-select-highlight {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
 /* ─── Interactive Element Consistency ─── */
 button {
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;

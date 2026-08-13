@@ -1,4 +1,5 @@
 import { CommandBlock, CommandType } from '../types';
+import { executeWithRetry, RetryPresets } from './aiServiceWrapper';
 
 export type IssueSeverity = 'error' | 'warning' | 'info';
 
@@ -428,27 +429,43 @@ export async function analyzeCodeWithAI(
   const localResult = analyzeCode(blocks);
 
   try {
-    const response = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'reviewCode',
-        payload: {
-          commands: blocks,
-          mode,
-          localIssues: localResult.issues.map(i => ({
-            title: i.title,
-            severity: i.severity,
-            category: i.category,
-          })),
-        },
-      }),
-    });
+    // 🤖 Astra: [AI quality improvement]
+    // Wrapped fetch in executeWithRetry with a timeout to handle transient 5xx/429 errors and slow model responses.
+    const response = await executeWithRetry(async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'reviewCode',
+            payload: {
+              commands: blocks,
+              mode,
+              localIssues: localResult.issues.map(i => ({
+                title: i.title,
+                severity: i.severity,
+                category: i.category,
+              })),
+            },
+          }),
+          signal: controller.signal
+        });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.issues && Array.isArray(data.issues)) {
-        for (const aiIssue of data.issues) {
+        if (!res.ok) {
+          throw new Error(`AI API returned status ${res.status}`);
+        }
+
+        return res;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }, RetryPresets.quick, 'gemini');
+
+    const data = await response.json();
+    if (data.issues && Array.isArray(data.issues)) {
+      for (const aiIssue of data.issues) {
           if (aiIssue.title && aiIssue.description) {
             localResult.issues.push({
               id: generateId(),
@@ -460,11 +477,10 @@ export async function analyzeCodeWithAI(
               category: aiIssue.category || 'logic',
               fixSuggestion: aiIssue.fixSuggestion || 'Review this section.',
             });
-          }
         }
-        localResult.score = computeScore(localResult.issues);
-        localResult.summary = generateSummary(localResult.issues, localResult.score);
       }
+      localResult.score = computeScore(localResult.issues);
+      localResult.summary = generateSummary(localResult.issues, localResult.score);
     }
   } catch {
     // Fall back to local-only results

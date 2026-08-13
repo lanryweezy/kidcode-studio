@@ -1,4 +1,5 @@
 import { CommandBlock, CommandType } from '../types';
+import { executeWithRetry, RetryPresets } from './aiServiceWrapper';
 
 export interface TestConfig {
   blocks: CommandBlock[];
@@ -341,34 +342,49 @@ export async function runAITest(config: TestConfig): Promise<TestReport> {
   const localReport = simulateGame(config);
 
   try {
-    const response = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'testGame',
-        payload: {
-          blocks: config.blocks,
-          template: config.template,
-          localReport: {
-            passed: localReport.passed,
-            bugs: localReport.bugs.map(b => b.title),
-            summary: localReport.summary,
-          },
-        },
-      }),
-    });
+    // 🤖 Astra: [AI quality improvement]
+    // Wrapped fetch in executeWithRetry with a timeout to handle transient 5xx/429 errors and slow model responses.
+    const response = await executeWithRetry(async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'testGame',
+            payload: {
+              blocks: config.blocks,
+              template: config.template,
+              localReport: {
+                passed: localReport.passed,
+                bugs: localReport.bugs.map(b => b.title),
+                summary: localReport.summary,
+              },
+            },
+          }),
+          signal: controller.signal
+        });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.improvements && Array.isArray(data.improvements)) {
-        for (const imp of data.improvements) {
+        if (!res.ok) {
+          throw new Error(`AI API returned status ${res.status}`);
+        }
+
+        return res;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }, RetryPresets.quick, 'gemini');
+
+    const data = await response.json();
+    if (data.improvements && Array.isArray(data.improvements)) {
+      for (const imp of data.improvements) {
           if (imp.title && imp.description) {
             localReport.improvements.push({
               title: imp.title,
               description: imp.description,
               priority: imp.priority || 'medium',
             });
-          }
         }
       }
     }

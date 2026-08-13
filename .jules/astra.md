@@ -22,3 +22,6 @@
 ## 2024-05-24 - [Resilient AI Network Calls]
 **Learning:** Simple timeouts for AI API calls lead to frustrating, silent failures due to frequent transient rate limits (HTTP 429) and server overloads (HTTP 5xx) typical with LLM providers.
 **Action:** Always wrap `fetch` calls to AI APIs (like Gemini) with a `fetchWithRetry` utility using exponential backoff to handle 429 and 5xx errors gracefully, improving perceived reliability.
+## 2024-05-24 - Add Timeout and Retry to AI Tester and Reviewer
+**Learning:** Unguarded `fetch` calls to an AI API endpoints without retry or timeout configurations can cause the application to hang indefinitely if the API provider delays the response, limits the rate (429), or encounters transient server errors (500). Also `response.ok` must be checked before attempting to read `response.json()` to avoid silent failures caused by unhandled promises.
+**Action:** Always wrap standard `fetch` API calls within AI-dependent functions with an exponential backoff wrapper (such as `executeWithRetry`) and provide it with an `AbortController` timeout logic.

@@ -25,3 +25,7 @@
 ## 2024-05-24 - Add Timeout and Retry to AI Tester and Reviewer
 **Learning:** Unguarded `fetch` calls to an AI API endpoints without retry or timeout configurations can cause the application to hang indefinitely if the API provider delays the response, limits the rate (429), or encounters transient server errors (500). Also `response.ok` must be checked before attempting to read `response.json()` to avoid silent failures caused by unhandled promises.
 **Action:** Always wrap standard `fetch` API calls within AI-dependent functions with an exponential backoff wrapper (such as `executeWithRetry`) and provide it with an `AbortController` timeout logic.
+
+## 2024-05-24 - [Robust AI JSON Extraction]
+**Learning:** Using lazy regex matching (`/\[[\s\S]*?\]/`) to extract JSON arrays from AI responses is fragile. The regex will stop at the first closing bracket `]`, causing extraction to fail if the JSON array contains nested arrays. This leads to silent JSON parsing crashes.
+**Action:** Extract JSON arrays using `indexOf('[')` and `lastIndexOf(']')` to ensure the entire JSON array, including any nested brackets, is captured before parsing.

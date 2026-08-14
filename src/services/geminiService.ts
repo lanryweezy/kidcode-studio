@@ -195,10 +195,16 @@ export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Pro
         const data = await response.json();
         const text = data.text;
         if (!text) return null;
-        const jsonMatch = text.match(/\[[\s\S]*?\]/);
         
-        if (jsonMatch) {
-            return safeParseCommands(jsonMatch[0]);
+        // 🤖 Astra: [AI quality improvement]
+        // Used greedy indexOf/lastIndexOf to extract the JSON payload array instead of a non-greedy regex match.
+        // A non-greedy regex (/\[[\s\S]*?\]/) halts at the *first* closing bracket it sees, which results in silent
+        // JSON parsing crashes if the AI output array contains nested arrays (e.g., parameter objects with list values).
+        const startIdx = text.indexOf('[');
+        const endIdx = text.lastIndexOf(']');
+
+        if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+            return safeParseCommands(text.substring(startIdx, endIdx + 1));
         }
         return null;
     } catch (e) {

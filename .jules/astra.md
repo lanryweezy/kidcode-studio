@@ -29,3 +29,7 @@
 ## 2024-05-24 - [Robust AI JSON Extraction]
 **Learning:** Using lazy regex matching (`/\[[\s\S]*?\]/`) to extract JSON arrays from AI responses is fragile. The regex will stop at the first closing bracket `]`, causing extraction to fail if the JSON array contains nested arrays. This leads to silent JSON parsing crashes.
 **Action:** Extract JSON arrays using `indexOf('[')` and `lastIndexOf(']')` to ensure the entire JSON array, including any nested brackets, is captured before parsing.
+
+## 2025-06-21 - [Failure Resilience: Propagating AI Proxy Errors]
+**Learning:** Custom fetch helpers (like `proxyFetch` in `src/services/ai3DService.ts`) wrapped by retry mechanisms (like `executeWithRetry`) must explicitly throw an Error when `!response.ok`. If they just return the non-2xx Response, the retry wrapper falsely assumes the call succeeded and completely fails to apply exponential backoff for transient 429/5xx errors, eventually causing the application to crash silently when parsing the failed response.
+**Action:** Always include a `!response.ok` throw block inside generic `fetch` wrappers that are consumed by retry logic.

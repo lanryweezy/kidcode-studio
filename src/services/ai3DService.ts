@@ -12,6 +12,24 @@ import { executeWithRetry, executeWithFallback, RetryPresets } from './aiService
  */
 const proxyFetch = async (provider: string, path: string, options: RequestInit = {}) => {
   const response = await fetch(`/api/ai3d?provider=${provider}&path=${encodeURIComponent(path)}`, options);
+
+  // 🤖 Astra: [AI quality improvement]
+  // Throw an error if the response is not OK so `executeWithRetry` can catch it.
+  // We attach the `status` to the error object so that `classifyError` inside `aiServiceWrapper.ts`
+  // correctly identifies it as a retryable 429/5xx error and triggers exponential backoff.
+  if (!response.ok) {
+    let errorMessage = `API error ${response.status} from ${provider}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorData.message || errorMessage;
+    } catch {
+      // Ignore JSON parse errors for non-JSON error responses
+    }
+    const error = new Error(errorMessage) as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
   return response;
 };
 

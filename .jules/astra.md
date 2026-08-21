@@ -29,3 +29,7 @@
 ## 2024-05-24 - [Robust AI JSON Extraction]
 **Learning:** Using lazy regex matching (`/\[[\s\S]*?\]/`) to extract JSON arrays from AI responses is fragile. The regex will stop at the first closing bracket `]`, causing extraction to fail if the JSON array contains nested arrays. This leads to silent JSON parsing crashes.
 **Action:** Extract JSON arrays using `indexOf('[')` and `lastIndexOf(']')` to ensure the entire JSON array, including any nested brackets, is captured before parsing.
+
+## 2025-06-15 - [Failure Resilience: Propagating HTTP Status to Retry Wrappers]
+**Learning:** When a fetch helper function (like `proxyFetch` for AI services) doesn't explicitly throw an error with a `status` property attached when `!response.ok`, any higher-level retry wrappers (like `executeWithRetry` using exponential backoff) will either falsely assume success or fail to classify the error as retryable (e.g., 429 Too Many Requests, 5xx Server Errors). This breaks the resilience of the AI integration against transient network issues.
+**Action:** Always validate `!response.ok` within custom fetch helpers, and if true, extract the error details and throw an `Error` object that includes the HTTP `.status` property so that downstream retry wrappers can accurately classify and handle the failure.

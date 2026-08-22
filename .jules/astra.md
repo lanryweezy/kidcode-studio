@@ -29,3 +29,7 @@
 ## 2024-05-24 - [Robust AI JSON Extraction]
 **Learning:** Using lazy regex matching (`/\[[\s\S]*?\]/`) to extract JSON arrays from AI responses is fragile. The regex will stop at the first closing bracket `]`, causing extraction to fail if the JSON array contains nested arrays. This leads to silent JSON parsing crashes.
 **Action:** Extract JSON arrays using `indexOf('[')` and `lastIndexOf(']')` to ensure the entire JSON array, including any nested brackets, is captured before parsing.
+
+## 2025-06-15 - [Failure Resilience: API Wrappers Must Throw on HTTP Errors]
+**Learning:** Custom fetch helpers that act as API proxies (like `proxyFetch` for Vercel functions) must explicitly check `!response.ok` and `throw new Error`. If they silently return the failed Response object, wrapping them in an exponential backoff utility (like `executeWithRetry`) is useless because the wrapper assumes the promise resolved successfully and won't trigger its retry logic.
+**Action:** Always validate `!response.ok` and throw a custom Error inside the innermost fetch wrapper so that outer retry mechanisms can correctly intercept and mitigate transient network/API failures.

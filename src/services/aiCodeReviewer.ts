@@ -463,6 +463,12 @@ export async function analyzeCodeWithAI(
       }
     }, RetryPresets.quick, 'gemini');
 
+    // 🤖 Astra: [AI quality improvement]
+    // Validate proxy response before parsing to prevent silent JSON parse crashes on 5xx/429 HTML responses.
+    if (!response.ok) {
+      throw new Error(`AI proxy returned unexpected status: ${response.status}`);
+    }
+
     const data = await response.json();
     if (data.issues && Array.isArray(data.issues)) {
       for (const aiIssue of data.issues) {

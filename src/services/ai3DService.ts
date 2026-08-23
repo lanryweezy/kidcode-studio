@@ -12,6 +12,20 @@ import { executeWithRetry, executeWithFallback, RetryPresets } from './aiService
  */
 const proxyFetch = async (provider: string, path: string, options: RequestInit = {}) => {
   const response = await fetch(`/api/ai3d?provider=${provider}&path=${encodeURIComponent(path)}`, options);
+
+  // 🤖 Astra: [AI quality improvement]
+  // Throw an error when !response.ok so executeWithRetry catches it and applies exponential backoff
+  if (!response.ok) {
+    let errorMsg = response.statusText;
+    try {
+      const errorData = await response.json();
+      if (errorData.error) errorMsg = errorData.error;
+    } catch {
+      // Ignore JSON parse errors for non-JSON error responses
+    }
+    throw new Error(`${provider} API error: ${errorMsg}`);
+  }
+
   return response;
 };
 
@@ -347,11 +361,6 @@ const tripoAPI = {
           })
         });
 
-        if (!createResponse.ok) {
-          const errorData = await createResponse.json().catch(() => ({}));
-          throw new Error(`Tripo API error: ${errorData.error || createResponse.statusText}`);
-        }
-
         const createData = await createResponse.json();
         const taskId = createData.data.task_id;
 
@@ -360,11 +369,6 @@ const tripoAPI = {
 
         while (true) {
           const statusResponse = await proxyFetch('tripo', `task/${taskId}`);
-
-          if (!statusResponse.ok) {
-            const errorData = await statusResponse.json().catch(() => ({}));
-            throw new Error(`Tripo API error: ${errorData.error || statusResponse.statusText}`);
-          }
 
           const statusData = await statusResponse.json();
           
@@ -431,11 +435,6 @@ const tripoAPI = {
           })
         });
 
-        if (!createResponse.ok) {
-          const errorData = await createResponse.json().catch(() => ({}));
-          throw new Error(`Tripo API error: ${errorData.error || createResponse.statusText}`);
-        }
-
         const createData = await createResponse.json();
         const taskId = createData.data.task_id;
 
@@ -444,11 +443,6 @@ const tripoAPI = {
 
         while (true) {
           const statusResponse = await proxyFetch('tripo', `task/${taskId}`);
-
-          if (!statusResponse.ok) {
-            const errorData = await statusResponse.json().catch(() => ({}));
-            throw new Error(`Tripo API error: ${errorData.error || statusResponse.statusText}`);
-          }
 
           const statusData = await statusResponse.json();
           
@@ -519,11 +513,6 @@ const meshyAPI = {
       })
     }), RetryPresets.standard, 'meshy');
 
-    if (!createResponse.ok) {
-      const errorData = await createResponse.json().catch(() => ({}));
-      throw new Error(`Meshy API error: ${errorData.error || createResponse.statusText}`);
-    }
-
     const createData = await createResponse.json();
     const taskId = createData.id;
 
@@ -532,11 +521,6 @@ const meshyAPI = {
 
     while (true) {
       const statusResponse = await executeWithRetry(() => proxyFetch('meshy', `tasks/${taskId}`), RetryPresets.standard, 'meshy');
-
-      if (!statusResponse.ok) {
-        const errorData = await statusResponse.json().catch(() => ({}));
-        throw new Error(`Meshy API error: ${errorData.error || statusResponse.statusText}`);
-      }
 
       const statusData = await statusResponse.json();
       
@@ -587,11 +571,6 @@ const meshyAPI = {
       })
     }), RetryPresets.standard, 'meshy');
 
-    if (!createResponse.ok) {
-      const errorData = await createResponse.json().catch(() => ({}));
-      throw new Error(`Meshy API error: ${errorData.error || createResponse.statusText}`);
-    }
-
     const createData = await createResponse.json();
     const taskId = createData.id;
 
@@ -600,11 +579,6 @@ const meshyAPI = {
 
     while (true) {
       const statusResponse = await executeWithRetry(() => proxyFetch('meshy', `tasks/${taskId}`), RetryPresets.standard, 'meshy');
-
-      if (!statusResponse.ok) {
-        const errorData = await statusResponse.json().catch(() => ({}));
-        throw new Error(`Meshy API error: ${errorData.error || statusResponse.statusText}`);
-      }
 
       const statusData = await statusResponse.json();
       
@@ -648,10 +622,6 @@ const meshyAPI = {
         format: 'glb'
       })
     }), RetryPresets.standard, 'meshy');
-
-    if (!response.ok) {
-      throw new Error('Rigging failed');
-    }
 
     const data = await response.json();
 

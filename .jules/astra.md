@@ -30,6 +30,9 @@
 **Learning:** Using lazy regex matching (`/\[[\s\S]*?\]/`) to extract JSON arrays from AI responses is fragile. The regex will stop at the first closing bracket `]`, causing extraction to fail if the JSON array contains nested arrays. This leads to silent JSON parsing crashes.
 **Action:** Extract JSON arrays using `indexOf('[')` and `lastIndexOf(']')` to ensure the entire JSON array, including any nested brackets, is captured before parsing.
 
+## 2025-06-15 - [Failure Resilience: Propagating HTTP Status to Retry Wrappers]
+**Learning:** When a fetch helper function (like `proxyFetch` for AI services) doesn't explicitly throw an error with a `status` property attached when `!response.ok`, any higher-level retry wrappers (like `executeWithRetry` using exponential backoff) will either falsely assume success or fail to classify the error as retryable (e.g., 429 Too Many Requests, 5xx Server Errors). This breaks the resilience of the AI integration against transient network issues.
+**Action:** Always validate `!response.ok` within custom fetch helpers, and if true, extract the error details and throw an `Error` object that includes the HTTP `.status` property so that downstream retry wrappers can accurately classify and handle the failure.
 ## 2025-06-15 - [Failure Resilience: API Wrappers Must Throw on HTTP Errors]
 **Learning:** Custom fetch helpers that act as API proxies (like `proxyFetch` for Vercel functions) must explicitly check `!response.ok` and `throw new Error`. If they silently return the failed Response object, wrapping them in an exponential backoff utility (like `executeWithRetry`) is useless because the wrapper assumes the promise resolved successfully and won't trigger its retry logic.
 **Action:** Always validate `!response.ok` and throw a custom Error inside the innermost fetch wrapper so that outer retry mechanisms can correctly intercept and mitigate transient network/API failures.

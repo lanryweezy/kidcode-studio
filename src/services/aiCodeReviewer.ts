@@ -439,7 +439,8 @@ export async function analyzeCodeWithAI(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            action: 'reviewCode',
+            // 🤖 Astra: [AI quality improvement] Changed action to 'analyzeCode' to avoid conflicts with plain-text review.
+            action: 'analyzeCode',
             payload: {
               commands: blocks,
               mode,

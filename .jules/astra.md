@@ -33,3 +33,7 @@
 ## 2025-06-15 - [Failure Resilience: API Wrappers Must Throw on HTTP Errors]
 **Learning:** Custom fetch helpers that act as API proxies (like `proxyFetch` for Vercel functions) must explicitly check `!response.ok` and `throw new Error`. If they silently return the failed Response object, wrapping them in an exponential backoff utility (like `executeWithRetry`) is useless because the wrapper assumes the promise resolved successfully and won't trigger its retry logic.
 **Action:** Always validate `!response.ok` and throw a custom Error inside the innermost fetch wrapper so that outer retry mechanisms can correctly intercept and mitigate transient network/API failures.
+
+## 2025-06-25 - [Preventing Action Conflicts & Enforcing Structured Contracts]
+**Learning:** Overloading an AI endpoint action (e.g. `action: 'reviewCode'`) for both unstructured text responses (for UI chat) and structured JSON responses (for the technical code reviewer) leads to collisions. If the prompt does not strictly enforce the expected schema with explicit formatting constraints, the AI model will hallucinate structures or mix plain text with JSON, causing downstream parsing errors.
+**Action:** Always use distinct API actions for distinct data expectations (e.g., `reviewCode` for plain text vs `analyzeCode` for structured JSON). Additionally, explicitly provide the required JSON schema in the prompt and sanitize the response text (e.g., removing markdown code blocks) before calling `JSON.parse`.

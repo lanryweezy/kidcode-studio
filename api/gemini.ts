@@ -122,6 +122,44 @@ export default async function handler(req: Request) {
       });
     }
 
+    if (action === 'analyzeCode') {
+      const { commands, mode, localIssues } = payload;
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        systemInstruction: SYSTEM_PROMPT,
+      });
+      const prompt = `
+            You are a technical KidCode block analyzer.
+            Analyze this ${mode} project: ${JSON.stringify(commands)}.
+            Local issues found: ${localIssues ? JSON.stringify(localIssues) : 'None'}.
+
+            Return ONLY a JSON array of issue objects. Do not include markdown, preamble, or explanations.
+            Each issue MUST match this schema:
+            {
+               "title": string,
+               "description": string,
+               "severity": "error" | "warning" | "info",
+               "category": "logic" | "style" | "performance" | "bug",
+               "fixSuggestion": string
+            }
+            Ensure the response is valid JSON.
+        `;
+      const result = await model.generateContent(prompt);
+      let textResult = result.response.text();
+      // Sanitize the output to remove any rogue markdown blocks before returning it to the client.
+      textResult = textResult.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      let parsedIssues: Array<Record<string, unknown>> = [];
+      try {
+         parsedIssues = JSON.parse(textResult);
+      } catch (e) {
+         console.error("Failed to parse analyzeCode JSON", e);
+         parsedIssues = [];
+      }
+      return new Response(JSON.stringify({ issues: parsedIssues }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     if (action === 'getFixedCode') {
       const { commands, mode } = payload;
       const model = genAI.getGenerativeModel({

@@ -131,7 +131,7 @@ export default async function handler(req: Request) {
       const prompt = `
             You are a technical KidCode block analyzer.
             Analyze this ${mode} project: ${JSON.stringify(commands)}.
-            Local issues found: ${JSON.stringify(localIssues)}.
+            Local issues found: ${localIssues ? JSON.stringify(localIssues) : 'None'}.
 
             Return ONLY a JSON array of issue objects. Do not include markdown, preamble, or explanations.
             Each issue MUST match this schema:
@@ -147,8 +147,8 @@ export default async function handler(req: Request) {
       const result = await model.generateContent(prompt);
       let textResult = result.response.text();
       // Sanitize the output to remove any rogue markdown blocks before returning it to the client.
-      textResult = textResult.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-      let parsedIssues = [];
+      textResult = textResult.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      let parsedIssues: Array<Record<string, unknown>> = [];
       try {
          parsedIssues = JSON.parse(textResult);
       } catch (e) {

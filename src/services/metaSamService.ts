@@ -125,9 +125,13 @@ export const extractSprite = async (
           body: JSON.stringify(requestBody)
         });
 
+        // 🤖 Astra: [AI quality improvement]
+        // Throw an error with `.status` when !response.ok so `executeWithRetry` can correctly identify it as a retryable 429/5xx error.
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`SAM API error: ${error.error || response.statusText}`);
+          const errorData = await response.json().catch(() => ({}));
+          const error = new Error(`SAM API error: ${errorData.error || response.statusText}`) as Error & { status?: number };
+          error.status = response.status;
+          throw error;
         }
 
         onProgress?.({

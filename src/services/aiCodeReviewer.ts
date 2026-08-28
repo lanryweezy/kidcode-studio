@@ -454,8 +454,12 @@ export async function analyzeCodeWithAI(
           signal: controller.signal
         });
 
+        // 🤖 Astra: [AI quality improvement]
+        // Throw an error with `.status` when !res.ok so `executeWithRetry` can correctly identify it as a retryable 429/5xx error.
         if (!res.ok) {
-          throw new Error(`AI API returned status ${res.status}`);
+          const error = new Error(`API error ${res.status} from gemini`) as Error & { status?: number };
+          error.status = res.status;
+          throw error;
         }
 
         return res;

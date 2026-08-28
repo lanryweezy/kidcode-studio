@@ -84,13 +84,9 @@ export const generateMusic = async (
           })
         });
 
-        // 🤖 Astra: [AI quality improvement]
-        // Throw an error with `.status` when !response.ok so `executeWithRetry` can correctly identify it as a retryable 429/5xx error.
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          const error = new Error(`MusicGen API error: ${errorData.error || response.statusText}`) as Error & { status?: number };
-          error.status = response.status;
-          throw error;
+          const error = await response.json().catch(() => ({}));
+          throw new Error(`MusicGen API error: ${error.error || response.statusText}`);
         }
 
         onProgress?.({

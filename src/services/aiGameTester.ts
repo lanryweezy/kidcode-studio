@@ -366,12 +366,8 @@ export async function runAITest(config: TestConfig): Promise<TestReport> {
           signal: controller.signal
         });
 
-        // 🤖 Astra: [AI quality improvement]
-        // Throw an error with `.status` when !res.ok so `executeWithRetry` can correctly identify it as a retryable 429/5xx error.
         if (!res.ok) {
-          const error = new Error(`API error ${res.status} from gemini`) as Error & { status?: number };
-          error.status = res.status;
-          throw error;
+          throw new Error(`AI API returned status ${res.status}`);
         }
 
         return res;

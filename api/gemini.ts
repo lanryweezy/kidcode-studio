@@ -160,6 +160,52 @@ export default async function handler(req: Request) {
       });
     }
 
+    if (action === 'testGame') {
+      const { blocks, template, localReport } = payload;
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        systemInstruction: SYSTEM_PROMPT,
+      });
+      const prompt = `
+            You are an expert KidCode QA tester.
+            Review this game code: ${JSON.stringify(blocks)}.
+            Template: ${template || 'None'}.
+            Local report: ${JSON.stringify(localReport)}.
+
+            Return ONLY a valid JSON object with an 'improvements' array.
+            Do not include markdown formatting or explanations.
+            Schema:
+            {
+              "improvements": [
+                {
+                  "title": string,
+                  "description": string,
+                  "priority": "high" | "medium" | "low"
+                }
+              ]
+            }
+        `;
+      const result = await model.generateContent(prompt);
+      let textResult = result.response.text();
+      // 🤖 Astra: [AI quality improvement]
+      // Sanitize the output to remove any rogue markdown blocks before returning it to the client.
+      textResult = textResult.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+
+      let parsedImprovements: Array<Record<string, unknown>> = [];
+      try {
+         const parsed = JSON.parse(textResult);
+         if (parsed && Array.isArray(parsed.improvements)) {
+             parsedImprovements = parsed.improvements;
+         }
+      } catch (e) {
+         console.error("Failed to parse testGame JSON", e);
+         parsedImprovements = [];
+      }
+      return new Response(JSON.stringify({ improvements: parsedImprovements }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     if (action === 'getFixedCode') {
       const { commands, mode } = payload;
       const model = genAI.getGenerativeModel({

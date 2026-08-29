@@ -167,36 +167,27 @@ export default async function handler(req: Request) {
         systemInstruction: SYSTEM_PROMPT,
       });
       const prompt = `
-            You are an expert KidCode QA tester.
-            Review this game code: ${JSON.stringify(blocks)}.
-            Template: ${template || 'None'}.
-            Local report: ${JSON.stringify(localReport)}.
+            You are an expert game tester for KidCode Studio.
+            Review this ${template || 'game'} project blocks: ${JSON.stringify(blocks)}.
+            Local test results: ${JSON.stringify(localReport)}.
 
-            Return ONLY a valid JSON object with an 'improvements' array.
-            Do not include markdown formatting or explanations.
-            Schema:
+            Based on the blocks and test results, suggest game improvements.
+            Return ONLY a JSON array of improvement objects. Do not include markdown, preamble, or explanations.
+            Each improvement MUST match this schema:
             {
-              "improvements": [
-                {
-                  "title": string,
-                  "description": string,
-                  "priority": "high" | "medium" | "low"
-                }
-              ]
+               "title": string,
+               "description": string,
+               "priority": "low" | "medium" | "high"
             }
+            Ensure the response is valid JSON.
         `;
       const result = await model.generateContent(prompt);
       let textResult = result.response.text();
-      // 🤖 Astra: [AI quality improvement]
       // Sanitize the output to remove any rogue markdown blocks before returning it to the client.
       textResult = textResult.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-
       let parsedImprovements: Array<Record<string, unknown>> = [];
       try {
-         const parsed = JSON.parse(textResult);
-         if (parsed && Array.isArray(parsed.improvements)) {
-             parsedImprovements = parsed.improvements;
-         }
+         parsedImprovements = JSON.parse(textResult);
       } catch (e) {
          console.error("Failed to parse testGame JSON", e);
          parsedImprovements = [];

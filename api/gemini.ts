@@ -160,6 +160,43 @@ export default async function handler(req: Request) {
       });
     }
 
+    if (action === 'testGame') {
+      const { blocks, template, localReport } = payload;
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        systemInstruction: SYSTEM_PROMPT,
+      });
+      const prompt = `
+            You are an expert game tester for KidCode Studio.
+            Review this ${template || 'game'} project blocks: ${JSON.stringify(blocks)}.
+            Local test results: ${JSON.stringify(localReport)}.
+
+            Based on the blocks and test results, suggest game improvements.
+            Return ONLY a JSON array of improvement objects. Do not include markdown, preamble, or explanations.
+            Each improvement MUST match this schema:
+            {
+               "title": string,
+               "description": string,
+               "priority": "low" | "medium" | "high"
+            }
+            Ensure the response is valid JSON.
+        `;
+      const result = await model.generateContent(prompt);
+      let textResult = result.response.text();
+      // Sanitize the output to remove any rogue markdown blocks before returning it to the client.
+      textResult = textResult.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      let parsedImprovements: Array<Record<string, unknown>> = [];
+      try {
+         parsedImprovements = JSON.parse(textResult);
+      } catch (e) {
+         console.error("Failed to parse testGame JSON", e);
+         parsedImprovements = [];
+      }
+      return new Response(JSON.stringify({ improvements: parsedImprovements }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     if (action === 'getFixedCode') {
       const { commands, mode } = payload;
       const model = genAI.getGenerativeModel({

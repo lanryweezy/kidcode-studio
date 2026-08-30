@@ -85,8 +85,10 @@ export const generateMusic = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`MusicGen API error: ${error.error || response.statusText}`);
+          const errorData = await response.json().catch(() => ({}));
+          const error = new Error(`MusicGen API error: ${errorData.error || response.statusText}`) as Error & { status?: number };
+          error.status = response.status;
+          throw error;
         }
 
         onProgress?.({

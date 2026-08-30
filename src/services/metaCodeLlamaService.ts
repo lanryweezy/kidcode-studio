@@ -94,8 +94,10 @@ export const getCodeAssistance = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
+          const errorData = await response.json().catch(() => ({}));
+          const error = new Error(`Code Llama API error: ${errorData.error || response.statusText}`) as Error & { status?: number };
+          error.status = response.status;
+          throw error;
         }
 
         return await response.json();

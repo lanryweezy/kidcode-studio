@@ -127,7 +127,11 @@ export const extractSprite = async (
 
         if (!response.ok) {
           const error = await response.json().catch(() => ({}));
-          throw new Error(`SAM API error: ${error.error || response.statusText}`);
+          // 🤖 Astra: [AI quality improvement]
+          // Attached HTTP status to the error to enable upstream exponential backoff mechanisms to correctly identify retryable failures (429/5xx).
+          const err = new Error(`SAM API error: ${error.error || response.statusText}`);
+          (err as any).status = response.status;
+          throw err;
         }
 
         onProgress?.({

@@ -47,3 +47,7 @@
 ## 2025-07-08 - [Silent Failures via Missing Structured AI Endpoints]
 **Learning:** When adding AI features that require structured JSON (like `testGame`), if the specific action handler is completely omitted from the API proxy (e.g. `api/gemini.ts`), the proxy returns a 400 Bad Request. The client-side retry logic handles this as an error and silently falls back to local processing, masking the fact that the AI capability is totally broken.
 **Action:** When implementing new structured AI features, ensure the backend API explicitly handles the new action, enforces the JSON schema within the prompt, and sanitizes the output (removing markdown) before applying `JSON.parse()` to prevent silent fallback failures.
+
+## 2025-07-20 - [Failure Resilience: Propagating HTTP Status in External AI APIs]
+**Learning:** When throwing errors from rejected HTTP responses (`!response.ok`) in AI service providers (e.g., `metaMusicService.ts`, `metaSamService.ts`, `metaCodeLlamaService.ts`), if the HTTP status code (`response.status`) is not explicitly attached to the `Error` object, centralized wrapper logic (like `classifyError` in `aiServiceWrapper.ts`) cannot reliably identify rate limits (429) or server errors (5xx) for exponential backoff retries.
+**Action:** Always explicitly attach the HTTP `status` property to the thrown error when handling `!response.ok` (e.g., `(err as any).status = response.status`), enabling retry wrappers to correctly classify and mitigate transient failures.

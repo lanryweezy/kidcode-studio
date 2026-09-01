@@ -1,4 +1,0 @@
-💡 What: Added HTTP status code propagation to thrown Error objects across `metaCodeLlamaService.ts`, `metaSamService.ts`, and `metaMusicService.ts`.
-🎯 Why: Previously, failed API responses threw generic Error objects without an HTTP status code, making it impossible for the `executeWithRetry` wrapper (via `classifyError`) to distinguish between retryable errors (like 429 or 5xx) and non-retryable ones (like 400). This caused silent fallback failures.
-📊 Impact: Eliminates a failure mode where the app's native exponential backoff and retry mechanism doesn't activate for transient network limits. AI network requests will now be much more resilient to standard LLM API provider bottlenecks (like rate limits and server overloads).
-🔬 Verification: Run `pnpm test` and `pnpm lint` to verify that no core functionality is broken. Manually trigger a 429 response via the backend proxy and check that `executeWithRetry` successfully triggers its exponential backoff loop.

@@ -94,8 +94,13 @@ export const getCodeAssistance = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
+          const errorData = await response.json().catch(() => ({}));
+          // 🤖 Astra: [AI quality improvement]
+          // Attach HTTP status to the error so `classifyError` in `aiServiceWrapper.ts`
+          // can correctly identify retryable errors (429, 5xx) vs non-retryable (4xx).
+          const error = new Error(`Code Llama API error: ${errorData.error || response.statusText}`);
+          (error as any).status = response.status;
+          throw error;
         }
 
         return await response.json();

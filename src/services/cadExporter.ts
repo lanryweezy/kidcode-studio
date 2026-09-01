@@ -439,6 +439,7 @@ export async function exportCADModel(
       if (mesh.geometry) {
         const result = validateMesh(mesh.geometry);
         if (!result.valid) {
+          allValid = false;
           mesh.geometry = fixMesh(mesh.geometry);
         }
       }

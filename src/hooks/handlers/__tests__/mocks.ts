@@ -14,6 +14,7 @@ export const createMockSpriteState = (overrides: Partial<SpriteState> = {}): Spr
   currentAnimation: null,
   animationSpeed: 1,
   speech: null,
+  speechType: 'say',
   weather: 'none',
   score: 0,
   keys: 0,

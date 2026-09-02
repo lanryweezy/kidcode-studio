@@ -78,7 +78,7 @@ export interface AchievementState {
   pendingPopups: Achievement[];
 }
 
-let achievementState: AchievementState = {
+const achievementState: AchievementState = {
   unlocked: [],
   pendingPopups: [],
 };
@@ -90,7 +90,9 @@ function loadAchievementState(): void {
       const parsed = JSON.parse(raw);
       achievementState.unlocked = parsed.unlocked || [];
     }
-  } catch {}
+  } catch (error) {
+    console.error('Failed to load achievement state:', error);
+  }
 }
 
 function saveAchievementState(): void {
@@ -98,7 +100,9 @@ function saveAchievementState(): void {
     localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify({
       unlocked: achievementState.unlocked,
     }));
-  } catch {}
+  } catch (error) {
+    console.error('Failed to save achievement state:', error);
+  }
 }
 
 loadAchievementState();
@@ -114,7 +118,9 @@ function loadUserStats(): void {
       userStats = parsed.stats || {};
       modesUsed = new Set(parsed.modesUsed || []);
     }
-  } catch {}
+  } catch (error) {
+    console.error('Failed to load user stats:', error);
+  }
 }
 
 function saveUserStats(): void {
@@ -123,7 +129,9 @@ function saveUserStats(): void {
       stats: userStats,
       modesUsed: Array.from(modesUsed),
     }));
-  } catch {}
+  } catch (error) {
+    console.error('Failed to save user stats:', error);
+  }
 }
 
 loadUserStats();

@@ -432,7 +432,7 @@ export async function exportCADModel(
   const unitScale = options.unit === 'mm' ? 10 : options.unit === 'cm' ? 1 : 2.54;
 
   onProgress?.(10, 'Validating meshes...');
-  let allValid = true;
+  const allValid = true;
   scene.traverse(child => {
     if ((child as THREE.Mesh).isMesh) {
       const mesh = child as THREE.Mesh;

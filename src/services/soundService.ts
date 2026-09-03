@@ -542,7 +542,9 @@ export const stopBackgroundMusic = () => {
           bgMusicOsc?.stop();
           osc2Ref?.stop();
           lfoRef?.stop();
-        } catch {}
+        } catch {
+          // ignore error
+        }
         bgMusicOsc = null;
         bgMusicGain = null;
       }, 600);

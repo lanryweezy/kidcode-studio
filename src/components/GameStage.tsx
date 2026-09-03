@@ -599,7 +599,7 @@ const JoystickPad = ({ onInput }: { onInput: (id: string, active: boolean) => vo
             }
             return;
         }
-        let dir = 'right';
+        let dir;
         if (Math.abs(dx) > Math.abs(dy)) {
             dir = dx > 0 ? 'right' : 'left';
         } else {

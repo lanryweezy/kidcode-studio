@@ -126,8 +126,10 @@ export const extractSprite = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`SAM API error: ${error.error || response.statusText}`);
+          const errorInfo = await response.json().catch(() => ({}));
+          const error = new Error(`SAM API error: ${errorInfo.error || response.statusText}`);
+          (error as any).status = response.status;
+          throw error;
         }
 
         onProgress?.({

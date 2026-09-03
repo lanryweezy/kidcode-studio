@@ -367,7 +367,9 @@ export async function runAITest(config: TestConfig): Promise<TestReport> {
         });
 
         if (!res.ok) {
-          throw new Error(`AI API returned status ${res.status}`);
+          const error = new Error(`AI API returned status ${res.status}`);
+          (error as any).status = res.status;
+          throw error;
         }
 
         return res;

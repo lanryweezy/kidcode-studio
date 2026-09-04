@@ -67,8 +67,8 @@ const AppInner: React.FC = () => {
     const {
         showLanding, showHome, showGallery, hackerMode,
         showShortcuts, setShowShortcuts, advancedPhysics,
-        spriteState, advancedPhysics: advPhysics, highContrast,
-        mode, showHome: showHomeState,
+        highContrast,
+        mode,
     } = useStore();
 
     const controller = useEditorController();
@@ -83,7 +83,7 @@ const AppInner: React.FC = () => {
         spriteStateRef,
         gameCanvasSizeRef,
         isPlaying,
-        matterTick, setMatterTick,
+        setMatterTick,
     } = controller;
 
     const handleGalleryBack = useCallback(() => {
@@ -139,19 +139,17 @@ const AppInner: React.FC = () => {
                     </React.Suspense>
                 )}
                 <div className={`flex-1 min-h-0 fade-enter ${viewVisible ? 'fade-enter-active' : ''}`}>
-                    {showLanding ? (
-                        <LandingPage />
-                    ) : showGallery ? (
-                        <GalleryPage onBack={handleGalleryBack} />
-                    ) : showHome ? (
-                        <HomeScreen />
-                    ) : mode === AppMode.CAD ? (
-                        <React.Suspense fallback={<LoadingScreen />}>
-                            <CADLayout onBack={() => useStore.getState().setShowHome(true)} />
-                        </React.Suspense>
-                    ) : (
-                        <EditorLayout {...controller} />
-                    )}
+                    {(() => {
+                        if (showLanding) return <LandingPage />;
+                        if (showGallery) return <GalleryPage onBack={handleGalleryBack} />;
+                        if (showHome) return <HomeScreen />;
+                        if (mode === AppMode.CAD) return (
+                            <React.Suspense fallback={<LoadingScreen />}>
+                                <CADLayout onBack={() => useStore.getState().setShowHome(true)} />
+                            </React.Suspense>
+                        );
+                        return <EditorLayout {...controller} />;
+                    })()}
                 </div>
 
                 <EditorModals {...controller} />

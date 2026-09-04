@@ -64,7 +64,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ objects }) => {
   }, [bounds.height, printer.layerHeight]);
 
   const supportInfo = useMemo(() => {
-    const { BufferAttribute } = require('three');
+
     let totalUnsupportedFaces = 0;
     const objectSupports: { name: string; unsupportedFaces: number }[] = [];
 

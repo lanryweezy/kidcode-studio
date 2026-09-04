@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useStore } from '../store/useStore';
+
 import { generateVoxelsFromPrompt, Voxel } from '../services/voxelService';
 import { X, Box, Sparkles, Loader2, Check } from 'lucide-react';
 import { useToast } from './ui/Toast';

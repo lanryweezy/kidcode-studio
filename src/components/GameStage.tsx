@@ -202,10 +202,10 @@ const GameCanvas = React.memo(({
                 return;
             }
 
-            let targetCameraX = 0;
+            // let targetCameraX = 0;
             let targetCameraY = 0;
             if (isExecuting) {
-                targetCameraX = current.x - (width / 2) / zoom;
+                // targetCameraX = current.x - (width / 2) / zoom;
                 targetCameraY = Math.max(0, current.y - (height / 2) / zoom);
                 if (currentTilemap && currentTilemap.length > 0) {
                     let maxX = 0, maxY = 0;

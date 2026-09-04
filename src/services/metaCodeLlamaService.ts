@@ -94,8 +94,13 @@ export const getCodeAssistance = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
+          // 🤖 Astra: [AI quality improvement]
+          // Attaching HTTP status so that retry wrappers (like executeWithRetry) can
+          // accurately identify rate limits (429) or server errors (5xx) for proper backoff.
+          const errorData = await response.json().catch(() => ({}));
+          const error = new Error(`Code Llama API error: ${errorData.error || response.statusText}`);
+          (error as any).status = response.status;
+          throw error;
         }
 
         return await response.json();

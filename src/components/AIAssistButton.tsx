@@ -28,7 +28,7 @@ const AIAssistButton: React.FC<AIAssistButtonProps> = ({ currentMode, onAppendCo
             setPrompt('');
             setIsOpen(false);
         } catch (err) {
-            console.error('AI Assist error:', err);
+            // console.error('AI Assist error:', err);
         } finally {
             setIsGenerating(false);
         }

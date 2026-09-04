@@ -139,19 +139,19 @@ export function useEditorController() {
     }) => {
         pushHistory();
         if (info.type === 'trash' && info.sourceBlockId) {
-            setCommands(prev => prev.filter(c => c.id !== info.sourceBlockId));
+            setCommands(commandsRef.current.filter((c: CommandBlock) => c.id !== info.sourceBlockId));
             return;
         }
         if (info.type === 'move' && info.sourceBlockId) {
-            setCommands(prev => {
-                const oldIndex = prev.findIndex(c => c.id === info.sourceBlockId);
-                if (oldIndex === -1) return prev;
+            const prev = commandsRef.current;
+            const oldIndex = prev.findIndex(c => c.id === info.sourceBlockId);
+            if (oldIndex !== -1) {
                 const newCmds = [...prev];
                 const [moved] = newCmds.splice(oldIndex, 1);
                 const newIndex = oldIndex < info.dropIndex ? info.dropIndex - 1 : info.dropIndex;
                 newCmds.splice(newIndex, 0, moved);
-                return newCmds;
-            });
+                setCommands(newCmds);
+            }
             setSnappingBlockId(info.sourceBlockId);
             setTimeout(() => setSnappingBlockId(null), 300);
             return;
@@ -163,11 +163,10 @@ export function useEditorController() {
                 params: { ...info.blockDef.defaultParams },
             };
             markBlockAsNew(newBlock.id);
-            setCommands(prev => {
-                const newCmds = [...prev];
-                newCmds.splice(info.dropIndex, 0, newBlock);
-                return newCmds;
-            });
+            const prev = commandsRef.current;
+            const newCmds = [...prev];
+            newCmds.splice(info.dropIndex, 0, newBlock);
+            setCommands(newCmds);
             setSnappingBlockId(newBlock.id);
             setTimeout(() => setSnappingBlockId(null), 300);
         }

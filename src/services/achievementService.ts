@@ -78,7 +78,7 @@ export interface AchievementState {
   pendingPopups: Achievement[];
 }
 
-let achievementState: AchievementState = {
+const achievementState: AchievementState = {
   unlocked: [],
   pendingPopups: [],
 };
@@ -90,7 +90,7 @@ function loadAchievementState(): void {
       const parsed = JSON.parse(raw);
       achievementState.unlocked = parsed.unlocked || [];
     }
-  } catch {}
+  } catch { /* ignore error */ }
 }
 
 function saveAchievementState(): void {
@@ -98,7 +98,7 @@ function saveAchievementState(): void {
     localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify({
       unlocked: achievementState.unlocked,
     }));
-  } catch {}
+  } catch { /* ignore error */ }
 }
 
 loadAchievementState();
@@ -114,7 +114,7 @@ function loadUserStats(): void {
       userStats = parsed.stats || {};
       modesUsed = new Set(parsed.modesUsed || []);
     }
-  } catch {}
+  } catch { /* ignore error */ }
 }
 
 function saveUserStats(): void {
@@ -123,7 +123,7 @@ function saveUserStats(): void {
       stats: userStats,
       modesUsed: Array.from(modesUsed),
     }));
-  } catch {}
+  } catch { /* ignore error */ }
 }
 
 loadUserStats();

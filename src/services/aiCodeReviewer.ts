@@ -455,7 +455,12 @@ export async function analyzeCodeWithAI(
         });
 
         if (!res.ok) {
-          throw new Error(`AI API returned status ${res.status}`);
+          // 🤖 Astra: [AI quality improvement]
+          // Attaching HTTP status so that retry wrappers (like executeWithRetry) can
+          // accurately identify rate limits (429) or server errors (5xx) for proper backoff.
+          const error = new Error(`AI API returned status ${res.status}`);
+          (error as any).status = res.status;
+          throw error;
         }
 
         return res;

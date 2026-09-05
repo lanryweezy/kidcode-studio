@@ -94,8 +94,12 @@ export const getCodeAssistance = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
+          const errorInfo = await response.json().catch(() => ({}));
+          // 🤖 Astra: [AI quality improvement]
+          // Attaching HTTP status to the Error so executeWithRetry can apply backoff for 429/5xx.
+          const error: any = new Error(`Code Llama API error: ${errorInfo.error || response.statusText}`);
+          error.status = response.status;
+          throw error;
         }
 
         return await response.json();

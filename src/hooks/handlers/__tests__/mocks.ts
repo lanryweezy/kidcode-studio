@@ -13,7 +13,10 @@ export const createMockSpriteState = (overrides: Partial<SpriteState> = {}): Spr
   animations: {},
   currentAnimation: null,
   animationSpeed: 1,
+  costume: 'default',
+  costumes: [],
   speech: null,
+  speechType: 'say',
   weather: 'none',
   score: 0,
   keys: 0,
@@ -57,6 +60,9 @@ export const createMockSpriteState = (overrides: Partial<SpriteState> = {}): Spr
   bossHealth: 0,
   bossMaxHealth: 0,
   bossPhase: 0,
+  penDown: false,
+  penColor: '#000000',
+  penTrails: [],
   ...overrides,
 });
 

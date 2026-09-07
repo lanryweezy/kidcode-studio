@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { CADObject3D, PRINT_BED, PRINTER_PROFILES } from '../../types/cad';
 import { calculatePrintVolume } from '../../services/cadParametrics';
+import { Vector3, BufferAttribute } from 'three';
 
 interface PrintPreviewProps {
   objects: CADObject3D[];
@@ -39,7 +40,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ objects }) => {
       let vol = 0;
       obj.geometry.computeBoundingBox();
       if (obj.geometry.boundingBox) {
-        const s = obj.geometry.boundingBox.getSize(new (require('three').Vector3)());
+        const s = obj.geometry.boundingBox.getSize(new Vector3());
         vol = (s.x * 10 * obj.scale.x) * (s.y * 10 * obj.scale.y) * (s.z * 10 * obj.scale.z);
       }
       return sum + vol;
@@ -64,7 +65,6 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ objects }) => {
   }, [bounds.height, printer.layerHeight]);
 
   const supportInfo = useMemo(() => {
-    const { BufferAttribute } = require('three');
     let totalUnsupportedFaces = 0;
     const objectSupports: { name: string; unsupportedFaces: number }[] = [];
 

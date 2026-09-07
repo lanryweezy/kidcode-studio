@@ -58,7 +58,6 @@ describe('Block', () => {
     onDelete: vi.fn(),
     onDuplicate: vi.fn(),
     isDraggable: true,
-    onDragStart: vi.fn(),
     onDragEnter: vi.fn(),
     onMouseEnter: vi.fn(),
     onMouseLeave: vi.fn(),

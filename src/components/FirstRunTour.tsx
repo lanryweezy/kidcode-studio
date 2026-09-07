@@ -6,7 +6,7 @@ interface TourStep {
     title: string;
     text: string;
     targetId: string;
-    position: 'top' | 'bottom' | 'left' | 'right';
+    position: 'top' | 'bottom' | 'left' | 'right' | 'center';
 }
 
 const TOUR_STEPS: TourStep[] = [

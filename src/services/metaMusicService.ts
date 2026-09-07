@@ -85,8 +85,19 @@ export const generateMusic = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`MusicGen API error: ${error.error || response.statusText}`);
+          let errorMessage = `MusicGen API error: ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = `MusicGen API error: ${errorData.error || errorData.message || response.statusText}`;
+          } catch {
+            // Ignore JSON parse errors for non-JSON error responses
+          }
+          // 🤖 Astra: [AI quality improvement]
+          // Attach the HTTP status code to the error object so `classifyError` in `aiServiceWrapper.ts`
+          // can correctly identify it as a retryable 429/5xx error and trigger exponential backoff.
+          const error = new Error(errorMessage) as Error & { status?: number };
+          error.status = response.status;
+          throw error;
         }
 
         onProgress?.({

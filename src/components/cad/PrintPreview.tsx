@@ -71,7 +71,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ objects }) => {
     for (const obj of visibleObjects) {
       if (!obj.geometry) continue;
       const geo = obj.geometry;
-      const posAttr = geo.getAttribute('position') as typeof BufferAttribute;
+      const posAttr = geo.getAttribute('position') as BufferAttribute;
       if (!posAttr) continue;
 
       let objUnsupported = 0;

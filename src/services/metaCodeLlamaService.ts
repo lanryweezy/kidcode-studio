@@ -94,8 +94,12 @@ export const getCodeAssistance = async (
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(`Code Llama API error: ${error.error || response.statusText}`);
+          const errorBody = await response.json().catch(() => ({}));
+          // 🤖 Astra: [Failure Resilience: Propagating HTTP Status to Retry Wrappers]
+          // Attach the response.status to the Error so executeWithRetry can detect 429/5xx and retry.
+          const err = new Error(`Code Llama API error: ${errorBody.error || response.statusText}`) as Error & { status?: number };
+          err.status = response.status;
+          throw err;
         }
 
         return await response.json();

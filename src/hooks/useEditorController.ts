@@ -139,12 +139,12 @@ export function useEditorController() {
     }) => {
         pushHistory();
         if (info.type === 'trash' && info.sourceBlockId) {
-            setCommands(prev => prev.filter(c => c.id !== info.sourceBlockId));
+            setCommands((prev: CommandBlock[]) => prev.filter((c: CommandBlock) => c.id !== info.sourceBlockId));
             return;
         }
         if (info.type === 'move' && info.sourceBlockId) {
-            setCommands(prev => {
-                const oldIndex = prev.findIndex(c => c.id === info.sourceBlockId);
+            setCommands((prev: CommandBlock[]) => {
+                const oldIndex = prev.findIndex((c: CommandBlock) => c.id === info.sourceBlockId);
                 if (oldIndex === -1) return prev;
                 const newCmds = [...prev];
                 const [moved] = newCmds.splice(oldIndex, 1);
@@ -163,7 +163,7 @@ export function useEditorController() {
                 params: { ...info.blockDef.defaultParams },
             };
             markBlockAsNew(newBlock.id);
-            setCommands(prev => {
+            setCommands((prev: CommandBlock[]) => {
                 const newCmds = [...prev];
                 newCmds.splice(info.dropIndex, 0, newBlock);
                 return newCmds;

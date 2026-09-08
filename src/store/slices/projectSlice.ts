@@ -45,7 +45,7 @@ export interface ProjectSlice {
 
     // Actions
     setProject: (project: any) => void;
-    setCommands: (commands: CommandBlock[]) => void;
+    setCommands: (commands: CommandBlock[] | ((prev: CommandBlock[]) => CommandBlock[])) => void;
     updateHardwareState: (state: Partial<HardwareState>) => void;
     updateSpriteState: (state: Partial<SpriteState>) => void;
     updateAppState: (state: Partial<AppState>) => void;
@@ -104,7 +104,10 @@ export const createProjectSlice: StateCreator<StoreState, [], [], ProjectSlice> 
         saveStatus: 'saved'
     }),
 
-    setCommands: (commands) => set({ commands, saveStatus: 'unsaved' }),
+    setCommands: (commands) => set((state) => ({
+        commands: typeof commands === 'function' ? commands(state.commands) : commands,
+        saveStatus: 'unsaved'
+    })),
 
     updateHardwareState: (state) => set((prev) => ({
         hardwareState: { ...prev.hardwareState, ...state }

@@ -79,7 +79,7 @@ export const GameEndScreen: React.FC<GameEndScreenProps> = ({
           <Button variant="secondary" fullWidth icon={<Home size={16} />} onClick={onHome} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2">
             Home
           </Button>
-          <Button variant={isVictory ? 'success' : 'danger'} fullWidth icon={<RotateCcw size={16} />} onClick={onRestart} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2">
+          <Button variant={isVictory ? 'primary' : 'danger'} fullWidth icon={<RotateCcw size={16} />} onClick={onRestart} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2">
             {isVictory ? 'Play Again' : 'Try Again'}
           </Button>
         </div>

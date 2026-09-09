@@ -86,7 +86,11 @@ export const generateMusic = async (
 
         if (!response.ok) {
           const error = await response.json().catch(() => ({}));
-          throw new Error(`MusicGen API error: ${error.error || response.statusText}`);
+          // 🤖 Astra: [AI quality improvement]
+          // Attach HTTP status so classifyError in aiServiceWrapper can trigger retries on 429/5xx.
+          const err = new Error(`MusicGen API error: ${error.error || response.statusText}`) as Error & { status?: number };
+          err.status = response.status;
+          throw err;
         }
 
         onProgress?.({

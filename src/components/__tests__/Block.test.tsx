@@ -58,7 +58,6 @@ describe('Block', () => {
     onDelete: vi.fn(),
     onDuplicate: vi.fn(),
     isDraggable: true,
-    onDragStart: vi.fn(),
     onDragEnter: vi.fn(),
     onMouseEnter: vi.fn(),
     onMouseLeave: vi.fn(),
@@ -115,8 +114,7 @@ describe('Block', () => {
   });
 
   it('handles drag start', () => {
-    const onDragStart = vi.fn();
-    render(<Block {...defaultProps} onDragStart={onDragStart} />);
+    render(<Block {...defaultProps} />);
     const block = screen.getByRole('article', { name: /code block:.*set variable/i });
     fireEvent.pointerDown(block, { clientX: 0, clientY: 0, button: 0 });
     fireEvent.pointerMove(block, { clientX: 10, clientY: 10 });

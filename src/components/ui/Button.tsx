@@ -1,6 +1,6 @@
 import React, { useRef, useCallback } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'icon';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,6 +17,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold',
   ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 font-semibold',
   danger: 'bg-rose-500 hover:bg-rose-600 text-white shadow-sm',
+  success: 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

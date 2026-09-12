@@ -116,12 +116,16 @@ export const generateCodeFromPromptStream = async function* (
     }
 
     // Done streaming, now parse the final output
-    const jsonMatch = fullText.match(/```json\n([\s\S]*?)\n```/);
+    // 🤖 Astra: [AI quality improvement]
+    // Use robust array extraction to handle cases where the model includes conversational preamble
+    // before the JSON block, which bypasses naive regex stripping and crashes JSON.parse.
+    const startIdx = fullText.indexOf('[');
+    const endIdx = fullText.lastIndexOf(']');
     let commands: Omit<CommandBlock, 'id'>[] | undefined;
 
-    if (jsonMatch && jsonMatch[1]) {
+    if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
       try {
-        commands = safeParseCommands(jsonMatch[1]);
+        commands = safeParseCommands(fullText.substring(startIdx, endIdx + 1));
       } catch (e) {
         console.error("Failed to parse or validate generated JSON", e);
       }

@@ -146,14 +146,21 @@ export default async function handler(req: Request) {
         `;
       const result = await model.generateContent(prompt);
       let textResult = result.response.text();
-      // Sanitize the output to remove any rogue markdown blocks before returning it to the client.
-      textResult = textResult.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      // 🤖 Astra: [AI quality improvement]
+      // Use robust array extraction to handle cases where the model includes conversational preamble
+      // before the JSON block, which bypasses naive regex stripping and crashes JSON.parse.
+      const startIdx = textResult.indexOf('[');
+      const endIdx = textResult.lastIndexOf(']');
       let parsedIssues: Array<Record<string, unknown>> = [];
-      try {
-         parsedIssues = JSON.parse(textResult);
-      } catch (e) {
-         console.error("Failed to parse analyzeCode JSON", e);
-         parsedIssues = [];
+      if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+        try {
+           parsedIssues = JSON.parse(textResult.substring(startIdx, endIdx + 1));
+        } catch (e) {
+           console.error("Failed to parse analyzeCode JSON", e);
+           parsedIssues = [];
+        }
+      } else {
+        console.error("Failed to find JSON array in analyzeCode response");
       }
       return new Response(JSON.stringify({ issues: parsedIssues }), {
         headers: { 'Content-Type': 'application/json' }
@@ -183,14 +190,21 @@ export default async function handler(req: Request) {
         `;
       const result = await model.generateContent(prompt);
       let textResult = result.response.text();
-      // Sanitize the output to remove any rogue markdown blocks before returning it to the client.
-      textResult = textResult.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      // 🤖 Astra: [AI quality improvement]
+      // Use robust array extraction to handle cases where the model includes conversational preamble
+      // before the JSON block, which bypasses naive regex stripping and crashes JSON.parse.
+      const startIdx = textResult.indexOf('[');
+      const endIdx = textResult.lastIndexOf(']');
       let parsedImprovements: Array<Record<string, unknown>> = [];
-      try {
-         parsedImprovements = JSON.parse(textResult);
-      } catch (e) {
-         console.error("Failed to parse testGame JSON", e);
-         parsedImprovements = [];
+      if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+        try {
+           parsedImprovements = JSON.parse(textResult.substring(startIdx, endIdx + 1));
+        } catch (e) {
+           console.error("Failed to parse testGame JSON", e);
+           parsedImprovements = [];
+        }
+      } else {
+        console.error("Failed to find JSON array in testGame response");
       }
       return new Response(JSON.stringify({ improvements: parsedImprovements }), {
         headers: { 'Content-Type': 'application/json' }

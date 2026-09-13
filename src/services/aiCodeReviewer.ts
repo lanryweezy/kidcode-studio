@@ -455,7 +455,11 @@ export async function analyzeCodeWithAI(
         });
 
         if (!res.ok) {
-          throw new Error(`AI API returned status ${res.status}`);
+          // 🤖 Astra: [AI quality improvement]
+          // Attach HTTP status to Error object so retry wrappers can correctly classify 429/5xx errors.
+          const error = new Error(`AI API returned status ${res.status}`) as Error & { status?: number };
+          error.status = res.status;
+          throw error;
         }
 
         return res;

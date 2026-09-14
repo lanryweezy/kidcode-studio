@@ -455,7 +455,11 @@ export async function analyzeCodeWithAI(
         });
 
         if (!res.ok) {
-          throw new Error(`AI API returned status ${res.status}`);
+          // 🤖 Astra: [AI quality improvement]
+          // Attach HTTP status to Error object so retry wrappers can correctly classify errors.
+          const error = new Error(`AI API returned status ${res.status}`) as Error & { status?: number };
+          error.status = res.status;
+          throw error;
         }
 
         return res;
@@ -467,7 +471,9 @@ export async function analyzeCodeWithAI(
     // 🤖 Astra: [AI quality improvement]
     // Validate proxy response before parsing to prevent silent JSON parse crashes on 5xx/429 HTML responses.
     if (!response.ok) {
-      throw new Error(`AI proxy returned unexpected status: ${response.status}`);
+      const error = new Error(`AI proxy returned unexpected status: ${response.status}`) as Error & { status?: number };
+      error.status = response.status;
+      throw error;
     }
 
     const data = await response.json();

@@ -48,6 +48,7 @@ const GameCanvas = React.memo(({
     const isPaintingTile = useRef(false);
     const tilemapRef = useRef(spriteState.tilemap || []);
     const [editorScrollX, setEditorScrollX] = useState(0);
+    const [editorScrollY, setEditorScrollY] = useState(0);
     const gameParticles = useRef<any[]>([]);
     const weatherParticles = useRef<any[]>([]);
     const frameCache = useRef<Record<string, HTMLImageElement>>({});
@@ -417,14 +418,15 @@ const GameCanvas = React.memo(({
         };
         render();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [canvasRef, spriteState, isExecuting, shakeAmount, editorScrollX, width, height, onTick, showPauseMenu, zoom]);
+    }, [canvasRef, spriteState, isExecuting, shakeAmount, editorScrollX, editorScrollY, width, height, onTick, showPauseMenu, zoom]);
 
     const placeTileAt = (clientX: number, clientY: number) => {
         if (appState.activeLevelTool && canvasRef.current) {
             const rect = canvasRef.current.getBoundingClientRect();
             const rawX = clientX - rect.left + editorScrollX;
             const x = Math.floor(rawX / 40);
-            const y = Math.floor((clientY - rect.top) / 40);
+            const rawY = clientY - rect.top + editorScrollY;
+            const y = Math.floor(rawY / 40);
             const newMap = [...tilemapRef.current];
             const existingIdx = newMap.findIndex((t: any) => t.x === x && t.y === y);
             if (existingIdx >= 0 && newMap[existingIdx].type === appState.activeLevelTool) return;

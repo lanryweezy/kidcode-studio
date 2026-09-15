@@ -286,7 +286,7 @@ const CADViewport = forwardRef<CADViewportHandle, CADViewportProps>(({
     const ctrl = controlsRef.current;
 
     let pos: [number, number, number];
-    let target: [number, number, number] = [0, 0, 0];
+    const target: [number, number, number] = [0, 0, 0];
 
     switch (preset) {
       case 'front': pos = [0, 0, 20]; break;

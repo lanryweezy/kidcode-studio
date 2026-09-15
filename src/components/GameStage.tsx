@@ -48,6 +48,7 @@ const GameCanvas = React.memo(({
     const isPaintingTile = useRef(false);
     const tilemapRef = useRef(spriteState.tilemap || []);
     const [editorScrollX, setEditorScrollX] = useState(0);
+    const [editorScrollY, setEditorScrollY] = useState(0);
     const gameParticles = useRef<any[]>([]);
     const weatherParticles = useRef<any[]>([]);
     const frameCache = useRef<Record<string, HTMLImageElement>>({});
@@ -202,8 +203,8 @@ const GameCanvas = React.memo(({
                 return;
             }
 
-            let targetCameraX = 0;
-            let targetCameraY = 0;
+            let targetCameraX: number;
+            let targetCameraY: number;
             if (isExecuting) {
                 targetCameraX = current.x - (width / 2) / zoom;
                 targetCameraY = Math.max(0, current.y - (height / 2) / zoom);
@@ -218,6 +219,7 @@ const GameCanvas = React.memo(({
                 }
             } else {
                 targetCameraX = editorScrollX;
+                targetCameraY = editorScrollY;
             }
 
             const lerpFactor = isExecuting ? 0.08 : 1;
@@ -416,14 +418,15 @@ const GameCanvas = React.memo(({
         };
         render();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [canvasRef, spriteState, isExecuting, shakeAmount, editorScrollX, width, height, onTick, showPauseMenu, zoom]);
+    }, [canvasRef, spriteState, isExecuting, shakeAmount, editorScrollX, editorScrollY, width, height, onTick, showPauseMenu, zoom]);
 
     const placeTileAt = (clientX: number, clientY: number) => {
         if (appState.activeLevelTool && canvasRef.current) {
             const rect = canvasRef.current.getBoundingClientRect();
             const rawX = clientX - rect.left + editorScrollX;
             const x = Math.floor(rawX / 40);
-            const y = Math.floor((clientY - rect.top) / 40);
+            const rawY = clientY - rect.top + editorScrollY;
+            const y = Math.floor(rawY / 40);
             const newMap = [...tilemapRef.current];
             const existingIdx = newMap.findIndex((t: any) => t.x === x && t.y === y);
             if (existingIdx >= 0 && newMap[existingIdx].type === appState.activeLevelTool) return;
@@ -599,7 +602,7 @@ const JoystickPad = ({ onInput }: { onInput: (id: string, active: boolean) => vo
             }
             return;
         }
-        let dir = 'right';
+        let dir: string;
         if (Math.abs(dx) > Math.abs(dy)) {
             dir = dx > 0 ? 'right' : 'left';
         } else {

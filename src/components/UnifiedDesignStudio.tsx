@@ -1160,7 +1160,7 @@ export default function UnifiedDesignStudio({ onClose, onSave, initialData }: Un
         objects: [...s.objects.filter(o => !cadState.selectedObjectIds.includes(o.id)), newObj],
         selectedObjectIds: [newId],
       }));
-      return;
+
     }
   }, [cadState.selectedObjectIds, cadState.objects, pushCADHistory]);
 

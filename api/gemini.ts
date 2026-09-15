@@ -263,8 +263,14 @@ export default async function handler(req: Request) {
     return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 });
 
   } catch (error: any) {
+    // 🤖 Astra: [AI quality improvement]
+    // Return 400 Bad Request for safety/content blocks instead of 500 Server Error.
+    // This prevents client-side fetch wrappers from infinitely retrying deterministic refusals.
+    const errorMessage = error.message?.toLowerCase() || '';
+    const isSafetyBlock = errorMessage.includes('safety') || errorMessage.includes('blocked');
+
     return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
+        status: isSafetyBlock ? 400 : 500,
         headers: { 'Content-Type': 'application/json' }
     });
   }

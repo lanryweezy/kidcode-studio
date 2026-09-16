@@ -263,8 +263,14 @@ export default async function handler(req: Request) {
     return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 });
 
   } catch (error: any) {
+    // 🤖 Astra: [AI quality improvement]
+    // Detect deterministic safety/content blocks from Google Generative AI.
+    // Return 400 Bad Request instead of 500 to prevent client-side wrappers from uselessly retrying unrecoverable errors.
+    const isSafetyBlock = error?.message?.toLowerCase().includes('safety') || error?.message?.toLowerCase().includes('blocked');
+    const status = isSafetyBlock ? 400 : 500;
+
     return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
+        status,
         headers: { 'Content-Type': 'application/json' }
     });
   }

@@ -263,6 +263,17 @@ export default async function handler(req: Request) {
     return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 });
 
   } catch (error: any) {
+    // 🤖 Astra: [AI quality improvement]
+    // Deterministic model refusals (e.g. safety blocks) must be mapped to a 400 Bad Request instead of 500 Internal Server Error.
+    // This prevents client-side `executeWithRetry` logic from infinitely retrying unrecoverable errors.
+    const errorMessage = error.message?.toLowerCase() || '';
+    if (errorMessage.includes('safety') || errorMessage.includes('blocked') || errorMessage.includes('candidate was blocked') || errorMessage.includes('finish reason was safety')) {
+      return new Response(JSON.stringify({ error: 'Request was blocked due to safety policies.' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }

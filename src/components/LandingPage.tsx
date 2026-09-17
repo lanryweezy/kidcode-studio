@@ -1,7 +1,6 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { useState } from 'react';
 import { Zap, Sparkles, Trophy, Users, Star, ArrowRight, Play, Rocket } from 'lucide-react';
 import { playSoundEffect } from '../services/soundService';
 import { VideoModal } from './VideoModal';

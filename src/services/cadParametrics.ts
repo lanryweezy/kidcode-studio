@@ -411,7 +411,6 @@ function mergeBufferGeometries(geometries: THREE.BufferGeometry[]): THREE.Buffer
   const normals = new Float32Array(totalVertices * 3);
   const indices: number[] = [];
   let vertexOffset = 0;
-  let indexOffset = 0;
 
   for (const geo of geometries) {
     const posAttr = geo.attributes.position as THREE.BufferAttribute;

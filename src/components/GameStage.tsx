@@ -218,6 +218,7 @@ const GameCanvas = React.memo(({
                 }
             } else {
                 targetCameraX = editorScrollX;
+                targetCameraY = 0;
             }
 
             const lerpFactor = isExecuting ? 0.08 : 1;

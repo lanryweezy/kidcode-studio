@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import * as THREE from 'three';
 import { CADObject3D, PRINT_BED, PRINTER_PROFILES } from '../../types/cad';
 import { calculatePrintVolume } from '../../services/cadParametrics';
 

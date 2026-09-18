@@ -542,7 +542,9 @@ export const stopBackgroundMusic = () => {
           bgMusicOsc?.stop();
           osc2Ref?.stop();
           lfoRef?.stop();
-        } catch {}
+        } catch (e) {
+          console.error("Failed to stop background music nodes", e);
+        }
         bgMusicOsc = null;
         bgMusicGain = null;
       }, 600);

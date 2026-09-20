@@ -78,7 +78,7 @@ export interface AchievementState {
   pendingPopups: Achievement[];
 }
 
-let achievementState: AchievementState = {
+const achievementState: AchievementState = {
   unlocked: [],
   pendingPopups: [],
 };
@@ -90,7 +90,7 @@ function loadAchievementState(): void {
       const parsed = JSON.parse(raw);
       achievementState.unlocked = parsed.unlocked || [];
     }
-  } catch {}
+  } catch { /* empty */ }
 }
 
 function saveAchievementState(): void {
@@ -98,12 +98,12 @@ function saveAchievementState(): void {
     localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify({
       unlocked: achievementState.unlocked,
     }));
-  } catch {}
+  } catch { /* empty */ }
 }
 
 loadAchievementState();
 
-let userStats: Record<string, number> = {};
+let userStats: Record<string, number> = { /* empty */ };
 let modesUsed: Set<string> = new Set();
 
 function loadUserStats(): void {
@@ -111,10 +111,10 @@ function loadUserStats(): void {
     const raw = localStorage.getItem('kidcode_user_stats');
     if (raw) {
       const parsed = JSON.parse(raw);
-      userStats = parsed.stats || {};
+      userStats = parsed.stats || { /* empty */ };
       modesUsed = new Set(parsed.modesUsed || []);
     }
-  } catch {}
+  } catch { /* empty */ }
 }
 
 function saveUserStats(): void {
@@ -123,7 +123,7 @@ function saveUserStats(): void {
       stats: userStats,
       modesUsed: Array.from(modesUsed),
     }));
-  } catch {}
+  } catch { /* empty */ }
 }
 
 loadUserStats();

@@ -1,4 +1,5 @@
-import { AppMode, CommandBlock, CommandType } from "../types";
+import { AppMode, CommandBlock } from "../types";
+import { executeWithRetry, RetryPresets } from "./aiServiceWrapper";
 
 /**
  * SECURITY NOTE: API keys are handled server-side via /api/gemini proxy
@@ -30,72 +31,37 @@ const safeParseCommands = (jsonStr: string): Omit<CommandBlock, 'id'>[] => {
 };
 
 
-/**
- * Utility to add a timeout to fetch requests.
- */
-async function fetchWithTimeout(resource: RequestInfo | URL, options: RequestInit & { timeout?: number } = {}) {
-    const { timeout = 10000, ...fetchOptions } = options;
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    const response = await fetch(resource, {
-        ...fetchOptions,
-        signal: controller.signal
-    });
-    clearTimeout(id);
-    return response;
-}
-
-/**
- * Utility to fetch with exponential backoff retries.
- * Handles transient network issues and API rate limits (429/500+).
- */
-async function fetchWithRetry(resource: RequestInfo | URL, options: RequestInit & { timeout?: number, retries?: number, delay?: number } = {}) {
-    const { retries = 3, delay = 1000, ...fetchOptions } = options;
-
-    let lastError: Error | null = null;
-    // We execute the loop retries + 1 times. The first attempt, plus 'retries' number of retries.
-    // If retries is 0, we still attempt once.
-    const maxAttempts = Math.max(1, retries + 1);
-
-    for (let i = 0; i < maxAttempts; i++) {
-        try {
-            const response = await fetchWithTimeout(resource, fetchOptions);
-            // Retry on 429 (Too Many Requests) or 5xx (Server Errors)
-            if (!response.ok && (response.status === 429 || response.status >= 500)) {
-                if (i === maxAttempts - 1) return response; // Return the last response if out of retries
-                await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
-                continue;
-            }
-            return response;
-        } catch (error) {
-            lastError = error instanceof Error ? error : new Error(String(error));
-            // Only retry on network errors or timeouts (AbortError)
-            if (i === maxAttempts - 1) throw error;
-            await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
-        }
-    }
-    throw lastError || new Error("Max attempts reached");
-}
 
 export const generateCodeFromPromptStream = async function* (
   userPrompt: string,
   currentMode: AppMode
 ): AsyncGenerator<{ text: string; isDone: boolean; commands?: Omit<CommandBlock, 'id'>[] }, void, unknown> {
   try {
-    const response = await fetchWithRetry('/api/gemini', {
-        timeout: 20000,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            action: 'generateCodeStream',
-            payload: { userPrompt, currentMode }
-        })
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to connect to AI brain');
-    }
+    const response = await executeWithRetry(async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      try {
+        const res = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'generateCodeStream',
+                payload: { userPrompt, currentMode }
+            }),
+            signal: controller.signal
+        });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error for proper retry classification
+            const error = new Error(errorData.error || `AI API returned status ${res.status}`) as Error & { status?: number };
+            error.status = res.status;
+            throw error;
+        }
+        return res;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }, RetryPresets.quick, 'gemini');
 
     const reader = response.body?.getReader();
     if (!reader) throw new Error('Response body is null');
@@ -158,19 +124,30 @@ export const generateCodeFromPrompt = async (
 
 export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {
     try {
-        const response = await fetchWithRetry('/api/gemini', {
-            timeout: 10000,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'reviewCode',
-                payload: { commands, mode }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
-        }
+        const response = await executeWithRetry(async () => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            try {
+                const res = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'reviewCode',
+                        payload: { commands, mode }
+                    }),
+                    signal: controller.signal
+                });
+                if (!res.ok) {
+                    // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error for proper retry classification
+                    const error = new Error(`AI API returned status ${res.status}`) as Error & { status?: number };
+                    error.status = res.status;
+                    throw error;
+                }
+                return res;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }, RetryPresets.quick, 'gemini');
 
         const data = await response.json();
         return data.text || "I couldn't review your code right now, but keep building! 🚀";
@@ -182,19 +159,30 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
 
 export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Promise<Omit<CommandBlock, 'id'>[] | null> => {
     try {
-        const response = await fetchWithRetry('/api/gemini', {
-            timeout: 10000,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'getFixedCode',
-                payload: { commands, mode }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
-        }
+        const response = await executeWithRetry(async () => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            try {
+                const res = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'getFixedCode',
+                        payload: { commands, mode }
+                    }),
+                    signal: controller.signal
+                });
+                if (!res.ok) {
+                    // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error for proper retry classification
+                    const error = new Error(`AI API returned status ${res.status}`) as Error & { status?: number };
+                    error.status = res.status;
+                    throw error;
+                }
+                return res;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }, RetryPresets.quick, 'gemini');
 
         const data = await response.json();
         const text = data.text;
@@ -219,19 +207,30 @@ export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Pro
 
 export const generateSprite = async (description: string): Promise<string | null> => {
     try {
-        const response = await fetchWithRetry('/api/gemini', {
-            timeout: 20000,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'generateSprite',
-                payload: { description }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
-        }
+        const response = await executeWithRetry(async () => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+            try {
+                const res = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generateSprite',
+                        payload: { description }
+                    }),
+                    signal: controller.signal
+                });
+                if (!res.ok) {
+                    // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error for proper retry classification
+                    const error = new Error(`AI API returned status ${res.status}`) as Error & { status?: number };
+                    error.status = res.status;
+                    throw error;
+                }
+                return res;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }, RetryPresets.standard, 'gemini');
 
         const data = await response.json();
         return data.dataUri || null;
@@ -243,19 +242,30 @@ export const generateSprite = async (description: string): Promise<string | null
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
     try {
-        const response = await fetchWithRetry('/api/gemini', {
-            timeout: 20000,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'generateSpeech',
-                payload: { text }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
-        }
+        const response = await executeWithRetry(async () => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+            try {
+                const res = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generateSpeech',
+                        payload: { text }
+                    }),
+                    signal: controller.signal
+                });
+                if (!res.ok) {
+                    // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error for proper retry classification
+                    const error = new Error(`AI API returned status ${res.status}`) as Error & { status?: number };
+                    error.status = res.status;
+                    throw error;
+                }
+                return res;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }, RetryPresets.standard, 'gemini');
 
         const data = await response.json();
         const base64Audio = data.base64Audio;

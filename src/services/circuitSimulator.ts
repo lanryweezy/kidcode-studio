@@ -950,6 +950,7 @@ export function generateSensorReadings(
     if (!SENSOR_COMPONENT_TYPES.has(comp.type)) return;
 
     let value = 0;
+    void value;
     switch (comp.type) {
       case 'LIGHT_SENSOR':
         value = Math.round((0.5 + 0.5 * Math.sin(t * 0.1)) * 1023);

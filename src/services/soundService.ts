@@ -542,7 +542,7 @@ export const stopBackgroundMusic = () => {
           bgMusicOsc?.stop();
           osc2Ref?.stop();
           lfoRef?.stop();
-        } catch {}
+        } catch { /* empty */ }
         bgMusicOsc = null;
         bgMusicGain = null;
       }, 600);
@@ -695,5 +695,5 @@ export const createCompressor = (ctx?: AudioContext, options?: { threshold?: num
 
 export const DEFAULT_ADSR = { attack: 0.01, decay: 0.1, sustain: 0.7, release: 0.3 };
 
-export const initSoundPool = (_size?: number) => {};
-export const disposeSoundPool = () => {};
+export const initSoundPool = (_size?: number) => { /* empty */ };
+export const disposeSoundPool = () => { /* empty */ };

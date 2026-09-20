@@ -17,7 +17,7 @@ function loadProgress(): ChallengeProgress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch { /* empty */ }
   return {
     completedChallenges: [],
     currentStreak: 0,
@@ -26,14 +26,14 @@ function loadProgress(): ChallengeProgress {
     todayCompleted: [],
     totalXpEarned: 0,
     totalCoinsEarned: 0,
-    challengesAttempted: {},
+    challengesAttempted: { /* empty */ },
   };
 }
 
 function saveProgress(progress: ChallengeProgress): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  } catch {}
+  } catch { /* empty */ }
 }
 
 function getTodayString(): string {

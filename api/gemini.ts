@@ -263,8 +263,14 @@ export default async function handler(req: Request) {
     return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 });
 
   } catch (error: any) {
+    // 🤖 Astra: [AI quality improvement]
+    // Deterministic model refusals (safety blocks) should be returned as 400 Bad Request.
+    // Returning 500 Internal Server Error causes client-side retry wrappers to infinite-loop
+    // trying to recover from an unrecoverable content policy violation.
+    const isRefusal = error.message?.includes('SAFETY') || error.message?.includes('content was blocked');
+
     return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
+        status: isRefusal ? 400 : 500,
         headers: { 'Content-Type': 'application/json' }
     });
   }

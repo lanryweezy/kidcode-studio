@@ -542,7 +542,9 @@ export const stopBackgroundMusic = () => {
           bgMusicOsc?.stop();
           osc2Ref?.stop();
           lfoRef?.stop();
-        } catch {}
+        } catch (e) {
+          // Ignore stop errors if already stopped
+        }
         bgMusicOsc = null;
         bgMusicGain = null;
       }, 600);
@@ -617,7 +619,7 @@ export const playSoundWithReverb = (type: SoundEffectType, decay: number = 1.5, 
         break;
       default:
         playSoundEffect(type, panX);
-        return;
+
     }
   } catch (e) {
     console.error('Reverb playback failed', e);

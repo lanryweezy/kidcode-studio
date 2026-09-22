@@ -38,7 +38,7 @@ let activeDrag: {
 } | null = null;
 
 let indicatorEl: HTMLElement | null = null;
-let newBlockIds = new Set<string>();
+const newBlockIds = new Set<string>();
 
 export function setGlobalDragCallbacks(callbacks: DragCallbacks) {
     globalCallbacks = callbacks;

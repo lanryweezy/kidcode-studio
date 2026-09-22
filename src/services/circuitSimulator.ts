@@ -949,72 +949,72 @@ export function generateSensorReadings(
   components.forEach(comp => {
     if (!SENSOR_COMPONENT_TYPES.has(comp.type)) return;
 
-    let value = 0;
+    let sensorValue = 0;
     switch (comp.type) {
       case 'LIGHT_SENSOR':
-        value = Math.round((0.5 + 0.5 * Math.sin(t * 0.1)) * 1023);
+        sensorValue = Math.round((0.5 + 0.5 * Math.sin(t * 0.1)) * 1023);
         break;
       case 'TEMP_SENSOR':
-        value = Math.round((22 + 2 * Math.sin(t * 0.02) + (Math.random() - 0.5)) * 10) / 10;
+        sensorValue = Math.round((22 + 2 * Math.sin(t * 0.02) + (Math.random() - 0.5)) * 10) / 10;
         break;
       case 'ULTRASONIC':
-        value = Math.round((200 + 150 * Math.sin(t * 0.05)) * 10) / 10;
+        sensorValue = Math.round((200 + 150 * Math.sin(t * 0.05)) * 10) / 10;
         break;
       case 'POTENTIOMETER':
       case 'SLIDE_POT':
-        value = hardwareState.potentiometerValue;
+        sensorValue = hardwareState.potentiometerValue;
         break;
       case 'DHT11':
-        value = Math.round(22 + Math.sin(t * 0.01) * 3);
+        sensorValue = Math.round(22 + Math.sin(t * 0.01) * 3);
         break;
       case 'DHT22':
-        value = Math.round((22.5 + Math.sin(t * 0.01) * 3.5) * 10) / 10;
+        sensorValue = Math.round((22.5 + Math.sin(t * 0.01) * 3.5) * 10) / 10;
         break;
       case 'MOTION':
-        value = Math.random() > 0.8 ? 1 : 0;
+        sensorValue = Math.random() > 0.8 ? 1 : 0;
         break;
       case 'SOUND_SENSOR':
-        value = Math.round(50 + 200 * Math.abs(Math.sin(t * 0.3)) + (Math.random() - 0.5) * 20);
+        sensorValue = Math.round(50 + 200 * Math.abs(Math.sin(t * 0.3)) + (Math.random() - 0.5) * 20);
         break;
       case 'GAS_SENSOR':
-        value = Math.round(100 + 300 * Math.sin(t * 0.005) + (Math.random() - 0.5) * 10);
+        sensorValue = Math.round(100 + 300 * Math.sin(t * 0.005) + (Math.random() - 0.5) * 10);
         break;
       case 'FLAME_SENSOR':
-        value = Math.random() > 0.95 ? 1 : 0;
+        sensorValue = Math.random() > 0.95 ? 1 : 0;
         break;
       case 'RAIN_SENSOR':
-        value = Math.round(50 + 200 * Math.abs(Math.sin(t * 0.01)));
+        sensorValue = Math.round(50 + 200 * Math.abs(Math.sin(t * 0.01)));
         break;
       case 'SOIL_SENSOR':
-        value = Math.round(400 + 100 * Math.sin(t * 0.003));
+        sensorValue = Math.round(400 + 100 * Math.sin(t * 0.003));
         break;
       case 'PRESSURE_SENSOR':
-        value = Math.round((1013.25 + Math.sin(t * 0.001) * 2) * 10) / 10;
+        sensorValue = Math.round((1013.25 + Math.sin(t * 0.001) * 2) * 10) / 10;
         break;
       case 'FLEX_SENSOR':
-        value = Math.round(200 + 300 * Math.abs(Math.sin(t * 0.1)));
+        sensorValue = Math.round(200 + 300 * Math.abs(Math.sin(t * 0.1)));
         break;
       case 'TILT_SENSOR':
-        value = Math.sin(t * 0.05) > 0 ? 1 : 0;
+        sensorValue = Math.sin(t * 0.05) > 0 ? 1 : 0;
         break;
       case 'HALL_SENSOR':
-        value = Math.round(Math.abs(Math.sin(t * 0.2)) * 5 * 100) / 100;
+        sensorValue = Math.round(Math.abs(Math.sin(t * 0.2)) * 5 * 100) / 100;
         break;
       case 'COMPASS':
-        value = Math.round(((t * 10) % 360) * 10) / 10;
+        sensorValue = Math.round(((t * 10) % 360) * 10) / 10;
         break;
       case 'HEARTBEAT':
-        value = Math.round(72 + Math.sin(t * 0.1) * 8);
+        sensorValue = Math.round(72 + Math.sin(t * 0.1) * 8);
         break;
       case 'COLOR_SENSOR':
-        value = Math.round(Math.random() * 0xFFFFFF);
+        sensorValue = Math.round(Math.random() * 0xFFFFFF);
         break;
       default:
-        value = Math.round(Math.random() * 1023);
+        sensorValue = Math.round(Math.random() * 1023);
         break;
     }
 
-    sensorReadings.set(comp.id, value);
+    sensorReadings.set(comp.id, sensorValue);
   });
 
   return { sensorReadings };

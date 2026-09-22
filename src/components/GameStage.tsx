@@ -202,23 +202,29 @@ const GameCanvas = React.memo(({
                 return;
             }
 
-            let targetCameraX = 0;
-            let targetCameraY = 0;
-            if (isExecuting) {
-                targetCameraX = current.x - (width / 2) / zoom;
-                targetCameraY = Math.max(0, current.y - (height / 2) / zoom);
+            const targetCameraX = isExecuting ? (() => {
+                let x = current.x - (width / 2) / zoom;
                 if (currentTilemap && currentTilemap.length > 0) {
-                    let maxX = 0, maxY = 0;
+                    let maxX = 0;
                     for (const t of currentTilemap) {
                         maxX = Math.max(maxX, (t.x + 1) * 40);
+                    }
+                    x = Math.max(0, Math.min(x, maxX - width / zoom));
+                }
+                return x;
+            })() : editorScrollX;
+
+            const targetCameraY = isExecuting ? (() => {
+                let y = Math.max(0, current.y - (height / 2) / zoom);
+                if (currentTilemap && currentTilemap.length > 0) {
+                    let maxY = 0;
+                    for (const t of currentTilemap) {
                         maxY = Math.max(maxY, (t.y + 1) * 40);
                     }
-                    targetCameraX = Math.max(0, Math.min(targetCameraX, maxX - width / zoom));
-                    targetCameraY = Math.max(0, Math.min(targetCameraY, maxY - height / zoom));
+                    y = Math.max(0, Math.min(y, maxY - height / zoom));
                 }
-            } else {
-                targetCameraX = editorScrollX;
-            }
+                return y;
+            })() : 0;
 
             const lerpFactor = isExecuting ? 0.08 : 1;
             cameraPos.current.x += (targetCameraX - cameraPos.current.x) * lerpFactor;
@@ -599,12 +605,10 @@ const JoystickPad = ({ onInput }: { onInput: (id: string, active: boolean) => vo
             }
             return;
         }
-        let dir = 'right';
-        if (Math.abs(dx) > Math.abs(dy)) {
-            dir = dx > 0 ? 'right' : 'left';
-        } else {
-            dir = dy > 0 ? 'down' : 'up';
-        }
+        const dir = Math.abs(dx) > Math.abs(dy)
+            ? (dx > 0 ? 'right' : 'left')
+            : (dy > 0 ? 'down' : 'up');
+
         if (dir !== activeDir.current) {
             if (activeDir.current) onInput(activeDir.current, false);
             activeDir.current = dir;

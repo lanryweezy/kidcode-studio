@@ -202,7 +202,7 @@ const GameCanvas = React.memo(({
                 return;
             }
 
-            let targetCameraX = 0;
+            let targetCameraX = editorScrollX;
             let targetCameraY = 0;
             if (isExecuting) {
                 targetCameraX = current.x - (width / 2) / zoom;
@@ -216,8 +216,6 @@ const GameCanvas = React.memo(({
                     targetCameraX = Math.max(0, Math.min(targetCameraX, maxX - width / zoom));
                     targetCameraY = Math.max(0, Math.min(targetCameraY, maxY - height / zoom));
                 }
-            } else {
-                targetCameraX = editorScrollX;
             }
 
             const lerpFactor = isExecuting ? 0.08 : 1;
@@ -599,7 +597,7 @@ const JoystickPad = ({ onInput }: { onInput: (id: string, active: boolean) => vo
             }
             return;
         }
-        let dir = 'right';
+        let dir;
         if (Math.abs(dx) > Math.abs(dy)) {
             dir = dx > 0 ? 'right' : 'left';
         } else {

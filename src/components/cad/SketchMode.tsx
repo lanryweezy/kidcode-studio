@@ -82,9 +82,9 @@ const SketchMode: React.FC<SketchModeProps> = ({
     const dy = Math.abs(end.y - start.y);
     if (dx < dy) {
       return { x: start.x, y: end.y, id: '' };
-    } else {
-      return { x: end.x, y: start.y, id: '' };
     }
+      return { x: end.x, y: start.y, id: '' };
+
   }, []);
 
   const applyConstraintToPoints = useCallback((p1: CADPoint, p2: CADPoint, constraint: CADConstraintType): { start: CADPoint; end: CADPoint } => {

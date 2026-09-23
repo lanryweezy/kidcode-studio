@@ -144,7 +144,7 @@ function num(v: unknown, def: number = 0): number {
 }
 
 function str(v: unknown, def: string = ''): string {
-  return v != null ? String(v) : def;
+  return v !== null ? String(v) : def;
 }
 
 function proc(p: GameProject, b: BlockInput) {
@@ -177,7 +177,7 @@ function proc(p: GameProject, b: BlockInput) {
     case 'SET_SCORE': W.score = num(P.value, 0); break;
     case 'CHANGE_HEALTH': W.health = Math.max(0, Math.min(W.maxHealth, W.health + num(P.value, 0))); break;
     case 'SET_HEALTH': W.health = num(P.value, 100); break;
-    case 'SET_VAR': W.vars[str(P.varName, 'x')] = num(P.value, 0); break;
+    case 'SET_VAR': W.vars[P.varName || 'x'] = num(P.value, 0); break;
     case 'CHANGE_VAR': W.vars[str(P.varName, 'x')] = (num(W.vars[str(P.varName, 'x')], 0)) + (num(P.value, 1)); break;
     case 'START_WAVE': W.wave = num(P.value, 1); break;
     case 'NEXT_WAVE': W.wave++; break;

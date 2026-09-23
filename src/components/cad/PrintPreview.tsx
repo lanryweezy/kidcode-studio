@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import React, { useMemo, useState } from 'react';
 import { CADObject3D, PRINT_BED, PRINTER_PROFILES } from '../../types/cad';
 import { calculatePrintVolume } from '../../services/cadParametrics';
@@ -71,7 +72,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ objects }) => {
     for (const obj of visibleObjects) {
       if (!obj.geometry) continue;
       const geo = obj.geometry;
-      const posAttr = geo.getAttribute('position') as typeof BufferAttribute;
+      const posAttr = geo.getAttribute('position') as THREE.BufferAttribute;
       if (!posAttr) continue;
 
       let objUnsupported = 0;

@@ -88,11 +88,21 @@ export default async function handler(req: Request) {
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            controller.enqueue(encoder.encode(text));
+          try {
+            for await (const chunk of result.stream) {
+              const text = chunk.text();
+              controller.enqueue(encoder.encode(text));
+            }
+          } catch (e: any) {
+            // 🤖 Astra: [AI quality improvement]
+            // Handle mid-stream model refusals or network drops gracefully.
+            console.error("Stream error in generateCodeStream:", e);
+            const fallbackMsg = "\n\nOops! My brain froze in the middle of thinking. Please try again! 🤖";
+            controller.enqueue(encoder.encode(fallbackMsg));
+          } finally {
+            // Guarantee controller closes even if the loop throws, preventing client UI hangs.
+            controller.close();
           }
-          controller.close();
         },
       });
 

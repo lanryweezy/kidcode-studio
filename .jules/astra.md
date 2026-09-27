@@ -10,3 +10,7 @@
 ## 2024-09-26 - Unhandled Promise Rejections in AI Streams
 **Learning:** In async generation streams (like `model.generateContentStream`), transient errors (e.g., network drops, mid-stream safety blockages) within the `for await` loop can cause unhandled promise rejections. This bypasses the outer request-level try/catch, resulting in the backend stream hanging open indefinitely without closing the client controller.
 **Action:** Always wrap `for await` iteration blocks inside stream controllers with a local `try/catch/finally` block. Log the error in the `catch` and optionally enqueue a friendly fallback message. Critically, ensure `controller.close()` is always called in the `finally` block to guarantee the stream resolves and prevents the client UI from hanging.
+
+## 2026-09-27 - [Enforce Fetch Timeouts in Service Proxies]
+**Learning:** Unprotected `fetch` calls inside proxy wrappers (like `proxyFetch` in `ai3DService.ts`) can hang indefinitely if the network drops or the server doesn't respond. This permanently locks up the client UI because it bypasses the timeout logic in the outer retry wrapper (e.g., `executeWithRetry`), which only checks the timeout *between* retry attempts, not during the fetch execution itself.
+**Action:** Always inject an `AbortController` with a definitive timeout (e.g., 60 seconds) into raw `fetch` calls inside backend proxies, and ensure the timeout is cleared in a `finally` block.

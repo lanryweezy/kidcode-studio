@@ -11,7 +11,21 @@ import { executeWithRetry, executeWithFallback, RetryPresets } from './aiService
  * Proxy fetch helper to call AI services through Vercel serverless functions
  */
 const proxyFetch = async (provider: string, path: string, options: RequestInit = {}) => {
-  const response = await fetch(`/api/ai3d?provider=${provider}&path=${encodeURIComponent(path)}`, options);
+  // 🤖 Astra: [AI quality improvement]
+  // Added AbortController timeout to prevent fetch from hanging indefinitely on network drops,
+  // which would otherwise bypass `executeWithRetry` and permanently lock up the UI.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
+  let response;
+  try {
+    response = await fetch(`/api/ai3d?provider=${provider}&path=${encodeURIComponent(path)}`, {
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   // 🤖 Astra: [AI quality improvement]
   // Throw an error if the response is not OK so `executeWithRetry` can catch it.

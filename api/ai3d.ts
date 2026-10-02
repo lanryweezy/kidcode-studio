@@ -64,7 +64,22 @@ export default async function handler(req: Request) {
       }
     }
 
-    const response = await fetch(targetUrl, options);
+    // 🤖 Astra: [AI quality improvement]
+    // Added AbortController timeout to prevent fetch from hanging indefinitely on network drops,
+    // which would otherwise bypass `executeWithRetry` and permanently lock up the UI.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
+    let response;
+    try {
+      response = await fetch(targetUrl, {
+        ...options,
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
     const data = await response.text();
 
     return new Response(data, {

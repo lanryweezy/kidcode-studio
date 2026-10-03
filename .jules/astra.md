@@ -14,3 +14,11 @@
 ## 2026-09-27 - [Enforce Fetch Timeouts in Service Proxies]
 **Learning:** Unprotected `fetch` calls inside proxy wrappers (like `proxyFetch` in `ai3DService.ts`) can hang indefinitely if the network drops or the server doesn't respond. This permanently locks up the client UI because it bypasses the timeout logic in the outer retry wrapper (e.g., `executeWithRetry`), which only checks the timeout *between* retry attempts, not during the fetch execution itself.
 **Action:** Always inject an `AbortController` with a definitive timeout (e.g., 60 seconds) into raw `fetch` calls inside backend proxies, and ensure the timeout is cleared in a `finally` block.
+
+## 2025-02-23 - Handle raw AI text to JSON extraction robustly
+**Learning:** Hardcoded returns masking missing JSON extraction lead to completely broken AI-generated structures (like `designCircuit` returning empty arrays instead of parsed AI responses).
+**Action:** When extracting JSON from a potentially hallucinated or wrapped AI string (e.g., Markdown block), explicitly find the block (`indexOf('{')` / `lastIndexOf('}')`) and safely parse and validate the types of its properties (e.g. `Array.isArray()`, `typeof === 'string'`) instead of a generic `JSON.parse` wrapper that trusts the output blindly.
+
+## 2025-02-23 - Hardcoded responses masking model output failures
+**Learning:** Hardcoded default empty returns (e.g. `components: [], wires: []`) that completely bypass reading the AI's actual payload render generation features useless while silently suppressing errors.
+**Action:** When an AI model is tasked with generating structured JSON data to populate domain objects (like circuits, issues, properties), explicitly extract and securely parse its JSON blob, and type-check the arrays before usage instead of replacing the expected objects with empty stand-ins.

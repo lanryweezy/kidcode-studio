@@ -14,3 +14,6 @@
 ## 2026-09-27 - [Enforce Fetch Timeouts in Service Proxies]
 **Learning:** Unprotected `fetch` calls inside proxy wrappers (like `proxyFetch` in `ai3DService.ts`) can hang indefinitely if the network drops or the server doesn't respond. This permanently locks up the client UI because it bypasses the timeout logic in the outer retry wrapper (e.g., `executeWithRetry`), which only checks the timeout *between* retry attempts, not during the fetch execution itself.
 **Action:** Always inject an `AbortController` with a definitive timeout (e.g., 60 seconds) into raw `fetch` calls inside backend proxies, and ensure the timeout is cleared in a `finally` block.
+## 2026-10-02 - [Enforce Fetch Timeouts in Service Proxies]
+**Learning:** Unprotected `fetch` calls inside proxy wrappers (like `proxyFetch` in `ai3DService.ts`) can hang indefinitely if the network drops or the server doesn't respond. This permanently locks up the client UI because it bypasses the timeout logic in the outer retry wrapper (e.g., `executeWithRetry`), which only checks the timeout *between* retry attempts, not during the fetch execution itself.
+**Action:** Always inject an `AbortController` with a definitive timeout (e.g., 60 seconds) into raw `fetch` calls inside backend proxies, and ensure the timeout is cleared in a `finally` block.

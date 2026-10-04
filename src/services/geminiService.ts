@@ -169,7 +169,10 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
         });
 
         if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
+            // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error object for accurate classification
+            const error = new Error(`AI API returned status ${response.status}`) as Error & { status?: number };
+            error.status = response.status;
+            throw error;
         }
 
         const data = await response.json();
@@ -193,7 +196,10 @@ export const getFixedCode = async (commands: CommandBlock[], mode: AppMode): Pro
         });
 
         if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
+            // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error object for accurate classification
+            const error = new Error(`AI API returned status ${response.status}`) as Error & { status?: number };
+            error.status = response.status;
+            throw error;
         }
 
         const data = await response.json();
@@ -230,7 +236,10 @@ export const generateSprite = async (description: string): Promise<string | null
         });
 
         if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
+            // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error object for accurate classification
+            const error = new Error(`AI API returned status ${response.status}`) as Error & { status?: number };
+            error.status = response.status;
+            throw error;
         }
 
         const data = await response.json();
@@ -254,7 +263,10 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
         });
 
         if (!response.ok) {
-            throw new Error(`AI API returned status ${response.status}`);
+            // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error object for accurate classification
+            const error = new Error(`AI API returned status ${response.status}`) as Error & { status?: number };
+            error.status = response.status;
+            throw error;
         }
 
         const data = await response.json();

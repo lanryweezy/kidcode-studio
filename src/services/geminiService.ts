@@ -103,16 +103,48 @@ export const generateCodeFromPromptStream = async function* (
     let fullText = "";
     const textDecoder = new TextDecoder();
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        // 🤖 Astra: [AI quality improvement]
+        // Wrap stream reading in a timeout because outer fetch timeout doesn't protect against mid-stream stalls.
+        const readPromise = reader.read();
+        let timeoutId: ReturnType<typeof setTimeout>;
+        const timeoutPromise = new Promise<{ done: boolean; value: undefined }>((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error("Stream read timeout")), 15000);
+        });
 
-      const chunkText = textDecoder.decode(value);
-      fullText += chunkText;
+        let done: boolean, value: Uint8Array | undefined;
+        try {
+          const result = await Promise.race([readPromise, timeoutPromise]);
+          done = result.done;
+          value = result.value;
+        } catch (err) {
+          clearTimeout(timeoutId!);
+          // The read is still pending, so we must cancel the reader to prevent an invalid state error upon releaseLock.
+          reader.cancel(err).catch(() => {});
+          throw err;
+        }
 
-      // Only yield text that is not part of a markdown code block (yet). We'll parse the code at the end.
-      const cleanTextSoFar = fullText.replace(/```json[\s\S]*?(```|$)/g, '').trim();
-      yield { text: cleanTextSoFar, isDone: false };
+        clearTimeout(timeoutId!);
+
+        if (done) break;
+
+        if (value) {
+          const chunkText = textDecoder.decode(value);
+          fullText += chunkText;
+
+          // Only yield text that is not part of a markdown code block (yet). We'll parse the code at the end.
+          const cleanTextSoFar = fullText.replace(/```json[\s\S]*?(```|$)/g, '').trim();
+          yield { text: cleanTextSoFar, isDone: false };
+        }
+      }
+    } finally {
+      // Ensure the reader is properly released/canceled if we break out early (e.g., timeout).
+      try {
+        reader.releaseLock();
+      } catch (e) {
+        // Ignore errors from releaseLock if the reader is already released or in a bad state
+      }
     }
 
     // Done streaming, now parse the final output

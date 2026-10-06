@@ -103,16 +103,43 @@ export const generateCodeFromPromptStream = async function* (
     let fullText = "";
     const textDecoder = new TextDecoder();
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        // 🤖 Astra: [AI quality improvement]
+        // Wrap reader.read() in a timeout. fetchWithTimeout only protects initial connection,
+        // leaving the subsequent stream reads unprotected against mid-stream network stalls.
+        const readPromise = reader.read();
+        let timeoutId: ReturnType<typeof setTimeout>;
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('Stream read timeout')), 15000);
+        });
 
-      const chunkText = textDecoder.decode(value);
-      fullText += chunkText;
+        let done, value;
+        try {
+          const result = await Promise.race([readPromise, timeoutPromise]);
+          done = result.done;
+          value = result.value;
+        } catch (e) {
+          // 🤖 Astra: [AI quality improvement]
+          // If a pending read is aborted (e.g., by our timeout), we must call reader.cancel(e)
+          // to handle the pending read before releasing the lock, otherwise releaseLock() throws.
+          await reader.cancel(e).catch(() => {});
+          throw e;
+        } finally {
+          clearTimeout(timeoutId!);
+        }
 
-      // Only yield text that is not part of a markdown code block (yet). We'll parse the code at the end.
-      const cleanTextSoFar = fullText.replace(/```json[\s\S]*?(```|$)/g, '').trim();
-      yield { text: cleanTextSoFar, isDone: false };
+        if (done) break;
+
+        const chunkText = textDecoder.decode(value);
+        fullText += chunkText;
+
+        // Only yield text that is not part of a markdown code block (yet). We'll parse the code at the end.
+        const cleanTextSoFar = fullText.replace(/```json[\s\S]*?(```|$)/g, '').trim();
+        yield { text: cleanTextSoFar, isDone: false };
+      }
+    } finally {
+      reader.releaseLock();
     }
 
     // Done streaming, now parse the final output

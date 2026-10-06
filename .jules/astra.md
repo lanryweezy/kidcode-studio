@@ -17,3 +17,7 @@
 ## 2026-10-02 - [Enforce Fetch Timeouts in Service Proxies]
 **Learning:** Unprotected `fetch` calls inside proxy wrappers (like `proxyFetch` in `ai3DService.ts`) can hang indefinitely if the network drops or the server doesn't respond. This permanently locks up the client UI because it bypasses the timeout logic in the outer retry wrapper (e.g., `executeWithRetry`), which only checks the timeout *between* retry attempts, not during the fetch execution itself.
 **Action:** Always inject an `AbortController` with a definitive timeout (e.g., 60 seconds) into raw `fetch` calls inside backend proxies, and ensure the timeout is cleared in a `finally` block.
+
+## 2024-10-25 - [Enforce Stream Read Timeouts in AI Services]
+**Learning:** In streaming scenarios (e.g. `reader.read()` after a successful fetch), outer request timeouts like `fetchWithTimeout` only cover the initial header response. If the network drops or the AI provider hangs mid-stream, `reader.read()` can block indefinitely and lock up the client UI because it is not bound by the initial fetch's abort signal timeout.
+**Action:** Always wrap `reader.read()` calls in a `Promise.race` against a local timeout (e.g. 15-20 seconds) and ensure `clearTimeout` is called in a `finally` block to prevent lingering timers.

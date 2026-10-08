@@ -37,12 +37,17 @@ async function fetchWithTimeout(resource: RequestInfo | URL, options: RequestIni
     const { timeout = 10000, ...fetchOptions } = options;
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
-    const response = await fetch(resource, {
-        ...fetchOptions,
-        signal: controller.signal
-    });
-    clearTimeout(id);
-    return response;
+    try {
+        const response = await fetch(resource, {
+            ...fetchOptions,
+            signal: controller.signal
+        });
+        return response;
+    } finally {
+        // 🤖 Astra: [AI quality improvement]
+        // Wrap fetch in try/finally to ensure the timeout is always cleared, preventing memory leaks and hanging tests on error.
+        clearTimeout(id);
+    }
 }
 
 /**

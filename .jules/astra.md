@@ -21,3 +21,7 @@
 ## 2024-10-25 - [Enforce Stream Read Timeouts in AI Services]
 **Learning:** In streaming scenarios (e.g. `reader.read()` after a successful fetch), outer request timeouts like `fetchWithTimeout` only cover the initial header response. If the network drops or the AI provider hangs mid-stream, `reader.read()` can block indefinitely and lock up the client UI because it is not bound by the initial fetch's abort signal timeout.
 **Action:** Always wrap `reader.read()` calls in a `Promise.race` against a local timeout (e.g. 15-20 seconds) and ensure `clearTimeout` is called in a `finally` block to prevent lingering timers.
+
+## 2024-11-23 - [Clear Timers in Fetch Wrappers]
+**Learning:** If `fetch` is aborted or throws an error in `fetchWithTimeout`, `clearTimeout` might not be called if it's placed after `await fetch(...)` without a `finally` block. This leads to dangling timers, which can cause memory leaks or hang test suites.
+**Action:** Always wrap `await fetch()` in a `try/finally` block and call `clearTimeout` inside the `finally` clause to guarantee cleanup even on failure.

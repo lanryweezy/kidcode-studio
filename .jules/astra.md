@@ -1,3 +1,6 @@
+## 2025-02-23 - Prevent dangling timers in fetch timeout wrappers
+**Learning:** When implementing `fetchWithTimeout` utility functions using `setTimeout` and `AbortController`, if `clearTimeout` is placed directly after the `await fetch()` call, it will be skipped if the fetch throws an error (e.g., due to a network failure or an actual abort). This leaves dangling timers in the event loop, causing memory leaks and hanging test suites.
+**Action:** Always wrap the `await fetch()` execution inside a `try/finally` block and move `clearTimeout` into the `finally` clause to guarantee timer cleanup regardless of network success or failure.
 
 ## 2024-05-24 - [Robust JSON Array Extraction from AI Responses]
 **Learning:** Naive regex parsing (e.g. replacing ````json`) frequently fails to parse AI JSON responses if the AI output contains leading conversational preamble (e.g., "Here is the code you requested:\n```json\n[...]"). Also, lazy non-greedy regex matching (`/\[[\s\S]*?\]/`) can truncate nested JSON arrays at the first closing bracket.

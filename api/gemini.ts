@@ -164,9 +164,18 @@ export default async function handler(req: Request) {
       let parsedIssues: Array<Record<string, unknown>> = [];
       if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
         try {
-           parsedIssues = JSON.parse(textResult.substring(startIdx, endIdx + 1));
+           // 🤖 Astra: [AI quality improvement]
+           // Explicitly validate parsed JSON arrays to ensure they match the required object schema
+           // before returning the response. This prevents silent downstream crashes.
+           const rawParsed = JSON.parse(textResult.substring(startIdx, endIdx + 1));
+           if (!Array.isArray(rawParsed)) {
+             throw new Error("Parsed analyzeCode output is not an array");
+           }
+           parsedIssues = rawParsed.filter(item =>
+             item && typeof item === 'object' && typeof item.title === 'string' && typeof item.description === 'string'
+           );
         } catch (e) {
-           console.error("Failed to parse analyzeCode JSON", e);
+           console.error("Failed to parse or validate analyzeCode JSON", e);
            parsedIssues = [];
         }
       } else {
@@ -208,9 +217,18 @@ export default async function handler(req: Request) {
       let parsedImprovements: Array<Record<string, unknown>> = [];
       if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
         try {
-           parsedImprovements = JSON.parse(textResult.substring(startIdx, endIdx + 1));
+           // 🤖 Astra: [AI quality improvement]
+           // Explicitly validate parsed JSON arrays to ensure they match the required object schema
+           // before returning the response. This prevents silent downstream crashes.
+           const rawParsed = JSON.parse(textResult.substring(startIdx, endIdx + 1));
+           if (!Array.isArray(rawParsed)) {
+             throw new Error("Parsed testGame output is not an array");
+           }
+           parsedImprovements = rawParsed.filter(item =>
+             item && typeof item === 'object' && typeof item.title === 'string' && typeof item.description === 'string'
+           );
         } catch (e) {
-           console.error("Failed to parse testGame JSON", e);
+           console.error("Failed to parse or validate testGame JSON", e);
            parsedImprovements = [];
         }
       } else {

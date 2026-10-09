@@ -24,3 +24,6 @@
 ## 2024-10-25 - [Enforce Stream Read Timeouts in AI Services]
 **Learning:** In streaming scenarios (e.g. `reader.read()` after a successful fetch), outer request timeouts like `fetchWithTimeout` only cover the initial header response. If the network drops or the AI provider hangs mid-stream, `reader.read()` can block indefinitely and lock up the client UI because it is not bound by the initial fetch's abort signal timeout.
 **Action:** Always wrap `reader.read()` calls in a `Promise.race` against a local timeout (e.g. 15-20 seconds) and ensure `clearTimeout` is called in a `finally` block to prevent lingering timers.
+## 2025-02-23 - [AI JSON Schema Validation]
+**Learning:** Trusting `JSON.parse()` on model output without validating the expected fields (even if it successfully parses an array) can cause silent downstream UI crashes or incomplete data rendering when the LLM hallucinates an unexpected object structure.
+**Action:** Always filter and validate parsed JSON arrays to ensure they match the required object schema (e.g., verifying presence of specific keys like `title` and `description`) before returning the response.

@@ -252,7 +252,33 @@ export default async function handler(req: Request) {
             Only return a valid JSON array of CommandBlocks. No text. No IDs.
         `;
       const result = await model.generateContent(prompt);
-      return new Response(JSON.stringify({ text: result.response.text() }), {
+      const textResult = result.response.text();
+      // 🤖 Astra: [AI quality improvement]
+      // Use robust array extraction to handle cases where the model includes conversational preamble
+      // before the JSON block, which bypasses naive regex stripping and crashes JSON.parse.
+      const startIdx = textResult.indexOf('[');
+      const endIdx = textResult.lastIndexOf(']');
+      let parsedBlocks: Array<Record<string, unknown>> = [];
+      if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+        try {
+           // 🤖 Astra: [AI quality improvement]
+           // Explicitly validate parsed JSON arrays to ensure they match the required object schema
+           // before returning the response. This prevents silent downstream crashes.
+           const rawParsed = JSON.parse(textResult.substring(startIdx, endIdx + 1));
+           if (!Array.isArray(rawParsed)) {
+             throw new Error("Parsed getFixedCode output is not an array");
+           }
+           parsedBlocks = rawParsed.filter(item =>
+             item && typeof item === 'object' && typeof item.type === 'string'
+           );
+        } catch (e) {
+           console.error("Failed to parse or validate getFixedCode JSON", e);
+           parsedBlocks = [];
+        }
+      } else {
+        console.error("Failed to find JSON array in getFixedCode response");
+      }
+      return new Response(JSON.stringify({ text: JSON.stringify(parsedBlocks) }), {
         headers: { 'Content-Type': 'application/json' }
       });
     }

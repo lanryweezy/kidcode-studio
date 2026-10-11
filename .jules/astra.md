@@ -27,3 +27,6 @@
 ## 2025-02-23 - [AI JSON Schema Validation]
 **Learning:** Trusting `JSON.parse()` on model output without validating the expected fields (even if it successfully parses an array) can cause silent downstream UI crashes or incomplete data rendering when the LLM hallucinates an unexpected object structure.
 **Action:** Always filter and validate parsed JSON arrays to ensure they match the required object schema (e.g., verifying presence of specific keys like `title` and `description`) before returning the response.
+## 2024-10-25 - [AI JSON Schema Validation in Edge Functions]
+**Learning:** Returning unvalidated text from AI providers in edge functions (like `/api/gemini`) can lead to downstream JSON parsing crashes on the client, especially when prompts request JSON arrays but the model hallucinates conversational preamble. Relying solely on client-side validation is insufficient if the proxy API contract implies a guaranteed stringified JSON structure.
+**Action:** Always extract JSON bounds (using `indexOf` and `lastIndexOf`), parse the JSON, and validate the expected schema (e.g., verifying it's an array and contains required keys like `type`) inside the edge proxy before forwarding it to the client. This provides an additional layer of resilience against model hallucinations.

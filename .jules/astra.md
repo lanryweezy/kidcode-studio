@@ -30,3 +30,7 @@
 ## 2024-10-25 - [AI JSON Schema Validation in Edge Functions]
 **Learning:** Returning unvalidated text from AI providers in edge functions (like `/api/gemini`) can lead to downstream JSON parsing crashes on the client, especially when prompts request JSON arrays but the model hallucinates conversational preamble. Relying solely on client-side validation is insufficient if the proxy API contract implies a guaranteed stringified JSON structure.
 **Action:** Always extract JSON bounds (using `indexOf` and `lastIndexOf`), parse the JSON, and validate the expected schema (e.g., verifying it's an array and contains required keys like `type`) inside the edge proxy before forwarding it to the client. This provides an additional layer of resilience against model hallucinations.
+
+## 2024-05-18 - [AI Code Review Caching]
+**Learning:** For deterministic AI tasks that are frequently re-triggered by the user (like code reviews of the exact same blocks), redundant network calls degrade the UX with high latency and waste AI tokens.
+**Action:** Implemented a module-level `Map` in `geminiService.ts` to cache code reviews based on the serialized request payload. This eliminates redundant API calls for unchanged code blocks, saving cost and improving latency.

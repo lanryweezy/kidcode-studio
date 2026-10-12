@@ -193,8 +193,18 @@ export const generateCodeFromPrompt = async (
   return lastResult;
 };
 
+const reviewCache = new Map<string, string>();
+
 export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {
     try {
+        // 🤖 Astra: [AI quality improvement]
+        // Added response caching for deterministic code reviews to eliminate redundant API calls,
+        // saving tokens and reducing latency for identical requests.
+        const cacheKey = JSON.stringify({ mode, commands });
+        if (reviewCache.has(cacheKey)) {
+            return reviewCache.get(cacheKey)!;
+        }
+
         const response = await fetchWithRetry('/api/gemini', {
             timeout: 10000,
             method: 'POST',
@@ -213,7 +223,13 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
         }
 
         const data = await response.json();
-        return data.text || "I couldn't review your code right now, but keep building! 🚀";
+        const text = data.text || "I couldn't review your code right now, but keep building! 🚀";
+
+        if (response.ok && data.text) {
+            reviewCache.set(cacheKey, text);
+        }
+
+        return text;
     } catch (e) {
         console.error("AI Review error:", e);
         return "I couldn't review your code right now, but keep building! 🚀";

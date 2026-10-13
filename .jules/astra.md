@@ -34,3 +34,6 @@
 ## 2024-05-18 - [AI Code Review Caching]
 **Learning:** For deterministic AI tasks that are frequently re-triggered by the user (like code reviews of the exact same blocks), redundant network calls degrade the UX with high latency and waste AI tokens.
 **Action:** Implemented a module-level `Map` in `geminiService.ts` to cache code reviews based on the serialized request payload. This eliminates redundant API calls for unchanged code blocks, saving cost and improving latency.
+## 2026-10-13 - [AI Code Review Caching: Key Serialization & Bounding]
+**Learning:** When caching AI results based on ASTs or complex objects (e.g., `CommandBlock[]`), relying solely on node IDs for cache keys prevents invalidation when users edit block properties, leading to stale responses. Additionally, generating cache keys via full array serialization (`JSON.stringify(blocks)`) can cause runtime crashes if the AST contains circular references. Finally, unbounded `Map` caches cause memory leaks in long-running environments.
+**Action:** Generate cache keys by explicitly extracting and serializing relevant properties (e.g., `type`, `id`, and `params`) with a `try/catch` block to handle potential serialization errors safely. Always enforce a size limit (e.g., `MAX_CACHE_ENTRIES = 50`) on in-memory caches, evicting oldest entries to prevent memory exhaustion.

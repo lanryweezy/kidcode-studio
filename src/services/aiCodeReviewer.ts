@@ -405,6 +405,9 @@ function generateSummary(issues: ReviewIssue[], score: number): string {
   return summary;
 }
 
+const analyzeCache = new Map<string, string>();
+const MAX_CACHE_ENTRIES = 50;
+
 export function analyzeCode(blocks: CommandBlock[]): ReviewResult {
   const allIssues: ReviewIssue[] = [
     ...checkBlockStructure(blocks),
@@ -426,6 +429,29 @@ export async function analyzeCodeWithAI(
   blocks: CommandBlock[],
   mode: string
 ): Promise<ReviewResult> {
+  // 🤖 Astra: [AI quality improvement]
+  // Added response caching for deterministic code analysis to eliminate redundant API calls,
+  // saving tokens and reducing latency for identical requests.
+
+  // Create a representation of blocks for cache key to avoid circular reference crashes
+  // while also taking into account all block parameters so that parameter edits invalidate the cache.
+  const blockSignatures = blocks.map(b => {
+    try {
+      return `${b.type}:${b.id}:${JSON.stringify(b.params)}`;
+    } catch {
+      return `${b.type}:${b.id}`;
+    }
+  }).join('|');
+  const cacheKey = `${mode}:${blockSignatures}`;
+
+  if (analyzeCache.has(cacheKey)) {
+      try {
+          return JSON.parse(analyzeCache.get(cacheKey)!);
+      } catch (e) {
+          console.error("Cache parse error", e);
+      }
+  }
+
   const localResult = analyzeCode(blocks);
 
   try {
@@ -495,6 +521,12 @@ export async function analyzeCodeWithAI(
       localResult.score = computeScore(localResult.issues);
       localResult.summary = generateSummary(localResult.issues, localResult.score);
     }
+
+    if (analyzeCache.size >= MAX_CACHE_ENTRIES) {
+      const firstKey = analyzeCache.keys().next().value;
+      if (firstKey) analyzeCache.delete(firstKey);
+    }
+    analyzeCache.set(cacheKey, JSON.stringify(localResult));
   } catch {
     // Fall back to local-only results
   }

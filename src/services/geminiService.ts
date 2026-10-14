@@ -194,6 +194,7 @@ export const generateCodeFromPrompt = async (
 };
 
 const reviewCache = new Map<string, string>();
+const MAX_CACHE_ENTRIES = 50;
 
 export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promise<string> => {
     try {
@@ -226,6 +227,11 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
         const text = data.text || "I couldn't review your code right now, but keep building! 🚀";
 
         if (response.ok && data.text) {
+            // 🤖 Astra: [AI quality improvement] Enforce max cache size to prevent memory leaks
+            if (reviewCache.size >= MAX_CACHE_ENTRIES) {
+                const firstKey = reviewCache.keys().next().value;
+                if (firstKey) reviewCache.delete(firstKey);
+            }
             reviewCache.set(cacheKey, text);
         }
 

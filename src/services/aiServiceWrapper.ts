@@ -636,6 +636,7 @@ interface CacheEntry<T> {
 }
 
 const aiCache = new Map<string, CacheEntry<unknown>>();
+const MAX_CACHE_ENTRIES = 100;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const hashPrompt = (prompt: string, provider: string): string => {
@@ -662,6 +663,11 @@ export const getCachedResult = <T>(prompt: string, provider: string): T | null =
 
 export const setCachedResult = <T>(prompt: string, provider: string, value: T): void => {
   const key = hashPrompt(prompt, provider);
+  // 🤖 Astra: [AI quality improvement] Enforce max cache size to prevent memory leaks
+  if (aiCache.size >= MAX_CACHE_ENTRIES) {
+    const firstKey = aiCache.keys().next().value;
+    if (firstKey) aiCache.delete(firstKey);
+  }
   aiCache.set(key, { value, timestamp: Date.now() });
 };
 

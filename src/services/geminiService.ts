@@ -229,7 +229,8 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
         if (response.ok && data.text) {
             // 🤖 Astra: [AI quality improvement] Enforce max cache size to prevent memory leaks
             if (reviewCache.size >= MAX_CACHE_ENTRIES) {
-                reviewCache.delete(reviewCache.keys().next().value);
+                const firstKey = reviewCache.keys().next().value;
+                if (firstKey) reviewCache.delete(firstKey);
             }
             reviewCache.set(cacheKey, text);
         }

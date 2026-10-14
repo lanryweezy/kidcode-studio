@@ -665,7 +665,8 @@ export const setCachedResult = <T>(prompt: string, provider: string, value: T): 
   const key = hashPrompt(prompt, provider);
   // 🤖 Astra: [AI quality improvement] Enforce max cache size to prevent memory leaks
   if (aiCache.size >= MAX_CACHE_ENTRIES) {
-    aiCache.delete(aiCache.keys().next().value);
+    const firstKey = aiCache.keys().next().value;
+    if (firstKey) aiCache.delete(firstKey);
   }
   aiCache.set(key, { value, timestamp: Date.now() });
 };

@@ -101,6 +101,9 @@ function countBlockType(blocks: CommandBlock[], type: CommandType): number {
   return blocks.filter(b => b.type === type).length;
 }
 
+const testCache = new Map<string, string>();
+const MAX_CACHE_ENTRIES = 50;
+
 function detectStuck(state: SimulatedState): boolean {
   const positions = state.positions;
   if (positions.length < 10) return false;
@@ -339,7 +342,34 @@ export function simulateGame(config: TestConfig): TestReport {
 }
 
 export async function runAITest(config: TestConfig): Promise<TestReport> {
+  // 🤖 Astra: [AI quality improvement]
+  // Added response caching for deterministic game testing to eliminate redundant API calls,
+  // saving tokens and reducing latency for identical requests.
+
+  // Create a representation of blocks for cache key to avoid circular reference crashes
+  // while also taking into account all block parameters so that parameter edits invalidate the cache.
+  const blockSignatures = config.blocks.map(b => {
+    try {
+      return `${b.type}:${b.id}:${JSON.stringify(b.params)}`;
+    } catch {
+      return `${b.type}:${b.id}`;
+    }
+  }).join('|');
+  const cacheKey = `${config.template || 'default'}:${blockSignatures}`;
+
   const localReport = simulateGame(config);
+
+  if (testCache.has(cacheKey)) {
+    try {
+      const cachedImprovements = JSON.parse(testCache.get(cacheKey)!);
+      if (Array.isArray(cachedImprovements)) {
+        localReport.improvements.push(...cachedImprovements);
+        return localReport;
+      }
+    } catch (e) {
+      console.error("Cache parse error", e);
+    }
+  }
 
   try {
     // 🤖 Astra: [AI quality improvement]
@@ -390,15 +420,24 @@ export async function runAITest(config: TestConfig): Promise<TestReport> {
 
     const data = await response.json();
     if (data.improvements && Array.isArray(data.improvements)) {
+      const validImprovements = [];
       for (const imp of data.improvements) {
           if (imp.title && imp.description) {
-            localReport.improvements.push({
+            const parsedImp = {
               title: imp.title,
               description: imp.description,
               priority: imp.priority || 'medium',
-            });
+            };
+            localReport.improvements.push(parsedImp);
+            validImprovements.push(parsedImp);
         }
       }
+
+      if (testCache.size >= MAX_CACHE_ENTRIES) {
+        const firstKey = testCache.keys().next().value;
+        if (firstKey) testCache.delete(firstKey);
+      }
+      testCache.set(cacheKey, JSON.stringify(validImprovements));
     }
   } catch {
     // Fall back to local report

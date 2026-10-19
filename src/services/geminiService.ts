@@ -99,7 +99,10 @@ export const generateCodeFromPromptStream = async function* (
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to connect to AI brain');
+        // 🤖 Astra: [AI quality improvement] Attach HTTP status to Error object for accurate classification
+        const error = new Error(errorData.error || 'Failed to connect to AI brain') as Error & { status?: number };
+        error.status = response.status;
+        throw error;
     }
 
     const reader = response.body?.getReader();

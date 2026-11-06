@@ -204,7 +204,20 @@ export const reviewCode = async (commands: CommandBlock[], mode: AppMode): Promi
         // 🤖 Astra: [AI quality improvement]
         // Added response caching for deterministic code reviews to eliminate redundant API calls,
         // saving tokens and reducing latency for identical requests.
-        const cacheKey = JSON.stringify({ mode, commands });
+
+        // 🤖 Astra: [AI quality improvement]
+        // Create a representation of blocks for cache key to avoid circular reference crashes
+        // while also taking into account all block parameters so that parameter edits invalidate the cache.
+        // If serialization fails, fallback to a unique random key to prevent stale cache collisions.
+        const blockSignatures = commands.map(b => {
+          try {
+            return `${b.type}:${b.id}:${JSON.stringify(b.params)}`;
+          } catch {
+            return `${b.type}:${b.id}:${Math.random()}`;
+          }
+        }).join('|');
+        const cacheKey = `${mode}:${blockSignatures}`;
+
         if (reviewCache.has(cacheKey)) {
             return reviewCache.get(cacheKey)!;
         }

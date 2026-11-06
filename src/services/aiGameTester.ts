@@ -348,11 +348,12 @@ export async function runAITest(config: TestConfig): Promise<TestReport> {
 
   // Create a representation of blocks for cache key to avoid circular reference crashes
   // while also taking into account all block parameters so that parameter edits invalidate the cache.
+  // If serialization fails, fallback to a unique random key to prevent stale cache collisions.
   const blockSignatures = config.blocks.map(b => {
     try {
       return `${b.type}:${b.id}:${JSON.stringify(b.params)}`;
     } catch {
-      return `${b.type}:${b.id}`;
+      return `${b.type}:${b.id}:${Math.random()}`;
     }
   }).join('|');
   const cacheKey = `${config.template || 'default'}:${blockSignatures}`;
